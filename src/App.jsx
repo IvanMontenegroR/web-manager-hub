@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutGrid, ClipboardList, ListChecks, Boxes } from 'lucide-react'
+import { LayoutGrid, ClipboardList, ListChecks, Boxes, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import WebProjects from './modules/WebProjects.jsx'
 import Placeholder from './modules/Placeholder.jsx'
 
@@ -15,18 +15,29 @@ const MODULES = [
 
 export default function App() {
   const [active, setActive] = useState('web')
+  const [collapsed, setCollapsed] = useState(false)
   const mod = MODULES.find((m) => m.id === active)
 
   return (
-    <div className="app">
+    <div className={`app${collapsed ? ' nav-collapsed' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">W</div>
-          <div>
+          <div className="brand-text">
             <div className="brand-name">Web Manager Hub</div>
             <div className="brand-sub">Nestle Purina LATAM</div>
           </div>
         </div>
+
+        <button
+          className="nav-toggle"
+          onClick={() => setCollapsed((v) => !v)}
+          title={collapsed ? 'Expandir barra' : 'Colapsar barra'}
+        >
+          {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+          <span className="nav-label">Colapsar</span>
+        </button>
+
         {MODULES.map((m) => {
           const Icon = m.icon
           return (
@@ -34,9 +45,10 @@ export default function App() {
               key={m.id}
               className={`nav-item${active === m.id ? ' active' : ''}`}
               onClick={() => setActive(m.id)}
+              title={m.label}
             >
               <Icon size={17} />
-              {m.label}
+              <span className="nav-label">{m.label}</span>
               {!m.ready && <span className="badge-soon">Pronto</span>}
             </button>
           )

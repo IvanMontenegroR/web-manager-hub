@@ -16,6 +16,13 @@ function todayISO() {
   return toISO(new Date())
 }
 
+// Convierte un codigo de pais de 2 letras (MX, BR, AR) en emoji de bandera.
+function flagEmoji(cc) {
+  if (!cc || !/^[a-zA-Z]{2}$/.test(cc.trim())) return ''
+  const c = cc.trim().toUpperCase()
+  return String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65, 0x1f1e6 + c.charCodeAt(1) - 65)
+}
+
 export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEditTask, onDeleteTask }) {
   const { projects, partners, enriched, conflictIds } = useData()
   const [tip, setTip] = useState(null)
@@ -145,11 +152,12 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
                 <div className="proj-row">
                   <div className="proj-label">
                     <span className="p-name">{project.name}</span>
-                    <div className="proj-meta">
-                      {project.brand && <span className="pill">{project.brand}</span>}
-                      {project.market && <span className="pill">{project.market}</span>}
-                      <span className={`status ${String(project.status).replace(/\s+/g, '')}`}>{project.status}</span>
-                    </div>
+                    {project.market && (
+                      <span className="p-flag" title={project.market}>
+                        <span className="flag">{flagEmoji(project.market)}</span>
+                        {project.market}
+                      </span>
+                    )}
                     <div className="proj-actions">
                       <button className="btn btn-ghost btn-sm btn-icon" title="Agregar tarea" onClick={() => onAddTask(project)}>
                         <Plus size={15} />
@@ -178,10 +186,8 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
                         <span className="swatch" style={{ background: color }} />
-                        <div>
-                          <div className="t-name">{t.action_name}</div>
-                          <div className="t-partner">{partnerName(partners, t.partner_id)}</div>
-                        </div>
+                        <span className="t-name">{t.action_name}</span>
+                        <span className="t-partner">{partnerName(partners, t.partner_id)}</span>
                         <div className="task-actions">
                           <button className="btn btn-ghost btn-sm btn-icon" title="Editar tarea" onClick={() => onEditTask(t, project)}>
                             <Pencil size={13} />
