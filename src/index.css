@@ -667,9 +667,12 @@ textarea.control { resize: vertical; min-height: 64px; }
   padding: 4px 12px; border-radius: 20px;
 }
 
-.legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--ink-2); margin: 2px 0 14px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--ink-2); margin: 2px 0 14px; }
 .legend .lg { display: flex; align-items: center; gap: 6px; }
+.legend .lg-label { font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.4px; font-size: 10.5px; }
+.legend .lg-sep { width: 1px; height: 14px; background: var(--border-strong); }
 .legend .lg-swatch { width: 22px; height: 12px; border-radius: 3px; }
+.legend .lg-dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #2e6fd0 0 50%, #e8a13a 50% 100%); }
 .legend .lg-swatch.conflict {
   background: #9aa0a6;
   background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0, rgba(255,255,255,.4) 3px, transparent 3px, transparent 7px);

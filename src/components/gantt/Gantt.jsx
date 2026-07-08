@@ -5,7 +5,7 @@ import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
   fmtCorto, fmtLargo,
 } from '../../lib/dates'
-import { textOn, partnerColor, partnerName } from '../../lib/colors'
+import { textOn, partnerColor, partnerName, statusColor } from '../../lib/colors'
 
 const DOW = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES_LARGO = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -119,7 +119,7 @@ export default function Gantt({
   }
 
   function showTip(e, t, project) {
-    const color = partnerColor(partners, t.partner_id)
+    const color = statusColor(t.status)
     setTip({
       x: e.clientX, y: e.clientY,
       color,
@@ -227,7 +227,8 @@ export default function Gantt({
                 </div>
 
                 {tks.map((t) => {
-                  const color = partnerColor(partners, t.partner_id)
+                  const color = partnerColor(partners, t.partner_id) // punto del partner en la etiqueta
+                  const barColor = statusColor(t.status) // color de la barra segun estado
                   const isConflict = conflictIds.has(t.id)
                   // Barra plan, recortada si empieza antes del rango visible (hidePast)
                   const startPx = idxOf(t.planned_start) * dayW
@@ -264,7 +265,7 @@ export default function Gantt({
                         {barVisible && (
                           <div
                             className={`bar${isConflict ? ' conflict' : ''}`}
-                            style={{ left, width, background: color, color: textOn(color) }}
+                            style={{ left, width, background: barColor, color: textOn(barColor) }}
                             onMouseEnter={(e) => showTip(e, t, project)}
                             onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
                             onMouseLeave={() => setTip(null)}

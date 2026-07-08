@@ -76,7 +76,13 @@ export default function WebProjects() {
         ) : (
           <>
             <div className="legend">
-              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--info)' }} /> Barra = tarea planificada (color del partner)</span>
+              <span className="lg-label">Estado:</span>
+              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--ink-3)' }} /> Pendiente</span>
+              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--info)' }} /> En curso</span>
+              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--ok)' }} /> Completado</span>
+              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--warn)' }} /> Retrasado</span>
+              <span className="lg-sep" />
+              <span className="lg"><span className="lg-dot" /> Punto = partner</span>
               <span className="lg"><span className="lg-swatch conflict" /> Solapamiento de partner</span>
               <span className="lg"><span className="lg-swatch delay" /> Delay</span>
               <span className="lg"><span className="lg-swatch launch" /> Market Launch (deadline del mercado)</span>
