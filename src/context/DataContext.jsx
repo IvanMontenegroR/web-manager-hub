@@ -31,11 +31,14 @@ export function DataProvider({ children }) {
   }, [refresh])
 
   const derived = useMemo(() => {
-    const { pairs, conflictIds } = detectOverlaps(state.tasks)
-    const delays = detectDelays(state.tasks)
+    // Los proyectos archivados no participan del cronograma activo ni del analisis.
+    const archivedIds = new Set(state.projects.filter((p) => p.archived).map((p) => p.id))
+    const activeTasks = state.tasks.filter((t) => !archivedIds.has(t.project_id))
+    const { pairs, conflictIds } = detectOverlaps(activeTasks)
+    const delays = detectDelays(activeTasks)
     const enriched = state.tasks.map(withDerived)
-    return { pairs, conflictIds, delays, enriched }
-  }, [state.tasks])
+    return { pairs, conflictIds, delays, enriched, archivedIds }
+  }, [state.tasks, state.projects])
 
   const value = useMemo(
     () => ({ ...state, ...derived, loading, error, refresh }),

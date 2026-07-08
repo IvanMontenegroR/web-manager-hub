@@ -688,3 +688,26 @@ textarea.control { resize: vertical; min-height: 64px; }
 .empty-projects {
   text-align: center; padding: 60px 20px; color: var(--ink-3);
 }
+
+/* Acordeon de proyectos archivados (cronograma aparte, al final) */
+.archived { margin-top: 22px; border-top: 1px solid var(--border-strong); padding-top: 14px; }
+.archived-toggle {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 13px; font-weight: 600; color: var(--ink-2);
+  cursor: pointer; transition: background 0.12s, border-color 0.12s;
+}
+.archived-toggle:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.archived-toggle .chev { transition: transform 0.15s; color: var(--ink-3); }
+.archived.open .archived-toggle .chev { transform: rotate(90deg); }
+.archived-toggle .count {
+  margin-left: auto;
+  font-size: 11px; font-weight: 700;
+  min-width: 20px; text-align: center;
+  padding: 1px 7px; border-radius: 20px;
+  background: var(--proj-bg); color: var(--ink-2);
+}
+.archived-body { margin-top: 12px; }
+.archived-body .gantt-wrap { opacity: 0.92; }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, CheckCircle2, Ban, Flag } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -23,13 +23,25 @@ function flagEmoji(cc) {
   return String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65, 0x1f1e6 + c.charCodeAt(1) - 65)
 }
 
-export default function Gantt({ hidePast = false, onEditProject, onDeleteProject, onAddTask, onEditTask, onDeleteTask }) {
-  const { projects, partners, enriched, conflictIds } = useData()
+export default function Gantt({
+  projects,
+  hidePast = false,
+  emptyLabel,
+  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask,
+}) {
+  const { partners, enriched, conflictIds } = useData()
   const [tip, setTip] = useState(null)
+
+  // Solo las tareas de los proyectos que este Gantt renderiza (activos o archivados).
+  const projectIds = useMemo(() => new Set(projects.map((p) => p.id)), [projects])
+  const myTasks = useMemo(
+    () => enriched.filter((t) => projectIds.has(t.project_id)),
+    [enriched, projectIds]
+  )
 
   const geo = useMemo(() => {
     const dates = []
-    for (const t of enriched) {
+    for (const t of myTasks) {
       if (t.planned_start) dates.push(t.planned_start)
       if (t.planned_end) dates.push(t.planned_end)
       if (t.actual_start) dates.push(t.actual_start)
@@ -63,16 +75,16 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
     const weekendIdx = days.map((iso, i) => (isWeekendISO(iso) ? i : -1)).filter((i) => i >= 0)
     const todayIdx = daysBetween(start, today)
     return { start, days, months, weekendIdx, todayIdx, today }
-  }, [enriched, projects, hidePast])
+  }, [myTasks, projects, hidePast])
 
   const tasksByProject = useMemo(() => {
     const map = {}
-    for (const t of enriched) {
+    for (const t of myTasks) {
       ;(map[t.project_id] ||= []).push(t)
     }
     for (const k in map) map[k].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
     return map
-  }, [enriched])
+  }, [myTasks])
 
   const dayW = 34
   const labelW = 300
@@ -128,7 +140,7 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
   if (projects.length === 0) {
     return (
       <div className="empty-projects">
-        No hay proyectos todavia. Crea el primero con el boton Nuevo proyecto.
+        {emptyLabel || 'No hay proyectos todavia. Crea el primero con el boton Nuevo proyecto.'}
       </div>
     )
   }
@@ -194,6 +206,15 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
                       <button className="btn btn-ghost btn-sm btn-icon" title="Editar proyecto" onClick={() => onEditProject(project)}>
                         <Pencil size={14} />
                       </button>
+                      {onArchiveProject && (
+                        <button
+                          className="btn btn-ghost btn-sm btn-icon"
+                          title={project.archived ? 'Desarchivar proyecto' : 'Archivar proyecto'}
+                          onClick={() => onArchiveProject(project)}
+                        >
+                          {project.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+                        </button>
+                      )}
                       <button className="btn btn-ghost btn-sm btn-icon" title="Borrar proyecto" onClick={() => onDeleteProject(project)}>
                         <Trash2 size={14} />
                       </button>

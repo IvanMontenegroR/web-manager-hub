@@ -25,8 +25,10 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
 
 - `partners(id, name, color, created_at)`
 - `sla_definitions(id, action_name, sla_days, created_at)`
-- `projects(id, name, brand, market, start_date, market_launch, status, created_at)`
-  (`market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt)
+- `projects(id, name, brand, market, start_date, market_launch, status, archived, created_at)`
+  (`market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt.
+  `archived` = bool; los archivados se ocultan del cronograma activo y del analisis, y se muestran
+  en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, sort_order, created_at)`
 

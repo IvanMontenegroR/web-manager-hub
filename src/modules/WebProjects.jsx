@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FolderPlus, Users, Timer, Download, RotateCw, CalendarX2 } from 'lucide-react'
+import { FolderPlus, Users, Timer, Download, RotateCw, CalendarX2, Archive, ChevronRight } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import OverlapPanel from '../components/panels/OverlapPanel.jsx'
@@ -8,17 +8,26 @@ import ProjectModal from '../components/modals/ProjectModal.jsx'
 import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import SlaModal from '../components/modals/SlaModal.jsx'
-import { deleteProject, deleteTask } from '../lib/db'
+import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
 import { exportGlobal } from '../lib/exportXlsx'
 
 export default function WebProjects() {
   const { loading, error, projects, tasks, partners, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
   const [hidePast, setHidePast] = useState(false)
+  const [archivedOpen, setArchivedOpen] = useState(false)
+
+  const activeProjects = projects.filter((p) => !p.archived)
+  const archivedProjects = projects.filter((p) => p.archived)
 
   async function handleDeleteProject(project) {
     if (!confirm(`Borrar el proyecto "${project.name}" y todas sus tareas? Esta accion no se puede deshacer.`)) return
     await deleteProject(project.id)
+    await refresh()
+  }
+
+  async function handleArchiveProject(project) {
+    await setProjectArchived(project.id, !project.archived)
     await refresh()
   }
 
@@ -74,9 +83,16 @@ export default function WebProjects() {
             </div>
 
             <Gantt
+              projects={activeProjects}
               hidePast={hidePast}
+              emptyLabel={
+                archivedProjects.length > 0
+                  ? 'No hay proyectos activos. Los archivados estan abajo.'
+                  : 'No hay proyectos todavia. Crea el primero con el boton Nuevo proyecto.'
+              }
               onEditProject={(p) => setModal({ type: 'project', project: p })}
               onDeleteProject={handleDeleteProject}
+              onArchiveProject={handleArchiveProject}
               onAddTask={(p) => setModal({ type: 'task', project: p })}
               onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
               onDeleteTask={handleDeleteTask}
@@ -86,6 +102,31 @@ export default function WebProjects() {
               <OverlapPanel />
               <DelayPanel />
             </div>
+
+            {archivedProjects.length > 0 && (
+              <div className={`archived${archivedOpen ? ' open' : ''}`}>
+                <button className="archived-toggle" onClick={() => setArchivedOpen((v) => !v)}>
+                  <ChevronRight size={16} className="chev" />
+                  <Archive size={15} />
+                  <span>Proyectos archivados</span>
+                  <span className="count">{archivedProjects.length}</span>
+                </button>
+                {archivedOpen && (
+                  <div className="archived-body">
+                    <Gantt
+                      projects={archivedProjects}
+                      hidePast={false}
+                      onEditProject={(p) => setModal({ type: 'project', project: p })}
+                      onDeleteProject={handleDeleteProject}
+                      onArchiveProject={handleArchiveProject}
+                      onAddTask={(p) => setModal({ type: 'task', project: p })}
+                      onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
+                      onDeleteTask={handleDeleteTask}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

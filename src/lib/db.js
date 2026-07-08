@@ -68,6 +68,18 @@ export async function deleteProject(id) {
   throwIf(error) // ON DELETE CASCADE borra las tasks del proyecto
 }
 
+// Archiva o desarchiva un proyecto. No toca el resto de sus campos.
+export async function setProjectArchived(id, archived) {
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ archived })
+    .eq('id', id)
+    .select()
+    .single()
+  throwIf(error)
+  return data
+}
+
 // ---- Tasks ----
 // Nota: no se escribe planned_end (columna generada).
 function taskPayload(t) {
