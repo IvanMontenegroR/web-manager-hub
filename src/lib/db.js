@@ -9,21 +9,24 @@ function throwIf(error) {
 
 // ---- Lecturas ----
 export async function fetchAll() {
-  const [partners, slas, projects, tasks] = await Promise.all([
+  const [partners, slas, projects, tasks, holidays] = await Promise.all([
     supabase.from('partners').select('*').order('name'),
     supabase.from('sla_definitions').select('*').order('sla_days'),
     supabase.from('projects').select('*').order('start_date'),
     supabase.from('tasks').select('*').order('sort_order'),
+    supabase.from('holidays').select('*').order('date'),
   ])
   throwIf(partners.error)
   throwIf(slas.error)
   throwIf(projects.error)
   throwIf(tasks.error)
+  throwIf(holidays.error)
   return {
     partners: partners.data ?? [],
     slas: slas.data ?? [],
     projects: projects.data ?? [],
     tasks: tasks.data ?? [],
+    holidays: holidays.data ?? [],
   }
 }
 
@@ -175,5 +178,21 @@ export async function updateSla(id, s) {
 
 export async function deleteSla(id) {
   const { error } = await supabase.from('sla_definitions').delete().eq('id', id)
+  throwIf(error)
+}
+
+// ---- Holidays (feriados por partner) ----
+export async function createHoliday(h) {
+  const { data, error } = await supabase
+    .from('holidays')
+    .insert({ partner_id: h.partner_id, date: h.date, name: h.name || null })
+    .select()
+    .single()
+  throwIf(error)
+  return data
+}
+
+export async function deleteHoliday(id) {
+  const { error } = await supabase.from('holidays').delete().eq('id', id)
   throwIf(error)
 }

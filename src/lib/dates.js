@@ -25,10 +25,55 @@ export function addDaysISO(iso, n) {
   return toISO(addDays(parseDay(iso), n))
 }
 
-// planned_end = planned_start + planned_days - 1 (misma logica que la columna generada).
-export function plannedEnd(planned_start, planned_days) {
+// --- Dias habiles ---
+// Un dia es habil si no es fin de semana y no es feriado del partner (Set de ISO).
+export function isBusinessDay(iso, holidays) {
+  return !isWeekendISO(iso) && !(holidays && holidays.has(iso))
+}
+
+// Devuelve el ISO del n-esimo dia habil contando desde startISO (inclusive).
+// Si start cae en fin de semana/feriado, no cuenta y se avanza.
+export function addBusinessDays(startISO, n, holidays) {
+  let count = 0
+  let cur = startISO
+  for (let i = 0; i < 100000; i++) {
+    if (isBusinessDay(cur, holidays)) {
+      count += 1
+      if (count >= n) return cur
+    }
+    cur = addDaysISO(cur, 1)
+  }
+  return cur
+}
+
+// Cantidad de dias habiles en el rango (from, to]  (excluye from, incluye to).
+// 0 si to <= from. Usado para medir el retraso en dias habiles.
+export function businessDaysBetween(fromISO, toISO_, holidays) {
+  if (!fromISO || !toISO_ || daysBetween(fromISO, toISO_) <= 0) return 0
+  let count = 0
+  let cur = addDaysISO(fromISO, 1)
+  while (daysBetween(cur, toISO_) >= 0) {
+    if (isBusinessDay(cur, holidays)) count += 1
+    cur = addDaysISO(cur, 1)
+  }
+  return count
+}
+
+// Hay al menos un dia habil en el rango [sISO, eISO] (inclusive)?
+export function hasBusinessDayInRange(sISO, eISO, holidays) {
+  let cur = sISO
+  while (daysBetween(cur, eISO) >= 0) {
+    if (isBusinessDay(cur, holidays)) return true
+    cur = addDaysISO(cur, 1)
+  }
+  return false
+}
+
+// planned_end en DIAS HABILES: el planned_days-esimo dia habil desde planned_start.
+// (La columna generada en Postgres es de dias calendario y se ignora: la UI usa esta.)
+export function plannedEnd(planned_start, planned_days, holidays) {
   if (!planned_start || !planned_days) return planned_start
-  return addDaysISO(planned_start, planned_days - 1)
+  return addBusinessDays(planned_start, planned_days, holidays)
 }
 
 // Dias de calendario entre dos ISO (b - a). Mismo dia = 0.

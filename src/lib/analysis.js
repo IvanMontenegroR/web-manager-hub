@@ -1,41 +1,60 @@
 // Logica derivada: deteccion de solapamientos por partner y calculo de retrasos.
-import { plannedEnd, rangesOverlap, daysBetween } from './dates'
+// Todo se mide en DIAS HABILES (sin fines de semana ni feriados del partner).
+import {
+  plannedEnd, businessDaysBetween, hasBusinessDayInRange,
+  rangesOverlap, daysBetween,
+} from './dates'
 
-// Enriquece cada task con planned_end calculado y su delta de atraso.
-export function withDerived(task) {
-  const pEnd = plannedEnd(task.planned_start, task.planned_days)
-  // Retraso: actual_end supera planned_end. delta = magnitud en dias.
+// Enriquece una task con planned_end (dias habiles) y su delta de atraso (dias habiles).
+export function withDerived(task, holidays) {
+  const pEnd = plannedEnd(task.planned_start, task.planned_days, holidays)
+  // Retraso: dias habiles que actual_end supera a planned_end.
   let delayDays = 0
   if (task.actual_end && daysBetween(pEnd, task.actual_end) > 0) {
-    delayDays = daysBetween(pEnd, task.actual_end)
+    delayDays = businessDaysBetween(pEnd, task.actual_end, holidays)
   }
   return { ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0 }
 }
 
-// Solapamiento: mismo partner, proyectos DISTINTOS, rangos planificados que se pisan.
-// Devuelve pares de conflicto y un Set con los ids de tasks en conflicto.
-export function detectOverlaps(tasks) {
-  const enriched = tasks.map(withDerived).filter((t) => t.partner_id && t.planned_start && t.planned_days)
+// Enriquece todas las tasks usando los feriados del partner de cada una.
+export function enrich(tasks, holidaysByPartner) {
+  return tasks.map((t) => withDerived(t, holidaysByPartner?.get(t.partner_id)))
+}
+
+function maxISO(a, b) {
+  return daysBetween(a, b) >= 0 ? b : a
+}
+function minISO(a, b) {
+  return daysBetween(a, b) >= 0 ? a : b
+}
+
+// Solapamiento: mismo partner, proyectos DISTINTOS, y la interseccion de sus rangos
+// planificados contiene al menos un dia HABIL (los findes/feriados no cuentan).
+export function detectOverlaps(enriched, holidaysByPartner) {
+  const list = enriched.filter((t) => t.partner_id && t.planned_start && t.planned_days)
   const pairs = []
   const conflictIds = new Set()
 
-  for (let i = 0; i < enriched.length; i++) {
-    for (let j = i + 1; j < enriched.length; j++) {
-      const a = enriched[i]
-      const b = enriched[j]
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const a = list[i]
+      const b = list[j]
       if (a.partner_id !== b.partner_id) continue
       if (a.project_id === b.project_id) continue
-      if (rangesOverlap(a.planned_start, a.planned_end, b.planned_start, b.planned_end)) {
-        pairs.push({ a, b, partner_id: a.partner_id })
-        conflictIds.add(a.id)
-        conflictIds.add(b.id)
-      }
+      if (!rangesOverlap(a.planned_start, a.planned_end, b.planned_start, b.planned_end)) continue
+      const s = maxISO(a.planned_start, b.planned_start)
+      const e = minISO(a.planned_end, b.planned_end)
+      const hol = holidaysByPartner?.get(a.partner_id)
+      if (!hasBusinessDayInRange(s, e, hol)) continue
+      pairs.push({ a, b, partner_id: a.partner_id })
+      conflictIds.add(a.id)
+      conflictIds.add(b.id)
     }
   }
   return { pairs, conflictIds }
 }
 
-// Lista de tasks retrasadas (con planned_end / actual_end / delta).
-export function detectDelays(tasks) {
-  return tasks.map(withDerived).filter((t) => t.isDelayed)
+// Lista de tasks retrasadas (ya enriquecidas).
+export function detectDelays(enriched) {
+  return enriched.filter((t) => t.isDelayed)
 }

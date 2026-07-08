@@ -23,8 +23,11 @@ otros tres (Daily Ops, Tareas, Ecosystem 2.0) son placeholders en el shell.
 
 Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume):
 
-- `partners(id, name, color, created_at)`
-- `sla_definitions(id, action_name, sla_days, created_at)`
+- `partners(id, name, color, created_at)` (incluye a **Purina** como partner, color rojo de marca
+  `#ED1C24`; las tareas de region/feedback son responsabilidad de Purina)
+- `sla_definitions(id, action_name, sla_days, created_at)` (`sla_days` = dias HABILES)
+- `holidays(id, partner_id, date, name, created_at)` (feriados por partner; FK ON DELETE CASCADE.
+  Los feriados de un partner no cuentan como dias habiles para ese partner)
 - `projects(id, name, brand, market, start_date, market_launch, status, archived, created_at)`
   (`market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt.
   `archived` = bool; los archivados se ocultan del cronograma activo y del analisis, y se muestran
@@ -32,20 +35,26 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, sort_order, created_at)`
 
-CRITICO: `planned_end` es una **columna generada** (`planned_start + planned_days - 1`).
-Nunca se escribe. En inserts/updates solo se mandan `planned_start` y `planned_days`
-(ver `src/lib/db.js`). El `planned_end` para la UI se recalcula en `src/lib/dates.js`.
+CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
+dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**
+en `src/lib/dates.js` (`plannedEnd`). Nunca se escribe. En inserts/updates solo se mandan
+`planned_start` y `planned_days`. No se puede hacer la columna generada consciente de feriados
+(estan en otra tabla), por eso el calculo real vive en el front.
+
+DIAS HABILES: todo lo que sea "dias" (planned_days, retraso, solapamiento) cuenta solo dias
+habiles = sin sabados/domingos ni los feriados del partner responsable (tabla `holidays`).
+Ver `src/lib/dates.js` (`isBusinessDay`, `addBusinessDays`, `businessDaysBetween`).
 
 FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL.
 
 ## Logica clave
 
 - **Solapamientos** (`src/lib/analysis.js` -> `detectOverlaps`): comparacion por pares de
-  todas las tasks. Conflicto = mismo `partner_id`, `project_id` distinto, y rangos
-  `[planned_start, planned_end]` (inclusivos) que se intersectan. Un dia compartido en el
-  borde (fin de una = inicio de otra) cuenta como conflicto.
-- **Retrasos** (`detectDelays`): `actual_end > planned_end`. El delta en dias es la
-  magnitud del atraso, y se dibuja como extension rayada despues de la barra plan.
+  todas las tasks. Conflicto = mismo `partner_id`, `project_id` distinto, y la interseccion de
+  sus rangos `[planned_start, planned_end]` contiene al menos un dia **habil** (findes/feriados
+  del partner no cuentan).
+- **Retrasos** (`detectDelays`): `actual_end > planned_end`. El delta en **dias habiles** es la
+  magnitud del atraso, y se dibuja como extension rayada (hasta el fin real) despues de la barra.
 - La razon de retraso es **obligatoria** en el form cuando `actual_end > planned_end`
   (`src/components/modals/TaskModal.jsx`).
 

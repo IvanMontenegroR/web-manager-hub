@@ -3,14 +3,14 @@ import { ListPlus } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
-import { plannedEnd, daysBetween, fmtCorto, toISO } from '../../lib/dates'
+import { plannedEnd, daysBetween, businessDaysBetween, fmtCorto, toISO } from '../../lib/dates'
 
 // El retraso se detecta automaticamente (fin real > fin plan); no es un estado manual.
 const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado']
 const CUSTOM = '__custom__'
 
 export default function TaskModal({ task, project, onClose }) {
-  const { slas, partners, tasks, refresh } = useData()
+  const { slas, partners, tasks, holidaysByPartner, refresh } = useData()
   const editing = !!task
 
   const knownAction = slas.some((s) => s.action_name === task?.action_name)
@@ -33,12 +33,16 @@ export default function TaskModal({ task, project, onClose }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
+  const holSet = holidaysByPartner?.get(form.partner_id)
   const pEnd = useMemo(
-    () => plannedEnd(form.planned_start, Number(form.planned_days) || 1),
-    [form.planned_start, form.planned_days]
+    () => plannedEnd(form.planned_start, Number(form.planned_days) || 1, holSet),
+    [form.planned_start, form.planned_days, holSet]
   )
-  const isDelayed = form.actual_end && daysBetween(pEnd, form.actual_end) > 0
-  const delayDays = isDelayed ? daysBetween(pEnd, form.actual_end) : 0
+  const delayDays =
+    form.actual_end && daysBetween(pEnd, form.actual_end) > 0
+      ? businessDaysBetween(pEnd, form.actual_end, holSet)
+      : 0
+  const isDelayed = delayDays > 0
 
   function onActionChange(e) {
     const v = e.target.value
@@ -143,9 +147,9 @@ export default function TaskModal({ task, project, onClose }) {
           <input type="date" className="control" value={form.planned_start} onChange={set('planned_start')} />
         </div>
         <div className="field req">
-          <label>Dias (SLA)</label>
+          <label>Dias habiles (SLA)</label>
           <input type="number" min="1" className="control" value={form.planned_days} onChange={set('planned_days')} />
-          <div className="hint">Fin plan: {fmtCorto(pEnd)}</div>
+          <div className="hint">Fin plan: {fmtCorto(pEnd)} (sin findes ni feriados del partner)</div>
         </div>
         <div className="field">
           <label>Status</label>
@@ -176,7 +180,7 @@ export default function TaskModal({ task, project, onClose }) {
         />
         {isDelayed && (
           <div className="hint" style={{ color: 'var(--danger)' }}>
-            Retraso de {delayDays} dia{delayDays > 1 ? 's' : ''} respecto al fin plan ({fmtCorto(pEnd)}).
+            Retraso de {delayDays} dia{delayDays > 1 ? 's' : ''} habil{delayDays > 1 ? 'es' : ''} respecto al fin plan ({fmtCorto(pEnd)}).
           </div>
         )}
       </div>

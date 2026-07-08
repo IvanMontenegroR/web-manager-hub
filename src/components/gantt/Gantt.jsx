@@ -237,9 +237,10 @@ export default function Gantt({
                   const barVisible = endPx > 0
                   const left = clipStart + 2
                   const width = Math.max(endPx - clipStart - 4, 12)
-                  // Extension de retraso (tambien recortable)
+                  // Extension de retraso: del dia siguiente al fin plan hasta el fin real
+                  // (calendario). El numero (+Nd) es en dias habiles.
                   const dStartPx = (idxOf(t.planned_end) + 1) * dayW
-                  const dEndPx = dStartPx + t.delayDays * dayW
+                  const dEndPx = t.actual_end ? (idxOf(t.actual_end) + 1) * dayW : dStartPx
                   const dClip = Math.max(dStartPx, 0)
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip

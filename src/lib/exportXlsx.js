@@ -1,13 +1,13 @@
 // Export a Excel (.xlsx). Formato simple de planilla, sin reproducir el Gantt.
+// Recibe tasks YA enriquecidas (planned_end / delayDays en dias habiles).
 import * as XLSX from 'xlsx'
-import { withDerived } from './analysis'
 import { partnerName } from './colors'
 
 // fmt de fecha para planilla: dejamos el ISO tal cual (YYYY-MM-DD), es claro y ordenable.
 function buildRows(tasks, projects, partners) {
   const projById = Object.fromEntries(projects.map((p) => [p.id, p]))
   return tasks
-    .map(withDerived)
+    .slice()
     .sort((a, b) => {
       const pa = projById[a.project_id]?.name || ''
       const pb = projById[b.project_id]?.name || ''

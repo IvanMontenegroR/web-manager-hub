@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FolderPlus, Users, Timer, Download, RotateCw, CalendarX2, Archive, ChevronRight } from 'lucide-react'
+import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, Archive, ChevronRight } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import OverlapPanel from '../components/panels/OverlapPanel.jsx'
@@ -8,11 +8,12 @@ import ProjectModal from '../components/modals/ProjectModal.jsx'
 import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import SlaModal from '../components/modals/SlaModal.jsx'
+import HolidaysModal from '../components/modals/HolidaysModal.jsx'
 import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
 import { exportGlobal } from '../lib/exportXlsx'
 
 export default function WebProjects() {
-  const { loading, error, projects, tasks, partners, refresh } = useData()
+  const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
   const [hidePast, setHidePast] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
@@ -55,7 +56,8 @@ export default function WebProjects() {
           </button>
           <button className="btn" onClick={() => setModal({ type: 'partners' })}><Users size={16} /> Partners</button>
           <button className="btn" onClick={() => setModal({ type: 'slas' })}><Timer size={16} /> SLAs</button>
-          <button className="btn" onClick={() => exportGlobal(tasks, projects, partners)} disabled={tasks.length === 0}>
+          <button className="btn" onClick={() => setModal({ type: 'holidays' })}><CalendarOff size={16} /> Feriados</button>
+          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners)} disabled={tasks.length === 0}>
             <Download size={16} /> Exportar
           </button>
           <button className="btn btn-primary" onClick={() => setModal({ type: 'project' })}>
@@ -144,6 +146,7 @@ export default function WebProjects() {
       )}
       {modal?.type === 'partners' && <PartnersModal onClose={() => setModal(null)} />}
       {modal?.type === 'slas' && <SlaModal onClose={() => setModal(null)} />}
+      {modal?.type === 'holidays' && <HolidaysModal onClose={() => setModal(null)} />}
     </>
   )
 }
