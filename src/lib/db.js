@@ -36,6 +36,7 @@ export async function createProject(p) {
       brand: p.brand,
       market: p.market,
       start_date: p.start_date,
+      market_launch: p.market_launch || null,
       status: p.status || 'En curso',
     })
     .select()
@@ -52,6 +53,7 @@ export async function updateProject(id, p) {
       brand: p.brand,
       market: p.market,
       start_date: p.start_date,
+      market_launch: p.market_launch || null,
       status: p.status,
     })
     .eq('id', id)

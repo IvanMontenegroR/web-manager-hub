@@ -24,6 +24,8 @@
   --danger-tint: #fbe9e6;
   --info: #2e6fd0;
   --info-tint: #e9f0fb;
+  --launch: #7c3aed;
+  --launch-tint: #f0eafc;
 
   --shadow-sm: 0 1px 2px rgba(23, 31, 43, 0.06), 0 1px 3px rgba(23, 31, 43, 0.05);
   --shadow-md: 0 4px 16px rgba(23, 31, 43, 0.1);
@@ -338,6 +340,19 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   letter-spacing: 0.3px;
 }
 .proj-label .p-flag .flag { font-size: 15px; line-height: 1; }
+.proj-label .p-launch {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--launch);
+  background: var(--launch-tint);
+  border-radius: 20px;
+  padding: 1px 7px 1px 5px;
+  letter-spacing: 0.2px;
+}
 .pill {
   font-size: 10.5px;
   font-weight: 600;
@@ -350,6 +365,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .proj-actions { flex: none; display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
 .proj-row:hover .proj-actions { opacity: 1; }
 .proj-row:hover .p-flag { display: none; }
+.proj-row:hover .p-launch { display: none; }
 .proj-timeline { position: relative; flex: 1; background: var(--proj-bg); }
 
 /* Proyecto finalizado (Completado / Cancelado): atenuado + icono */
@@ -410,6 +426,20 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   position: absolute; top: 0; bottom: 0;
   width: 2px; background: var(--purina);
   z-index: 6; opacity: 0.7;
+}
+/* Marcador de Market Launch: deadline objetivo del mercado */
+.launch-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--launch);
+  z-index: 7; pointer-events: none;
+}
+.launch-line::before {
+  content: '';
+  position: absolute; top: 0; left: -4px;
+  border-width: 6px 4px 0 4px;
+  border-style: solid;
+  border-color: var(--launch) transparent transparent transparent;
 }
 
 /* Barras */
@@ -648,6 +678,11 @@ textarea.control { resize: vertical; min-height: 64px; }
 .legend .lg-swatch.delay {
   background-image: repeating-linear-gradient(45deg, rgba(208,67,47,.55) 0, rgba(208,67,47,.55) 4px, rgba(208,67,47,.18) 4px, rgba(208,67,47,.18) 8px);
   border: 1px solid var(--danger);
+}
+.legend .lg-swatch.launch {
+  width: 0; height: 16px;
+  border-radius: 0;
+  border-left: 2px dashed var(--launch);
 }
 
 .empty-projects {

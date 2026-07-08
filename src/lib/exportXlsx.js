@@ -16,6 +16,7 @@ function buildRows(tasks, projects, partners) {
     })
     .map((t) => ({
       Proyecto: projById[t.project_id]?.name || '',
+      'Market Launch': projById[t.project_id]?.market_launch || '',
       Accion: t.action_name || '',
       Partner: partnerName(partners, t.partner_id, ''),
       'Inicio plan': t.planned_start || '',
@@ -32,7 +33,7 @@ function download(rows, sheetName, filename) {
   const ws = XLSX.utils.json_to_sheet(rows)
   // Anchos de columna comodos.
   ws['!cols'] = [
-    { wch: 22 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
+    { wch: 22 }, { wch: 13 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
     { wch: 9 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 48 },
   ]
   const wb = XLSX.utils.book_new()

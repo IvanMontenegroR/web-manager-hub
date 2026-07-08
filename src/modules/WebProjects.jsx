@@ -69,7 +69,8 @@ export default function WebProjects() {
             <div className="legend">
               <span className="lg"><span className="lg-swatch" style={{ background: 'var(--info)' }} /> Barra = tarea planificada (color del partner)</span>
               <span className="lg"><span className="lg-swatch conflict" /> Solapamiento de partner</span>
-              <span className="lg"><span className="lg-swatch delay" /> Extension de retraso</span>
+              <span className="lg"><span className="lg-swatch delay" /> Delay</span>
+              <span className="lg"><span className="lg-swatch launch" /> Market Launch (deadline del mercado)</span>
             </div>
 
             <Gantt

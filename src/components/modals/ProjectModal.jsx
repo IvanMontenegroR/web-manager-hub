@@ -15,6 +15,7 @@ export default function ProjectModal({ project, onClose }) {
     brand: project?.brand || '',
     market: project?.market || '',
     start_date: project?.start_date || toISO(new Date()),
+    market_launch: project?.market_launch || '',
     status: project?.status || 'En curso',
   })
   const [err, setErr] = useState(null)
@@ -72,11 +73,19 @@ export default function ProjectModal({ project, onClose }) {
           <input type="date" className="control" value={form.start_date} onChange={set('start_date')} />
         </div>
         <div className="field">
+          <label>Market Launch</label>
+          <input type="date" className="control" value={form.market_launch} onChange={set('market_launch')} />
+          <div className="hint">Fecha en la que el mercado debe lanzar (deadline objetivo).</div>
+        </div>
+      </div>
+      <div className="row-2">
+        <div className="field">
           <label>Status</label>
           <select className="control" value={form.status} onChange={set('status')}>
             {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+        <div className="field" />
       </div>
     </Modal>
   )

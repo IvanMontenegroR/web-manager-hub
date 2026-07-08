@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, CheckCircle2, Ban } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle2, Ban, Flag } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -35,6 +35,10 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
       if (t.actual_start) dates.push(t.actual_start)
       if (t.actual_end) dates.push(t.actual_end)
     }
+    // El deadline de Market Launch debe quedar siempre dentro del rango visible.
+    for (const p of projects) {
+      if (p.market_launch) dates.push(p.market_launch)
+    }
     const today = todayISO()
     dates.push(today)
     if (dates.length === 0) dates.push(today)
@@ -59,7 +63,7 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
     const weekendIdx = days.map((iso, i) => (isWeekendISO(iso) ? i : -1)).filter((i) => i >= 0)
     const todayIdx = daysBetween(start, today)
     return { start, days, months, weekendIdx, todayIdx, today }
-  }, [enriched, hidePast])
+  }, [enriched, projects, hidePast])
 
   const tasksByProject = useMemo(() => {
     const map = {}
@@ -85,6 +89,20 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
           <div className="today-line" style={{ left: geo.todayIdx * dayW + dayW / 2 }} />
         )}
       </>
+    )
+  }
+
+  // Marcador vertical del Market Launch (deadline del mercado) para un proyecto.
+  function LaunchLine({ iso }) {
+    if (!iso) return null
+    const i = idxOf(iso)
+    if (i < 0 || i >= geo.days.length) return null
+    return (
+      <div
+        className="launch-line"
+        style={{ left: i * dayW + dayW / 2 }}
+        title={`Market Launch: ${fmtLargo(iso)}`}
+      />
     )
   }
 
@@ -164,6 +182,11 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
                         {project.market}
                       </span>
                     )}
+                    {project.market_launch && (
+                      <span className="p-launch" title={`Market Launch: ${fmtLargo(project.market_launch)}`}>
+                        <Flag size={11} /> {fmtCorto(project.market_launch)}
+                      </span>
+                    )}
                     <div className="proj-actions">
                       <button className="btn btn-ghost btn-sm btn-icon" title="Agregar tarea" onClick={() => onAddTask(project)}>
                         <Plus size={15} />
@@ -178,6 +201,7 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
                   </div>
                   <div className="proj-timeline" style={{ width: totalW }}>
                     <BgLayer />
+                    <LaunchLine iso={project.market_launch} />
                   </div>
                 </div>
 
@@ -215,6 +239,7 @@ export default function Gantt({ hidePast = false, onEditProject, onDeleteProject
                       </div>
                       <div className="task-timeline" style={{ width: totalW }}>
                         <BgLayer />
+                        <LaunchLine iso={project.market_launch} />
                         {barVisible && (
                           <div
                             className={`bar${isConflict ? ' conflict' : ''}`}
