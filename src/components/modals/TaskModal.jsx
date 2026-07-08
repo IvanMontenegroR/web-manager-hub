@@ -5,7 +5,8 @@ import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
 import { plannedEnd, daysBetween, fmtCorto, toISO } from '../../lib/dates'
 
-const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado', 'Retrasado']
+// El retraso se detecta automaticamente (fin real > fin plan); no es un estado manual.
+const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado']
 const CUSTOM = '__custom__'
 
 export default function TaskModal({ task, project, onClose }) {

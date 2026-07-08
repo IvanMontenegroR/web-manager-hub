@@ -37,11 +37,11 @@ export function partnerName(partners, id, fallback = 'Sin partner') {
 }
 
 // Color de la barra segun el estado de la tarea (mismos tonos que las vars del CSS).
+// El retraso NO es un estado: se detecta y dibuja aparte (extension rayada roja).
 export const STATUS_COLORS = {
   Pendiente: '#868e99', // gris (--ink-3)
   'En curso': '#2e6fd0', // azul (--info)
   Completado: '#2f8f5b', // verde (--ok)
-  Retrasado: '#c8811a', // ambar (--warn)
 }
 
 export function statusColor(status, fallback = '#868e99') {

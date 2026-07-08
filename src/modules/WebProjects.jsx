@@ -80,7 +80,6 @@ export default function WebProjects() {
               <span className="lg"><span className="lg-swatch" style={{ background: 'var(--ink-3)' }} /> Pendiente</span>
               <span className="lg"><span className="lg-swatch" style={{ background: 'var(--info)' }} /> En curso</span>
               <span className="lg"><span className="lg-swatch" style={{ background: 'var(--ok)' }} /> Completado</span>
-              <span className="lg"><span className="lg-swatch" style={{ background: 'var(--warn)' }} /> Retrasado</span>
               <span className="lg-sep" />
               <span className="lg"><span className="lg-dot" /> Punto = partner</span>
               <span className="lg"><span className="lg-swatch conflict" /> Solapamiento de partner</span>
