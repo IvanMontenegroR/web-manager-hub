@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FolderPlus, Users, Timer, Download, RotateCw } from 'lucide-react'
+import { FolderPlus, Users, Timer, Download, RotateCw, CalendarX2 } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import OverlapPanel from '../components/panels/OverlapPanel.jsx'
@@ -14,6 +14,7 @@ import { exportGlobal } from '../lib/exportXlsx'
 export default function WebProjects() {
   const { loading, error, projects, tasks, partners, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
+  const [hidePast, setHidePast] = useState(false)
 
   async function handleDeleteProject(project) {
     if (!confirm(`Borrar el proyecto "${project.name}" y todas sus tareas? Esta accion no se puede deshacer.`)) return
@@ -36,6 +37,13 @@ export default function WebProjects() {
         </div>
         <div className="topbar-actions">
           <button className="btn btn-icon" title="Recargar" onClick={refresh}><RotateCw size={16} /></button>
+          <button
+            className={`btn${hidePast ? ' active' : ''}`}
+            title={hidePast ? 'Mostrar dias pasados' : 'Ocultar dias pasados'}
+            onClick={() => setHidePast((v) => !v)}
+          >
+            <CalendarX2 size={16} /> {hidePast ? 'Mostrando desde hoy' : 'Ocultar pasado'}
+          </button>
           <button className="btn" onClick={() => setModal({ type: 'partners' })}><Users size={16} /> Partners</button>
           <button className="btn" onClick={() => setModal({ type: 'slas' })}><Timer size={16} /> SLAs</button>
           <button className="btn" onClick={() => exportGlobal(tasks, projects, partners)} disabled={tasks.length === 0}>
@@ -65,6 +73,7 @@ export default function WebProjects() {
             </div>
 
             <Gantt
+              hidePast={hidePast}
               onEditProject={(p) => setModal({ type: 'project', project: p })}
               onDeleteProject={handleDeleteProject}
               onAddTask={(p) => setModal({ type: 'task', project: p })}

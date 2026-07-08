@@ -197,6 +197,12 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .btn-sm { padding: 5px 9px; font-size: 12px; }
 .btn-icon { padding: 6px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.active {
+  background: var(--purina-tint);
+  border-color: var(--purina);
+  color: var(--purina-ink);
+}
+.btn.active:hover { background: var(--purina-tint); }
 
 /* ---------- Cards / secciones ---------- */
 .card {
@@ -345,6 +351,15 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .proj-row:hover .proj-actions { opacity: 1; }
 .proj-row:hover .p-flag { display: none; }
 .proj-timeline { position: relative; flex: 1; background: var(--proj-bg); }
+
+/* Proyecto finalizado (Completado / Cancelado): atenuado + icono */
+.proj-label .fin-icon { flex: none; }
+.proj-label .fin-icon.ok { color: var(--ok); }
+.proj-label .fin-icon.bad { color: var(--danger); }
+.proj-group.finished .p-name { color: var(--ink-3); }
+.proj-group.finished .bar { opacity: 0.5; }
+.proj-group.finished .bar-delay { opacity: 0.55; }
+.proj-group.finished .task-label .t-name { color: var(--ink-3); }
 
 /* Fila de task */
 .task-row {

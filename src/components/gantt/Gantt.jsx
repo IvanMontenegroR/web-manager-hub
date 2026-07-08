@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle2, Ban } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -23,7 +23,7 @@ function flagEmoji(cc) {
   return String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65, 0x1f1e6 + c.charCodeAt(1) - 65)
 }
 
-export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEditTask, onDeleteTask }) {
+export default function Gantt({ hidePast = false, onEditProject, onDeleteProject, onAddTask, onEditTask, onDeleteTask }) {
   const { projects, partners, enriched, conflictIds } = useData()
   const [tip, setTip] = useState(null)
 
@@ -43,7 +43,8 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
       if (daysBetween(d, min) > 0) min = d
       if (daysBetween(max, d) > 0) max = d
     }
-    const start = addDaysISO(min, -2)
+    // Con hidePast el cronograma arranca hoy; sino, 2 dias antes del primer hito.
+    const start = hidePast ? today : addDaysISO(min, -2)
     const end = addDaysISO(max, 3)
     const days = eachDayISO(start, end)
     // segmentos de mes
@@ -58,7 +59,7 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
     const weekendIdx = days.map((iso, i) => (isWeekendISO(iso) ? i : -1)).filter((i) => i >= 0)
     const todayIdx = daysBetween(start, today)
     return { start, days, months, weekendIdx, todayIdx, today }
-  }, [enriched])
+  }, [enriched, hidePast])
 
   const tasksByProject = useMemo(() => {
     const map = {}
@@ -147,11 +148,16 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
           {/* Filas */}
           {projects.map((project) => {
             const tks = tasksByProject[project.id] || []
+            const done = project.status === 'Completado'
+            const cancelled = project.status === 'Cancelado'
+            const finished = done || cancelled
             return (
-              <div key={project.id}>
+              <div key={project.id} className={`proj-group${finished ? ' finished' : ''}`}>
                 <div className="proj-row">
                   <div className="proj-label">
                     <span className="p-name">{project.name}</span>
+                    {done && <CheckCircle2 size={14} className="fin-icon ok" title="Completado" />}
+                    {cancelled && <Ban size={14} className="fin-icon bad" title="Cancelado" />}
                     {project.market && (
                       <span className="p-flag" title={project.market}>
                         <span className="flag">{flagEmoji(project.market)}</span>
@@ -178,10 +184,20 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
                 {tks.map((t) => {
                   const color = partnerColor(partners, t.partner_id)
                   const isConflict = conflictIds.has(t.id)
-                  const left = idxOf(t.planned_start) * dayW + 2
-                  const width = Math.max(t.planned_days * dayW - 4, 16)
-                  const delayLeft = (idxOf(t.planned_end) + 1) * dayW
-                  const delayWidth = t.delayDays * dayW - 2
+                  // Barra plan, recortada si empieza antes del rango visible (hidePast)
+                  const startPx = idxOf(t.planned_start) * dayW
+                  const endPx = (idxOf(t.planned_end) + 1) * dayW
+                  const clipStart = Math.max(startPx, 0)
+                  const barVisible = endPx > 0
+                  const left = clipStart + 2
+                  const width = Math.max(endPx - clipStart - 4, 12)
+                  // Extension de retraso (tambien recortable)
+                  const dStartPx = (idxOf(t.planned_end) + 1) * dayW
+                  const dEndPx = dStartPx + t.delayDays * dayW
+                  const dClip = Math.max(dStartPx, 0)
+                  const delayVisible = t.isDelayed && dEndPx > 0
+                  const delayLeft = dClip
+                  const delayWidth = Math.max(dEndPx - dClip - 2, 8)
                   return (
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
@@ -199,19 +215,21 @@ export default function Gantt({ onEditProject, onDeleteProject, onAddTask, onEdi
                       </div>
                       <div className="task-timeline" style={{ width: totalW }}>
                         <BgLayer />
-                        <div
-                          className={`bar${isConflict ? ' conflict' : ''}`}
-                          style={{ left, width, background: color, color: textOn(color) }}
-                          onMouseEnter={(e) => showTip(e, t, project)}
-                          onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
-                          onMouseLeave={() => setTip(null)}
-                        >
-                          <span className="bar-txt">{t.action_name}</span>
-                        </div>
-                        {t.isDelayed && (
+                        {barVisible && (
+                          <div
+                            className={`bar${isConflict ? ' conflict' : ''}`}
+                            style={{ left, width, background: color, color: textOn(color) }}
+                            onMouseEnter={(e) => showTip(e, t, project)}
+                            onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
+                            onMouseLeave={() => setTip(null)}
+                          >
+                            <span className="bar-txt">{t.action_name}</span>
+                          </div>
+                        )}
+                        {delayVisible && (
                           <div
                             className="bar-delay"
-                            style={{ left: delayLeft, width: Math.max(delayWidth, 10) }}
+                            style={{ left: delayLeft, width: delayWidth }}
                             onMouseEnter={(e) => showTip(e, t, project)}
                             onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
                             onMouseLeave={() => setTip(null)}
