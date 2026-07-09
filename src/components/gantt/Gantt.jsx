@@ -287,6 +287,10 @@ export default function Gantt({
                   const ghostVisible = (startMoved || endMoved) && gEndPx > 0
                   const gLeft = gClip + 1
                   const gWidth = Math.max(gEndPx - gClip - 2, 10)
+                  // Linea rayada que une el fin del fantasma con el inicio de la barra real.
+                  const linkLeft = Math.max(gEndPx, 0)
+                  const linkVisible = ghostVisible && startPx > linkLeft
+                  const linkWidth = Math.max(startPx - linkLeft, 0)
                   return (
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
@@ -311,6 +315,9 @@ export default function Gantt({
                             style={{ left: gLeft, width: gWidth }}
                             title={`Plan original: ${fmtCorto(t.planned_start)} a ${fmtCorto(t.planned_end)}`}
                           />
+                        )}
+                        {linkVisible && (
+                          <div className="bar-link" style={{ left: linkLeft, width: linkWidth }} />
                         )}
                         {barVisible && (
                           <div

@@ -532,6 +532,17 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 }
 .bar-forecast .bar-txt { font-size: 10px; font-weight: 700; white-space: nowrap; }
 
+/* Linea rayada que conecta el fantasma (plan) con la barra real corrida. */
+.bar-link {
+  position: absolute;
+  top: calc(var(--row-h) / 2 - 1px);
+  height: 0;
+  border-top: 1.5px dashed var(--ink-3);
+  z-index: 3;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 /* Fantasma del plan original (contorno hueco, detras de la barra real). */
 .bar-ghost {
   position: absolute;
