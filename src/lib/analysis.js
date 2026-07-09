@@ -33,12 +33,14 @@ function minISO(a, b) {
 }
 
 // Solapamiento: mismo partner, proyectos DISTINTOS, y la interseccion de sus rangos
-// planificados contiene al menos un dia HABIL (los findes/feriados no cuentan).
-// Usa el set de feriados efectivo adjuntado a cada task enriquecida (a.holidaysSet).
+// REALES/proyectados (renderStart..renderEnd) contiene al menos un dia HABIL (los
+// findes/feriados no cuentan). Usa el set de feriados efectivo (a.holidaysSet).
 export function detectOverlaps(enriched) {
   const list = enriched.filter((t) => t.partner_id && t.planned_start && t.planned_days)
   const pairs = []
   const conflictIds = new Set()
+  const s0 = (t) => t.renderStart || t.planned_start
+  const e0 = (t) => t.renderEnd || t.planned_end
 
   for (let i = 0; i < list.length; i++) {
     for (let j = i + 1; j < list.length; j++) {
@@ -46,9 +48,9 @@ export function detectOverlaps(enriched) {
       const b = list[j]
       if (a.partner_id !== b.partner_id) continue
       if (a.project_id === b.project_id) continue
-      if (!rangesOverlap(a.planned_start, a.planned_end, b.planned_start, b.planned_end)) continue
-      const s = maxISO(a.planned_start, b.planned_start)
-      const e = minISO(a.planned_end, b.planned_end)
+      if (!rangesOverlap(s0(a), e0(a), s0(b), e0(b))) continue
+      const s = maxISO(s0(a), s0(b))
+      const e = minISO(e0(a), e0(b))
       if (!hasBusinessDayInRange(s, e, a.holidaysSet)) continue
       pairs.push({ a, b, partner_id: a.partner_id })
       conflictIds.add(a.id)

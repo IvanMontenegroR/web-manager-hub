@@ -73,9 +73,15 @@ export function DataProvider({ children }) {
       if (!p) continue
       t.projStart = p.projStart
       t.projEnd = p.projEnd
+      t.effEnd = p.effEnd
       t.pushed = p.pushed
       t.pushedBy = p.pushedBy
       t.pushedByName = p.pushedBy ? byId.get(p.pushedBy)?.action_name || null : null
+      // Fin de la barra REAL/proyectada: si arranco, hasta el fin efectivo (o hoy);
+      // si no arranco, hasta su fin proyectado.
+      const started = !!t.actual_start || !!t.actual_end || t.status === 'En curso'
+      t.renderStart = p.projStart
+      t.renderEnd = started ? p.effEnd : p.projEnd
     }
 
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))

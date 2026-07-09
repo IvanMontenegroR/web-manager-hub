@@ -159,8 +159,10 @@ export default function Gantt({
       delay: t.isDelayed ? t.delayDays : 0,
       pushed: t.pushed && !t.actual_end,
       pushedBy: t.pushedByName,
-      projected:
-        t.pushed && !t.actual_end ? `${fmtCorto(t.projStart)} a ${fmtCorto(t.projEnd)}` : null,
+      real:
+        t.projStart !== t.planned_start || (t.isDelayed ? t.delayEnd : t.renderEnd) !== t.planned_end
+          ? `${fmtCorto(t.projStart)} a ${fmtCorto(t.isDelayed ? t.delayEnd : t.renderEnd)}`
+          : null,
     })
   }
 
@@ -258,29 +260,33 @@ export default function Gantt({
                   const color = partnerColor(partners, t.partner_id) // punto del partner en la etiqueta
                   const barColor = statusColor(t.status) // color de la barra segun estado
                   const isConflict = conflictIds.has(t.id)
-                  // Barra plan, recortada si empieza antes del rango visible (hidePast)
-                  const startPx = idxOf(t.planned_start) * dayW
-                  const endPx = (idxOf(t.planned_end) + 1) * dayW
+                  // Barra REAL/proyectada (solida): de projStart al fin real. Si hay atraso
+                  // propio, la porcion que pasa el fin del plan va rayada en rojo (bar-delay),
+                  // asi que la parte solida corta en planned_end.
+                  const barEndIso = t.isDelayed ? t.planned_end : t.renderEnd
+                  const startPx = idxOf(t.projStart) * dayW
+                  const endPx = (idxOf(barEndIso) + 1) * dayW
                   const clipStart = Math.max(startPx, 0)
                   const barVisible = endPx > 0
                   const left = clipStart + 2
                   const width = Math.max(endPx - clipStart - 4, 12)
-                  // Extension de retraso: del dia siguiente al fin plan hasta el fin real
-                  // (calendario). El numero (+Nd) es en dias habiles.
+                  // Extension de retraso: del dia siguiente al fin plan hasta delayEnd (fin real
+                  // o hoy). El numero (+Nd) es en dias habiles.
                   const dStartPx = (idxOf(t.planned_end) + 1) * dayW
                   const dEndPx = t.delayEnd ? (idxOf(t.delayEnd) + 1) * dayW : dStartPx
                   const dClip = Math.max(dStartPx, 0)
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip
                   const delayWidth = Math.max(dEndPx - dClip - 2, 8)
-                  // Forecast: barra proyectada si una predecesora la empuja (y aun no termino)
-                  const showForecast = t.pushed && !t.actual_end && daysBetween(t.planned_start, t.projStart) > 0
-                  const fStartPx = idxOf(t.projStart) * dayW
-                  const fEndPx = (idxOf(t.projEnd) + 1) * dayW
-                  const fClip = Math.max(fStartPx, 0)
-                  const forecastVisible = showForecast && fEndPx > 0
-                  const fLeft = fClip + 2
-                  const fWidth = Math.max(fEndPx - fClip - 4, 12)
+                  // Fantasma del plan original: cuando la realidad se corrio del plan.
+                  const startMoved = idxOf(t.projStart) !== idxOf(t.planned_start)
+                  const endMoved = !t.isDelayed && idxOf(t.renderEnd) !== idxOf(t.planned_end)
+                  const gStartPx = idxOf(t.planned_start) * dayW
+                  const gEndPx = (idxOf(t.planned_end) + 1) * dayW
+                  const gClip = Math.max(gStartPx, 0)
+                  const ghostVisible = (startMoved || endMoved) && gEndPx > 0
+                  const gLeft = gClip + 1
+                  const gWidth = Math.max(gEndPx - gClip - 2, 10)
                   return (
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
@@ -299,6 +305,13 @@ export default function Gantt({
                       <div className="task-timeline" style={{ width: totalW }}>
                         <BgLayer />
                         <LaunchLine iso={project.market_launch} />
+                        {ghostVisible && (
+                          <div
+                            className="bar-ghost"
+                            style={{ left: gLeft, width: gWidth }}
+                            title={`Plan original: ${fmtCorto(t.planned_start)} a ${fmtCorto(t.planned_end)}`}
+                          />
+                        )}
                         {barVisible && (
                           <div
                             className={`bar${isConflict ? ' conflict' : ''}`}
@@ -319,17 +332,6 @@ export default function Gantt({
                             onMouseLeave={() => setTip(null)}
                           >
                             +{t.delayDays}d
-                          </div>
-                        )}
-                        {forecastVisible && (
-                          <div
-                            className="bar-forecast"
-                            style={{ left: fLeft, width: fWidth, borderColor: barColor, color: barColor }}
-                            onMouseEnter={(e) => showTip(e, t, project)}
-                            onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
-                            onMouseLeave={() => setTip(null)}
-                          >
-                            <span className="bar-txt">⟶ {fmtCorto(t.projStart)}</span>
                           </div>
                         )}
                         <OverlayLayer holidaysSet={t.holidaysSet} />
@@ -362,7 +364,7 @@ export default function Gantt({
           <div className="tt-row"><span>Dias SLA</span><b>{tip.dias}</b></div>
           <div className="tt-row"><span>Status</span><b>{tip.status}</b></div>
           {tip.actual && <div className="tt-row"><span>Real</span><b>{tip.actual}</b></div>}
-          {tip.projected && <div className="tt-row"><span>Forecast</span><b>{tip.projected}</b></div>}
+          {tip.real && <div className="tt-row"><span>Real</span><b>{tip.real}</b></div>}
           {tip.conflict && <div className="tt-flag danger">Solapamiento de partner</div>}
           {tip.delay > 0 && <div className="tt-flag warn">Retraso de {tip.delay} dia{tip.delay > 1 ? 's' : ''}</div>}
           {tip.pushed && (

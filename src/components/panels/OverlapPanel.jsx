@@ -33,11 +33,11 @@ export default function OverlapPanel() {
               <div className="ci-legs">
                 <div className="ci-leg">
                   <div className="leg-proj">{projName(a.project_id)}</div>
-                  <div className="leg-range">{fmtCorto(a.planned_start)} a {fmtCorto(a.planned_end)}</div>
+                  <div className="leg-range">{fmtCorto(a.renderStart || a.planned_start)} a {fmtCorto(a.renderEnd || a.planned_end)}</div>
                 </div>
                 <div className="ci-leg">
                   <div className="leg-proj">{projName(b.project_id)}</div>
-                  <div className="leg-range">{fmtCorto(b.planned_start)} a {fmtCorto(b.planned_end)}</div>
+                  <div className="leg-range">{fmtCorto(b.renderStart || b.planned_start)} a {fmtCorto(b.renderEnd || b.planned_end)}</div>
                 </div>
               </div>
             </div>

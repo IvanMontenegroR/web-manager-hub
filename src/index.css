@@ -532,6 +532,19 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 }
 .bar-forecast .bar-txt { font-size: 10px; font-weight: 700; white-space: nowrap; }
 
+/* Fantasma del plan original (contorno hueco, detras de la barra real). */
+.bar-ghost {
+  position: absolute;
+  top: 6px;
+  height: calc(var(--row-h) - 12px);
+  border-radius: 5px;
+  z-index: 2;
+  background: transparent;
+  border: 1.5px dashed var(--ink-3);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 /* Tooltip */
 .tooltip {
   position: fixed;
@@ -729,8 +742,8 @@ textarea.control { resize: vertical; min-height: 64px; }
   border-radius: 0;
   border-left: 2px dashed var(--launch);
 }
-.legend .lg-swatch.forecast {
-  background: var(--surface);
+.legend .lg-swatch.ghost {
+  background: transparent;
   border: 1.5px dashed var(--ink-3);
 }
 .legend .lg-swatch.nonwork {

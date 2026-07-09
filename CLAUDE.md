@@ -60,8 +60,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 
 - **Solapamientos** (`src/lib/analysis.js` -> `detectOverlaps`): comparacion por pares de
   todas las tasks. Conflicto = mismo `partner_id`, `project_id` distinto, y la interseccion de
-  sus rangos `[planned_start, planned_end]` contiene al menos un dia **habil** (findes/feriados
-  del partner no cuentan).
+  sus rangos **REALES/proyectados** (`renderStart..renderEnd`) contiene al menos un dia **habil**
+  (findes/feriados del partner no cuentan).
 - **Retrasos** (`detectDelays`): una tarea esta atrasada si cerro tarde (`actual_end > planned_end`)
   O sigue abierta y ya paso su fin planeado (se mide contra HOY). Ambos casos son "atraso" y se
   tratan/pintan IGUAL (mismo rojo). El fin de referencia es `delayEnd` (= `actual_end` o HOY). El
@@ -72,9 +72,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   baseline (`planned_start`/`planned_days`) no se toca. Por dependencias (`depends_on`) se calcula
   `projStart = max(inicio_baseline, dia habil siguiente al fin efectivo de las predecesoras)`. Fin
   efectivo = `actual_end` si termino, si no `max(plannedEnd(projStart), hoy)` (una tarea abierta y
-  vencida empuja desde hoy). En el Gantt, si una tarea sin `actual_end` queda empujada, se dibuja una
-  barra **forecast** punteada (`.bar-forecast`) y el tooltip muestra la predecesora culpable
-  (`pushedByName`). Las tareas tipo SEO no son predecesoras de otras (no bloquean).
+  vencida empuja desde hoy). En el Gantt la **barra solida es la realidad/proyeccion**
+  (`renderStart..renderEnd`, color por estado; el tramo pasado del plan va rayado rojo si hay atraso)
+  y el **plan original** se dibuja como **fantasma** hueco (`.bar-ghost`) solo cuando la realidad se
+  corrio. El tooltip muestra Plan, Real y la predecesora culpable (`pushedByName`). Las tareas tipo
+  SEO no son predecesoras de otras (no bloquean).
 
 ## Estructura
 
