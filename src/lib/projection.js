@@ -45,10 +45,13 @@ export function computeProjection(tasks, todayISO) {
       }
     }
 
-    // Inicio proyectado = max(baseline, dia habil siguiente al fin de la predecesora).
+    // Inicio proyectado. Si la tarea YA empezo, su inicio real es un hecho (no se
+    // arrastra). Si no empezo, se empuja al dia habil siguiente al fin de la predecesora.
     let projStart = t.planned_start
     let pushed = false
-    if (predEnd) {
+    if (t.actual_start) {
+      projStart = t.actual_start
+    } else if (predEnd) {
       const earliest = nextBusinessDay(predEnd, t.holidaysSet)
       if (daysBetween(projStart, earliest) > 0) {
         projStart = earliest
