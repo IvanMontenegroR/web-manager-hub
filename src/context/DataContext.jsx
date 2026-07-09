@@ -46,6 +46,7 @@ export function DataProvider({ children }) {
     const projectById = new Map(state.projects.map((p) => [p.id, p]))
     // Los proyectos archivados no participan del cronograma activo ni del analisis.
     const archivedIds = new Set(state.projects.filter((p) => p.archived).map((p) => p.id))
+    const today = toISO(new Date())
 
     const enriched = state.tasks.map((t) => {
       // Calendario de la tarea: pais del partner, o si no tiene, el market del proyecto.
@@ -58,14 +59,13 @@ export function DataProvider({ children }) {
         hol = new Set(base)
         for (const d of excl) hol.delete(d)
       }
-      const d = withDerived(t, hol)
+      const d = withDerived(t, hol, today)
       d.country = country
       d.holidaysSet = hol || null
       return d
     })
 
     // Proyeccion no destructiva del arrastre por dependencias.
-    const today = toISO(new Date())
     const proj = computeProjection(enriched, today)
     const byId = new Map(enriched.map((t) => [t.id, t]))
     for (const t of enriched) {

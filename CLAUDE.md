@@ -62,8 +62,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   todas las tasks. Conflicto = mismo `partner_id`, `project_id` distinto, y la interseccion de
   sus rangos `[planned_start, planned_end]` contiene al menos un dia **habil** (findes/feriados
   del partner no cuentan).
-- **Retrasos** (`detectDelays`): `actual_end > planned_end`. El delta en **dias habiles** es la
-  magnitud del atraso, y se dibuja como extension rayada (hasta el fin real) despues de la barra.
+- **Retrasos** (`detectDelays`): una tarea esta atrasada si cerro tarde (`actual_end > planned_end`)
+  O sigue abierta y ya paso su fin planeado (se mide contra HOY). Ambos casos son "atraso" y se
+  tratan/pintan IGUAL (mismo rojo). El fin de referencia es `delayEnd` (= `actual_end` o HOY). El
+  delta en **dias habiles** se dibuja como extension rayada (de `planned_end` a `delayEnd`).
 - La razon de retraso es **obligatoria** en el form cuando `actual_end > planned_end`
   (`src/components/modals/TaskModal.jsx`).
 - **Proyeccion / forecast** (`src/lib/projection.js` -> `computeProjection`): NO destructiva. El

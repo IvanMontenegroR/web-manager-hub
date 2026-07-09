@@ -6,14 +6,23 @@ import {
 } from './dates'
 
 // Enriquece una task con planned_end (dias habiles) y su delta de atraso (dias habiles).
-export function withDerived(task, holidays) {
+// Atraso = cerro tarde (actual_end > planned_end) O sigue abierta y ya paso su fin
+// planeado (se mide contra HOY). Ambos son "atraso" y se tratan/pintan igual.
+export function withDerived(task, holidays, today) {
   const pEnd = plannedEnd(task.planned_start, task.planned_days, holidays)
-  // Retraso: dias habiles que actual_end supera a planned_end.
+  // Fin de referencia: si cerro, su fin real; si ya arranco (en curso) y sigue abierta
+  // y vencida, HOY. Una tarea que NO arranco no es "atraso propio": su demora es
+  // heredada (la predecesora) y se ve como forecast, no como retraso rojo.
+  const started = !!task.actual_start || task.status === 'En curso'
+  const openOverdue = started && !task.actual_end && !!today && daysBetween(pEnd, today) > 0
+  const delayRef = task.actual_end || (openOverdue ? today : null)
   let delayDays = 0
-  if (task.actual_end && daysBetween(pEnd, task.actual_end) > 0) {
-    delayDays = businessDaysBetween(pEnd, task.actual_end, holidays)
+  let delayEnd = null
+  if (delayRef && daysBetween(pEnd, delayRef) > 0) {
+    delayDays = businessDaysBetween(pEnd, delayRef, holidays)
+    delayEnd = delayRef
   }
-  return { ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0 }
+  return { ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0, delayEnd }
 }
 
 function maxISO(a, b) {

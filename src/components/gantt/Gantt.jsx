@@ -268,7 +268,7 @@ export default function Gantt({
                   // Extension de retraso: del dia siguiente al fin plan hasta el fin real
                   // (calendario). El numero (+Nd) es en dias habiles.
                   const dStartPx = (idxOf(t.planned_end) + 1) * dayW
-                  const dEndPx = t.actual_end ? (idxOf(t.actual_end) + 1) * dayW : dStartPx
+                  const dEndPx = t.delayEnd ? (idxOf(t.delayEnd) + 1) * dayW : dStartPx
                   const dClip = Math.max(dStartPx, 0)
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip

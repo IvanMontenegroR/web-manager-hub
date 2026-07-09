@@ -31,7 +31,7 @@ export default function DelayPanel() {
             </div>
             <div className="delay-grid">
               <span className="k">Fin SLA</span><span className="v">{fmtCorto(t.planned_end)}</span>
-              <span className="k">Fin real</span><span className="v">{fmtCorto(t.actual_end)}</span>
+              <span className="k">Fin real</span><span className="v">{fmtCorto(t.delayEnd)}</span>
             </div>
             {t.delay_reason && <div className="delay-reason">{t.delay_reason}</div>}
           </div>
