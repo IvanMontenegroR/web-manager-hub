@@ -1,7 +1,9 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAll } from '../lib/db'
 import { detectOverlaps, detectDelays, withDerived } from '../lib/analysis'
+import { computeProjection } from '../lib/projection'
 import { taskCountry } from '../lib/countries'
+import { toISO } from '../lib/dates'
 
 const DataContext = createContext(null)
 
@@ -61,6 +63,21 @@ export function DataProvider({ children }) {
       d.holidaysSet = hol || null
       return d
     })
+
+    // Proyeccion no destructiva del arrastre por dependencias.
+    const today = toISO(new Date())
+    const proj = computeProjection(enriched, today)
+    const byId = new Map(enriched.map((t) => [t.id, t]))
+    for (const t of enriched) {
+      const p = proj.get(t.id)
+      if (!p) continue
+      t.projStart = p.projStart
+      t.projEnd = p.projEnd
+      t.pushed = p.pushed
+      t.pushedBy = p.pushedBy
+      t.pushedByName = p.pushedBy ? byId.get(p.pushedBy)?.action_name || null : null
+    }
+
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))
     const { pairs, conflictIds } = detectOverlaps(active)
     const delays = detectDelays(active)

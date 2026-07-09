@@ -15,6 +15,19 @@ export default function TaskModal({ task, project, onClose }) {
   const editing = !!task
 
   const knownAction = slas.some((s) => s.action_name === task?.action_name)
+
+  // Tareas hermanas (mismo proyecto) para elegir predecesoras.
+  const siblings = tasks
+    .filter((t) => t.project_id === project?.id && t.id !== task?.id)
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+  // Default de dependencias: al editar, las guardadas; al crear, la ultima tarea del proyecto.
+  const defaultDeps = editing
+    ? (Array.isArray(task.depends_on) ? task.depends_on : [])
+    : (() => {
+        const prev = siblings.reduce((m, t) => (!m || (t.sort_order || 0) > (m.sort_order || 0) ? t : m), null)
+        return prev ? [prev.id] : []
+      })()
+
   const [form, setForm] = useState({
     action_name: task?.action_name || '',
     partner_id: task?.partner_id || '',
@@ -25,7 +38,14 @@ export default function TaskModal({ task, project, onClose }) {
     actual_end: task?.actual_end || '',
     delay_reason: task?.delay_reason || '',
     excluded_holidays: Array.isArray(task?.excluded_holidays) ? task.excluded_holidays : [],
+    depends_on: defaultDeps,
   })
+
+  const toggleDep = (id) =>
+    setForm((f) => {
+      const cur = f.depends_on || []
+      return { ...f, depends_on: cur.includes(id) ? cur.filter((d) => d !== id) : [...cur, id] }
+    })
   // control del selector de accion: valor de sla o custom
   const [actionSel, setActionSel] = useState(
     !task?.action_name ? '' : knownAction ? task.action_name : CUSTOM
@@ -195,6 +215,28 @@ export default function TaskModal({ task, project, onClose }) {
           </select>
         </div>
       </div>
+
+      {siblings.length > 0 && (
+        <div className="field">
+          <label>Depende de (predecesoras)</label>
+          <div className="hint" style={{ marginBottom: 6 }}>
+            Si una predecesora se atrasa, esta tarea se corre en el <b>forecast</b> (el plan no cambia).
+            Para una tarea en paralelo (ej. SEO), dejala dependiendo del punto de ramificacion, no de la
+            tarea que corre en simultaneo.
+          </div>
+          <div className="hol-list">
+            {siblings.map((s) => {
+              const on = (form.depends_on || []).includes(s.id)
+              return (
+                <label key={s.id} className="hol-item">
+                  <input type="checkbox" checked={on} onChange={() => toggleDep(s.id)} />
+                  <span className="hol-name">{s.action_name}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {holidaysInSpan.length > 0 && (
         <div className="field">

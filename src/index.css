@@ -515,6 +515,23 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   color: var(--danger);
 }
 
+/* Forecast: barra proyectada (arrastre por dependencias). Contorno punteado, translucida. */
+.bar-forecast {
+  position: absolute;
+  top: 6px;
+  height: calc(var(--row-h) - 12px);
+  border-radius: 5px;
+  z-index: 5;
+  background: var(--surface);
+  border: 1.5px dashed currentColor;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  overflow: hidden;
+}
+.bar-forecast .bar-txt { font-size: 10px; font-weight: 700; white-space: nowrap; }
+
 /* Tooltip */
 .tooltip {
   position: fixed;
@@ -536,6 +553,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .tooltip .tt-flag { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15); font-weight: 600; }
 .tooltip .tt-flag.danger { color: #ff9d8f; }
 .tooltip .tt-flag.warn { color: #ffca7a; }
+.tooltip .tt-flag.info { color: #8fc2ff; }
 
 /* ---------- Paneles overlap / delay ---------- */
 .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
@@ -710,6 +728,10 @@ textarea.control { resize: vertical; min-height: 64px; }
   width: 0; height: 16px;
   border-radius: 0;
   border-left: 2px dashed var(--launch);
+}
+.legend .lg-swatch.forecast {
+  background: var(--surface);
+  border: 1.5px dashed var(--ink-3);
 }
 .legend .lg-swatch.nonwork {
   background: rgba(120, 132, 145, 0.30);

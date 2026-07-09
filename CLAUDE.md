@@ -36,8 +36,9 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, excluded_holidays,
-  sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO frenan esta
-  tarea puntualmente, ej. hay backup approver de otro pais)
+  depends_on, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
+  frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
+  task ids predecesoras finish-to-start)
 
 CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
 dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**
@@ -65,6 +66,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   magnitud del atraso, y se dibuja como extension rayada (hasta el fin real) despues de la barra.
 - La razon de retraso es **obligatoria** en el form cuando `actual_end > planned_end`
   (`src/components/modals/TaskModal.jsx`).
+- **Proyeccion / forecast** (`src/lib/projection.js` -> `computeProjection`): NO destructiva. El
+  baseline (`planned_start`/`planned_days`) no se toca. Por dependencias (`depends_on`) se calcula
+  `projStart = max(inicio_baseline, dia habil siguiente al fin efectivo de las predecesoras)`. Fin
+  efectivo = `actual_end` si termino, si no `max(plannedEnd(projStart), hoy)` (una tarea abierta y
+  vencida empuja desde hoy). En el Gantt, si una tarea sin `actual_end` queda empujada, se dibuja una
+  barra **forecast** punteada (`.bar-forecast`) y el tooltip muestra la predecesora culpable
+  (`pushedByName`). Las tareas tipo SEO no son predecesoras de otras (no bloquean).
 
 ## Estructura
 

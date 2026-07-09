@@ -86,6 +86,7 @@ export default function WebProjects() {
               <span className="lg"><span className="lg-dot" /> Punto = partner</span>
               <span className="lg"><span className="lg-swatch conflict" /> Solapamiento de partner</span>
               <span className="lg"><span className="lg-swatch delay" /> Delay</span>
+              <span className="lg"><span className="lg-swatch forecast" /> Forecast (arrastre)</span>
               <span className="lg"><span className="lg-swatch launch" /> Market Launch (deadline del mercado)</span>
               <span className="lg"><span className="lg-swatch nonwork" /> Finde / feriado (no laboral)</span>
             </div>

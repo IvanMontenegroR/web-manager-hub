@@ -157,6 +157,10 @@ export default function Gantt({
         : null,
       conflict: conflictIds.has(t.id),
       delay: t.isDelayed ? t.delayDays : 0,
+      pushed: t.pushed && !t.actual_end,
+      pushedBy: t.pushedByName,
+      projected:
+        t.pushed && !t.actual_end ? `${fmtCorto(t.projStart)} a ${fmtCorto(t.projEnd)}` : null,
     })
   }
 
@@ -269,6 +273,14 @@ export default function Gantt({
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip
                   const delayWidth = Math.max(dEndPx - dClip - 2, 8)
+                  // Forecast: barra proyectada si una predecesora la empuja (y aun no termino)
+                  const showForecast = t.pushed && !t.actual_end && daysBetween(t.planned_start, t.projStart) > 0
+                  const fStartPx = idxOf(t.projStart) * dayW
+                  const fEndPx = (idxOf(t.projEnd) + 1) * dayW
+                  const fClip = Math.max(fStartPx, 0)
+                  const forecastVisible = showForecast && fEndPx > 0
+                  const fLeft = fClip + 2
+                  const fWidth = Math.max(fEndPx - fClip - 4, 12)
                   return (
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
@@ -309,6 +321,17 @@ export default function Gantt({
                             +{t.delayDays}d
                           </div>
                         )}
+                        {forecastVisible && (
+                          <div
+                            className="bar-forecast"
+                            style={{ left: fLeft, width: fWidth, borderColor: barColor, color: barColor }}
+                            onMouseEnter={(e) => showTip(e, t, project)}
+                            onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
+                            onMouseLeave={() => setTip(null)}
+                          >
+                            <span className="bar-txt">⟶ {fmtCorto(t.projStart)}</span>
+                          </div>
+                        )}
                         <OverlayLayer holidaysSet={t.holidaysSet} />
                       </div>
                     </div>
@@ -339,8 +362,14 @@ export default function Gantt({
           <div className="tt-row"><span>Dias SLA</span><b>{tip.dias}</b></div>
           <div className="tt-row"><span>Status</span><b>{tip.status}</b></div>
           {tip.actual && <div className="tt-row"><span>Real</span><b>{tip.actual}</b></div>}
+          {tip.projected && <div className="tt-row"><span>Forecast</span><b>{tip.projected}</b></div>}
           {tip.conflict && <div className="tt-flag danger">Solapamiento de partner</div>}
           {tip.delay > 0 && <div className="tt-flag warn">Retraso de {tip.delay} dia{tip.delay > 1 ? 's' : ''}</div>}
+          {tip.pushed && (
+            <div className="tt-flag info">
+              Empujada por dependencia{tip.pushedBy ? `: ${tip.pushedBy}` : ''}
+            </div>
+          )}
         </div>
       )}
     </>
