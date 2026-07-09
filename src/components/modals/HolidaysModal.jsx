@@ -3,12 +3,13 @@ import { CalendarOff, Plus, Trash2 } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createHoliday, deleteHoliday } from '../../lib/db'
-import { partnerName, partnerColor } from '../../lib/colors'
+import { COUNTRIES, countryName } from '../../lib/countries'
 import { fmtLargo, toISO } from '../../lib/dates'
 
 export default function HolidaysModal({ onClose }) {
-  const { holidays, partners, refresh } = useData()
-  const [nw, setNw] = useState({ partner_id: '', date: toISO(new Date()), name: '' })
+  const { holidays, refresh } = useData()
+  const [nw, setNw] = useState({ country: '', date: toISO(new Date()), name: '' })
+  const [filter, setFilter] = useState('')
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -20,25 +21,18 @@ export default function HolidaysModal({ onClose }) {
   }
 
   const add = () => {
-    if (!nw.partner_id) return setErr('Elegi el partner del feriado.')
+    if (!nw.country) return setErr('Elegi el país del feriado.')
     if (!nw.date) return setErr('La fecha es obligatoria.')
-    run(async () => {
-      await createHoliday(nw)
-      setNw((n) => ({ ...n, name: '' }))
-    })
+    run(async () => { await createHoliday(nw); setNw((n) => ({ ...n, name: '' })) })
   }
 
-  // Ordenados por partner y luego fecha.
-  const sorted = [...holidays].sort((a, b) => {
-    const pa = partnerName(partners, a.partner_id)
-    const pb = partnerName(partners, b.partner_id)
-    if (pa !== pb) return pa.localeCompare(pb)
-    return a.date.localeCompare(b.date)
-  })
+  const sorted = [...holidays]
+    .filter((h) => !filter || h.country === filter)
+    .sort((a, b) => (a.country !== b.country ? a.country.localeCompare(b.country) : a.date.localeCompare(b.date)))
 
   return (
     <Modal
-      title="Feriados por partner"
+      title="Feriados por país"
       icon={<CalendarOff size={18} color="var(--purina)" />}
       onClose={onClose}
       wide
@@ -46,25 +40,31 @@ export default function HolidaysModal({ onClose }) {
     >
       {err && <div className="form-error">{err}</div>}
       <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
-        Los feriados de un partner no cuentan como dias habiles: se excluyen del calculo de fin
-        planificado, de los retrasos y de los solapamientos de ese partner (igual que los findes).
+        Los feriados de un país no cuentan como días hábiles para las tareas de ese calendario
+        (el país del partner responsable, o el mercado del proyecto para Purina). Datos 2026 best-effort: revisá y ajustá.
       </p>
+      <div style={{ marginBottom: 10, maxWidth: 260 }}>
+        <select className="control" value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="">Todos los países ({holidays.length})</option>
+          {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+        </select>
+      </div>
       <table className="mtable">
         <thead>
           <tr>
-            <th style={{ width: 160 }}>Partner</th>
+            <th style={{ width: 190 }}>País</th>
             <th style={{ width: 150 }}>Fecha</th>
-            <th>Nombre (opcional)</th>
+            <th>Nombre</th>
             <th style={{ width: 60 }}></th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              <select className="control" value={nw.partner_id}
-                onChange={(e) => setNw((n) => ({ ...n, partner_id: e.target.value }))}>
-                <option value="" disabled>Elegir...</option>
-                {partners.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              <select className="control" value={nw.country}
+                onChange={(e) => setNw((n) => ({ ...n, country: e.target.value }))}>
+                <option value="" disabled>Elegir país...</option>
+                {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
               </select>
             </td>
             <td>
@@ -72,7 +72,7 @@ export default function HolidaysModal({ onClose }) {
                 onChange={(e) => setNw((n) => ({ ...n, date: e.target.value }))} />
             </td>
             <td>
-              <input className="control" placeholder="Ej: Independencia" value={nw.name}
+              <input className="control" placeholder="Ej: Feriado local" value={nw.name}
                 onChange={(e) => setNw((n) => ({ ...n, name: e.target.value }))} />
             </td>
             <td>
@@ -84,24 +84,17 @@ export default function HolidaysModal({ onClose }) {
             </td>
           </tr>
           {sorted.length === 0 ? (
-            <tr><td colSpan={4} className="hint" style={{ textAlign: 'center', padding: 16 }}>Sin feriados cargados.</td></tr>
+            <tr><td colSpan={4} className="hint" style={{ textAlign: 'center', padding: 16 }}>Sin feriados.</td></tr>
           ) : (
             sorted.map((h) => (
               <tr key={h.id}>
-                <td>
-                  <span style={{
-                    display: 'inline-block', width: 10, height: 10, borderRadius: 3,
-                    marginRight: 6, verticalAlign: 'middle',
-                    background: partnerColor(partners, h.partner_id),
-                  }} />
-                  {partnerName(partners, h.partner_id)}
-                </td>
+                <td>{countryName(h.country)}</td>
                 <td>{fmtLargo(h.date)}</td>
                 <td>{h.name || <span className="hint">—</span>}</td>
                 <td>
                   <div className="row-actions">
                     <button className="btn btn-sm btn-danger btn-icon" title="Borrar" disabled={busy}
-                      onClick={() => confirm(`Borrar feriado ${fmtLargo(h.date)}?`) && run(() => deleteHoliday(h.id))}>
+                      onClick={() => confirm(`Borrar feriado ${fmtLargo(h.date)} (${countryName(h.country)})?`) && run(() => deleteHoliday(h.id))}>
                       <Trash2 size={14} />
                     </button>
                   </div>

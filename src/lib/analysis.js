@@ -16,11 +16,6 @@ export function withDerived(task, holidays) {
   return { ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0 }
 }
 
-// Enriquece todas las tasks usando los feriados del partner de cada una.
-export function enrich(tasks, holidaysByPartner) {
-  return tasks.map((t) => withDerived(t, holidaysByPartner?.get(t.partner_id)))
-}
-
 function maxISO(a, b) {
   return daysBetween(a, b) >= 0 ? b : a
 }
@@ -30,7 +25,8 @@ function minISO(a, b) {
 
 // Solapamiento: mismo partner, proyectos DISTINTOS, y la interseccion de sus rangos
 // planificados contiene al menos un dia HABIL (los findes/feriados no cuentan).
-export function detectOverlaps(enriched, holidaysByPartner) {
+// Usa el set de feriados efectivo adjuntado a cada task enriquecida (a.holidaysSet).
+export function detectOverlaps(enriched) {
   const list = enriched.filter((t) => t.partner_id && t.planned_start && t.planned_days)
   const pairs = []
   const conflictIds = new Set()
@@ -44,8 +40,7 @@ export function detectOverlaps(enriched, holidaysByPartner) {
       if (!rangesOverlap(a.planned_start, a.planned_end, b.planned_start, b.planned_end)) continue
       const s = maxISO(a.planned_start, b.planned_start)
       const e = minISO(a.planned_end, b.planned_end)
-      const hol = holidaysByPartner?.get(a.partner_id)
-      if (!hasBusinessDayInRange(s, e, hol)) continue
+      if (!hasBusinessDayInRange(s, e, a.holidaysSet)) continue
       pairs.push({ a, b, partner_id: a.partner_id })
       conflictIds.add(a.id)
       conflictIds.add(b.id)

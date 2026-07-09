@@ -3,14 +3,15 @@ import { ListPlus } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
-import { plannedEnd, daysBetween, businessDaysBetween, fmtCorto, toISO } from '../../lib/dates'
+import { plannedEnd, daysBetween, businessDaysBetween, isWeekendISO, fmtCorto, toISO } from '../../lib/dates'
+import { taskCountry, countryName } from '../../lib/countries'
 
 // El retraso se detecta automaticamente (fin real > fin plan); no es un estado manual.
 const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado']
 const CUSTOM = '__custom__'
 
 export default function TaskModal({ task, project, onClose }) {
-  const { slas, partners, tasks, holidaysByPartner, refresh } = useData()
+  const { slas, partners, tasks, holidaysByCountry, holidays, refresh } = useData()
   const editing = !!task
 
   const knownAction = slas.some((s) => s.action_name === task?.action_name)
@@ -23,6 +24,7 @@ export default function TaskModal({ task, project, onClose }) {
     actual_start: task?.actual_start || '',
     actual_end: task?.actual_end || '',
     delay_reason: task?.delay_reason || '',
+    excluded_holidays: Array.isArray(task?.excluded_holidays) ? task.excluded_holidays : [],
   })
   // control del selector de accion: valor de sla o custom
   const [actionSel, setActionSel] = useState(
@@ -33,7 +35,21 @@ export default function TaskModal({ task, project, onClose }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
-  const holSet = holidaysByPartner?.get(form.partner_id)
+  // Calendario de feriados de la tarea: pais del partner, o el market del proyecto.
+  const partner = partners.find((p) => p.id === form.partner_id)
+  const country = taskCountry(partner, project)
+  const countrySet = holidaysByCountry?.get(country) || null
+
+  // Feriados efectivos = los del pais menos los excluidos en esta tarea.
+  const holSet = useMemo(() => {
+    if (!countrySet) return null
+    const excl = form.excluded_holidays
+    if (!excl || !excl.length) return countrySet
+    const s = new Set(countrySet)
+    for (const d of excl) s.delete(d)
+    return s
+  }, [countrySet, form.excluded_holidays])
+
   const pEnd = useMemo(
     () => plannedEnd(form.planned_start, Number(form.planned_days) || 1, holSet),
     [form.planned_start, form.planned_days, holSet]
@@ -43,6 +59,27 @@ export default function TaskModal({ task, project, onClose }) {
       ? businessDaysBetween(pEnd, form.actual_end, holSet)
       : 0
   const isDelayed = delayDays > 0
+
+  // Feriados (dia habil) del pais dentro del rango de la tarea, para poder excluirlos.
+  const spanEndFull = plannedEnd(form.planned_start, Number(form.planned_days) || 1, countrySet)
+  const holidaysInSpan = holidays
+    .filter(
+      (h) =>
+        h.country === country &&
+        !isWeekendISO(h.date) &&
+        h.date >= form.planned_start &&
+        h.date <= spanEndFull
+    )
+    .sort((a, b) => a.date.localeCompare(b.date))
+
+  const toggleHoliday = (date) =>
+    setForm((f) => {
+      const cur = f.excluded_holidays || []
+      return {
+        ...f,
+        excluded_holidays: cur.includes(date) ? cur.filter((d) => d !== date) : [...cur, date],
+      }
+    })
 
   function onActionChange(e) {
     const v = e.target.value
@@ -158,6 +195,28 @@ export default function TaskModal({ task, project, onClose }) {
           </select>
         </div>
       </div>
+
+      {holidaysInSpan.length > 0 && (
+        <div className="field">
+          <label>Feriados en el rango ({countryName(country)})</label>
+          <div className="hint" style={{ marginBottom: 6 }}>
+            Cuentan como dias no habiles y corren el fin. Destilda uno si esta tarea NO se frena ese
+            dia (ej. hay un backup approver de otro pais).
+          </div>
+          <div className="hol-list">
+            {holidaysInSpan.map((h) => {
+              const excluded = (form.excluded_holidays || []).includes(h.date)
+              return (
+                <label key={h.id} className={`hol-item${excluded ? ' off' : ''}`}>
+                  <input type="checkbox" checked={!excluded} onChange={() => toggleHoliday(h.date)} />
+                  <span className="hol-date">{fmtCorto(h.date)}</span>
+                  <span className="hol-name">{h.name || 'Feriado'}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="row-2">
         <div className="field">

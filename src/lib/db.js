@@ -96,6 +96,7 @@ function taskPayload(t) {
     actual_end: t.actual_end || null,
     status: t.status || 'Pendiente',
     delay_reason: t.delay_reason || null,
+    excluded_holidays: Array.isArray(t.excluded_holidays) ? t.excluded_holidays : [],
   }
 }
 
@@ -131,7 +132,7 @@ export async function deleteTask(id) {
 export async function createPartner(p) {
   const { data, error } = await supabase
     .from('partners')
-    .insert({ name: p.name, color: p.color })
+    .insert({ name: p.name, color: p.color, country: p.country || null })
     .select()
     .single()
   throwIf(error)
@@ -141,7 +142,7 @@ export async function createPartner(p) {
 export async function updatePartner(id, p) {
   const { data, error } = await supabase
     .from('partners')
-    .update({ name: p.name, color: p.color })
+    .update({ name: p.name, color: p.color, country: p.country || null })
     .eq('id', id)
     .select()
     .single()
@@ -185,7 +186,7 @@ export async function deleteSla(id) {
 export async function createHoliday(h) {
   const { data, error } = await supabase
     .from('holidays')
-    .insert({ partner_id: h.partner_id, date: h.date, name: h.name || null })
+    .insert({ country: h.country, date: h.date, name: h.name || null })
     .select()
     .single()
   throwIf(error)

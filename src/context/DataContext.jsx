@@ -1,6 +1,7 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAll } from '../lib/db'
-import { detectOverlaps, detectDelays, enrich } from '../lib/analysis'
+import { detectOverlaps, detectDelays, withDerived } from '../lib/analysis'
+import { taskCountry } from '../lib/countries'
 
 const DataContext = createContext(null)
 
@@ -32,21 +33,39 @@ export function DataProvider({ children }) {
   }, [refresh])
 
   const derived = useMemo(() => {
-    // Mapa partner_id -> Set de feriados (ISO) para el calculo de dias habiles.
-    const holidaysByPartner = new Map()
+    // Mapa country -> Set de feriados (ISO) para el calculo de dias habiles.
+    const holidaysByCountry = new Map()
     for (const h of state.holidays) {
-      if (!h.partner_id) continue
-      if (!holidaysByPartner.has(h.partner_id)) holidaysByPartner.set(h.partner_id, new Set())
-      holidaysByPartner.get(h.partner_id).add(h.date)
+      if (!h.country) continue
+      if (!holidaysByCountry.has(h.country)) holidaysByCountry.set(h.country, new Set())
+      holidaysByCountry.get(h.country).add(h.date)
     }
+    const partnerById = new Map(state.partners.map((p) => [p.id, p]))
+    const projectById = new Map(state.projects.map((p) => [p.id, p]))
     // Los proyectos archivados no participan del cronograma activo ni del analisis.
     const archivedIds = new Set(state.projects.filter((p) => p.archived).map((p) => p.id))
-    const enriched = enrich(state.tasks, holidaysByPartner)
+
+    const enriched = state.tasks.map((t) => {
+      // Calendario de la tarea: pais del partner, o si no tiene, el market del proyecto.
+      const country = taskCountry(partnerById.get(t.partner_id), projectById.get(t.project_id))
+      const base = holidaysByCountry.get(country)
+      // Feriados efectivos = los del pais menos los excluidos puntualmente en la tarea.
+      let hol = base
+      const excl = t.excluded_holidays
+      if (base && Array.isArray(excl) && excl.length) {
+        hol = new Set(base)
+        for (const d of excl) hol.delete(d)
+      }
+      const d = withDerived(t, hol)
+      d.country = country
+      d.holidaysSet = hol || null
+      return d
+    })
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))
-    const { pairs, conflictIds } = detectOverlaps(active, holidaysByPartner)
+    const { pairs, conflictIds } = detectOverlaps(active)
     const delays = detectDelays(active)
-    return { pairs, conflictIds, delays, enriched, archivedIds, holidaysByPartner }
-  }, [state.tasks, state.projects, state.holidays])
+    return { pairs, conflictIds, delays, enriched, archivedIds, holidaysByCountry }
+  }, [state.tasks, state.projects, state.partners, state.holidays])
 
   const value = useMemo(
     () => ({ ...state, ...derived, loading, error, refresh }),

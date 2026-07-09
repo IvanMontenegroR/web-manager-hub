@@ -3,11 +3,12 @@ import { Users, Plus, Trash2, Check } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createPartner, updatePartner, deletePartner } from '../../lib/db'
+import { COUNTRIES } from '../../lib/countries'
 
 export default function PartnersModal({ onClose }) {
   const { partners, refresh } = useData()
   const [draft, setDraft] = useState({})
-  const [nw, setNw] = useState({ name: '', color: '#888888' })
+  const [nw, setNw] = useState({ name: '', color: '#888888', country: '' })
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -22,22 +23,35 @@ export default function PartnersModal({ onClose }) {
   }
 
   const saveRow = (p) => run(async () => {
-    await updatePartner(p.id, { name: val(p, 'name'), color: val(p, 'color') })
+    await updatePartner(p.id, { name: val(p, 'name'), color: val(p, 'color'), country: val(p, 'country') || null })
     setDraft((d) => { const c = { ...d }; delete c[p.id]; return c })
   })
 
   const add = () => {
     if (!nw.name.trim()) return setErr('El nombre del partner es obligatorio.')
-    run(async () => { await createPartner(nw); setNw({ name: '', color: '#888888' }) })
+    run(async () => { await createPartner(nw); setNw({ name: '', color: '#888888', country: '' }) })
   }
 
+  const CountrySelect = ({ value, onChange }) => (
+    <select className="control" value={value || ''} onChange={onChange}>
+      <option value="">Usa país del proyecto</option>
+      {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+    </select>
+  )
+
+  const colorStyle = { width: 34, height: 28, padding: 0, border: '1px solid var(--border-strong)', borderRadius: 6, background: 'none' }
+
   return (
-    <Modal title="Partners" icon={<Users size={18} color="var(--purina)" />} onClose={onClose}
+    <Modal title="Partners" icon={<Users size={18} color="var(--purina)" />} onClose={onClose} wide
       footer={<button className="btn btn-primary" onClick={onClose}>Listo</button>}>
       {err && <div className="form-error">{err}</div>}
+      <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
+        El país define el calendario de feriados del partner. Si se deja vacío (ej. Purina), la tarea
+        usa los feriados del mercado del proyecto.
+      </p>
       <table className="mtable">
         <thead>
-          <tr><th>Color</th><th>Nombre</th><th style={{ width: 90 }}></th></tr>
+          <tr><th style={{ width: 60 }}>Color</th><th>Nombre</th><th style={{ width: 180 }}>País (feriados)</th><th style={{ width: 90 }}></th></tr>
         </thead>
         <tbody>
           {partners.map((p) => {
@@ -45,11 +59,13 @@ export default function PartnersModal({ onClose }) {
             return (
               <tr key={p.id}>
                 <td>
-                  <input type="color" value={val(p, 'color')} onChange={(e) => edit(p.id, 'color', e.target.value)}
-                    style={{ width: 34, height: 28, padding: 0, border: '1px solid var(--border-strong)', borderRadius: 6, background: 'none' }} />
+                  <input type="color" value={val(p, 'color')} onChange={(e) => edit(p.id, 'color', e.target.value)} style={colorStyle} />
                 </td>
                 <td>
                   <input className="control" value={val(p, 'name')} onChange={(e) => edit(p.id, 'name', e.target.value)} />
+                </td>
+                <td>
+                  <CountrySelect value={val(p, 'country')} onChange={(e) => edit(p.id, 'country', e.target.value)} />
                 </td>
                 <td>
                   <div className="row-actions">
@@ -69,12 +85,14 @@ export default function PartnersModal({ onClose }) {
           })}
           <tr>
             <td>
-              <input type="color" value={nw.color} onChange={(e) => setNw((n) => ({ ...n, color: e.target.value }))}
-                style={{ width: 34, height: 28, padding: 0, border: '1px solid var(--border-strong)', borderRadius: 6, background: 'none' }} />
+              <input type="color" value={nw.color} onChange={(e) => setNw((n) => ({ ...n, color: e.target.value }))} style={colorStyle} />
             </td>
             <td>
               <input className="control" placeholder="Nuevo partner" value={nw.name}
                 onChange={(e) => setNw((n) => ({ ...n, name: e.target.value }))} />
+            </td>
+            <td>
+              <CountrySelect value={nw.country} onChange={(e) => setNw((n) => ({ ...n, country: e.target.value }))} />
             </td>
             <td>
               <div className="row-actions">

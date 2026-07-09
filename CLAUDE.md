@@ -23,17 +23,21 @@ otros tres (Daily Ops, Tareas, Ecosystem 2.0) son placeholders en el shell.
 
 Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume):
 
-- `partners(id, name, color, created_at)` (incluye a **Purina** como partner, color rojo de marca
-  `#ED1C24`; las tareas de region/feedback son responsabilidad de Purina)
+- `partners(id, name, color, country, created_at)` (incluye a **Purina** como partner, color rojo de
+  marca `#ED1C24`; `country` = codigo de calendario de feriados, ej. MX/CO/PY/AR/BR/BR-SP.
+  Purina tiene `country` NULL a proposito: sus tareas usan el `market` del proyecto)
 - `sla_definitions(id, action_name, sla_days, created_at)` (`sla_days` = dias HABILES)
-- `holidays(id, partner_id, date, name, created_at)` (feriados por partner; FK ON DELETE CASCADE.
-  Los feriados de un partner no cuentan como dias habiles para ese partner)
+- `holidays(id, country, date, name, created_at)` (feriados **por pais/calendario**, unique(country,date).
+  Codigos en `src/lib/countries.js`. Datos 2026 best-effort, editables desde el modal Feriados)
 - `projects(id, name, brand, market, start_date, market_launch, status, archived, created_at)`
-  (`market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt.
+  (`market` = codigo de pais/mercado, se usa como calendario de feriados para las tareas de Purina.
+  `market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt.
   `archived` = bool; los archivados se ocultan del cronograma activo y del analisis, y se muestran
   en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
-  planned_end GENERADA, actual_start, actual_end, status, delay_reason, sort_order, created_at)`
+  planned_end GENERADA, actual_start, actual_end, status, delay_reason, excluded_holidays,
+  sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO frenan esta
+  tarea puntualmente, ej. hay backup approver de otro pais)
 
 CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
 dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**
@@ -42,8 +46,12 @@ en `src/lib/dates.js` (`plannedEnd`). Nunca se escribe. En inserts/updates solo 
 (estan en otra tabla), por eso el calculo real vive en el front.
 
 DIAS HABILES: todo lo que sea "dias" (planned_days, retraso, solapamiento) cuenta solo dias
-habiles = sin sabados/domingos ni los feriados del partner responsable (tabla `holidays`).
-Ver `src/lib/dates.js` (`isBusinessDay`, `addBusinessDays`, `businessDaysBetween`).
+habiles = sin sabados/domingos ni feriados. Ver `src/lib/dates.js` (`isBusinessDay`,
+`addBusinessDays`, `businessDaysBetween`). El calendario de feriados de cada tarea se resuelve en
+`DataContext`: `country` = `partner.country` o, si es NULL (Purina), `project.market`; feriados
+efectivos = los de ese pais MENOS los `excluded_holidays` de la tarea. El set efectivo se adjunta a
+cada task enriquecida como `holidaysSet`. En el Gantt, findes y feriados se pintan POR ENCIMA de las
+barras (`.day-over`) para que se vea que no son laborales.
 
 FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL.
 

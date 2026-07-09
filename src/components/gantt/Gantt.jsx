@@ -6,6 +6,7 @@ import {
   fmtCorto, fmtLargo,
 } from '../../lib/dates'
 import { textOn, partnerColor, partnerName, statusColor } from '../../lib/colors'
+import { countryName } from '../../lib/countries'
 
 const DOW = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES_LARGO = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -104,6 +105,27 @@ export default function Gantt({
     )
   }
 
+  // Capa POR ENCIMA de las barras: columnas de finde (y feriados de la fila) para
+  // que se vea que no cuentan como dias laborales.
+  function OverlayLayer({ holidaysSet }) {
+    const holIdx = []
+    if (holidaysSet) {
+      for (let i = 0; i < geo.days.length; i++) {
+        if (holidaysSet.has(geo.days[i])) holIdx.push(i)
+      }
+    }
+    return (
+      <>
+        {geo.weekendIdx.map((i) => (
+          <div key={`w${i}`} className="day-over weekend" style={{ left: i * dayW, width: dayW }} />
+        ))}
+        {holIdx.map((i) => (
+          <div key={`h${i}`} className="day-over holiday" style={{ left: i * dayW, width: dayW }} title="Feriado" />
+        ))}
+      </>
+    )
+  }
+
   // Marcador vertical del Market Launch (deadline del mercado) para un proyecto.
   function LaunchLine({ iso }) {
     if (!iso) return null
@@ -126,6 +148,7 @@ export default function Gantt({
       title: t.action_name,
       project: project.name,
       partner: partnerName(partners, t.partner_id),
+      country: t.country,
       planned: `${fmtCorto(t.planned_start)} a ${fmtCorto(t.planned_end)}`,
       dias: t.planned_days,
       status: t.status,
@@ -223,6 +246,7 @@ export default function Gantt({
                   <div className="proj-timeline" style={{ width: totalW }}>
                     <BgLayer />
                     <LaunchLine iso={project.market_launch} />
+                    <OverlayLayer holidaysSet={null} />
                   </div>
                 </div>
 
@@ -285,6 +309,7 @@ export default function Gantt({
                             +{t.delayDays}d
                           </div>
                         )}
+                        <OverlayLayer holidaysSet={t.holidaysSet} />
                       </div>
                     </div>
                   )
@@ -309,6 +334,7 @@ export default function Gantt({
           </div>
           <div className="tt-row"><span>Proyecto</span><b>{tip.project}</b></div>
           <div className="tt-row"><span>Partner</span><b>{tip.partner}</b></div>
+          {tip.country && <div className="tt-row"><span>Feriados</span><b>{countryName(tip.country)}</b></div>}
           <div className="tt-row"><span>Plan</span><b>{tip.planned}</b></div>
           <div className="tt-row"><span>Dias SLA</span><b>{tip.dias}</b></div>
           <div className="tt-row"><span>Status</span><b>{tip.status}</b></div>
