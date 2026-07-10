@@ -82,6 +82,8 @@ export function DataProvider({ children }) {
       const started = !!t.actual_start || !!t.actual_end || t.status === 'En curso'
       t.renderStart = p.projStart
       t.renderEnd = started ? p.effEnd : p.projEnd
+      // Guard: nunca dibujar una barra invertida (fin antes que inicio) por datos malos.
+      if (t.renderEnd && t.renderStart && t.renderEnd < t.renderStart) t.renderEnd = t.renderStart
     }
 
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))

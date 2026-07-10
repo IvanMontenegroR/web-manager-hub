@@ -121,6 +121,9 @@ export default function TaskModal({ task, project, onClose }) {
     if (!form.action_name.trim()) return setErr('La accion es obligatoria.')
     if (!form.planned_start) return setErr('La fecha de inicio es obligatoria.')
     if (Number(form.planned_days) < 1) return setErr('Los dias deben ser 1 o mas.')
+    if (form.actual_start && form.actual_end && form.actual_end < form.actual_start) {
+      return setErr('El fin real no puede ser anterior al inicio real.')
+    }
     if (isDelayed && !form.delay_reason.trim()) {
       return setErr('El fin real supera el fin planificado: la razon del retraso es obligatoria.')
     }
