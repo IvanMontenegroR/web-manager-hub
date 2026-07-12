@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Copy, Trash2, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -28,7 +28,7 @@ export default function Gantt({
   projects,
   hidePast = false,
   emptyLabel,
-  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onDuplicateTask,
+  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask,
 }) {
   const { partners, enriched, conflictIds } = useData()
   const [tip, setTip] = useState(null)
@@ -301,11 +301,6 @@ export default function Gantt({
                           <button className="btn btn-ghost btn-sm btn-icon" title="Editar tarea" onClick={() => onEditTask(t, project)}>
                             <Pencil size={13} />
                           </button>
-                          {onDuplicateTask && (
-                            <button className="btn btn-ghost btn-sm btn-icon" title="Duplicar tarea" onClick={() => onDuplicateTask(t, project)}>
-                              <Copy size={13} />
-                            </button>
-                          )}
                           <button className="btn btn-ghost btn-sm btn-icon" title="Borrar tarea" onClick={() => onDeleteTask(t, project)}>
                             <Trash2 size={13} />
                           </button>

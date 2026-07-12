@@ -9,7 +9,7 @@ import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import SlaModal from '../components/modals/SlaModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
-import { deleteProject, deleteTask, setProjectArchived, createTask } from '../lib/db'
+import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
 import { exportGlobal } from '../lib/exportXlsx'
 
 export default function WebProjects() {
@@ -35,28 +35,6 @@ export default function WebProjects() {
   async function handleDeleteTask(task, project) {
     if (!confirm(`Borrar la tarea "${task.action_name}" de ${project.name}?`)) return
     await deleteTask(task.id)
-    await refresh()
-  }
-
-  async function handleDuplicateTask(task, project) {
-    const siblings = tasks.filter((t) => t.project_id === project.id)
-    const nextSort = siblings.reduce((m, t) => Math.max(m, t.sort_order || 0), 0) + 1
-    await createTask(
-      {
-        project_id: project.id,
-        partner_id: task.partner_id,
-        action_name: `${task.action_name} (copia)`,
-        planned_start: task.planned_start,
-        planned_days: task.planned_days,
-        actual_start: task.actual_start,
-        actual_end: task.actual_end,
-        status: task.status,
-        delay_reason: task.delay_reason,
-        excluded_holidays: task.excluded_holidays,
-        depends_on: task.depends_on,
-      },
-      nextSort
-    )
     await refresh()
   }
 
@@ -127,7 +105,6 @@ export default function WebProjects() {
               onAddTask={(p) => setModal({ type: 'task', project: p })}
               onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
               onDeleteTask={handleDeleteTask}
-              onDuplicateTask={handleDuplicateTask}
             />
 
             <div className="panels">
@@ -154,7 +131,6 @@ export default function WebProjects() {
                       onAddTask={(p) => setModal({ type: 'task', project: p })}
                       onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
                       onDeleteTask={handleDeleteTask}
-                      onDuplicateTask={handleDuplicateTask}
                     />
                   </div>
                 )}
