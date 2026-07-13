@@ -47,6 +47,11 @@ export default function Gantt({
       if (t.planned_end) dates.push(t.planned_end)
       if (t.actual_start) dates.push(t.actual_start)
       if (t.actual_end) dates.push(t.actual_end)
+      // Tambien las fechas REALES/proyectadas (forecast), para que el header cubra
+      // todo lo que se dibuja y no se corte.
+      if (t.renderStart) dates.push(t.renderStart)
+      if (t.renderEnd) dates.push(t.renderEnd)
+      if (t.delayEnd) dates.push(t.delayEnd)
     }
     // El deadline de Market Launch debe quedar siempre dentro del rango visible.
     for (const p of projects) {
