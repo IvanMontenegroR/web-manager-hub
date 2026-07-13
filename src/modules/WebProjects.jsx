@@ -10,7 +10,7 @@ import PartnersModal from '../components/modals/PartnersModal.jsx'
 import SlaModal from '../components/modals/SlaModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
 import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
-import { exportGlobal } from '../lib/exportXlsx'
+import { exportGlobal, exportProject } from '../lib/exportTimeline'
 
 export default function WebProjects() {
   const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
@@ -36,6 +36,10 @@ export default function WebProjects() {
     if (!confirm(`Borrar la tarea "${task.action_name}" de ${project.name}?`)) return
     await deleteTask(task.id)
     await refresh()
+  }
+
+  function handleExportProject(project) {
+    exportProject(project, enriched, partners)
   }
 
   return (
@@ -105,6 +109,7 @@ export default function WebProjects() {
               onAddTask={(p) => setModal({ type: 'task', project: p })}
               onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
               onDeleteTask={handleDeleteTask}
+              onExportProject={handleExportProject}
             />
 
             <div className="panels">
@@ -131,6 +136,7 @@ export default function WebProjects() {
                       onAddTask={(p) => setModal({ type: 'task', project: p })}
                       onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
                       onDeleteTask={handleDeleteTask}
+                      onExportProject={handleExportProject}
                     />
                   </div>
                 )}

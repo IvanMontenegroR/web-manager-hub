@@ -18,7 +18,7 @@ export default defineConfig(({ command }) => ({
         manualChunks: {
           react: ['react', 'react-dom'],
           supabase: ['@supabase/supabase-js'],
-          xlsx: ['xlsx'],
+          exceljs: ['exceljs'],
         },
       },
     },

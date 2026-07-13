@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -28,7 +28,7 @@ export default function Gantt({
   projects,
   hidePast = false,
   emptyLabel,
-  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask,
+  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject,
 }) {
   const { partners, enriched, conflictIds } = useData()
   const [tip, setTip] = useState(null)
@@ -240,6 +240,11 @@ export default function Gantt({
                       <button className="btn btn-ghost btn-sm btn-icon" title="Editar proyecto" onClick={() => onEditProject(project)}>
                         <Pencil size={14} />
                       </button>
+                      {onExportProject && (
+                        <button className="btn btn-ghost btn-sm btn-icon" title="Exportar proyecto (Excel)" onClick={() => onExportProject(project)}>
+                          <Download size={14} />
+                        </button>
+                      )}
                       {onArchiveProject && (
                         <button
                           className="btn btn-ghost btn-sm btn-icon"
