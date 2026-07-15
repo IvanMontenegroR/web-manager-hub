@@ -14,6 +14,7 @@ export function DataProvider({ children }) {
     projects: [],
     tasks: [],
     holidays: [],
+    projectLaunches: [],
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -92,9 +93,21 @@ export function DataProvider({ children }) {
     return { pairs, conflictIds, delays, enriched, archivedIds, holidaysByCountry }
   }, [state.tasks, state.projects, state.partners, state.holidays])
 
+  const launchesByProject = useMemo(() => {
+    const m = new Map()
+    for (const l of state.projectLaunches) {
+      if (!m.has(l.project_id)) m.set(l.project_id, [])
+      m.get(l.project_id).push(l)
+    }
+    for (const arr of m.values()) {
+      arr.sort((a, b) => (a.launch_date || '9999').localeCompare(b.launch_date || '9999'))
+    }
+    return m
+  }, [state.projectLaunches])
+
   const value = useMemo(
-    () => ({ ...state, ...derived, loading, error, refresh }),
-    [state, derived, loading, error, refresh]
+    () => ({ ...state, ...derived, launchesByProject, loading, error, refresh }),
+    [state, derived, launchesByProject, loading, error, refresh]
   )
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

@@ -9,6 +9,7 @@ import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import SlaModal from '../components/modals/SlaModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
+import LaunchWidget from '../components/panels/LaunchWidget.jsx'
 import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
 import { exportGlobal, exportProject } from '../lib/exportTimeline'
 
@@ -81,6 +82,7 @@ export default function WebProjects() {
           </div>
         ) : (
           <>
+            <LaunchWidget />
             <div className="legend">
               <span className="lg-label">Estado:</span>
               <span className="lg"><span className="lg-swatch" style={{ background: 'var(--ink-3)' }} /> Pendiente</span>

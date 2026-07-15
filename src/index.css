@@ -453,6 +453,13 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   border-style: solid;
   border-color: var(--launch) transparent transparent transparent;
 }
+.launch-line.month { border-left-style: dotted; }
+.launch-tag {
+  position: absolute; top: -2px; left: 3px;
+  font-size: 8.5px; font-weight: 800; color: var(--launch);
+  background: var(--surface); padding: 0 2px; border-radius: 2px;
+  white-space: nowrap; line-height: 1.35; z-index: 9;
+}
 
 /* Barras */
 .bar {
@@ -676,6 +683,9 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .hol-item .hol-name { color: var(--ink-2); }
 .hol-item.off { opacity: 0.55; }
 .hol-item.off .hol-date, .hol-item.off .hol-name { text-decoration: line-through; }
+/* Fila de lanzamiento por mercado en ProjectModal */
+.launch-row { display: grid; grid-template-columns: 1fr 140px 160px auto; gap: 6px; align-items: center; }
+.launch-row .control { margin: 0; }
 .control {
   width: 100%;
   padding: 8px 10px;
@@ -789,3 +799,50 @@ textarea.control { resize: vertical; min-height: 64px; }
 }
 .archived-body { margin-top: 12px; }
 .archived-body .gantt-wrap { opacity: 0.92; }
+
+/* ---- Widget de próximos lanzamientos (Web Projects) ---- */
+.launch-widget {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 12px; margin-bottom: 10px;
+  font-size: 12px; overflow-x: auto;
+}
+.lw-title { display: flex; align-items: center; gap: 5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.lw-markets { display: flex; gap: 16px; flex-wrap: wrap; }
+.lw-market { display: flex; align-items: center; gap: 6px; }
+.lw-mk { font-weight: 800; font-size: 11px; background: var(--proj-bg); color: var(--ink); border-radius: 4px; padding: 1px 6px; }
+.lw-items { display: flex; gap: 10px; flex-wrap: wrap; }
+.lw-item { color: var(--ink-2); white-space: nowrap; }
+.lw-item b { color: var(--launch); }
+
+/* ---- Calendario ---- */
+.cal-title { font-weight: 700; font-size: 14px; margin: 0 4px; min-width: 130px; }
+.cal-views { display: flex; gap: 2px; margin-left: 8px; }
+.cal-band {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  background: var(--launch-tint); border: 1px dashed var(--launch);
+  border-radius: var(--radius-sm); padding: 6px 10px; margin-bottom: 10px; font-size: 12px;
+}
+.cal-band-lbl { font-weight: 700; color: var(--launch); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.cal-dow { background: var(--surface-2); text-align: center; font-size: 11px; font-weight: 700; color: var(--ink-3); padding: 6px 0; }
+.cal-cell { background: var(--surface); min-height: 96px; padding: 4px 5px; }
+.cal-cell.out { background: var(--surface-2); }
+.cal-cell.out .cal-daynum { color: var(--ink-3); }
+.cal-cell.today { box-shadow: inset 0 0 0 2px var(--purina); }
+.cal-daynum { font-size: 11px; font-weight: 700; color: var(--ink-2); text-align: right; }
+.cal-cell-evs { display: flex; flex-direction: column; gap: 2px; margin-top: 3px; }
+.cal-ev { font-size: 10.5px; background: var(--launch-tint); border-radius: 3px; padding: 1px 5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-ev b { color: var(--launch); }
+.cal-ev.month { background: transparent; border: 1px dashed var(--launch); }
+.cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.cal-wcol { background: var(--surface); min-height: 240px; padding: 4px 5px; }
+.cal-wcol.today { box-shadow: inset 0 0 0 2px var(--purina); }
+.cal-whead { font-size: 11px; font-weight: 700; text-align: center; color: var(--ink-2); padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 5px; }
+.cal-day-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; background: var(--surface); font-size: 13px; }
+.cal-year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cal-ymonth { text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+.cal-ymonth:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.cal-ymonth.today { box-shadow: inset 0 0 0 2px var(--purina); }
+.cal-ymname { font-weight: 700; font-size: 13px; }
+.cal-ycount { font-size: 11px; color: var(--ink-3); margin-top: 5px; }

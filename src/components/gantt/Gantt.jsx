@@ -24,13 +24,24 @@ function flagEmoji(cc) {
   return String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65, 0x1f1e6 + c.charCodeAt(1) - 65)
 }
 
+// Formatea un lanzamiento por mercado (MX · 24 jul / AR · Septiembre 2026 / CO · TBD).
+function fmtLaunch(l) {
+  if (!l) return ''
+  if (l.precision === 'tbd' || !l.launch_date) return `${l.market} · TBD`
+  if (l.precision === 'month') {
+    const d = parseDay(l.launch_date)
+    return `${l.market} · ${MESES_LARGO[d.getMonth()]} ${d.getFullYear()}`
+  }
+  return `${l.market} · ${fmtCorto(l.launch_date)}`
+}
+
 export default function Gantt({
   projects,
   hidePast = false,
   emptyLabel,
   onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject,
 }) {
-  const { partners, enriched, conflictIds } = useData()
+  const { partners, enriched, conflictIds, launchesByProject } = useData()
   const [tip, setTip] = useState(null)
 
   // Solo las tareas de los proyectos que este Gantt renderiza (activos o archivados).
@@ -53,9 +64,11 @@ export default function Gantt({
       if (t.renderEnd) dates.push(t.renderEnd)
       if (t.delayEnd) dates.push(t.delayEnd)
     }
-    // El deadline de Market Launch debe quedar siempre dentro del rango visible.
+    // Los lanzamientos por mercado deben quedar siempre dentro del rango visible.
     for (const p of projects) {
-      if (p.market_launch) dates.push(p.market_launch)
+      for (const l of launchesByProject.get(p.id) || []) {
+        if (l.launch_date) dates.push(l.launch_date)
+      }
     }
     const today = todayISO()
     dates.push(today)
@@ -81,7 +94,7 @@ export default function Gantt({
     const weekendIdx = days.map((iso, i) => (isWeekendISO(iso) ? i : -1)).filter((i) => i >= 0)
     const todayIdx = daysBetween(start, today)
     return { start, days, months, weekendIdx, todayIdx, today }
-  }, [myTasks, projects, hidePast])
+  }, [myTasks, projects, hidePast, launchesByProject])
 
   const tasksByProject = useMemo(() => {
     const map = {}
@@ -131,17 +144,20 @@ export default function Gantt({
     )
   }
 
-  // Marcador vertical del Market Launch (deadline del mercado) para un proyecto.
-  function LaunchLine({ iso }) {
-    if (!iso) return null
-    const i = idxOf(iso)
+  // Marcador vertical de lanzamiento de un mercado. showTag: muestra el codigo arriba.
+  function LaunchMarker({ launch, showTag }) {
+    if (!launch || !launch.launch_date) return null
+    const i = idxOf(launch.launch_date)
     if (i < 0 || i >= geo.days.length) return null
+    const isMonth = launch.precision === 'month'
     return (
       <div
-        className="launch-line"
+        className={`launch-line${isMonth ? ' month' : ''}`}
         style={{ left: i * dayW + dayW / 2 }}
-        title={`Market Launch: ${fmtLargo(iso)}`}
-      />
+        title={`Lanzamiento ${launch.market}: ${fmtLaunch(launch)}`}
+      >
+        {showTag && <span className="launch-tag">{launch.market}{isMonth ? '~' : ''}</span>}
+      </div>
     )
   }
 
@@ -212,6 +228,7 @@ export default function Gantt({
           {/* Filas */}
           {projects.map((project) => {
             const tks = tasksByProject[project.id] || []
+            const launches = launchesByProject.get(project.id) || []
             const done = project.status === 'Completado'
             const cancelled = project.status === 'Cancelado'
             const finished = done || cancelled
@@ -228,9 +245,10 @@ export default function Gantt({
                         {project.market}
                       </span>
                     )}
-                    {project.market_launch && (
-                      <span className="p-launch" title={`Market Launch: ${fmtLargo(project.market_launch)}`}>
-                        <Flag size={11} /> {fmtCorto(project.market_launch)}
+                    {launches.length > 0 && (
+                      <span className="p-launch" title={launches.map(fmtLaunch).join('  ·  ')}>
+                        <Flag size={11} /> {fmtLaunch(launches[0])}
+                        {launches.length > 1 ? ` +${launches.length - 1}` : ''}
                       </span>
                     )}
                     <div className="proj-actions">
@@ -261,7 +279,7 @@ export default function Gantt({
                   </div>
                   <div className="proj-timeline" style={{ width: totalW }}>
                     <BgLayer />
-                    <LaunchLine iso={project.market_launch} />
+                    {launches.map((l) => <LaunchMarker key={l.id} launch={l} showTag />)}
                     <OverlayLayer holidaysSet={null} />
                   </div>
                 </div>
@@ -318,7 +336,7 @@ export default function Gantt({
                       </div>
                       <div className="task-timeline" style={{ width: totalW }}>
                         <BgLayer />
-                        <LaunchLine iso={project.market_launch} />
+                        {launches.map((l) => <LaunchMarker key={l.id} launch={l} />)}
                         {ghostVisible && (
                           <div
                             className="bar-ghost"

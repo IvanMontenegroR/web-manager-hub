@@ -9,25 +9,46 @@ function throwIf(error) {
 
 // ---- Lecturas ----
 export async function fetchAll() {
-  const [partners, slas, projects, tasks, holidays] = await Promise.all([
+  const [partners, slas, projects, tasks, holidays, launches] = await Promise.all([
     supabase.from('partners').select('*').order('name'),
     supabase.from('sla_definitions').select('*').order('sla_days'),
     supabase.from('projects').select('*').order('start_date'),
     supabase.from('tasks').select('*').order('sort_order'),
     supabase.from('holidays').select('*').order('date'),
+    supabase.from('project_launches').select('*').order('launch_date'),
   ])
   throwIf(partners.error)
   throwIf(slas.error)
   throwIf(projects.error)
   throwIf(tasks.error)
   throwIf(holidays.error)
+  throwIf(launches.error)
   return {
     partners: partners.data ?? [],
     slas: slas.data ?? [],
     projects: projects.data ?? [],
     tasks: tasks.data ?? [],
     holidays: holidays.data ?? [],
+    projectLaunches: launches.data ?? [],
   }
+}
+
+// Reemplaza TODOS los lanzamientos de un proyecto por la lista dada (borra + inserta).
+export async function replaceProjectLaunches(projectId, launches) {
+  const del = await supabase.from('project_launches').delete().eq('project_id', projectId)
+  throwIf(del.error)
+  const rows = (launches || [])
+    .filter((l) => l.market && String(l.market).trim())
+    .map((l) => ({
+      project_id: projectId,
+      market: l.market,
+      launch_date: l.precision === 'tbd' ? null : l.launch_date || null,
+      precision: l.precision || 'day',
+    }))
+  if (rows.length === 0) return []
+  const { data, error } = await supabase.from('project_launches').insert(rows).select()
+  throwIf(error)
+  return data
 }
 
 // ---- Projects ----
