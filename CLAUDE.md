@@ -86,12 +86,15 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   y el **plan original** se dibuja como **fantasma** hueco (`.bar-ghost`) solo cuando la realidad se
   corrio. El tooltip muestra Plan, Real y la predecesora culpable (`pushedByName`). Las tareas tipo
   SEO no son predecesoras de otras (no bloquean).
-- **Vistas del cronograma** (WebProjects): dos toggles en la topbar. `zoom` (`day`/`week`) se pasa al
-  `Gantt`; en semana el ancho de columna baja de 34px a 11px (`--day-w`) y el header solo etiqueta
-  los lunes (`d/m`). `hidden` es un Set de `project.id` ocultados manualmente del cronograma activo,
-  persistido en `localStorage['wmh_hidden_projects']`; se restauran desde una barra de chips. Ocultar
-  != archivar (archivar es persistente en DB y va al acordeon; ocultar es solo una preferencia de
-  vista local).
+- **Vistas del cronograma** (WebProjects): toggles en la topbar, todos preferencias locales.
+  `zoom` (`day`/`week`) se pasa al `Gantt`; en semana el ancho de columna baja de 34px a 11px
+  (`--day-w`) y el header solo etiqueta los lunes (`d/m`); persiste en `localStorage['wmh_zoom']`.
+  `showGhosts` prende/apaga el fantasma del plan original (`.bar-ghost` + `.bar-link`); **apagado
+  por defecto**, persiste en `localStorage['wmh_ghosts']`. `hidden` es un Set de `project.id`
+  ocultados manualmente del cronograma activo, persistido en `localStorage['wmh_hidden_projects']`;
+  se restauran desde una barra de chips. Ocultar != archivar (archivar es persistente en DB y va al
+  acordeon; ocultar es solo una preferencia de vista local). Los botones de admin (Partners, SLAs,
+  Feriados) viven en un menu desplegable **Admin** (`.dropdown`) en vez de sueltos en la topbar.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:

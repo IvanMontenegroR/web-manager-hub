@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight } from 'lucide-react'
+import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight, ChevronDown, Ghost, Settings } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import ControlPanel from '../components/panels/ControlPanel.jsx'
@@ -17,15 +17,20 @@ export default function WebProjects() {
   const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
   const [hidePast, setHidePast] = useState(false)
-  const [zoom, setZoom] = useState('day') // 'day' | 'week'
+  // La vista (dia/semana) y los fantasmas se recuerdan entre sesiones.
+  const [zoom, setZoom] = useState(() => (localStorage.getItem('wmh_zoom') === 'week' ? 'week' : 'day'))
+  const [showGhosts, setShowGhosts] = useState(() => localStorage.getItem('wmh_ghosts') === '1')
   const [archivedOpen, setArchivedOpen] = useState(false)
   const [showHiddenBar, setShowHiddenBar] = useState(false)
+  const [adminOpen, setAdminOpen] = useState(false)
   const [hidden, setHidden] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('wmh_hidden_projects') || '[]')) } catch { return new Set() }
   })
   useEffect(() => {
     localStorage.setItem('wmh_hidden_projects', JSON.stringify([...hidden]))
   }, [hidden])
+  useEffect(() => { localStorage.setItem('wmh_zoom', zoom) }, [zoom])
+  useEffect(() => { localStorage.setItem('wmh_ghosts', showGhosts ? '1' : '0') }, [showGhosts])
 
   const archivedProjects = projects.filter((p) => p.archived)
   const hiddenExisting = projects.filter((p) => !p.archived && hidden.has(p.id))
@@ -79,6 +84,13 @@ export default function WebProjects() {
           >
             <CalendarRange size={16} /> {zoom === 'week' ? 'Semanas' : 'Días'}
           </button>
+          <button
+            className={`btn${showGhosts ? ' active' : ''}`}
+            title={showGhosts ? 'Ocultar plan original (fantasmas)' : 'Mostrar plan original (fantasmas)'}
+            onClick={() => setShowGhosts((v) => !v)}
+          >
+            <Ghost size={16} /> Fantasmas
+          </button>
           {hiddenExisting.length > 0 && (
             <button
               className={`btn${showHiddenBar ? ' active' : ''}`}
@@ -88,12 +100,24 @@ export default function WebProjects() {
               <EyeOff size={16} /> {hiddenExisting.length} oculto{hiddenExisting.length > 1 ? 's' : ''}
             </button>
           )}
-          <button className="btn" onClick={() => setModal({ type: 'partners' })}><Users size={16} /> Partners</button>
-          <button className="btn" onClick={() => setModal({ type: 'slas' })}><Timer size={16} /> SLAs</button>
-          <button className="btn" onClick={() => setModal({ type: 'holidays' })}><CalendarOff size={16} /> Feriados</button>
           <button className="btn" onClick={() => exportGlobal(enriched, projects, partners)} disabled={tasks.length === 0}>
             <Download size={16} /> Exportar
           </button>
+          <div className="dropdown">
+            <button className={`btn${adminOpen ? ' active' : ''}`} title="Administracion" onClick={() => setAdminOpen((v) => !v)}>
+              <Settings size={16} /> Admin <ChevronDown size={13} />
+            </button>
+            {adminOpen && (
+              <>
+                <div className="dropdown-overlay" onClick={() => setAdminOpen(false)} />
+                <div className="dropdown-menu">
+                  <button className="dropdown-item" onClick={() => { setModal({ type: 'partners' }); setAdminOpen(false) }}><Users size={15} /> Partners</button>
+                  <button className="dropdown-item" onClick={() => { setModal({ type: 'slas' }); setAdminOpen(false) }}><Timer size={15} /> SLAs</button>
+                  <button className="dropdown-item" onClick={() => { setModal({ type: 'holidays' }); setAdminOpen(false) }}><CalendarOff size={15} /> Feriados</button>
+                </div>
+              </>
+            )}
+          </div>
           <button className="btn btn-primary" onClick={() => setModal({ type: 'project' })}>
             <FolderPlus size={16} /> Nuevo proyecto
           </button>
@@ -132,7 +156,7 @@ export default function WebProjects() {
               <span className="lg"><span className="lg-dot" /> Punto = partner</span>
               <span className="lg"><span className="lg-swatch conflict" /> Solapamiento de partner</span>
               <span className="lg"><span className="lg-swatch delay" /> Delay</span>
-              <span className="lg"><span className="lg-swatch ghost" /> Plan original (fantasma)</span>
+              {showGhosts && <span className="lg"><span className="lg-swatch ghost" /> Plan original (fantasma)</span>}
               <span className="lg"><span className="lg-swatch launch" /> Market Launch (deadline del mercado)</span>
               <span className="lg"><span className="lg-swatch nonwork" /> Finde / feriado (no laboral)</span>
             </div>
@@ -141,6 +165,7 @@ export default function WebProjects() {
               projects={activeProjects}
               hidePast={hidePast}
               zoom={zoom}
+              showGhosts={showGhosts}
               onHideProject={hideProject}
               emptyLabel={
                 archivedProjects.length > 0
@@ -174,6 +199,8 @@ export default function WebProjects() {
                     <Gantt
                       projects={archivedProjects}
                       hidePast={false}
+                      zoom={zoom}
+                      showGhosts={showGhosts}
                       onEditProject={(p) => setModal({ type: 'project', project: p })}
                       onDeleteProject={handleDeleteProject}
                       onArchiveProject={handleArchiveProject}

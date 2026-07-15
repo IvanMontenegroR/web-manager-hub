@@ -35,6 +35,7 @@ export default function Gantt({
   hidePast = false,
   emptyLabel,
   zoom = 'day',
+  showGhosts = false,
   onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject, onHideProject,
 }) {
   const { partners, enriched, conflictIds, launchesByProject } = useData()
@@ -344,14 +345,14 @@ export default function Gantt({
                       <div className="task-timeline" style={{ width: totalW }}>
                         <BgLayer />
                         {launches.map((l) => <LaunchMarker key={l.id} launch={l} />)}
-                        {ghostVisible && (
+                        {showGhosts && ghostVisible && (
                           <div
                             className="bar-ghost"
                             style={{ left: gLeft, width: gWidth }}
                             title={`Plan original: ${fmtCorto(t.planned_start)} a ${fmtCorto(t.planned_end)}`}
                           />
                         )}
-                        {linkVisible && (
+                        {showGhosts && linkVisible && (
                           <div className="bar-link" style={{ left: linkLeft, width: linkWidth }} />
                         )}
                         {barVisible && (

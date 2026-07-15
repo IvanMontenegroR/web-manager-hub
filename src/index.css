@@ -897,6 +897,23 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cal-ymname { font-weight: 700; font-size: 13px; }
 .cal-ycount { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
 
+/* Menu desplegable (Admin en Web Projects) */
+.dropdown { position: relative; display: inline-flex; }
+.dropdown-overlay { position: fixed; inset: 0; z-index: 40; }
+.dropdown-menu {
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: 41;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+  padding: 4px; min-width: 168px; display: flex; flex-direction: column; gap: 2px;
+}
+.dropdown-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 10px; font-size: 13px; border-radius: 5px;
+  background: none; border: none; cursor: pointer; color: var(--ink); text-align: left;
+}
+.dropdown-item:hover { background: var(--surface-2); }
+.dropdown-item svg { color: var(--ink-3); }
+
 /* Barra de proyectos ocultos (Web Projects) */
 .hidden-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
