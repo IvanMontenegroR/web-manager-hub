@@ -47,7 +47,7 @@ export default function Ecosystem() {
   const [tableMissing, setTableMissing] = useState(false)
   const [seeding, setSeeding] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [filter, setFilter] = useState('__all__')
+  const [filter, setFilter] = useState(() => localStorage.getItem('wmh_eco_filter') || '__all__')
   const [modal, setModal] = useState(null) // { task? , status? }
   const [dragId, setDragId] = useState(null)
   const [overCol, setOverCol] = useState(null)
@@ -72,9 +72,12 @@ export default function Ecosystem() {
     () => [...new Set(tasks.map((t) => t.owner).filter(Boolean))].sort(),
     [tasks]
   )
+  useEffect(() => { localStorage.setItem('wmh_eco_filter', filter) }, [filter])
+  // Si la seccion guardada ya no existe (se borro / renombro), caemos a "Todas".
+  const activeFilter = filter !== '__all__' && !sections.includes(filter) ? '__all__' : filter
   const visible = useMemo(
-    () => (filter === '__all__' ? tasks : tasks.filter((t) => t.section === filter)),
-    [tasks, filter]
+    () => (activeFilter === '__all__' ? tasks : tasks.filter((t) => t.section === activeFilter)),
+    [tasks, activeFilter]
   )
   const byStatus = useMemo(() => {
     const m = Object.fromEntries(ECO_STATUSES.map((s) => [s, []]))
@@ -160,14 +163,14 @@ export default function Ecosystem() {
 
             <div className="eco-toolbar">
               <div className="eco-filter">
-                <button className={`chip${filter === '__all__' ? ' active' : ''}`} onClick={() => setFilter('__all__')}>
+                <button className={`chip${activeFilter === '__all__' ? ' active' : ''}`} onClick={() => setFilter('__all__')}>
                   Todas <span className="chip-count">{tasks.length}</span>
                 </button>
                 {sections.map((s) => (
                   <button
                     key={s}
-                    className={`chip${filter === s ? ' active' : ''}`}
-                    style={filter === s ? { background: sectionColor(s), borderColor: sectionColor(s), color: '#fff' } : { borderColor: sectionColor(s) }}
+                    className={`chip${activeFilter === s ? ' active' : ''}`}
+                    style={activeFilter === s ? { background: sectionColor(s), borderColor: sectionColor(s), color: '#fff' } : { borderColor: sectionColor(s) }}
                     onClick={() => setFilter(s)}
                   >
                     <span className="chip-dot" style={{ background: sectionColor(s) }} />

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
@@ -16,8 +16,13 @@ const wk = { weekStartsOn: 1 }
 
 export default function Calendar() {
   const { projects, launchesByProject } = useData()
-  const [view, setView] = useState('month')
+  // La vista (dia/semana/mes/año) se recuerda; el cursor arranca siempre en hoy.
+  const [view, setView] = useState(() => {
+    const v = localStorage.getItem('wmh_cal_view')
+    return ['day', 'week', 'month', 'year'].includes(v) ? v : 'month'
+  })
   const [cursor, setCursor] = useState(() => new Date())
+  useEffect(() => { localStorage.setItem('wmh_cal_view', view) }, [view])
 
   const events = useMemo(() => {
     const out = []

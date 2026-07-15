@@ -16,13 +16,13 @@ import { exportGlobal, exportProject } from '../lib/exportTimeline'
 export default function WebProjects() {
   const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
-  const [hidePast, setHidePast] = useState(false)
-  // La vista (dia/semana) y los fantasmas se recuerdan entre sesiones.
+  // Preferencias de vista: todas se recuerdan entre sesiones (localStorage).
+  const [hidePast, setHidePast] = useState(() => localStorage.getItem('wmh_hidepast') === '1')
   const [zoom, setZoom] = useState(() => (localStorage.getItem('wmh_zoom') === 'week' ? 'week' : 'day'))
   const [showGhosts, setShowGhosts] = useState(() => localStorage.getItem('wmh_ghosts') === '1')
-  const [archivedOpen, setArchivedOpen] = useState(false)
-  const [showHiddenBar, setShowHiddenBar] = useState(false)
-  const [adminOpen, setAdminOpen] = useState(false)
+  const [archivedOpen, setArchivedOpen] = useState(() => localStorage.getItem('wmh_archived_open') === '1')
+  const [showHiddenBar, setShowHiddenBar] = useState(false) // popover transitorio, no se recuerda
+  const [adminOpen, setAdminOpen] = useState(false) // popover transitorio, no se recuerda
   const [hidden, setHidden] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('wmh_hidden_projects') || '[]')) } catch { return new Set() }
   })
@@ -31,6 +31,8 @@ export default function WebProjects() {
   }, [hidden])
   useEffect(() => { localStorage.setItem('wmh_zoom', zoom) }, [zoom])
   useEffect(() => { localStorage.setItem('wmh_ghosts', showGhosts ? '1' : '0') }, [showGhosts])
+  useEffect(() => { localStorage.setItem('wmh_hidepast', hidePast ? '1' : '0') }, [hidePast])
+  useEffect(() => { localStorage.setItem('wmh_archived_open', archivedOpen ? '1' : '0') }, [archivedOpen])
 
   const archivedProjects = projects.filter((p) => p.archived)
   const hiddenExisting = projects.filter((p) => !p.archived && hidden.has(p.id))

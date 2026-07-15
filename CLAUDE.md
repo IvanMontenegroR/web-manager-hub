@@ -95,6 +95,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   se restauran desde una barra de chips. Ocultar != archivar (archivar es persistente en DB y va al
   acordeon; ocultar es solo una preferencia de vista local). Los botones de admin (Partners, SLAs,
   Feriados) viven en un menu desplegable **Admin** (`.dropdown`) en vez de sueltos en la topbar.
+  Tambien se recuerdan `hidePast` (`wmh_hidepast`) y el acordeon de archivados (`wmh_archived_open`).
+  Otras preferencias persistidas: la vista del Calendario (`wmh_cal_view`, default mes; el cursor
+  arranca en hoy) y el filtro de seccion de Ecosystem (`wmh_eco_filter`; cae a "Todas" si la seccion
+  guardada ya no existe). Los popovers transitorios (dropdown Admin, barra de ocultos) NO se recuerdan.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
