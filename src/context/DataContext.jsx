@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAll } from '../lib/db'
-import { detectOverlaps, detectDelays, withDerived } from '../lib/analysis'
+import { detectOverlaps, detectDelays, withDerived, buildDailyControl } from '../lib/analysis'
 import { computeProjection } from '../lib/projection'
 import { taskCountry } from '../lib/countries'
 import { toISO } from '../lib/dates'
@@ -90,7 +90,8 @@ export function DataProvider({ children }) {
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))
     const { pairs, conflictIds } = detectOverlaps(active)
     const delays = detectDelays(active)
-    return { pairs, conflictIds, delays, enriched, archivedIds, holidaysByCountry }
+    const control = buildDailyControl(active, today)
+    return { pairs, conflictIds, delays, control, enriched, archivedIds, holidaysByCountry }
   }, [state.tasks, state.projects, state.partners, state.holidays])
 
   const launchesByProject = useMemo(() => {

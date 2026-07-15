@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
-import OverlapPanel from '../components/panels/OverlapPanel.jsx'
+import ControlPanel from '../components/panels/ControlPanel.jsx'
 import DelayPanel from '../components/panels/DelayPanel.jsx'
 import ProjectModal from '../components/modals/ProjectModal.jsx'
 import TaskModal from '../components/modals/TaskModal.jsx'
@@ -157,7 +157,7 @@ export default function WebProjects() {
             />
 
             <div className="panels">
-              <OverlapPanel />
+              <ControlPanel />
               <DelayPanel />
             </div>
 

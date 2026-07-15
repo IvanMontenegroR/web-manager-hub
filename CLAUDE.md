@@ -83,6 +83,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   persistido en `localStorage['wmh_hidden_projects']`; se restauran desde una barra de chips. Ocultar
   != archivar (archivar es persistente en DB y va al acordeon; ocultar es solo una preferencia de
   vista local).
+- **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
+  viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
+  Clasifica las tareas activas relativo a HOY en dias habiles, usando el fin **proyectado** (`renderEnd`)
+  para las abiertas y `actual_end` para las cerradas: `overdueOpen` (vencidas vs `planned_end` y sin
+  cerrar, bloque urgente), `dueToday` (fin proyectado = hoy), `upcoming` (cierran en 1..3 dias habiles) y
+  `recentlyDone` (cerradas en los ultimos 0..3 dias habiles, con badge a tiempo/tarde). Ventanas de 3
+  dias habiles; cada tarea usa su propio `holidaysSet`.
 
 ## Estructura
 
@@ -92,7 +99,7 @@ src/
   context/     DataContext (carga todo + refresh, expone derivados memoizados)
   components/
     gantt/     Gantt.jsx (header por dia, findes, hoy, barras, tooltip)
-    panels/    OverlapPanel, DelayPanel
+    panels/    ControlPanel (foco del dia), DelayPanel, LaunchWidget
     modals/    ProjectModal, TaskModal, PartnersModal, SlaModal
     ui/        Modal
   modules/     WebProjects (orquesta todo), Placeholder (modulos futuros)
