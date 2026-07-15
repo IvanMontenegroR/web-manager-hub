@@ -3,7 +3,7 @@ import {
   Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, Trash2, Pencil, User,
 } from 'lucide-react'
 import {
-  ECO_STATUSES, SETUP_SQL, fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
+  ECO_STATUSES, SETUP_SQL, ecoOrder, fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
 } from '../lib/ecosystemDb'
 import { daysBetween, businessDaysBetween, fmtCorto, toISO } from '../lib/dates'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
@@ -79,7 +79,8 @@ export default function Ecosystem() {
   const byStatus = useMemo(() => {
     const m = Object.fromEntries(ECO_STATUSES.map((s) => [s, []]))
     for (const t of visible) (m[t.status] || (m[t.status] = [])).push(t)
-    for (const s of ECO_STATUSES) m[s].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    // Orden: deadline predomina, luego prioridad (alta>media>baja).
+    for (const s of ECO_STATUSES) m[s].sort(ecoOrder)
     return m
   }, [visible])
 
@@ -231,6 +232,11 @@ export default function Ecosystem() {
                             {t.topic && <div className="eco-card-topic">{t.topic}</div>}
                             {t.issue && <div className="eco-card-issue">{t.issue}</div>}
                             <div className="eco-card-foot">
+                              {t.priority && (
+                                <span className={`eco-prio p-${t.priority}`} title={`Prioridad ${t.priority}`}>
+                                  {t.priority === 'alta' ? 'Alta' : t.priority === 'baja' ? 'Baja' : 'Media'}
+                                </span>
+                              )}
                               {t.owner && (
                                 <span className="eco-owner" title={t.owner}>
                                   <span className="eco-owner-dot" style={{ background: ownerColor(t.owner) }} />

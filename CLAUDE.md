@@ -40,12 +40,14 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   depends_on, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start)
-- `ecosystem_tasks(id, section, topic, issue, action, owner, status, notes, deadline, checklist jsonb,
-  sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de coordinacion de la migracion;
-  independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done. `checklist` = jsonb array de
-  {text, done}. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js` -> `SETUP_SQL`;
-  si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace su propio
-  fetch y tolera que la tabla no exista, para no romper el resto de la app)
+- `ecosystem_tasks(id, section, topic, issue, action, owner, status, priority, notes, deadline,
+  checklist jsonb, sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de coordinacion de
+  la migracion; independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done. `priority` =
+  alta|media|baja. `checklist` = jsonb array de {text, done}. Orden dentro de cada columna (`ecoOrder`):
+  PREDOMINA el deadline (con fecha van arriba, por fecha asc), luego la prioridad (alta>media>baja), y
+  `sort_order` como desempate. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
+  -> `SETUP_SQL`; si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace
+  su propio fetch y tolera que la tabla no exista, para no romper el resto de la app)
 
 CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
 dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**

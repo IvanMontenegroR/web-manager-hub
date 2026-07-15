@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Boxes, Plus, X, Check } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
-import { ECO_STATUSES, createEcoTask, updateEcoTask } from '../../lib/ecosystemDb'
+import { ECO_STATUSES, ECO_PRIORITIES, createEcoTask, updateEcoTask } from '../../lib/ecosystemDb'
 
 export default function EcoTaskModal({ task, sections, owners, defaultStatus, nextSort, onClose, onSaved }) {
   const editing = !!task
@@ -12,6 +12,7 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
     action: task?.action || '',
     owner: task?.owner || '',
     status: task?.status || defaultStatus || 'Open',
+    priority: task?.priority || 'media',
     deadline: task?.deadline || '',
     notes: task?.notes || '',
     checklist: Array.isArray(task?.checklist) ? task.checklist.map((c) => ({ ...c })) : [],
@@ -83,7 +84,7 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
         </div>
       </div>
 
-      <div className="row-2">
+      <div className="row-3">
         <div className="field">
           <label>Estado (columna)</label>
           <select className="control" value={form.status} onChange={set('status')}>
@@ -91,9 +92,15 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
           </select>
         </div>
         <div className="field">
+          <label>Prioridad</label>
+          <select className="control" value={form.priority} onChange={set('priority')}>
+            {ECO_PRIORITIES.map((p) => <option key={p} value={p}>{p[0].toUpperCase() + p.slice(1)}</option>)}
+          </select>
+        </div>
+        <div className="field">
           <label>Deadline (opcional)</label>
           <input type="date" className="control" value={form.deadline} onChange={set('deadline')} />
-          <div className="hint">Vencida = roja · faltan ≤3 dias habiles = amarilla · sin fecha = neutra</div>
+          <div className="hint">El deadline manda sobre la prioridad en el orden.</div>
         </div>
       </div>
 
