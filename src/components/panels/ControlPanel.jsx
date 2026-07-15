@@ -57,7 +57,7 @@ export default function ControlPanel() {
                 <Row
                   key={t.id}
                   t={t}
-                  right={<span className={`ctrl-tag ${t.actual_start ? 'info' : 'warn'}`}>{t.actual_start ? 'en curso' : 'sin arrancar'}</span>}
+                  right={<span className={`ctrl-tag ${t.started ? 'info' : 'warn'}`}>{t.started ? 'en curso' : 'sin arrancar'}</span>}
                 />
               ))}
             </div>
@@ -67,7 +67,7 @@ export default function ControlPanel() {
             <div className="ctrl-block soon">
               <div className="ctrl-block-head"><CalendarPlus size={13} /> Por vencer (prox. 3 d hab.) <span className="cb-count">{upcoming.length}</span></div>
               {upcoming.map((t) => (
-                <Row key={t.id} t={t} right={<span className="ctrl-tag soon" title={fmtCorto(t.ref)}>{aheadLabel(t.aheadDays)}</span>} />
+                <Row key={t.id} t={t} right={<span className="ctrl-tag soon" title={fmtCorto(t.planned_end)}>{aheadLabel(t.aheadDays)}</span>} />
               ))}
             </div>
           )}

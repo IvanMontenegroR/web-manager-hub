@@ -85,11 +85,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   vista local).
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
-  Clasifica las tareas activas relativo a HOY en dias habiles, usando el fin **proyectado** (`renderEnd`)
-  para las abiertas y `actual_end` para las cerradas: `overdueOpen` (vencidas vs `planned_end` y sin
-  cerrar, bloque urgente), `dueToday` (fin proyectado = hoy), `upcoming` (cierran en 1..3 dias habiles) y
-  `recentlyDone` (cerradas en los ultimos 0..3 dias habiles, con badge a tiempo/tarde). Ventanas de 3
-  dias habiles; cada tarea usa su propio `holidaysSet`.
+  Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
+  el fin **planeado** (`planned_end`) para las abiertas y `actual_end` para las cerradas. NO usa el
+  forecast: una tarea que vencio pero se corrio para adelante por delays de una predecesora (nunca
+  arranco) NO aparece. Buckets: `overdueOpen` (arrancaron, vencieron su plan y siguen abiertas =
+  `t.isDelayed`, atraso propio real, bloque urgente), `dueToday` (fin planeado = hoy), `upcoming` (fin
+  planeado en 1..3 dias habiles) y `recentlyDone` (cerradas en los ultimos 0..3 dias habiles, con badge
+  a tiempo/tarde). Ventanas de 3 dias habiles; cada tarea usa su propio `holidaysSet`.
 
 ## Estructura
 

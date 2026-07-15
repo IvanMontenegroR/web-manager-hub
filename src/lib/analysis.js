@@ -66,12 +66,16 @@ export function detectDelays(enriched) {
 }
 
 // Control diario: clasifica las tareas activas relativo a HOY, en DIAS HABILES,
-// para saber que hay que controlar. Referencia de fin = proyeccion real (renderEnd)
-// para tareas abiertas; fecha real de cierre (actual_end) para las cerradas. Cada
-// tarea usa su propio calendario de feriados (holidaysSet). Ventanas de 3 dias habiles.
-//   - overdueOpen : vencidas (planned_end paso) y aun sin cerrar. Bloque urgente.
-//   - dueToday    : abiertas cuyo fin proyectado cae HOY.
-//   - upcoming    : abiertas que cierran en los proximos 1..3 dias habiles.
+// para saber que hay que controlar. Trabaja SOLO con fechas reales/comprometidas:
+// la fecha comprometida del plan (planned_end) para las abiertas y la fecha real de
+// cierre (actual_end) para las cerradas. NO usa el forecast/proyeccion: una tarea que
+// vencio y se "corrio para adelante" por delays de una predecesora (nunca arranco) no
+// es un atraso real, asi que no aparece. Cada tarea usa su propio calendario
+// (holidaysSet). Ventanas de 3 dias habiles.
+//   - overdueOpen : arrancaron, vencieron su plan (planned_end paso) y siguen abiertas
+//                   (atraso propio y real = t.isDelayed). Bloque urgente.
+//   - dueToday    : abiertas cuyo fin PLANEADO cae HOY.
+//   - upcoming    : abiertas cuyo fin PLANEADO cae en los proximos 1..3 dias habiles.
 //   - recentlyDone: cerradas en los ultimos 0..3 dias habiles (0 = cerro hoy).
 export function buildDailyControl(enriched, today) {
   const overdueOpen = []
@@ -81,37 +85,33 @@ export function buildDailyControl(enriched, today) {
   if (!today) return { overdueOpen, dueToday, upcoming, recentlyDone }
 
   for (const t of enriched) {
-    if (!t.planned_start) continue
+    if (!t.planned_start || !t.planned_end) continue
     const hol = t.holidaysSet
 
+    // Cerrada: bucket por la fecha REAL de cierre.
     if (t.actual_end) {
-      // Cerrada: bucket por la fecha real de cierre.
       if (daysBetween(t.actual_end, today) < 0) continue // cierre en el futuro (dato raro)
       const backDays = businessDaysBetween(t.actual_end, today, hol) // 0 = hoy
       if (backDays <= 3) recentlyDone.push({ ...t, backDays })
       continue
     }
 
-    // Abierta y ya vencida contra el plan/SLA: lo mas urgente de controlar.
-    if (t.planned_end && daysBetween(t.planned_end, today) > 0) {
-      const overDays = businessDaysBetween(t.planned_end, today, hol)
-      overdueOpen.push({ ...t, overDays })
-      continue
-    }
-
-    // Abierta y aun en fecha: bucket por el fin proyectado (forecast).
-    const ref = t.renderEnd || t.planned_end
-    if (!ref) continue
-    const dc = daysBetween(today, ref)
-    if (dc === 0) dueToday.push({ ...t, ref })
-    else if (dc > 0) {
-      const aheadDays = businessDaysBetween(today, ref, hol)
-      if (aheadDays >= 1 && aheadDays <= 3) upcoming.push({ ...t, ref, aheadDays })
+    // Abierta: SIEMPRE contra la fecha comprometida (planned_end), nunca el forecast.
+    const diff = daysBetween(today, t.planned_end) // >0 futuro, 0 hoy, <0 ya paso
+    if (diff < 0) {
+      // Vencio el plan. Solo cuenta como atraso REAL si la tarea arranco (t.isDelayed).
+      // Si no arranco, su demora es heredada (la corrio una predecesora): no se muestra.
+      if (t.isDelayed) overdueOpen.push({ ...t, overDays: businessDaysBetween(t.planned_end, today, hol) })
+    } else if (diff === 0) {
+      dueToday.push({ ...t, started: !!t.actual_start || t.status === 'En curso' })
+    } else {
+      const aheadDays = businessDaysBetween(today, t.planned_end, hol)
+      if (aheadDays >= 1 && aheadDays <= 3) upcoming.push({ ...t, aheadDays })
     }
   }
 
   overdueOpen.sort((a, b) => b.overDays - a.overDays)
-  upcoming.sort((a, b) => a.aheadDays - b.aheadDays || daysBetween(b.ref, a.ref))
+  upcoming.sort((a, b) => a.aheadDays - b.aheadDays || daysBetween(b.planned_end, a.planned_end))
   recentlyDone.sort((a, b) => a.backDays - b.backDays)
   return { overdueOpen, dueToday, upcoming, recentlyDone }
 }
