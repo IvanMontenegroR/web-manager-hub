@@ -4,8 +4,9 @@ Herramienta interna y personal de gestion de proyectos web para Nestle Purina LA
 Un unico usuario (el Websites Expert). Gestiona landings ejecutadas por 5 agencias
 partner (BNN, F5, Hive, MSE, NBS) en 12 mercados.
 
-Arquitectura de 4 modulos; en esta fase solo esta construido **Web Projects**. Los
-otros tres (Daily Ops, Tareas, Ecosystem 2.0) son placeholders en el shell.
+Arquitectura de 4 modulos. Construidos: **Web Projects** (Gantt/cronograma), **Calendario**
+(lanzamientos por mercado) y **Ecosystem 2.0** (Kanban de coordinacion de la migracion).
+**Daily Ops** y **Tareas** siguen como placeholders en el shell.
 
 ## Stack (decisiones)
 
@@ -39,6 +40,12 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   depends_on, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start)
+- `ecosystem_tasks(id, section, topic, issue, action, owner, status, notes, deadline, checklist jsonb,
+  sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de coordinacion de la migracion;
+  independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done. `checklist` = jsonb array de
+  {text, done}. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js` -> `SETUP_SQL`;
+  si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace su propio
+  fetch y tolera que la tabla no exista, para no romper el resto de la app)
 
 CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
 dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**
@@ -97,14 +104,15 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 
 ```
 src/
-  lib/         supabase, db (CRUD), dates, analysis (overlaps/delays), colors, exportXlsx
+  lib/         supabase, db (CRUD), ecosystemDb (Kanban CRUD + seed + SETUP_SQL), dates,
+               analysis (overlaps/delays/control), colors, exportTimeline (Excel), countries, flags
   context/     DataContext (carga todo + refresh, expone derivados memoizados)
   components/
-    gantt/     Gantt.jsx (header por dia, findes, hoy, barras, tooltip)
+    gantt/     Gantt.jsx (header por dia/semana, findes, hoy, barras, tooltip)
     panels/    ControlPanel (foco del dia), DelayPanel, LaunchWidget
-    modals/    ProjectModal, TaskModal, PartnersModal, SlaModal
+    modals/    ProjectModal, TaskModal, PartnersModal, SlaModal, HolidaysModal, EcoTaskModal
     ui/        Modal
-  modules/     WebProjects (orquesta todo), Placeholder (modulos futuros)
+  modules/     WebProjects (orquesta todo), Calendar, Ecosystem (Kanban), Placeholder (modulos futuros)
 ```
 
 ## Variables de entorno
@@ -138,7 +146,7 @@ Repo privado: GitHub Pages en repos privados requiere plan Pro/Team.
 
 ## Fases futuras (NO construidas)
 
-- Daily Ops, Tareas, Ecosystem 2.0 (placeholders hoy).
+- Daily Ops, Tareas (placeholders hoy).
 - Generacion de emails y notificaciones con la API de Anthropic **desde una Edge Function**
   (la key vive server-side, nunca en el front). El `.mcp.json` ya apunta al proyecto
   Purina-Hub para gestionar migraciones/RLS/Edge Functions desde Claude Code.

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LayoutGrid, CalendarDays, ClipboardList, ListChecks, Boxes, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import WebProjects from './modules/WebProjects.jsx'
 import Calendar from './modules/Calendar.jsx'
+import Ecosystem from './modules/Ecosystem.jsx'
 import Placeholder from './modules/Placeholder.jsx'
 
 const MODULES = [
@@ -11,7 +12,7 @@ const MODULES = [
     desc: 'Tracker de tickets y pedidos con owner (yo o partner), bloqueos y stakeholder.' },
   { id: 'tasks', label: 'Tareas', icon: ListChecks, ready: false,
     desc: 'Lista unificada cross modulo con tags de mercado y proyecto, y flag Status a Helo exportable.' },
-  { id: 'eco', label: 'Ecosystem 2.0', icon: Boxes, ready: false,
+  { id: 'eco', label: 'Ecosystem 2.0', icon: Boxes, ready: true,
     desc: 'Tracker de status de implementaciones: CIAM, Conversational AI, Web Content.' },
 ]
 
@@ -63,6 +64,8 @@ export default function App() {
           <WebProjects />
         ) : mod.id === 'cal' ? (
           <Calendar />
+        ) : mod.id === 'eco' ? (
+          <Ecosystem />
         ) : (
           <Placeholder title={mod.label} desc={mod.desc} icon={mod.icon} />
         )}
