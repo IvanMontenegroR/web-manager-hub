@@ -343,7 +343,10 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   color: var(--ink-2);
   letter-spacing: 0.3px;
 }
-.proj-label .p-flag .flag { font-size: 15px; line-height: 1; }
+.proj-label .p-flag .flag {
+  display: block; width: 18px; height: 13px; border-radius: 2px;
+  object-fit: cover; box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+}
 .proj-label .p-launch {
   flex: none;
   display: inline-flex;

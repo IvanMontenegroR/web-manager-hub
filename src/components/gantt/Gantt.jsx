@@ -7,6 +7,7 @@ import {
 } from '../../lib/dates'
 import { textOn, partnerColor, partnerName, statusColor } from '../../lib/colors'
 import { countryName } from '../../lib/countries'
+import { flagSrc } from '../../lib/flags'
 
 const DOW = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES_LARGO = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -17,12 +18,6 @@ function todayISO() {
   return toISO(new Date())
 }
 
-// Convierte un codigo de pais de 2 letras (MX, BR, AR) en emoji de bandera.
-function flagEmoji(cc) {
-  if (!cc || !/^[a-zA-Z]{2}$/.test(cc.trim())) return ''
-  const c = cc.trim().toUpperCase()
-  return String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65, 0x1f1e6 + c.charCodeAt(1) - 65)
-}
 
 // Formatea un lanzamiento por mercado (MX · 24 jul / AR · Septiembre 2026 / CO · TBD).
 function fmtLaunch(l) {
@@ -245,8 +240,10 @@ export default function Gantt({
                     {done && <CheckCircle2 size={14} className="fin-icon ok" title="Completado" />}
                     {cancelled && <Ban size={14} className="fin-icon bad" title="Cancelado" />}
                     {project.market && (
-                      <span className="p-flag" title={project.market}>
-                        <span className="flag">{flagEmoji(project.market)}</span>
+                      <span className="p-flag" title={countryName(project.market)}>
+                        {flagSrc(project.market) && (
+                          <img className="flag" src={flagSrc(project.market)} alt="" width={18} height={13} />
+                        )}
                         {project.market}
                       </span>
                     )}
