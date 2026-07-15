@@ -38,8 +38,15 @@ export default function Gantt({
   showGhosts = false,
   onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject, onHideProject,
 }) {
-  const { partners, enriched, conflictIds, launchesByProject } = useData()
+  const { partners, enriched, conflictIds, launchesByProject, holidays } = useData()
   const [tip, setTip] = useState(null)
+
+  // Lookup de nombre de feriado por calendario+fecha, para el tooltip del hover.
+  const holName = useMemo(() => {
+    const m = new Map()
+    for (const h of holidays || []) m.set(`${h.country}|${h.date}`, h.name || 'Feriado')
+    return m
+  }, [holidays])
 
   // Solo las tareas de los proyectos que este Gantt renderiza (activos o archivados).
   const projectIds = useMemo(() => new Set(projects.map((p) => p.id)), [projects])
@@ -123,7 +130,7 @@ export default function Gantt({
 
   // Capa POR ENCIMA de las barras: columnas de finde (y feriados de la fila) para
   // que se vea que no cuentan como dias laborales.
-  function OverlayLayer({ holidaysSet }) {
+  function OverlayLayer({ holidaysSet, country }) {
     const holIdx = []
     if (holidaysSet) {
       for (let i = 0; i < geo.days.length; i++) {
@@ -135,9 +142,19 @@ export default function Gantt({
         {geo.weekendIdx.map((i) => (
           <div key={`w${i}`} className="day-over weekend" style={{ left: i * dayW, width: dayW }} />
         ))}
-        {holIdx.map((i) => (
-          <div key={`h${i}`} className="day-over holiday" style={{ left: i * dayW, width: dayW }} title="Feriado" />
-        ))}
+        {holIdx.map((i) => {
+          const iso = geo.days[i]
+          const name = holName.get(`${country}|${iso}`) || 'Feriado'
+          const place = countryName(country)
+          return (
+            <div
+              key={`h${i}`}
+              className="day-over holiday"
+              style={{ left: i * dayW, width: dayW }}
+              title={`${name}${place && place !== '—' ? ` — ${place}` : ''} · ${fmtCorto(iso)}`}
+            />
+          )
+        })}
       </>
     )
   }
@@ -377,7 +394,7 @@ export default function Gantt({
                             +{t.delayDays}d
                           </div>
                         )}
-                        <OverlayLayer holidaysSet={t.holidaysSet} />
+                        <OverlayLayer holidaysSet={t.holidaysSet} country={t.country} />
                       </div>
                     </div>
                   )

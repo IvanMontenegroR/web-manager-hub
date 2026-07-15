@@ -440,6 +440,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   background-image: repeating-linear-gradient(45deg,
     rgba(80, 90, 102, 0.42) 0, rgba(80, 90, 102, 0.42) 3px,
     transparent 3px, transparent 6px);
+  pointer-events: auto; cursor: help;
 }
 .today-line {
   position: absolute; top: 0; bottom: 0;

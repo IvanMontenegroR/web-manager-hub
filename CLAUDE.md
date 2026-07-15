@@ -61,7 +61,10 @@ habiles = sin sabados/domingos ni feriados. Ver `src/lib/dates.js` (`isBusinessD
 `DataContext`: `country` = `partner.country` o, si es NULL (Purina), `project.market`; feriados
 efectivos = los de ese pais MENOS los `excluded_holidays` de la tarea. El set efectivo se adjunta a
 cada task enriquecida como `holidaysSet`. En el Gantt, findes y feriados se pintan POR ENCIMA de las
-barras (`.day-over`) para que se vea que no son laborales.
+barras (`.day-over`) para que se vea que no son laborales. Al hover, el feriado muestra un tooltip
+con su nombre + calendario (`countryName`, ej. "Navidad — México" / "... — Brasil – São Paulo") + fecha;
+el nombre sale de un lookup `country|date` sobre la tabla `holidays` (`.day-over.holiday` con
+`pointer-events: auto`).
 
 FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL.
 
