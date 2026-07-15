@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, Download, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -39,7 +39,8 @@ export default function Gantt({
   projects,
   hidePast = false,
   emptyLabel,
-  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject,
+  zoom = 'day',
+  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject, onHideProject,
 }) {
   const { partners, enriched, conflictIds, launchesByProject } = useData()
   const [tip, setTip] = useState(null)
@@ -105,7 +106,8 @@ export default function Gantt({
     return map
   }, [myTasks])
 
-  const dayW = 34
+  const weekMode = zoom === 'week'
+  const dayW = weekMode ? 11 : 34
   const labelW = 300
   const idxOf = (iso) => daysBetween(geo.start, iso)
   const totalW = geo.days.length * dayW
@@ -198,11 +200,11 @@ export default function Gantt({
   return (
     <>
       <div className="gantt-wrap">
-        <div className="gantt-grid" style={{ width: labelW + totalW }}>
+        <div className="gantt-grid" style={{ width: labelW + totalW, '--day-w': `${dayW}px` }}>
           {/* Header */}
           <div className="gantt-head">
             <div className="head-months">
-              <div className="corner corner-top">Cronograma por dia</div>
+              <div className="corner corner-top">{weekMode ? 'Cronograma por semana' : 'Cronograma por dia'}</div>
               {geo.months.map((m) => (
                 <div key={m.key} className="month-cell" style={{ width: m.count * dayW, minWidth: m.count * dayW }}>
                   {m.label}
@@ -215,10 +217,13 @@ export default function Gantt({
                 const d = parseDay(iso)
                 const wknd = isWeekendISO(iso)
                 const isToday = i === geo.todayIdx
+                const isMon = d.getDay() === 1
+                // En modo semana solo etiquetamos los lunes (tick semanal).
+                const showLabel = !weekMode || isMon
                 return (
-                  <div key={iso} className={`day-cell${wknd ? ' weekend' : ''}${isToday ? ' today' : ''}`}>
-                    <div className="dow">{DOW[d.getDay()]}</div>
-                    <div className="dnum">{d.getDate()}</div>
+                  <div key={iso} className={`day-cell${wknd ? ' weekend' : ''}${isToday ? ' today' : ''}${weekMode ? ' wk' : ''}${weekMode && isMon ? ' mon' : ''}`}>
+                    {showLabel && !weekMode && <div className="dow">{DOW[d.getDay()]}</div>}
+                    {showLabel && <div className="dnum">{weekMode ? `${d.getDate()}/${d.getMonth() + 1}` : d.getDate()}</div>}
                   </div>
                 )
               })}
@@ -261,6 +266,11 @@ export default function Gantt({
                       {onExportProject && (
                         <button className="btn btn-ghost btn-sm btn-icon" title="Exportar proyecto (Excel)" onClick={() => onExportProject(project)}>
                           <Download size={14} />
+                        </button>
+                      )}
+                      {onHideProject && (
+                        <button className="btn btn-ghost btn-sm btn-icon" title="Ocultar del cronograma" onClick={() => onHideProject(project)}>
+                          <EyeOff size={14} />
                         </button>
                       )}
                       {onArchiveProject && (

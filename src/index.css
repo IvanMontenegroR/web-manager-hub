@@ -284,6 +284,10 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .day-cell .dow { font-size: 9px; text-transform: uppercase; opacity: 0.8; }
 .day-cell .dnum { font-weight: 600; color: var(--ink-2); }
 .day-cell.today .dnum { color: var(--purina-ink); }
+/* Modo semana: solo ticks en lunes, sin bordes por dia */
+.day-cell.wk { position: relative; min-height: 30px; padding: 0; overflow: visible; border-right: none; }
+.day-cell.wk.mon { border-left: 1px solid var(--border-strong); }
+.day-cell.wk .dnum { position: absolute; left: 3px; top: 9px; font-size: 9px; font-weight: 700; white-space: nowrap; }
 .month-cell {
   padding: 3px 8px;
   font-size: 10.5px;
@@ -846,3 +850,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cal-ymonth.today { box-shadow: inset 0 0 0 2px var(--purina); }
 .cal-ymname { font-weight: 700; font-size: 13px; }
 .cal-ycount { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
+
+/* Barra de proyectos ocultos (Web Projects) */
+.hidden-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 7px 12px; margin-bottom: 10px; font-size: 12px;
+}
+.hidden-bar .hb-label { display: flex; align-items: center; gap: 5px; font-weight: 700; color: var(--ink-2); }
+.hidden-bar .hb-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface-2); border: 1px solid var(--border-strong);
+  border-radius: 20px; padding: 3px 10px; font-size: 12px; color: var(--ink-2); cursor: pointer;
+}
+.hidden-bar .hb-chip:hover { background: var(--purina-tint); border-color: var(--purina); color: var(--purina-ink); }

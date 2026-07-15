@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, Archive, ChevronRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import OverlapPanel from '../components/panels/OverlapPanel.jsx'
@@ -17,10 +17,23 @@ export default function WebProjects() {
   const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
   const [hidePast, setHidePast] = useState(false)
+  const [zoom, setZoom] = useState('day') // 'day' | 'week'
   const [archivedOpen, setArchivedOpen] = useState(false)
+  const [showHiddenBar, setShowHiddenBar] = useState(false)
+  const [hidden, setHidden] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('wmh_hidden_projects') || '[]')) } catch { return new Set() }
+  })
+  useEffect(() => {
+    localStorage.setItem('wmh_hidden_projects', JSON.stringify([...hidden]))
+  }, [hidden])
 
-  const activeProjects = projects.filter((p) => !p.archived)
   const archivedProjects = projects.filter((p) => p.archived)
+  const hiddenExisting = projects.filter((p) => !p.archived && hidden.has(p.id))
+  const activeProjects = projects.filter((p) => !p.archived && !hidden.has(p.id))
+
+  const hideProject = (project) => setHidden((s) => new Set(s).add(project.id))
+  const unhideProject = (id) => setHidden((s) => { const n = new Set(s); n.delete(id); return n })
+  const showAllHidden = () => setHidden(new Set())
 
   async function handleDeleteProject(project) {
     if (!confirm(`Borrar el proyecto "${project.name}" y todas sus tareas? Esta accion no se puede deshacer.`)) return
@@ -59,6 +72,22 @@ export default function WebProjects() {
           >
             <CalendarX2 size={16} /> {hidePast ? 'Mostrando desde hoy' : 'Ocultar pasado'}
           </button>
+          <button
+            className={`btn${zoom === 'week' ? ' active' : ''}`}
+            title={zoom === 'week' ? 'Ver por días' : 'Ver por semanas'}
+            onClick={() => setZoom((z) => (z === 'week' ? 'day' : 'week'))}
+          >
+            <CalendarRange size={16} /> {zoom === 'week' ? 'Semanas' : 'Días'}
+          </button>
+          {hiddenExisting.length > 0 && (
+            <button
+              className={`btn${showHiddenBar ? ' active' : ''}`}
+              title="Proyectos ocultos"
+              onClick={() => setShowHiddenBar((v) => !v)}
+            >
+              <EyeOff size={16} /> {hiddenExisting.length} oculto{hiddenExisting.length > 1 ? 's' : ''}
+            </button>
+          )}
           <button className="btn" onClick={() => setModal({ type: 'partners' })}><Users size={16} /> Partners</button>
           <button className="btn" onClick={() => setModal({ type: 'slas' })}><Timer size={16} /> SLAs</button>
           <button className="btn" onClick={() => setModal({ type: 'holidays' })}><CalendarOff size={16} /> Feriados</button>
@@ -82,6 +111,17 @@ export default function WebProjects() {
           </div>
         ) : (
           <>
+            {showHiddenBar && hiddenExisting.length > 0 && (
+              <div className="hidden-bar">
+                <span className="hb-label"><EyeOff size={13} /> Ocultos:</span>
+                {hiddenExisting.map((p) => (
+                  <button key={p.id} className="hb-chip" title="Restaurar" onClick={() => unhideProject(p.id)}>
+                    {p.name} <Eye size={12} />
+                  </button>
+                ))}
+                <button className="btn btn-sm" onClick={showAllHidden}>Mostrar todos</button>
+              </div>
+            )}
             <LaunchWidget />
             <div className="legend">
               <span className="lg-label">Estado:</span>
@@ -100,6 +140,8 @@ export default function WebProjects() {
             <Gantt
               projects={activeProjects}
               hidePast={hidePast}
+              zoom={zoom}
+              onHideProject={hideProject}
               emptyLabel={
                 archivedProjects.length > 0
                   ? 'No hay proyectos activos. Los archivados estan abajo.'

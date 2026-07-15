@@ -77,6 +77,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   y el **plan original** se dibuja como **fantasma** hueco (`.bar-ghost`) solo cuando la realidad se
   corrio. El tooltip muestra Plan, Real y la predecesora culpable (`pushedByName`). Las tareas tipo
   SEO no son predecesoras de otras (no bloquean).
+- **Vistas del cronograma** (WebProjects): dos toggles en la topbar. `zoom` (`day`/`week`) se pasa al
+  `Gantt`; en semana el ancho de columna baja de 34px a 11px (`--day-w`) y el header solo etiqueta
+  los lunes (`d/m`). `hidden` es un Set de `project.id` ocultados manualmente del cronograma activo,
+  persistido en `localStorage['wmh_hidden_projects']`; se restauran desde una barra de chips. Ocultar
+  != archivar (archivar es persistente en DB y va al acordeon; ocultar es solo una preferencia de
+  vista local).
 
 ## Estructura
 
