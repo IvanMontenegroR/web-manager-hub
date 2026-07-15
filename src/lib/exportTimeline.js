@@ -31,8 +31,54 @@ const GRID = 'FFDCDCDC'
 const thin = { style: 'thin', color: { argb: GRID } }
 const border = { top: thin, left: thin, bottom: thin, right: thin }
 
+const CHECK = 'FF1E7A3D' // verde fuerte para el check de GO-Live
+
 function barFill(status) {
   return BAR[status] || BAR.Pendiente
+}
+
+// Detecta la tarea de lanzamiento por nombre: "GO-Live", "Go Live", "GoLive", "GO LIVE".
+function isGoLive(name) {
+  return /go[\s_-]*live/i.test(name || '')
+}
+
+// Leyenda de colores debajo de las tareas (columnas congeladas 1-2, siempre visibles).
+function buildLegend(ws, startRow) {
+  const items = [
+    ['Completado', BAR.Completado],
+    ['En curso', BAR['En curso']],
+    ['Pendiente', BAR.Pendiente],
+    ['Atraso (la realidad supera el plan)', OVERRUN],
+    ['Plan original (si la realidad se corrio)', GHOST],
+    ['Finde / feriado (no laboral)', NONWORK],
+  ]
+  const titleCell = ws.getCell(startRow, 1)
+  titleCell.value = 'REFERENCIAS'
+  titleCell.font = { bold: true, size: 9 }
+  titleCell.alignment = { vertical: 'middle' }
+
+  items.forEach((it, i) => {
+    const row = startRow + 1 + i
+    const label = ws.getCell(row, 1)
+    label.value = it[0]
+    label.font = { size: 9 }
+    label.alignment = { vertical: 'middle' }
+    const sw = ws.getCell(row, 2)
+    sw.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: it[1] } }
+    sw.border = border
+  })
+
+  // GO-Live: check verde.
+  const glRow = startRow + 1 + items.length
+  const glLabel = ws.getCell(glRow, 1)
+  glLabel.value = 'GO-Live del mercado'
+  glLabel.font = { size: 9 }
+  glLabel.alignment = { vertical: 'middle' }
+  const glSw = ws.getCell(glRow, 2)
+  glSw.value = '✔'
+  glSw.font = { bold: true, size: 12, color: { argb: CHECK } }
+  glSw.alignment = { horizontal: 'center', vertical: 'middle' }
+  glSw.border = border
 }
 
 // Rango de dias a dibujar para un set de tareas de un proyecto.
@@ -177,7 +223,28 @@ function buildSheet(wb, project, tasks, partners, idx) {
       else if (inPlan) fill = GHOST
       if (fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } }
     })
+
+    // GO-Live: check verde en el nombre y en el dia exacto del lanzamiento.
+    if (isGoLive(t.action_name)) {
+      nameCell.value = {
+        richText: [
+          { text: '✔ ', font: { bold: true, color: { argb: CHECK } } },
+          { text: t.action_name || '', font: { size: 9 } },
+        ],
+      }
+      const goLiveDay = t.actual_end || realEnd || t.planned_end
+      const gi = goLiveDay ? days.indexOf(goLiveDay) : -1
+      if (gi >= 0) {
+        const gcell = ws.getCell(row, C0 + gi)
+        gcell.value = '✔'
+        gcell.font = { bold: true, size: 11, color: { argb: CHECK } }
+        gcell.alignment = { horizontal: 'center', vertical: 'middle' }
+      }
+    }
   })
+
+  // Leyenda de colores (una fila de aire debajo de la ultima tarea).
+  buildLegend(ws, 4 + sorted.length + 1)
 
   ws.getRow(1).height = 20
   return ws
