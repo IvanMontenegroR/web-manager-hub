@@ -14,12 +14,35 @@ export const ECO_STATUSES = ['Open', 'In Progress', 'On Hold', 'Done']
 export const ECO_PRIORITIES = ['alta', 'media', 'baja']
 export const PRIORITY_RANK = { alta: 0, media: 1, baja: 2 }
 
-// Orden dentro de una columna: PREDOMINA el deadline (las que tienen fecha van arriba,
-// por fecha ascendente), luego la prioridad (alta > media > baja), y como desempate el
-// sort_order original.
+// Deadline efectivo de una tarjeta = la fecha mas temprana entre su propio deadline
+// y las deadlines de los items del checklist AUN NO hechos. Es lo que manda para el
+// color (tono) y el orden: si un sub-item vence pronto, la tarjeta sube aunque la
+// tarjeta en si no tenga fecha.
+export function effectiveDeadline(task) {
+  let best = task.deadline || null
+  for (const c of task.checklist || []) {
+    if (c.done || !c.deadline) continue
+    if (!best || c.deadline < best) best = c.deadline
+  }
+  return best
+}
+
+// La deadline pendiente mas cercana del checklist (para mostrar el chip en la tarjeta).
+export function nextChecklistDeadline(task) {
+  let best = null
+  for (const c of task.checklist || []) {
+    if (c.done || !c.deadline) continue
+    if (!best || c.deadline < best) best = c.deadline
+  }
+  return best
+}
+
+// Orden dentro de una columna: PREDOMINA el deadline EFECTIVO (las que tienen fecha van
+// arriba, por fecha ascendente), luego la prioridad (alta > media > baja), y como
+// desempate el sort_order original.
 export function ecoOrder(a, b) {
-  const ad = a.deadline || null
-  const bd = b.deadline || null
+  const ad = effectiveDeadline(a)
+  const bd = effectiveDeadline(b)
   if (ad && bd) { if (ad !== bd) return ad < bd ? -1 : 1 }
   else if (ad && !bd) return -1
   else if (!ad && bd) return 1

@@ -1031,6 +1031,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .eco-dl { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--ink-3); }
 .eco-dl.overdue { color: var(--danger); }
 .eco-dl.soon { color: var(--warn); }
+.eco-dl.cl { color: var(--ink-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 0 6px; }
+.eco-dl.cl.overdue { color: var(--danger); border-color: #f0c3ba; background: var(--danger-tint); }
+.eco-dl.cl.soon { color: var(--warn); border-color: #ecd6ab; background: var(--warn-tint); }
 .eco-prio { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; border-radius: 4px; padding: 1px 6px; border: 1px solid transparent; }
 .eco-prio.p-alta { background: var(--danger-tint); color: var(--danger); border-color: #f0c3ba; }
 .eco-prio.p-media { background: var(--warn-tint); color: var(--warn); border-color: #ecd6ab; }
@@ -1048,6 +1051,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .eco-check-txt { flex: 1; font-size: 13px; }
 .eco-check-txt.done { text-decoration: line-through; color: var(--ink-3); }
 .eco-check-add { display: flex; gap: 6px; margin-top: 2px; }
+.eco-check-date { flex: none; width: 140px; padding: 4px 8px; font-size: 12px; }
 
 @media (max-width: 1100px) {
   .eco-board { grid-template-columns: repeat(2, minmax(230px, 1fr)); }

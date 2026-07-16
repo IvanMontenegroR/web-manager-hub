@@ -18,6 +18,7 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
     checklist: Array.isArray(task?.checklist) ? task.checklist.map((c) => ({ ...c })) : [],
   })
   const [newItem, setNewItem] = useState('')
+  const [newDate, setNewDate] = useState('')
   const [err, setErr] = useState(null)
   const [saving, setSaving] = useState(false)
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
@@ -25,11 +26,13 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
   const addItem = () => {
     const text = newItem.trim()
     if (!text) return
-    setForm((f) => ({ ...f, checklist: [...f.checklist, { text, done: false }] }))
-    setNewItem('')
+    setForm((f) => ({ ...f, checklist: [...f.checklist, { text, done: false, deadline: newDate || null }] }))
+    setNewItem(''); setNewDate('')
   }
   const toggleItem = (i) =>
     setForm((f) => ({ ...f, checklist: f.checklist.map((c, j) => (j === i ? { ...c, done: !c.done } : c)) }))
+  const setItemDeadline = (i, v) =>
+    setForm((f) => ({ ...f, checklist: f.checklist.map((c, j) => (j === i ? { ...c, deadline: v || null } : c)) }))
   const removeItem = (i) =>
     setForm((f) => ({ ...f, checklist: f.checklist.filter((_, j) => j !== i) }))
 
@@ -126,6 +129,13 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
                 {c.done && <Check size={12} />}
               </button>
               <span className={`eco-check-txt${c.done ? ' done' : ''}`}>{c.text}</span>
+              <input
+                type="date"
+                className="control eco-check-date"
+                title="Deadline del sub-item"
+                value={c.deadline || ''}
+                onChange={(e) => setItemDeadline(i, e.target.value)}
+              />
               <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={() => removeItem(i)}><X size={13} /></button>
             </div>
           ))}
@@ -136,6 +146,13 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
               onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addItem() } }}
               placeholder="Agregar sub-tarea y Enter"
+            />
+            <input
+              type="date"
+              className="control eco-check-date"
+              title="Deadline (opcional)"
+              value={newDate}
+              onChange={(e) => setNewDate(e.target.value)}
             />
             <button type="button" className="btn btn-icon" onClick={addItem}><Plus size={15} /></button>
           </div>

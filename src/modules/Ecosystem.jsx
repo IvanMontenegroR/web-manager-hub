@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, Trash2, Pencil, User,
+  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, ListChecks, Trash2, Pencil, User,
 } from 'lucide-react'
 import {
-  ECO_STATUSES, SETUP_SQL, ecoOrder, fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
+  ECO_STATUSES, SETUP_SQL, ecoOrder, effectiveDeadline, nextChecklistDeadline,
+  fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
 } from '../lib/ecosystemDb'
 import { daysBetween, businessDaysBetween, fmtCorto, toISO } from '../lib/dates'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
@@ -24,13 +25,19 @@ function ownerColor(owner) {
   return OWNER_COLORS[owner.trim()] || '#64748b'
 }
 
-// Tono de la tarjeta segun deadline (dias habiles). Las 'Done' nunca se pintan.
-function cardTone(t, today) {
-  if (t.status === 'Done' || !t.deadline) return null
-  const diff = daysBetween(today, t.deadline)
-  if (diff < 0) return 'overdue'
-  if (businessDaysBetween(today, t.deadline, null) <= 3) return 'soon'
+// Tono de una fecha relativa a hoy (dias habiles): vencida / se acerca / neutra.
+function dateTone(iso, today) {
+  if (!iso) return null
+  if (daysBetween(today, iso) < 0) return 'overdue'
+  if (businessDaysBetween(today, iso, null) <= 3) return 'soon'
   return null
+}
+
+// Tono de la tarjeta segun su deadline EFECTIVO (propio + checklist pendiente).
+// Las 'Done' nunca se pintan.
+function cardTone(t, today) {
+  if (t.status === 'Done') return null
+  return dateTone(effectiveDeadline(t), today)
 }
 
 const COLUMN_HINT = {
@@ -220,6 +227,7 @@ export default function Ecosystem() {
                         const tone = cardTone(t, today)
                         const done = t.checklist?.filter((c) => c.done).length || 0
                         const total = t.checklist?.length || 0
+                        const clDl = nextChecklistDeadline(t)
                         return (
                           <div
                             key={t.id}
@@ -247,8 +255,13 @@ export default function Ecosystem() {
                                 </span>
                               )}
                               {t.deadline && (
-                                <span className={`eco-dl${tone ? ' ' + tone : ''}`}>
+                                <span className={`eco-dl${dateTone(t.deadline, today) ? ' ' + dateTone(t.deadline, today) : ''}`} title="Deadline de la tarjeta">
                                   <Clock size={11} /> {fmtCorto(t.deadline)}
+                                </span>
+                              )}
+                              {clDl && (
+                                <span className={`eco-dl cl${dateTone(clDl, today) ? ' ' + dateTone(clDl, today) : ''}`} title="Deadline mas cercana del checklist">
+                                  <ListChecks size={11} /> {fmtCorto(clDl)}
                                 </span>
                               )}
                               {total > 0 && (

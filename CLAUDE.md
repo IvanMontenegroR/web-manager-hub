@@ -53,9 +53,12 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
 - `ecosystem_tasks(id, section, topic, issue, action, owner, status, priority, notes, deadline,
   checklist jsonb, sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de coordinacion de
   la migracion; independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done. `priority` =
-  alta|media|baja. `checklist` = jsonb array de {text, done}. Orden dentro de cada columna (`ecoOrder`):
-  PREDOMINA el deadline (con fecha van arriba, por fecha asc), luego la prioridad (alta>media>baja), y
-  `sort_order` como desempate. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
+  alta|media|baja. `checklist` = jsonb array de {text, done, deadline?} (cada sub-item puede tener su
+  propia deadline). El **deadline efectivo** (`effectiveDeadline`) = la fecha mas temprana entre el
+  `deadline` propio y las deadlines de los items del checklist NO hechos; manda para el color y el orden.
+  La tarjeta muestra un chip con la deadline propia y otro (icono ListChecks) con la del checklist mas
+  cercana. Orden dentro de cada columna (`ecoOrder`): PREDOMINA el deadline EFECTIVO (con fecha van arriba,
+  por fecha asc), luego la prioridad (alta>media>baja), y `sort_order` como desempate. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
   -> `SETUP_SQL`; si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace
   su propio fetch y tolera que la tabla no exista, para no romper el resto de la app)
 
