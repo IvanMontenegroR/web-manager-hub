@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FolderPlus, Users, Timer, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight, ChevronDown, Ghost, Settings } from 'lucide-react'
+import { FolderPlus, Users, CalendarOff, Download, RotateCw, CalendarX2, CalendarRange, EyeOff, Eye, Archive, ChevronRight, ChevronDown, Ghost, Settings } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import Gantt from '../components/gantt/Gantt.jsx'
 import ControlPanel from '../components/panels/ControlPanel.jsx'
@@ -7,7 +7,6 @@ import DelayPanel from '../components/panels/DelayPanel.jsx'
 import ProjectModal from '../components/modals/ProjectModal.jsx'
 import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
-import SlaModal from '../components/modals/SlaModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
 import LaunchWidget from '../components/panels/LaunchWidget.jsx'
 import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
@@ -114,7 +113,6 @@ export default function WebProjects() {
                 <div className="dropdown-overlay" onClick={() => setAdminOpen(false)} />
                 <div className="dropdown-menu">
                   <button className="dropdown-item" onClick={() => { setModal({ type: 'partners' }); setAdminOpen(false) }}><Users size={15} /> Partners</button>
-                  <button className="dropdown-item" onClick={() => { setModal({ type: 'slas' }); setAdminOpen(false) }}><Timer size={15} /> SLAs</button>
                   <button className="dropdown-item" onClick={() => { setModal({ type: 'holidays' }); setAdminOpen(false) }}><CalendarOff size={15} /> Feriados</button>
                 </div>
               </>
@@ -226,7 +224,6 @@ export default function WebProjects() {
         <TaskModal task={modal.task} project={modal.project} onClose={() => setModal(null)} />
       )}
       {modal?.type === 'partners' && <PartnersModal onClose={() => setModal(null)} />}
-      {modal?.type === 'slas' && <SlaModal onClose={() => setModal(null)} />}
       {modal?.type === 'holidays' && <HolidaysModal onClose={() => setModal(null)} />}
     </>
   )

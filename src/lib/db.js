@@ -9,13 +9,14 @@ function throwIf(error) {
 
 // ---- Lecturas ----
 export async function fetchAll() {
-  const [partners, slas, projects, tasks, holidays, launches] = await Promise.all([
+  const [partners, slas, projects, tasks, holidays, launches, partnerSlas] = await Promise.all([
     supabase.from('partners').select('*').order('name'),
     supabase.from('sla_definitions').select('*').order('sla_days'),
     supabase.from('projects').select('*').order('start_date'),
     supabase.from('tasks').select('*').order('sort_order'),
     supabase.from('holidays').select('*').order('date'),
     supabase.from('project_launches').select('*').order('launch_date'),
+    supabase.from('partner_slas').select('*').order('sort_order'),
   ])
   throwIf(partners.error)
   throwIf(slas.error)
@@ -23,6 +24,7 @@ export async function fetchAll() {
   throwIf(tasks.error)
   throwIf(holidays.error)
   throwIf(launches.error)
+  throwIf(partnerSlas.error)
   return {
     partners: partners.data ?? [],
     slas: slas.data ?? [],
@@ -30,7 +32,45 @@ export async function fetchAll() {
     tasks: tasks.data ?? [],
     holidays: holidays.data ?? [],
     projectLaunches: launches.data ?? [],
+    partnerSlas: partnerSlas.data ?? [],
   }
+}
+
+// ---- Partner SLAs (referencia por agencia; category/activity/tier/value en texto) ----
+function partnerSlaPayload(s) {
+  return {
+    partner_id: s.partner_id,
+    category: s.category?.trim() || null,
+    activity: s.activity?.trim() || null,
+    tier: s.tier?.trim() || null,
+    value: s.value?.trim() || null,
+  }
+}
+
+export async function createPartnerSla(s, sortOrder) {
+  const { data, error } = await supabase
+    .from('partner_slas')
+    .insert({ ...partnerSlaPayload(s), sort_order: sortOrder ?? 0 })
+    .select()
+    .single()
+  throwIf(error)
+  return data
+}
+
+export async function updatePartnerSla(id, s) {
+  const { data, error } = await supabase
+    .from('partner_slas')
+    .update(partnerSlaPayload(s))
+    .eq('id', id)
+    .select()
+    .single()
+  throwIf(error)
+  return data
+}
+
+export async function deletePartnerSla(id) {
+  const { error } = await supabase.from('partner_slas').delete().eq('id', id)
+  throwIf(error)
 }
 
 // Reemplaza TODOS los lanzamientos de un proyecto por la lista dada (borra + inserta).

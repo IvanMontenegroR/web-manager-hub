@@ -898,6 +898,41 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cal-ymname { font-weight: 700; font-size: 13px; }
 .cal-ycount { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
 
+/* ==================== SLAs ==================== */
+.sla-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sla-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 8px 14px; font-size: 13.5px; font-weight: 600; color: var(--ink-3); cursor: pointer;
+  margin-bottom: -1px;
+}
+.sla-tab:hover { color: var(--ink-2); }
+.sla-tab.active { color: var(--ink); border-bottom-color: var(--purina); }
+.sla-tab-sub { font-size: 11px; font-weight: 400; color: var(--ink-3); }
+.sla-tab-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+.sla-panel { max-width: 900px; }
+.sla-group { margin-bottom: 22px; }
+.sla-cat {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--ink); background: var(--proj-bg);
+  padding: 7px 12px; border-radius: var(--radius-sm) var(--radius-sm) 0 0; border: 1px solid var(--border);
+}
+.sla-table-wrap { overflow-x: auto; }
+.sla-table { width: 100%; border-collapse: collapse; background: var(--surface); }
+.sla-table td, .sla-table th {
+  border: 1px solid var(--border); padding: 8px 12px; font-size: 13px; text-align: left; vertical-align: middle;
+}
+.sla-table th { background: var(--surface-2); font-weight: 700; font-size: 12px; color: var(--ink-2); }
+.sla-table .sla-act { color: var(--ink); }
+.sla-table.matrix .sla-act { font-weight: 600; min-width: 220px; }
+.sla-table .sla-val { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+.sla-table .sla-val.merged { text-align: center; font-style: italic; }
+.sla-table tr.clickable, .sla-table td.clickable { cursor: pointer; }
+.sla-table tr.clickable:hover td, .sla-table td.clickable:hover { background: var(--purina-tint); }
+.sla-table .sla-edit { width: 30px; text-align: center; color: var(--ink-3); }
+.sla-empty { color: var(--ink-3); font-weight: 700; }
+
 /* Menu desplegable (Admin en Web Projects) */
 .dropdown { position: relative; display: inline-flex; }
 .dropdown-overlay { position: fixed; inset: 0; z-index: 40; }

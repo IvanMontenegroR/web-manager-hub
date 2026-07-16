@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { LayoutGrid, CalendarDays, ClipboardList, ListChecks, Boxes, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { LayoutGrid, CalendarDays, Timer, ClipboardList, ListChecks, Boxes, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import WebProjects from './modules/WebProjects.jsx'
 import Calendar from './modules/Calendar.jsx'
 import Ecosystem from './modules/Ecosystem.jsx'
+import Slas from './modules/Slas.jsx'
 import Placeholder from './modules/Placeholder.jsx'
 
 const MODULES = [
   { id: 'web', label: 'Web Projects', icon: LayoutGrid, ready: true },
   { id: 'cal', label: 'Calendario', icon: CalendarDays, ready: true },
+  { id: 'slas', label: 'SLAs', icon: Timer, ready: true },
   { id: 'ops', label: 'Daily Ops', icon: ClipboardList, ready: false,
     desc: 'Tracker de tickets y pedidos con owner (yo o partner), bloqueos y stakeholder.' },
   { id: 'tasks', label: 'Tareas', icon: ListChecks, ready: false,
@@ -66,6 +68,8 @@ export default function App() {
           <Calendar />
         ) : mod.id === 'eco' ? (
           <Ecosystem />
+        ) : mod.id === 'slas' ? (
+          <Slas />
         ) : (
           <Placeholder title={mod.label} desc={mod.desc} icon={mod.icon} />
         )}

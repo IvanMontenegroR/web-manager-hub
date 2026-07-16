@@ -4,9 +4,12 @@ Herramienta interna y personal de gestion de proyectos web para Nestle Purina LA
 Un unico usuario (el Websites Expert). Gestiona landings ejecutadas por 5 agencias
 partner (BNN, F5, Hive, MSE, NBS) en 12 mercados.
 
-Arquitectura de 4 modulos. Construidos: **Web Projects** (Gantt/cronograma), **Calendario**
-(lanzamientos por mercado) y **Ecosystem 2.0** (Kanban de coordinacion de la migracion).
-**Daily Ops** y **Tareas** siguen como placeholders en el shell.
+Construidos: **Web Projects** (Gantt/cronograma), **Calendario** (lanzamientos por mercado),
+**SLAs** (fases internas + tablas de SLA por agencia) y **Ecosystem 2.0** (Kanban de coordinacion de la
+migracion). **Daily Ops** y **Tareas** siguen como placeholders en el shell. El modulo **SLAs** tiene
+pestanas: General (edita `sla_definitions`, el autofill de tareas; antes vivia en Admin → SLAs) + una
+pestana por agencia (BNN, NBS) que renderiza `partner_slas` (BNN como lista por categoria; NBS pivoteado
+en matriz por volumen de paginas). El tab activo se recuerda en `localStorage['wmh_sla_tab']`.
 
 ## Stack (decisiones)
 
@@ -27,7 +30,14 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
 - `partners(id, name, color, country, created_at)` (incluye a **Purina** como partner, color rojo de
   marca `#ED1C24`; `country` = codigo de calendario de feriados, ej. MX/CO/PY/AR/BR/BR-SP.
   Purina tiene `country` NULL a proposito: sus tareas usan el `market` del proyecto)
-- `sla_definitions(id, action_name, sla_days, created_at)` (`sla_days` = dias HABILES)
+- `sla_definitions(id, action_name, sla_days, created_at)` (`sla_days` = dias HABILES; fases internas del
+  cronograma que autocompletan `planned_days` al crear una tarea. Se editan en el modulo **SLAs**, pestaña
+  General)
+- `partner_slas(id, partner_id, category, activity, tier, value, sort_order, created_at)` (referencia de
+  SLAs por agencia del modulo **SLAs**. `category` = grupo, `activity` = fila, `tier` = columna de volumen
+  (NULL = valor unico/merge que ocupa toda la fila), `value` = dias o rango en TEXTO ("3", "8 - 12 days",
+  "N/A"). BNN es lista simple (sin tier); NBS es matriz por volumen de paginas. FK ON DELETE CASCADE.
+  RLS abierta. Solo BNN y NBS cargados hoy)
 - `holidays(id, country, date, name, created_at)` (feriados **por pais/calendario**, unique(country,date).
   Codigos en `src/lib/countries.js`. Datos 2026 best-effort, editables desde el modal Feriados)
 - `projects(id, name, brand, market, start_date, market_launch, status, archived, created_at)`
@@ -122,9 +132,10 @@ src/
   components/
     gantt/     Gantt.jsx (header por dia/semana, findes, hoy, barras, tooltip)
     panels/    ControlPanel (foco del dia), DelayPanel, LaunchWidget
-    modals/    ProjectModal, TaskModal, PartnersModal, SlaModal, HolidaysModal, EcoTaskModal
+    modals/    ProjectModal, TaskModal, PartnersModal, HolidaysModal, EcoTaskModal, SlaItemModal
     ui/        Modal
-  modules/     WebProjects (orquesta todo), Calendar, Ecosystem (Kanban), Placeholder (modulos futuros)
+  modules/     WebProjects (orquesta todo), Calendar, Ecosystem (Kanban), Slas (fases + agencias),
+               Placeholder (modulos futuros)
 ```
 
 ## Variables de entorno
