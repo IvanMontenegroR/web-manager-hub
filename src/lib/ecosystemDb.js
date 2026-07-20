@@ -14,6 +14,9 @@ export const ECO_STATUSES = ['Open', 'In Progress', 'On Hold', 'Done']
 export const ECO_PRIORITIES = ['alta', 'media', 'baja']
 export const PRIORITY_RANK = { alta: 0, media: 1, baja: 2 }
 
+// Tags sugeridos por defecto (se suman a los ya usados en el board).
+export const DEFAULT_TAGS = ['Helo']
+
 // Deadline efectivo de una tarjeta = la fecha mas temprana entre su propio deadline
 // y las deadlines de los items del checklist AUN NO hechos. Es lo que manda para el
 // color (tono) y el orden: si un sub-item vence pronto, la tarjeta sube aunque la
@@ -104,6 +107,7 @@ function ecoPayload(t) {
     notes: t.notes?.trim() || null,
     deadline: t.deadline || null,
     checklist: Array.isArray(t.checklist) ? t.checklist : [],
+    tags: Array.isArray(t.tags) ? t.tags.map((x) => String(x).trim()).filter(Boolean) : [],
   }
 }
 

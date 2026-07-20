@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, ListChecks, Trash2, Pencil, User,
+  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, ListChecks, Tag, Trash2, Pencil, User,
 } from 'lucide-react'
 import {
-  ECO_STATUSES, SETUP_SQL, ecoOrder, effectiveDeadline, nextChecklistDeadline,
+  ECO_STATUSES, DEFAULT_TAGS, SETUP_SQL, ecoOrder, effectiveDeadline, nextChecklistDeadline,
   fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
 } from '../lib/ecosystemDb'
 import { daysBetween, businessDaysBetween, fmtCorto, toISO } from '../lib/dates'
@@ -55,6 +55,7 @@ export default function Ecosystem() {
   const [seeding, setSeeding] = useState(false)
   const [copied, setCopied] = useState(false)
   const [filter, setFilter] = useState(() => localStorage.getItem('wmh_eco_filter') || '__all__')
+  const [tagFilter, setTagFilter] = useState(() => localStorage.getItem('wmh_eco_tag') || '__all__')
   const [modal, setModal] = useState(null) // { task? , status? }
   const [dragId, setDragId] = useState(null)
   const [overCol, setOverCol] = useState(null)
@@ -79,12 +80,22 @@ export default function Ecosystem() {
     () => [...new Set(tasks.map((t) => t.owner).filter(Boolean))].sort(),
     [tasks]
   )
+  // Tags en uso + los sugeridos por defecto (ej. Helo).
+  const allTags = useMemo(
+    () => [...new Set([...DEFAULT_TAGS, ...tasks.flatMap((t) => t.tags || [])])].sort(),
+    [tasks]
+  )
   useEffect(() => { localStorage.setItem('wmh_eco_filter', filter) }, [filter])
-  // Si la seccion guardada ya no existe (se borro / renombro), caemos a "Todas".
+  useEffect(() => { localStorage.setItem('wmh_eco_tag', tagFilter) }, [tagFilter])
+  // Si la seccion/tag guardado ya no existe, caemos a "Todas".
   const activeFilter = filter !== '__all__' && !sections.includes(filter) ? '__all__' : filter
+  const activeTag = tagFilter !== '__all__' && !allTags.includes(tagFilter) ? '__all__' : tagFilter
   const visible = useMemo(
-    () => (activeFilter === '__all__' ? tasks : tasks.filter((t) => t.section === activeFilter)),
-    [tasks, activeFilter]
+    () => tasks.filter((t) =>
+      (activeFilter === '__all__' || t.section === activeFilter) &&
+      (activeTag === '__all__' || (t.tags || []).includes(activeTag))
+    ),
+    [tasks, activeFilter, activeTag]
   )
   const byStatus = useMemo(() => {
     const m = Object.fromEntries(ECO_STATUSES.map((s) => [s, []]))
@@ -191,6 +202,18 @@ export default function Ecosystem() {
               </div>
             </div>
 
+            {tasks.some((t) => (t.tags || []).length > 0) && (
+              <div className="eco-tagbar">
+                <span className="eco-tagbar-lbl"><Tag size={13} /> Tags:</span>
+                <button className={`chip${activeTag === '__all__' ? ' active' : ''}`} onClick={() => setTagFilter('__all__')}>Todos</button>
+                {[...new Set(tasks.flatMap((t) => t.tags || []))].sort().map((tg) => (
+                  <button key={tg} className={`chip${activeTag === tg ? ' active' : ''}`} onClick={() => setTagFilter(tg)}>
+                    {tg} <span className="chip-count">{tasks.filter((t) => (t.tags || []).includes(tg)).length}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {tasks.length === 0 ? (
               <div className="eco-empty">
                 <Boxes size={26} />
@@ -242,6 +265,11 @@ export default function Ecosystem() {
                             )}
                             {t.topic && <div className="eco-card-topic">{t.topic}</div>}
                             {t.issue && <div className="eco-card-issue">{t.issue}</div>}
+                            {(t.tags || []).length > 0 && (
+                              <div className="eco-card-tags">
+                                {t.tags.map((tg) => <span key={tg} className="eco-tag sm"><Tag size={9} /> {tg}</span>)}
+                              </div>
+                            )}
                             <div className="eco-card-foot">
                               {t.priority && (
                                 <span className={`eco-prio p-${t.priority}`} title={`Prioridad ${t.priority}`}>
@@ -291,6 +319,7 @@ export default function Ecosystem() {
           defaultStatus={modal.status}
           sections={sections}
           owners={owners.length ? owners : ['Ivan', 'Gaby', 'F5', 'Hive', 'NBS']}
+          allTags={allTags}
           nextSort={nextSort}
           onClose={() => setModal(null)}
           onSaved={load}

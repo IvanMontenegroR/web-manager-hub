@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Boxes, Plus, X, Check } from 'lucide-react'
+import { Boxes, Plus, X, Check, Tag } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { ECO_STATUSES, ECO_PRIORITIES, createEcoTask, updateEcoTask } from '../../lib/ecosystemDb'
 
-export default function EcoTaskModal({ task, sections, owners, defaultStatus, nextSort, onClose, onSaved }) {
+export default function EcoTaskModal({ task, sections, owners, allTags = [], defaultStatus, nextSort, onClose, onSaved }) {
   const editing = !!task
   const [form, setForm] = useState({
     section: task?.section || '',
@@ -16,7 +16,9 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
     deadline: task?.deadline || '',
     notes: task?.notes || '',
     checklist: Array.isArray(task?.checklist) ? task.checklist.map((c) => ({ ...c })) : [],
+    tags: Array.isArray(task?.tags) ? [...task.tags] : [],
   })
+  const [newTag, setNewTag] = useState('')
   const [newItem, setNewItem] = useState('')
   const [newDate, setNewDate] = useState('')
   const [err, setErr] = useState(null)
@@ -35,6 +37,15 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
     setForm((f) => ({ ...f, checklist: f.checklist.map((c, j) => (j === i ? { ...c, deadline: v || null } : c)) }))
   const removeItem = (i) =>
     setForm((f) => ({ ...f, checklist: f.checklist.filter((_, j) => j !== i) }))
+
+  const addTag = (raw) => {
+    const t = (raw ?? newTag).trim()
+    if (!t) return
+    setForm((f) => (f.tags.some((x) => x.toLowerCase() === t.toLowerCase()) ? f : { ...f, tags: [...f.tags, t] }))
+    setNewTag('')
+  }
+  const removeTag = (t) => setForm((f) => ({ ...f, tags: f.tags.filter((x) => x !== t) }))
+  const suggestions = allTags.filter((t) => !form.tags.some((x) => x.toLowerCase() === t.toLowerCase()))
 
   async function save() {
     if (!form.issue.trim() && !form.topic.trim()) return setErr('Ponele al menos un tema o una descripcion.')
@@ -118,6 +129,33 @@ export default function EcoTaskModal({ task, sections, owners, defaultStatus, ne
       <div className="field">
         <label>Notas</label>
         <textarea className="control" value={form.notes} onChange={set('notes')} rows={2} placeholder="Contexto, definiciones, links..." />
+      </div>
+
+      <div className="field">
+        <label>Tags</label>
+        <div className="eco-tag-edit">
+          {form.tags.map((t) => (
+            <span key={t} className="eco-tag"><Tag size={11} /> {t}
+              <button type="button" className="eco-tag-x" onClick={() => removeTag(t)}><X size={11} /></button>
+            </span>
+          ))}
+          <input
+            className="control eco-tag-input"
+            list="eco-tags"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
+            placeholder="Agregar tag y Enter"
+          />
+          <datalist id="eco-tags">{suggestions.map((t) => <option key={t} value={t} />)}</datalist>
+        </div>
+        {suggestions.length > 0 && (
+          <div className="eco-tag-suggest">
+            {suggestions.slice(0, 8).map((t) => (
+              <button key={t} type="button" className="eco-tag-chip" onClick={() => addTag(t)}>+ {t}</button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="field">
