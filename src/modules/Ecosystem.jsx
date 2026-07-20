@@ -11,30 +11,26 @@ import Modal from '../components/ui/Modal.jsx'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 
 // Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag,
-// agrupadas por estado y ordenadas igual que el board.
+// agrupadas por estado. Cada tarjeta muestra: titulo (tema), descripcion (problema/situacion),
+// accion y nota; los campos vacios no se muestran. Sin prioridad/tags/deadline/checklist.
 function buildTagSummary(tasks, tag, todayISO) {
-  const rows = tasks.filter((t) => (t.tags || []).includes(tag))
-  const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`
-  if (rows.length === 0) return `${header}\n\nSin tareas con el tag "${tag}".`
-  const oneLine = (s) => String(s).replace(/\s*\n\s*/g, ' ').trim()
-  const parts = [header]
+  const oneLine = (s) => String(s || '').replace(/\s*\n\s*/g, ' ').trim()
+  const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
+  const rows = tasks
+    .filter((t) => (t.tags || []).includes(tag))
+    // titulo = tema, descripcion = problema/situacion, luego accion y nota.
+    .map((t) => ({ status: t.status, sort_order: t.sort_order, deadline: t.deadline, checklist: t.checklist,
+      fields: [oneLine(t.topic), oneLine(t.issue), oneLine(t.action), oneLine(t.notes)].filter(Boolean) }))
+    .filter((t) => t.fields.length > 0)
+  if (rows.length === 0) return `${header}\n\nSin tareas con contenido para el tag "${tag}".`
+  const parts = [`${header} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`]
   for (const st of ECO_STATUSES) {
     const group = rows.filter((t) => t.status === st).sort(ecoOrder)
     if (!group.length) continue
     parts.push(`\n${st.toUpperCase()} (${group.length})`)
     group.forEach((t, i) => {
-      const meta = []
-      if (t.section) meta.push(t.section)
-      if (t.owner) meta.push(t.owner)
-      if (t.priority) meta.push(`prioridad ${t.priority}`)
-      const dl = effectiveDeadline(t)
-      if (dl) meta.push(`deadline ${fmtCorto(dl)}`)
-      const total = (t.checklist || []).length
-      if (total) meta.push(`checklist ${(t.checklist || []).filter((c) => c.done).length}/${total}`)
-      parts.push(`${i + 1}. ${t.topic || t.issue || '(sin titulo)'}`)
-      if (meta.length) parts.push(`   ${meta.join(' · ')}`)
-      if (t.action) parts.push(`   Accion: ${oneLine(t.action)}`)
-      if (t.notes) parts.push(`   Notas: ${oneLine(t.notes)}`)
+      parts.push(`${i + 1}. ${t.fields[0]}`)
+      for (const f of t.fields.slice(1)) parts.push(`   ${f}`)
     })
   }
   return parts.join('\n')
