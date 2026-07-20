@@ -1,13 +1,44 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, ListChecks, Tag, Trash2, Pencil, User,
+  Boxes, RotateCw, Plus, Database, Copy, Check, AlertTriangle, Clock, ListChecks, Tag, FileText, Mail, Trash2, Pencil, User,
 } from 'lucide-react'
 import {
   ECO_STATUSES, DEFAULT_TAGS, SETUP_SQL, ecoOrder, effectiveDeadline, nextChecklistDeadline,
   fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
 } from '../lib/ecosystemDb'
-import { daysBetween, businessDaysBetween, fmtCorto, toISO } from '../lib/dates'
+import { daysBetween, businessDaysBetween, fmtCorto, fmtLargo, toISO } from '../lib/dates'
+import Modal from '../components/ui/Modal.jsx'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
+
+// Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag,
+// agrupadas por estado y ordenadas igual que el board.
+function buildTagSummary(tasks, tag, todayISO) {
+  const rows = tasks.filter((t) => (t.tags || []).includes(tag))
+  const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`
+  if (rows.length === 0) return `${header}\n\nSin tareas con el tag "${tag}".`
+  const oneLine = (s) => String(s).replace(/\s*\n\s*/g, ' ').trim()
+  const parts = [header]
+  for (const st of ECO_STATUSES) {
+    const group = rows.filter((t) => t.status === st).sort(ecoOrder)
+    if (!group.length) continue
+    parts.push(`\n${st.toUpperCase()} (${group.length})`)
+    group.forEach((t, i) => {
+      const meta = []
+      if (t.section) meta.push(t.section)
+      if (t.owner) meta.push(t.owner)
+      if (t.priority) meta.push(`prioridad ${t.priority}`)
+      const dl = effectiveDeadline(t)
+      if (dl) meta.push(`deadline ${fmtCorto(dl)}`)
+      const total = (t.checklist || []).length
+      if (total) meta.push(`checklist ${(t.checklist || []).filter((c) => c.done).length}/${total}`)
+      parts.push(`${i + 1}. ${t.topic || t.issue || '(sin titulo)'}`)
+      if (meta.length) parts.push(`   ${meta.join(' · ')}`)
+      if (t.action) parts.push(`   Accion: ${oneLine(t.action)}`)
+      if (t.notes) parts.push(`   Notas: ${oneLine(t.notes)}`)
+    })
+  }
+  return parts.join('\n')
+}
 
 // Paleta ciclica para los chips de seccion (estable por nombre).
 const SECTION_PALETTE = ['#2e6fd0', '#0f766e', '#b45309', '#7c3aed', '#be123c', '#0369a1', '#4d7c0f', '#9333ea', '#0891b2', '#c2410c']
@@ -57,6 +88,8 @@ export default function Ecosystem() {
   const [filter, setFilter] = useState(() => localStorage.getItem('wmh_eco_filter') || '__all__')
   const [tagFilter, setTagFilter] = useState(() => localStorage.getItem('wmh_eco_tag') || '__all__')
   const [modal, setModal] = useState(null) // { task? , status? }
+  const [summary, setSummary] = useState(null) // { tag, text }
+  const [sumCopied, setSumCopied] = useState(false)
   const [dragId, setDragId] = useState(null)
   const [overCol, setOverCol] = useState(null)
 
@@ -211,6 +244,15 @@ export default function Ecosystem() {
                     {tg} <span className="chip-count">{tasks.filter((t) => (t.tags || []).includes(tg)).length}</span>
                   </button>
                 ))}
+                {(() => {
+                  const target = activeTag === '__all__' ? 'Helo' : activeTag
+                  return (
+                    <button className="btn btn-sm" style={{ marginLeft: 4 }}
+                      onClick={() => { setSumCopied(false); setSummary({ tag: target, text: buildTagSummary(tasks, target, today) }) }}>
+                      <FileText size={14} /> Resumen {target}
+                    </button>
+                  )
+                })()}
               </div>
             )}
 
@@ -324,6 +366,33 @@ export default function Ecosystem() {
           onClose={() => setModal(null)}
           onSaved={load}
         />
+      )}
+
+      {summary && (
+        <Modal
+          title={`Resumen ${summary.tag}`}
+          icon={<FileText size={18} color="var(--purina)" />}
+          onClose={() => setSummary(null)}
+          wide
+          footer={
+            <>
+              <a
+                className="btn"
+                href={`mailto:?subject=${encodeURIComponent(`Resumen ${summary.tag} — ${fmtLargo(today)}`)}&body=${encodeURIComponent(summary.text)}`}
+              >
+                <Mail size={15} /> Abrir email
+              </a>
+              <button className="btn btn-primary" onClick={() => { navigator.clipboard?.writeText(summary.text); setSumCopied(true) }}>
+                {sumCopied ? <><Check size={15} /> Copiado</> : <><Copy size={15} /> Copiar</>}
+              </button>
+            </>
+          }
+        >
+          <p className="hint" style={{ marginTop: 0 }}>
+            Lista lista para pegar en el email semanal. Copiala o abrila directamente en tu cliente de correo.
+          </p>
+          <textarea className="control eco-summary" readOnly rows={18} value={summary.text} onFocus={(e) => e.target.select()} />
+        </Modal>
       )}
     </>
   )

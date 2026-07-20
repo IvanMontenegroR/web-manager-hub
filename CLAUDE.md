@@ -54,7 +54,9 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de
   coordinacion de la migracion; independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
-  se muestran como chips en la tarjeta y hay una barra de filtro por tag. `checklist` = jsonb array de
+  se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
+  "Resumen <tag>" (`buildTagSummary`) genera un texto plano de las tarjetas de ese tag (agrupadas por
+  estado, con meta + accion) para copiar o abrir en el email semanal (`mailto:`). `checklist` = jsonb array de
   {text, done, deadline?} (cada sub-item puede tener su
   propia deadline). El **deadline efectivo** (`effectiveDeadline`) = la fecha mas temprana entre el
   `deadline` propio y las deadlines de los items del checklist NO hechos; manda para el color y el orden.

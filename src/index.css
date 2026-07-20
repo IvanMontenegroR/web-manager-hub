@@ -1051,6 +1051,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .eco-card-actions { margin-left: auto; display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
 .eco-card:hover .eco-card-actions { opacity: 1; }
 
+.eco-summary { width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.5; white-space: pre; resize: vertical; }
+
 /* Tags: barra de filtro + editor en el modal */
 .eco-tagbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: -2px 0 12px; }
 .eco-tagbar-lbl { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
