@@ -18,13 +18,12 @@ function argb(hex, fallback = 'FF9AA0A6') {
   return ('FF' + h).toUpperCase()
 }
 
-// Fills de las barras (tono suave, misma tonalidad entre los tres).
+// Fills de las barras (tono calido suave, misma tonalidad entre los tres).
 const BAR = {
-  Completado: 'FF9BD3AE', // verde suave
-  'En curso': 'FF9DC3F0', // azul suave
-  Pendiente: 'FFEED98C', // amarillo suave (misma tonalidad que verde/azul)
+  Completado: 'FFC6E6C0', // verde suave (mismo tono calido)
+  'En curso': 'FFF7C7AC', // durazno
+  Pendiente: 'FFFBE2D5', // durazno claro
 }
-const OVERRUN = 'FFE7A6A0' // rojo/salmon: tramo de atraso (real pasa el plan)
 const PURINA_RED = 'FFED1C24' // rojo de marca
 const BRAND_BG = 'FF000000' // negro del logo
 const GREEN = 'FF1E7A3D' // check y linea de GO-LIVE
@@ -38,22 +37,25 @@ const medToday = { style: 'medium', color: { argb: TODAY_LINE } }
 
 // Finde / feriado: negro con rayas diagonales (no gris).
 const NONWORK_FILL = { type: 'pattern', pattern: 'darkDown', fgColor: { argb: 'FF000000' }, bgColor: { argb: 'FFFFFFFF' } }
+// Atraso: rayas diagonales ROJAS (se diferencia por textura del durazno de "En curso").
+const OVERRUN_FILL = { type: 'pattern', pattern: 'darkUp', fgColor: { argb: 'FFD0432F' }, bgColor: { argb: 'FFFFFFFF' } }
 const solidFill = (a) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: a } })
 
 function barFill(status) {
   return BAR[status] || BAR.Pendiente
 }
 
+// Marca una celda con una letra (F=feriado, X=atraso) centrada, blanca por defecto
+// (se lee sobre las rayas oscuras del finde/feriado y del atraso).
+function markCell(cell, letter, color = 'FFFFFFFF') {
+  cell.value = letter
+  cell.font = { bold: true, size: 9, color: { argb: color } }
+  cell.alignment = { horizontal: 'center', vertical: 'middle' }
+}
+
 // Superpone un borde vertical de color a una celda sin perder el resto del borde fino.
 function vLine(cell, side) {
   cell.border = { ...(cell.border || border), left: side, right: side }
-}
-
-// Nota (comentario) con caja de tamano fijo y legible. `editAs:'twoCells'` hace que
-// ExcelJS NO emita SizeWithCells, asi la caja no se encoge al ancho de la columna
-// (evita que el texto quede en vertical, una letra por linea).
-function mkNote(text) {
-  return { texts: [{ text }], editAs: 'twoCells' }
 }
 
 // Fecha de GO-LIVE del proyecto: la del task que se llame GO-LIVE, o el market_launch.
@@ -71,55 +73,77 @@ function isGoLive(name) {
   return /go[\s_-]*live/i.test(name || '')
 }
 
-// Leyenda de colores debajo de las tareas (columnas congeladas 1-2, siempre visibles).
-function buildLegend(ws, startRow) {
+// Leyenda + listado de feriados y retrasos (columnas congeladas 1-2).
+function buildLegend(ws, startRow, holList = [], delayList = []) {
   const items = [
-    ['Completado', solidFill(BAR.Completado)],
-    ['En curso', solidFill(BAR['En curso'])],
-    ['Pendiente', solidFill(BAR.Pendiente)],
-    ['Atraso', solidFill(OVERRUN)],
-    ['Finde / feriado (no laboral)', NONWORK_FILL],
+    ['Completado', solidFill(BAR.Completado), null],
+    ['En curso', solidFill(BAR['En curso']), null],
+    ['Pendiente', solidFill(BAR.Pendiente), null],
+    ['Atraso (X)', OVERRUN_FILL, 'X'],
+    ['Finde / feriado (F)', NONWORK_FILL, 'F'],
   ]
-  const titleCell = ws.getCell(startRow, 1)
-  titleCell.value = 'REFERENCIAS'
-  titleCell.font = { bold: true, size: 9 }
-  titleCell.alignment = { vertical: 'middle' }
-  titleCell.border = border
-
-  items.forEach((it, i) => {
-    const row = startRow + 1 + i
-    const label = ws.getCell(row, 1)
-    label.value = it[0]
-    label.font = { size: 9 }
-    label.alignment = { vertical: 'middle' }
-    label.border = border
-    const sw = ws.getCell(row, 2)
-    sw.fill = it[1]
+  let row = startRow
+  const setLabel = (r, text, bold = false) => {
+    const c = ws.getCell(r, 1)
+    c.value = text
+    c.font = { size: 9, bold }
+    c.alignment = { vertical: 'middle' }
+    c.border = border
+    return c
+  }
+  const setSwatch = (r, fill, mark) => {
+    const sw = ws.getCell(r, 2)
+    if (fill) sw.fill = fill
+    if (mark) {
+      sw.value = mark
+      sw.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+      sw.alignment = { horizontal: 'center', vertical: 'middle' }
+    }
     sw.border = border
-  })
+    return sw
+  }
 
-  // GO-LIVE: check verde + linea verde.
-  const glRow = startRow + 1 + items.length
-  const glLabel = ws.getCell(glRow, 1)
-  glLabel.value = 'GO-LIVE (linea verde)'
-  glLabel.font = { size: 9 }
-  glLabel.alignment = { vertical: 'middle' }
-  glLabel.border = border
-  const glSw = ws.getCell(glRow, 2)
-  glSw.value = '✔'
-  glSw.font = { bold: true, size: 13, color: { argb: GREEN } }
-  glSw.alignment = { horizontal: 'center', vertical: 'middle' }
-  glSw.border = { ...border, left: medGreen, right: medGreen }
+  setLabel(row, 'REFERENCIAS', true)
+  ws.getCell(row, 2).border = border
+  row++
 
-  // HOY: linea violeta.
-  const hoyRow = glRow + 1
-  const hoyLabel = ws.getCell(hoyRow, 1)
-  hoyLabel.value = 'Hoy (linea violeta)'
-  hoyLabel.font = { size: 9 }
-  hoyLabel.alignment = { vertical: 'middle' }
-  hoyLabel.border = border
-  const hoySw = ws.getCell(hoyRow, 2)
-  hoySw.border = { ...border, left: medToday, right: medToday }
+  for (const [label, fill, mark] of items) {
+    setLabel(row, label)
+    setSwatch(row, fill, mark)
+    row++
+  }
+
+  // GO-LIVE (linea verde) + HOY (linea violeta)
+  setLabel(row, 'GO-LIVE (linea verde)')
+  { const sw = ws.getCell(row, 2); sw.value = '✔'; sw.font = { bold: true, size: 13, color: { argb: GREEN } }; sw.alignment = { horizontal: 'center', vertical: 'middle' }; sw.border = { ...border, left: medGreen, right: medGreen } }
+  row++
+  setLabel(row, 'Hoy (linea violeta)')
+  ws.getCell(row, 2).border = { ...border, left: medToday, right: medToday }
+  row++
+
+  // FERIADOS: fecha — nombre (pais)
+  if (holList.length) {
+    row++
+    setLabel(row, 'FERIADOS', true); ws.getCell(row, 2).border = border; row++
+    for (const f of holList) {
+      const place = countryName(f.country)
+      setLabel(row, `${fmtLargo(f.date)} — ${f.name}${place && place !== '—' ? ` (${place})` : ''}`)
+      setSwatch(row, NONWORK_FILL, 'F')
+      row++
+    }
+  }
+
+  // RETRASOS: tarea, fechas y razon
+  if (delayList.length) {
+    row++
+    setLabel(row, 'RETRASOS', true); ws.getCell(row, 2).border = border; row++
+    for (const d of delayList) {
+      const range = d.from && d.to ? `${fmtLargo(d.from)} → ${fmtLargo(d.to)}` : ''
+      setLabel(row, `${d.name}: ${range}${d.days ? ` (+${d.days}d)` : ''}${d.reason ? ` — ${d.reason}` : ''}`)
+      setSwatch(row, OVERRUN_FILL, 'X')
+      row++
+    }
+  }
 }
 
 // Rango de dias a dibujar para un set de tareas de un proyecto.
@@ -262,6 +286,8 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   // --- Filas de tareas ---
   const sorted = [...tasks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   const goLiveCols = new Set()
+  const holidaysSeen = new Map() // country|date -> {date, country, name}
+  const delaysSeen = [] // {name, from, to, days, reason}
   sorted.forEach((t, r) => {
     const row = 4 + r
     // TASK
@@ -299,20 +325,30 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
       const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
       if (nonWorking) cell.fill = NONWORK_FILL
-      else if (isOverrun) cell.fill = solidFill(OVERRUN)
+      else if (isOverrun) cell.fill = OVERRUN_FILL
       else if (inReal) cell.fill = solidFill(barFill(t.status))
-      // Nota en la celda de feriado (solo si NO cae en finde): que feriado y de que pais.
+      // Feriado (solo si NO cae en finde): "F" en la celda + se agrega al listado de Referencias.
       if (isHoliday) {
-        const name = holByKey.get(`${t.country}|${iso}`) || 'Feriado'
-        const place = countryName(t.country)
-        cell.note = mkNote(`${name}${place && place !== '—' ? ` — ${place}` : ''}`)
+        markCell(cell, 'F')
+        holidaysSeen.set(`${t.country}|${iso}`, {
+          date: iso,
+          country: t.country,
+          name: holByKey.get(`${t.country}|${iso}`) || 'Feriado',
+        })
+      } else if (isOverrun) {
+        markCell(cell, 'X')
       }
     })
 
-    // Nota con la razon del retraso en la ultima celda del delay.
-    if (t.isDelayed && t.delay_reason && t.delayEnd) {
-      const di = days.indexOf(t.delayEnd)
-      if (di >= 0) ws.getCell(row, C0 + di).note = mkNote(`Retraso: ${t.delay_reason}`)
+    // Se registra el retraso para el listado de Referencias (fechas + razon).
+    if (t.isDelayed && t.delayEnd) {
+      delaysSeen.push({
+        name: t.action_name || 'Tarea',
+        from: t.planned_end,
+        to: t.delayEnd,
+        days: t.delayDays,
+        reason: t.delay_reason || '',
+      })
     }
 
     // GO-LIVE: check VERDE en el nombre y en el dia exacto del lanzamiento.
@@ -344,8 +380,9 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     if (todayCol > 0 && !goLiveCols.has(todayCol)) vLine(ws.getCell(row, todayCol), medToday)
   }
 
-  // Leyenda de colores (una fila de aire debajo de la ultima tarea).
-  buildLegend(ws, 4 + sorted.length + 1)
+  // Leyenda de colores + listado de feriados y retrasos (debajo de la ultima tarea).
+  const holList = [...holidaysSeen.values()].sort((a, b) => (a.date < b.date ? -1 : 1))
+  buildLegend(ws, 4 + sorted.length + 1, holList, delaysSeen)
 
   return ws
 }
