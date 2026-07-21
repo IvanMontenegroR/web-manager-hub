@@ -34,8 +34,8 @@ const thin = { style: 'thin', color: { argb: GRID } }
 const border = { top: thin, left: thin, bottom: thin, right: thin }
 const medGreen = { style: 'medium', color: { argb: GREEN } }
 const medToday = { style: 'medium', color: { argb: TODAY_LINE } }
-// Marco grueso para separar secciones (tabla vs. referencias).
-const section = { style: 'medium', color: { argb: 'FF000000' } }
+// Gris claro de los sub-titulos de la leyenda (FERIADOS / RETRASOS / INFO).
+const LEGEND_SUBHEAD = 'FFEDEDED'
 
 // Finde / feriado: negro con rayas diagonales (no gris).
 const NONWORK_FILL = { type: 'pattern', pattern: 'darkDown', fgColor: { argb: 'FF000000' }, bgColor: { argb: 'FFFFFFFF' } }
@@ -74,18 +74,6 @@ function vLineAt(ws, row, col, side) {
   }
   const nx = ws.getCell(row, col + 1)
   nx.border = { ...(nx.border || border), left: side }
-}
-
-// Marco (borde exterior) alrededor de un rango, sin pisar el resto de bordes.
-function boxOutline(ws, r1, c1, r2, c2, edge) {
-  for (let c = c1; c <= c2; c++) {
-    const t = ws.getCell(r1, c); t.border = { ...(t.border || border), top: edge }
-    const b = ws.getCell(r2, c); b.border = { ...(b.border || border), bottom: edge }
-  }
-  for (let r = r1; r <= r2; r++) {
-    const l = ws.getCell(r, c1); l.border = { ...(l.border || border), left: edge }
-    const rt = ws.getCell(r, c2); rt.border = { ...(rt.border || border), right: edge }
-  }
 }
 
 // Fecha de GO-LIVE del proyecto: la del task que se llame GO-LIVE, o el market_launch.
@@ -132,9 +120,26 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     sw.border = border
     return sw
   }
+  // Banda de titulo de la seccion completa (rojo de marca, texto blanco), a tono
+  // con los headers de la tabla. Ocupa las dos columnas de la leyenda.
+  const banner = (r, text) => {
+    const c = setLabel(r, text, true)
+    c.fill = solidFill(PURINA_RED)
+    c.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } }
+    const sw = ws.getCell(r, 2)
+    sw.fill = solidFill(PURINA_RED)
+    sw.border = border
+  }
+  // Sub-titulo (FERIADOS / RETRASOS / INFO): banda gris clara, texto oscuro.
+  const subheader = (r, text) => {
+    const c = setLabel(r, text, true)
+    c.fill = solidFill(LEGEND_SUBHEAD)
+    const sw = ws.getCell(r, 2)
+    sw.fill = solidFill(LEGEND_SUBHEAD)
+    sw.border = border
+  }
 
-  setLabel(row, 'REFERENCIAS', true)
-  ws.getCell(row, 2).border = border
+  banner(row, 'REFERENCIAS')
   row++
 
   for (const [label, fill, mark] of items) {
@@ -154,7 +159,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
   // FERIADOS: fecha — nombre (pais)
   if (holList.length) {
     row++
-    setLabel(row, 'FERIADOS', true); ws.getCell(row, 2).border = border; row++
+    subheader(row, 'FERIADOS'); row++
     for (const f of holList) {
       const place = countryName(f.country)
       setLabel(row, `${fmtLargo(f.date)} — ${f.name}${place && place !== '—' ? ` (${place})` : ''}`)
@@ -166,7 +171,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
   // RETRASOS: tarea, dias habiles de atraso y razon (razon completa con wrap).
   if (delayList.length) {
     row++
-    setLabel(row, 'RETRASOS', true); ws.getCell(row, 2).border = border; row++
+    subheader(row, 'RETRASOS'); row++
     for (const d of delayList) {
       const dLabel = d.days ? `+${d.days} día${d.days === 1 ? '' : 's'} hábil${d.days === 1 ? '' : 'es'}` : 'atraso'
       setLabel(row, `${d.name}: ${dLabel}${d.reason ? ` — ${d.reason}` : ''}`, false, true)
@@ -178,14 +183,11 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
   // INFO: fecha de GO-LIVE original (segun el plan), como referencia al pie.
   if (info.goLiveOriginal) {
     row++
-    setLabel(row, 'INFO', true); ws.getCell(row, 2).border = border; row++
+    subheader(row, 'INFO'); row++
     setLabel(row, `Go-live original (plan): ${fmtLargo(info.goLiveOriginal)}`)
     ws.getCell(row, 2).border = border
     row++
   }
-
-  // Marco grueso alrededor de toda la leyenda para que sea una seccion aparte.
-  boxOutline(ws, startRow, 1, row - 1, 2, section)
 }
 
 // Fecha de GO-LIVE ORIGINAL (segun el plan, sin proyeccion ni atraso): el fin
@@ -422,12 +424,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     }
   })
 
-  // --- Marco grueso alrededor de toda la tabla (header + timeline + tareas) para
-  // que se lea como una seccion aparte de las referencias de abajo. Se dibuja ANTES
-  // de las lineas verticales para que estas ganen en los bordes compartidos. ---
   const lastRow = 3 + sorted.length
-  const lastDayCol = C0 + days.length - 1
-  boxOutline(ws, 1, 1, lastRow, lastDayCol, section)
 
   // --- Lineas verticales: GO-LIVE (verde) y HOY (violeta, fecha real de exportacion) ---
   const todayIdx = days.indexOf(toISO(new Date()))
