@@ -8,9 +8,10 @@ import ProjectModal from '../components/modals/ProjectModal.jsx'
 import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
+import ExportModal from '../components/modals/ExportModal.jsx'
 import LaunchWidget from '../components/panels/LaunchWidget.jsx'
 import { deleteProject, deleteTask, setProjectArchived, updateTaskOrder } from '../lib/db'
-import { exportGlobal, exportProject } from '../lib/exportTimeline'
+import { exportProject } from '../lib/exportTimeline'
 
 export default function WebProjects() {
   const { loading, error, projects, tasks, partners, enriched, holidays, refresh } = useData()
@@ -121,7 +122,7 @@ export default function WebProjects() {
               <EyeOff size={16} /> {hiddenExisting.length} oculto{hiddenExisting.length > 1 ? 's' : ''}
             </button>
           )}
-          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners, zoom === 'week', holidays)} disabled={tasks.length === 0}>
+          <button className="btn" onClick={() => setModal({ type: 'export' })} disabled={tasks.length === 0}>
             <Download size={16} /> Exportar
           </button>
           <div className="dropdown">
@@ -247,6 +248,7 @@ export default function WebProjects() {
       )}
       {modal?.type === 'partners' && <PartnersModal onClose={() => setModal(null)} />}
       {modal?.type === 'holidays' && <HolidaysModal onClose={() => setModal(null)} />}
+      {modal?.type === 'export' && <ExportModal zoom={zoom} onClose={() => setModal(null)} />}
     </>
   )
 }

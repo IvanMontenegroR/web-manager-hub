@@ -2,7 +2,7 @@
 // barras), findes/feriados con rayas negras, ASSIGNED TO y STATUS con color, bandas de
 // mes/dia. Brandeado Purina (negro + rojo de marca, con logo). Usa ExcelJS.
 import ExcelJS from 'exceljs'
-import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo } from './dates'
+import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo, addDaysISO } from './dates'
 import { partnerColor, partnerName, textOn } from './colors'
 import { countryName } from './countries'
 import { PURINA_LOGO_B64 } from './purinaLogo'
@@ -483,24 +483,134 @@ function holidayMap(holidays) {
   return m
 }
 
-// Exporta TODOS los proyectos (no archivados) -> una hoja por proyecto.
-// week: dibuja en modo semana (segun el toggle del cronograma).
-export async function exportGlobal(enriched, projects, partners, week = false, holidays = []) {
-  const wb = new ExcelJS.Workbook()
-  const holByKey = holidayMap(holidays)
-  const active = projects.filter((p) => !p.archived)
-  active.forEach((project, idx) => {
-    const tasks = enriched.filter((t) => t.project_id === project.id)
-    buildSheet(wb, project, tasks, partners, idx, week, holByKey)
-  })
-  if (active.length === 0) buildSheet(wb, { name: 'Sin proyectos' }, [], partners, 0, week, holByKey)
-  await download(wb, 'Gantt Timeline.xlsx')
-}
-
 // Exporta UN proyecto. Nombre: "Project Name - Gantt Timeline.xlsx".
 export async function exportProject(project, enriched, partners, week = false, holidays = []) {
   const wb = new ExcelJS.Workbook()
   const tasks = enriched.filter((t) => t.project_id === project.id)
   buildSheet(wb, project, tasks, partners, 0, week, holidayMap(holidays))
   await download(wb, `${safeFileName(project.name)} - Gantt Timeline.xlsx`)
+}
+
+// --- Resumen semanal (1 celda = 1 semana) de varios proyectos ---
+// Colores de las barras de proyecto (se ciclan por proyecto).
+const SUMMARY_COLORS = ['FF9DC3F0', 'FFF7C7AC', 'FFC6E6C0', 'FFE0B7E8', 'FFF0DDA0', 'FFA0D8D8', 'FFF2B8C6']
+
+// Lunes de la semana que contiene a `iso` (semana = lunes a domingo).
+function mondayOfISO(iso) {
+  const dow = parseDay(iso).getDay() // 0 dom .. 6 sab
+  return addDaysISO(iso, -((dow + 6) % 7))
+}
+
+// Rango [min, max] real/proyectado de un proyecto + fecha de su GO-LIVE.
+function projectSpan(tasks) {
+  let min = null, max = null, goLive = null
+  for (const t of tasks) {
+    const s = t.renderStart || t.planned_start
+    const e = t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)
+    if (s && (!min || s < min)) min = s
+    if (e && (!max || e > max)) max = e
+    if (isGoLive(t.action_name)) goLive = t.actual_end || (t.isDelayed ? t.delayEnd : t.renderEnd) || t.planned_end
+  }
+  return { min, max, goLive }
+}
+
+// Hoja "Resumen (semanas)": una fila por proyecto, columnas = semanas, cada
+// celda = una semana. La barra cubre las semanas activas del proyecto; la
+// semana del GO-LIVE lleva un check verde. Linea violeta en la semana de hoy.
+function buildSummarySheet(wb, projects, enriched) {
+  const ws = wb.addWorksheet('Resumen (semanas)', { views: [{ state: 'frozen', xSplit: 1, ySplit: 2 }] })
+  const spans = projects
+    .map((p) => ({ project: p, ...projectSpan(enriched.filter((t) => t.project_id === p.id)) }))
+    .filter((s) => s.min && s.max)
+  if (spans.length === 0) { ws.getCell(1, 1).value = 'Sin datos'; return ws }
+
+  let gmin = spans[0].min, gmax = spans[0].max
+  for (const s of spans) { if (s.min < gmin) gmin = s.min; if (s.max > gmax) gmax = s.max }
+  const weeks = []
+  for (let iso = mondayOfISO(gmin); iso <= mondayOfISO(gmax); iso = addDaysISO(iso, 7)) weeks.push(iso)
+
+  const C0 = 2
+  ws.getColumn(1).width = 30
+  for (let i = 0; i < weeks.length; i++) ws.getColumn(C0 + i).width = 4
+
+  // Esquina (rows 1-2, col 1)
+  ws.mergeCells(1, 1, 2, 1)
+  const corner = ws.getCell(1, 1)
+  corner.value = 'Proyecto'
+  corner.fill = solidFill(PURINA_RED)
+  corner.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } }
+  corner.alignment = { horizontal: 'left', vertical: 'middle' }
+  corner.border = border
+  ws.getRow(1).height = 18
+
+  // Fila 1: bandas de mes. Fila 2: dia (numero) del lunes de cada semana.
+  let mStart = 0
+  weeks.forEach((wk, i) => {
+    const d = parseDay(wk)
+    const wc = ws.getCell(2, C0 + i)
+    wc.value = d.getDate()
+    wc.font = { size: 7, color: { argb: 'FF666666' } }
+    wc.alignment = { horizontal: 'center', vertical: 'middle' }
+    wc.border = border
+    const next = weeks[i + 1]
+    const boundary = !next || parseDay(next).getMonth() !== d.getMonth() || parseDay(next).getFullYear() !== d.getFullYear()
+    if (boundary) {
+      const c1 = C0 + mStart, c2 = C0 + i
+      if (c2 > c1) ws.mergeCells(1, c1, 1, c2)
+      const mc = ws.getCell(1, c1)
+      mc.value = `${MESES[d.getMonth()]} ${d.getFullYear()}`
+      mc.font = { bold: true, size: 8, color: { argb: 'FF333333' } }
+      mc.fill = solidFill('FFEDEDED')
+      mc.alignment = { horizontal: 'center', vertical: 'middle' }
+      mc.border = border
+      mStart = i + 1
+    }
+  })
+
+  // Filas de proyecto
+  const todayMon = mondayOfISO(toISO(new Date()))
+  spans.forEach((s, r) => {
+    const row = 3 + r
+    const color = SUMMARY_COLORS[r % SUMMARY_COLORS.length]
+    const nameCell = ws.getCell(row, 1)
+    nameCell.value = `${s.project.name}${s.project.market ? ` (${s.project.market})` : ''}`
+    nameCell.font = { size: 9, bold: true }
+    nameCell.alignment = { vertical: 'middle' }
+    nameCell.border = { ...border, left: { style: 'medium', color: { argb: color } } }
+    const glMon = s.goLive ? mondayOfISO(s.goLive) : null
+    weeks.forEach((wk, i) => {
+      const cell = ws.getCell(row, C0 + i)
+      cell.border = border
+      const wkEnd = addDaysISO(wk, 6)
+      if (s.min <= wkEnd && s.max >= wk) cell.fill = solidFill(color)
+      if (glMon && glMon === wk) {
+        cell.value = '✔'
+        cell.font = { bold: true, size: 10, color: { argb: GREEN } }
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+      }
+    })
+  })
+
+  // Linea violeta en la semana de hoy (si esta en rango).
+  const todayIdx = weeks.indexOf(todayMon)
+  if (todayIdx >= 0) {
+    for (let row = 2; row <= 2 + spans.length; row++) vLineAt(ws, row, C0 + todayIdx, medToday)
+  }
+  return ws
+}
+
+// Exporta una SELECCION de proyectos: una hoja por proyecto + (si son 2 o mas)
+// una hoja "Resumen (semanas)" con el timeline semanal de todos.
+export async function exportSelection(selected, enriched, partners, week = false, holidays = []) {
+  const wb = new ExcelJS.Workbook()
+  const holByKey = holidayMap(holidays)
+  selected.forEach((project, idx) => {
+    const tasks = enriched.filter((t) => t.project_id === project.id)
+    buildSheet(wb, project, tasks, partners, idx, week, holByKey)
+  })
+  if (selected.length >= 2) buildSummarySheet(wb, selected, enriched)
+  const name = selected.length === 1
+    ? `${safeFileName(selected[0].name)} - Gantt Timeline.xlsx`
+    : 'Gantt Timeline (seleccion).xlsx'
+  await download(wb, name)
 }
