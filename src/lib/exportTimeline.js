@@ -228,21 +228,22 @@ function safeSheetName(name, idx) {
 // fechas agrupadas por semana. holByKey = mapa country|date -> nombre de feriado.
 function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = new Map()) {
   const ws = wb.addWorksheet(safeSheetName(project.name, idx), {
-    views: [{ state: 'frozen', xSplit: 3, ySplit: 3 }],
+    views: [{ state: 'frozen', xSplit: 4, ySplit: 3 }],
   })
   const days = dateRange(tasks, project) || eachDayISO(project.start_date || '2026-01-01', project.start_date || '2026-01-01')
-  const C0 = 4 // primera columna de dia (A=1 TASK, B=2 ASSIGNED TO, C=3 STATUS)
+  const C0 = 5 // primera columna de dia (A=1 TASK, B=2 ASSIGNED TO, C=3 STATUS, D=4 DÍAS)
 
   // Anchos
   ws.getColumn(1).width = 42
   ws.getColumn(2).width = 16
   ws.getColumn(3).width = 14
+  ws.getColumn(4).width = 9 // DÍAS (habiles + retraso)
   const dayW = week ? 1.6 : 3.4
   for (let i = 0; i < days.length; i++) ws.getColumn(C0 + i).width = dayW
 
   // --- Encabezado con branding Purina + logo ---
-  // Fila 1 izquierda (cols 1-3): banda negra con el logo.
-  ws.mergeCells(1, 1, 1, 3)
+  // Fila 1 izquierda (cols 1-4): banda negra con el logo.
+  ws.mergeCells(1, 1, 1, 4)
   const brand = ws.getCell(1, 1)
   brand.fill = solidFill(BRAND_BG)
   brand.border = { top: { style: 'thin', color: { argb: PURINA_RED } }, left: { style: 'thin', color: { argb: PURINA_RED } }, bottom: thin, right: thin }
@@ -253,8 +254,8 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     ws.addImage(imgId, { tl: { col: 0.12, row: 0.12 }, ext: { width: 111, height: 24 } })
   } catch { /* si falla la imagen, queda la banda negra */ }
 
-  // Fila 2 izquierda (cols 1-3): nombre del proyecto + GO-LIVE resaltado (en vez del inicio).
-  ws.mergeCells(2, 1, 2, 3)
+  // Fila 2 izquierda (cols 1-4): nombre del proyecto + GO-LIVE resaltado (en vez del inicio).
+  ws.mergeCells(2, 1, 2, 4)
   const title = ws.getCell(2, 1)
   const glDate = goLiveDate(tasks, project)
   title.value = {
@@ -268,7 +269,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   title.border = border
 
   // Fila 3 izquierda: headers de columnas
-  const heads = ['TASK', 'ASSIGNED TO', 'STATUS']
+  const heads = ['TASK', 'ASSIGNED TO', 'STATUS', 'DÍAS']
   heads.forEach((h, i) => {
     const c = ws.getCell(3, 1 + i)
     c.value = h
@@ -369,6 +370,17 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     stCell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + sBar.slice(2))) } }
     stCell.alignment = { horizontal: 'center', vertical: 'middle' }
     stCell.border = border
+    // DÍAS habiles del plan; si hay atraso, se agrega "(+Nd)" en rojo.
+    const dCell = ws.getCell(row, 4)
+    dCell.value = t.isDelayed
+      ? { richText: [
+          { text: `${t.planned_days}d`, font: { size: 9 } },
+          { text: ` (+${t.delayDays}d)`, font: { size: 9, bold: true, color: { argb: PURINA_RED } } },
+        ] }
+      : `${t.planned_days}d`
+    dCell.font = { size: 9 }
+    dCell.alignment = { horizontal: 'center', vertical: 'middle' }
+    dCell.border = border
 
     // Barras por dia
     const realEnd = t.isDelayed ? t.delayEnd : t.renderEnd

@@ -350,6 +350,9 @@ export default function Gantt({
                         <span className="swatch" style={{ background: color }} />
                         {t.is_meeting && <Users size={13} className="t-meeting" aria-label="Reunión" />}
                         <span className="t-name">{t.action_name}</span>
+                        <span className="t-days" title="Días hábiles del plan (+ retraso)">
+                          {t.planned_days}d{t.isDelayed && <em className="t-delay"> (+{t.delayDays}d)</em>}
+                        </span>
                         <span className="t-partner">{partnerName(partners, t.partner_id)}</span>
                         <div className="task-actions">
                           {onMoveTask && (

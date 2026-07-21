@@ -408,14 +408,20 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 }
 .task-label .swatch { width: 9px; height: 9px; border-radius: 3px; flex: none; }
 .task-label .t-meeting { color: var(--purina); flex: none; }
-.task-label .t-name { font-size: 12.5px; font-weight: 550; white-space: nowrap; }
+.task-label .t-name { font-size: 12.5px; font-weight: 550; white-space: nowrap; flex: none; }
+.task-label .t-days {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex: none;
+}
+.task-label .t-days .t-delay { font-style: normal; font-weight: 700; color: var(--danger); }
 .task-label .t-partner {
   font-size: 11px;
   color: var(--ink-3);
   margin-left: auto;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: none;
   padding-left: 8px;
 }
 .task-actions { flex: none; display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; margin-left: 6px; }
