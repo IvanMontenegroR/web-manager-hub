@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore, ChevronUp, ChevronDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore, ChevronUp, ChevronDown, Users } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -348,6 +348,7 @@ export default function Gantt({
                     <div className="task-row" key={t.id}>
                       <div className="task-label">
                         <span className="swatch" style={{ background: color }} />
+                        {t.is_meeting && <Users size={13} className="t-meeting" aria-label="Reunión" />}
                         <span className="t-name">{t.action_name}</span>
                         <span className="t-partner">{partnerName(partners, t.partner_id)}</span>
                         <div className="task-actions">
@@ -390,6 +391,7 @@ export default function Gantt({
                             onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
                             onMouseLeave={() => setTip(null)}
                           >
+                            {t.is_meeting && <Users size={11} className="bar-meeting" />}
                             <span className="bar-txt">{t.action_name}</span>
                           </div>
                         )}

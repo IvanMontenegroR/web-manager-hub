@@ -407,6 +407,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   transition: background 0.1s;
 }
 .task-label .swatch { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.task-label .t-meeting { color: var(--purina); flex: none; }
 .task-label .t-name { font-size: 12.5px; font-weight: 550; white-space: nowrap; }
 .task-label .t-partner {
   font-size: 11px;
@@ -488,6 +489,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   z-index: 5;
 }
 .bar .bar-txt { text-overflow: ellipsis; overflow: hidden; }
+.bar .bar-meeting { flex: none; margin-right: 3px; }
 /* Conflicto: textura ademas de color (rayas diagonales) + borde marcado */
 .bar.conflict {
   box-shadow: inset 0 0 0 2px rgba(208, 67, 47, 0.95), var(--shadow-sm);

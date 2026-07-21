@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ListPlus } from 'lucide-react'
+import { ListPlus, Users } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
@@ -39,6 +39,7 @@ export default function TaskModal({ task, project, onClose }) {
     delay_reason: task?.delay_reason || '',
     excluded_holidays: Array.isArray(task?.excluded_holidays) ? task.excluded_holidays : [],
     depends_on: defaultDeps,
+    is_meeting: !!task?.is_meeting,
   })
 
   const toggleDep = (id) =>
@@ -217,6 +218,19 @@ export default function TaskModal({ task, project, onClose }) {
             {TASK_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+      </div>
+
+      <div className="field">
+        <label className="hol-item" style={{ cursor: 'pointer', display: 'inline-flex' }}>
+          <input
+            type="checkbox"
+            checked={form.is_meeting}
+            onChange={(e) => setForm((f) => ({ ...f, is_meeting: e.target.checked }))}
+          />
+          <Users size={15} color="var(--purina)" />
+          <span className="hol-name">Reunión</span>
+        </label>
+        <div className="hint">Muestra un icono de reunión en el cronograma y en el Excel.</div>
       </div>
 
       {siblings.length > 0 && (

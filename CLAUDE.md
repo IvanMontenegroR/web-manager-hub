@@ -52,9 +52,10 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, excluded_holidays,
-  depends_on, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
+  depends_on, is_meeting, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
-  task ids predecesoras finish-to-start)
+  task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
+  icono (Users / 👥) en el Gantt y en el export a Excel)
 - `ecosystem_tasks(id, section, topic, issue, action, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de
   coordinacion de la migracion; independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done.

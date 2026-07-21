@@ -99,6 +99,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     ['Pendiente', solidFill(BAR.Pendiente), null],
     ['Atraso (X)', OVERRUN_FILL, 'X'],
     ['Finde / feriado (F)', NONWORK_FILL, 'F'],
+    ['Reunión', null, '👥'],
   ]
   let row = startRow
   const setLabel = (r, text, bold = false, wrap = false) => {
@@ -343,9 +344,12 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   const delaysSeen = [] // {name, from, to, days, reason}
   sorted.forEach((t, r) => {
     const row = 4 + r
-    // TASK
+    // TASK (con icono de reunion 👥 al frente si aplica)
+    const meetingRun = t.is_meeting ? [{ text: '👥 ', font: { size: 9 } }] : []
     const nameCell = ws.getCell(row, 1)
-    nameCell.value = t.action_name || ''
+    nameCell.value = meetingRun.length
+      ? { richText: [...meetingRun, { text: t.action_name || '', font: { size: 9 } }] }
+      : (t.action_name || '')
     nameCell.font = { size: 9 }
     nameCell.alignment = { vertical: 'middle', wrapText: false }
     nameCell.border = border
@@ -408,6 +412,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     if (isGoLive(t.action_name)) {
       nameCell.value = {
         richText: [
+          ...meetingRun,
           { text: '✔ ', font: { bold: true, color: { argb: GREEN } } },
           { text: t.action_name || '', font: { size: 9 } },
         ],
