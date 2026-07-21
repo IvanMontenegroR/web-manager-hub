@@ -59,7 +59,7 @@ export default function WebProjects() {
   }
 
   function handleExportProject(project) {
-    exportProject(project, enriched, partners)
+    exportProject(project, enriched, partners, zoom === 'week')
   }
 
   return (
@@ -101,7 +101,7 @@ export default function WebProjects() {
               <EyeOff size={16} /> {hiddenExisting.length} oculto{hiddenExisting.length > 1 ? 's' : ''}
             </button>
           )}
-          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners)} disabled={tasks.length === 0}>
+          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners, zoom === 'week')} disabled={tasks.length === 0}>
             <Download size={16} /> Exportar
           </button>
           <div className="dropdown">
