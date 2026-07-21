@@ -11,7 +11,7 @@ const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado']
 const CUSTOM = '__custom__'
 
 export default function TaskModal({ task, project, onClose }) {
-  const { slas, partners, tasks, holidaysByCountry, holidays, refresh } = useData()
+  const { slas, partners, tasks, projects, holidaysByCountry, holidays, refresh } = useData()
   const editing = !!task
 
   const knownAction = slas.some((s) => s.action_name === task?.action_name)
@@ -53,6 +53,20 @@ export default function TaskModal({ task, project, onClose }) {
   )
   const [err, setErr] = useState(null)
   const [saving, setSaving] = useState(false)
+
+  // Predecesoras de OTROS proyectos (dependencias cruzadas, para rollouts regionales).
+  const otherProjects = (projects || [])
+    .filter((p) => p.id !== project?.id)
+    .map((p) => ({
+      project: p,
+      tasks: tasks.filter((t) => t.project_id === p.id).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+    }))
+    .filter((g) => g.tasks.length > 0)
+  const hasCrossDep = (form.depends_on || []).some((id) => {
+    const t = tasks.find((x) => x.id === id)
+    return t && t.project_id !== project?.id
+  })
+  const [showCross, setShowCross] = useState(hasCrossDep)
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -252,6 +266,36 @@ export default function TaskModal({ task, project, onClose }) {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {otherProjects.length > 0 && (
+        <div className="field">
+          <label>Depende de otro proyecto (regional)</label>
+          <div className="hint" style={{ marginBottom: 6 }}>
+            Para rollouts regionales: esta tarea puede esperar a una tarea de <b>otro proyecto</b>
+            {' '}(ej. hasta que se libere un partner). El forecast la arrastra igual que una predecesora interna.
+          </div>
+          {!showCross ? (
+            <button className="btn btn-sm" onClick={() => setShowCross(true)}>+ Elegir de otro proyecto</button>
+          ) : (
+            <div className="hol-list">
+              {otherProjects.map((g) => (
+                <div key={g.project.id} className="cross-proj">
+                  <div className="cross-proj-name">{g.project.name}{g.project.market ? ` (${g.project.market})` : ''}</div>
+                  {g.tasks.map((s) => {
+                    const on = (form.depends_on || []).includes(s.id)
+                    return (
+                      <label key={s.id} className="hol-item">
+                        <input type="checkbox" checked={on} onChange={() => toggleDep(s.id)} />
+                        <span className="hol-name">{s.action_name}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -742,6 +742,10 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .hol-item .hol-name { color: var(--ink-2); }
 .hol-item.off { opacity: 0.55; }
 .hol-item.off .hol-date, .hol-item.off .hol-name { text-decoration: line-through; }
+/* Dependencias cruzadas: subtitulo por proyecto */
+.cross-proj { display: flex; flex-direction: column; gap: 4px; }
+.cross-proj + .cross-proj { margin-top: 6px; }
+.cross-proj-name { font-size: 11px; font-weight: 700; color: var(--ink-2); margin: 4px 0 0; }
 /* Fila de lanzamiento por mercado en ProjectModal */
 .launch-row { display: grid; grid-template-columns: 1fr 140px 160px auto; gap: 6px; align-items: center; }
 .launch-row .control { margin: 0; }
