@@ -1,9 +1,9 @@
 // Export "client-facing": un Gantt VISUAL en Excel (celdas coloreadas que forman las
-// barras), con findes/feriados sombreados, ASSIGNED TO y STATUS con color, bandas de
-// mes/dia, y plan (fantasma) vs real/proyectado. Usa ExcelJS (soporta estilos de celda).
+// barras), findes/feriados con rayas negras, ASSIGNED TO y STATUS con color, bandas de
+// mes/dia. Brandeado Purina (rojo de marca). Usa ExcelJS (soporta estilos de celda).
 import ExcelJS from 'exceljs'
 import { eachDayISO, isWeekendISO, parseDay, daysBetween } from './dates'
-import { partnerColor, partnerName, textOn, statusColor } from './colors'
+import { partnerColor, partnerName, textOn } from './colors'
 
 const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
 const DOW = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
@@ -16,22 +16,22 @@ function argb(hex, fallback = 'FF9AA0A6') {
   return ('FF' + h).toUpperCase()
 }
 
-// Fills de las barras (tono suave para que sea legible como documento).
+// Fills de las barras (tono suave, misma tonalidad entre los tres).
 const BAR = {
   Completado: 'FF9BD3AE', // verde suave
   'En curso': 'FF9DC3F0', // azul suave
-  Pendiente: 'FFD3D7DC', // gris suave
+  Pendiente: 'FFEED98C', // amarillo suave (misma tonalidad que verde/azul)
 }
 const OVERRUN = 'FFE7A6A0' // rojo/salmon: tramo de atraso (real pasa el plan)
-const GHOST = 'FFF1F1F1' // plan original donde la realidad se corrio
-const NONWORK = 'FFDDDDDD' // finde / feriado
-const HEADER_BG = 'FF548235' // verde encabezado
-const GRID = 'FFDCDCDC'
+const HEADER_BG = 'FFED1C24' // rojo Purina (marca)
+const GRID = 'FFBEBEBE'
 
 const thin = { style: 'thin', color: { argb: GRID } }
 const border = { top: thin, left: thin, bottom: thin, right: thin }
 
-const CHECK = 'FF1E7A3D' // verde fuerte para el check de GO-Live
+// Finde / feriado: negro con rayas diagonales (no gris).
+const NONWORK_FILL = { type: 'pattern', pattern: 'darkDown', fgColor: { argb: 'FF000000' }, bgColor: { argb: 'FFFFFFFF' } }
+const solidFill = (a) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: a } })
 
 function barFill(status) {
   return BAR[status] || BAR.Pendiente
@@ -45,17 +45,17 @@ function isGoLive(name) {
 // Leyenda de colores debajo de las tareas (columnas congeladas 1-2, siempre visibles).
 function buildLegend(ws, startRow) {
   const items = [
-    ['Completado', BAR.Completado],
-    ['En curso', BAR['En curso']],
-    ['Pendiente', BAR.Pendiente],
-    ['Atraso (la realidad supera el plan)', OVERRUN],
-    ['Plan original (si la realidad se corrio)', GHOST],
-    ['Finde / feriado (no laboral)', NONWORK],
+    ['Completado', solidFill(BAR.Completado)],
+    ['En curso', solidFill(BAR['En curso'])],
+    ['Pendiente', solidFill(BAR.Pendiente)],
+    ['Atraso', solidFill(OVERRUN)],
+    ['Finde / feriado (no laboral)', NONWORK_FILL],
   ]
   const titleCell = ws.getCell(startRow, 1)
   titleCell.value = 'REFERENCIAS'
   titleCell.font = { bold: true, size: 9 }
   titleCell.alignment = { vertical: 'middle' }
+  titleCell.border = border
 
   items.forEach((it, i) => {
     const row = startRow + 1 + i
@@ -63,20 +63,22 @@ function buildLegend(ws, startRow) {
     label.value = it[0]
     label.font = { size: 9 }
     label.alignment = { vertical: 'middle' }
+    label.border = border
     const sw = ws.getCell(row, 2)
-    sw.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: it[1] } }
+    sw.fill = it[1]
     sw.border = border
   })
 
-  // GO-Live: check verde.
+  // GO-Live: check emoji.
   const glRow = startRow + 1 + items.length
   const glLabel = ws.getCell(glRow, 1)
-  glLabel.value = 'GO-Live del mercado'
+  glLabel.value = 'GO-LIVE'
   glLabel.font = { size: 9 }
   glLabel.alignment = { vertical: 'middle' }
+  glLabel.border = border
   const glSw = ws.getCell(glRow, 2)
-  glSw.value = '✔'
-  glSw.font = { bold: true, size: 12, color: { argb: CHECK } }
+  glSw.value = '✅'
+  glSw.font = { size: 12 }
   glSw.alignment = { horizontal: 'center', vertical: 'middle' }
   glSw.border = border
 }
@@ -125,9 +127,10 @@ function buildSheet(wb, project, tasks, partners, idx) {
   ws.mergeCells(1, 1, 2, 3)
   const title = ws.getCell(1, 1)
   title.value = `${project.name}${project.start_date ? '\n' + project.start_date : ''}`
-  title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEADER_BG } }
+  title.fill = solidFill(HEADER_BG)
   title.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 }
   title.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true }
+  title.border = border
 
   // Fila 3 izquierda: headers de columnas
   const heads = ['TASK', 'ASSIGNED TO', 'STATUS']
@@ -169,14 +172,9 @@ function buildSheet(wb, project, tasks, partners, idx) {
     numCell.border = border
     const dowCell = ws.getCell(3, col)
     dowCell.value = DOW[d.getDay()]
-    dowCell.font = { size: 7, color: { argb: 'FF888888' } }
+    dowCell.font = { size: 7, bold: wknd, color: { argb: wknd ? 'FF000000' : 'FF888888' } }
     dowCell.alignment = { horizontal: 'center', vertical: 'middle' }
     dowCell.border = border
-    if (wknd) {
-      const f = { type: 'pattern', pattern: 'solid', fgColor: { argb: NONWORK } }
-      numCell.fill = f
-      dowCell.fill = f
-    }
   })
 
   // --- Filas de tareas ---
@@ -197,12 +195,12 @@ function buildSheet(wb, project, tasks, partners, idx) {
     atCell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + pColor.slice(2))) } }
     atCell.alignment = { horizontal: 'center', vertical: 'middle' }
     atCell.border = border
-    // STATUS (color por estado)
-    const sColor = argb(statusColor(t.status))
+    // STATUS (mismo tono que las barras: verde / azul / amarillo)
+    const sBar = barFill(t.status)
     const stCell = ws.getCell(row, 3)
     stCell.value = t.status || ''
-    stCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: sColor } }
-    stCell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + sColor.slice(2))) } }
+    stCell.fill = solidFill(sBar)
+    stCell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + sBar.slice(2))) } }
     stCell.alignment = { horizontal: 'center', vertical: 'middle' }
     stCell.border = border
 
@@ -214,21 +212,17 @@ function buildSheet(wb, project, tasks, partners, idx) {
       cell.border = border
       const nonWorking = isWeekendISO(iso) || (t.holidaysSet && t.holidaysSet.has(iso))
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
-      const inPlan = t.planned_start && t.planned_end && iso >= t.planned_start && iso <= t.planned_end
       const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
-      let fill = null
-      if (nonWorking) fill = NONWORK
-      else if (isOverrun) fill = OVERRUN
-      else if (inReal) fill = barFill(t.status)
-      else if (inPlan) fill = GHOST
-      if (fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } }
+      if (nonWorking) cell.fill = NONWORK_FILL
+      else if (isOverrun) cell.fill = solidFill(OVERRUN)
+      else if (inReal) cell.fill = solidFill(barFill(t.status))
     })
 
-    // GO-Live: check verde en el nombre y en el dia exacto del lanzamiento.
+    // GO-LIVE: check emoji en el nombre y en el dia exacto del lanzamiento.
     if (isGoLive(t.action_name)) {
       nameCell.value = {
         richText: [
-          { text: '✔ ', font: { bold: true, color: { argb: CHECK } } },
+          { text: '✅ ' },
           { text: t.action_name || '', font: { size: 9 } },
         ],
       }
@@ -236,8 +230,8 @@ function buildSheet(wb, project, tasks, partners, idx) {
       const gi = goLiveDay ? days.indexOf(goLiveDay) : -1
       if (gi >= 0) {
         const gcell = ws.getCell(row, C0 + gi)
-        gcell.value = '✔'
-        gcell.font = { bold: true, size: 11, color: { argb: CHECK } }
+        gcell.value = '✅'
+        gcell.font = { size: 11 }
         gcell.alignment = { horizontal: 'center', vertical: 'middle' }
       }
     }
@@ -263,6 +257,11 @@ async function download(wb, filename) {
   URL.revokeObjectURL(url)
 }
 
+// Limpia un nombre para usarlo como nombre de archivo (sin caracteres invalidos).
+function safeFileName(name) {
+  return (name || 'Proyecto').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim()
+}
+
 // Exporta TODOS los proyectos (no archivados) -> una hoja por proyecto.
 export async function exportGlobal(enriched, projects, partners) {
   const wb = new ExcelJS.Workbook()
@@ -272,14 +271,13 @@ export async function exportGlobal(enriched, projects, partners) {
     buildSheet(wb, project, tasks, partners, idx)
   })
   if (active.length === 0) buildSheet(wb, { name: 'Sin proyectos' }, [], partners, 0)
-  await download(wb, 'web-manager-hub_timeline.xlsx')
+  await download(wb, 'Gantt Timeline.xlsx')
 }
 
-// Exporta UN proyecto.
+// Exporta UN proyecto. Nombre: "Project Name - Gantt Timeline.xlsx".
 export async function exportProject(project, enriched, partners) {
   const wb = new ExcelJS.Workbook()
   const tasks = enriched.filter((t) => t.project_id === project.id)
   buildSheet(wb, project, tasks, partners, 0)
-  const safe = (project.name || 'proyecto').replace(/[^\w\-]+/g, '_')
-  await download(wb, `web-manager-hub_${safe}.xlsx`)
+  await download(wb, `${safeFileName(project.name)} - Gantt Timeline.xlsx`)
 }
