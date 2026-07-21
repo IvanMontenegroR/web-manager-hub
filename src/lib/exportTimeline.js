@@ -45,9 +45,12 @@ function barFill(status) {
   return BAR[status] || BAR.Pendiente
 }
 
-// Marca una celda con una letra (F=feriado, X=atraso) centrada, blanca por defecto
-// (se lee sobre las rayas oscuras del finde/feriado y del atraso).
-function markCell(cell, letter, color = 'FFFFFFFF') {
+// Color de las letras marcadoras (F/X): negro, se lee sobre las rayas claras
+// (las tramas darkDown/darkUp son lineas finas sobre fondo blanco).
+const MARK_COLOR = 'FF000000'
+
+// Marca una celda con una letra (F=feriado, X=atraso) centrada y oscura.
+function markCell(cell, letter, color = MARK_COLOR) {
   cell.value = letter
   cell.font = { bold: true, size: 9, color: { argb: color } }
   cell.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -96,7 +99,7 @@ function buildLegend(ws, startRow, holList = [], delayList = []) {
     if (fill) sw.fill = fill
     if (mark) {
       sw.value = mark
-      sw.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+      sw.font = { bold: true, size: 9, color: { argb: MARK_COLOR } }
       sw.alignment = { horizontal: 'center', vertical: 'middle' }
     }
     sw.border = border
@@ -336,7 +339,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
           country: t.country,
           name: holByKey.get(`${t.country}|${iso}`) || 'Feriado',
         })
-      } else if (isOverrun) {
+      } else if (isOverrun && !nonWorking) {
         markCell(cell, 'X')
       }
     })
