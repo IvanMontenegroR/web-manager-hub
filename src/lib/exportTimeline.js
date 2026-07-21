@@ -196,7 +196,8 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   ws.getRow(1).height = 26
   try {
     const imgId = wb.addImage({ base64: PURINA_LOGO_B64, extension: 'png' })
-    ws.addImage(imgId, { tl: { col: 0.12, row: 0.12 }, ext: { width: 168, height: 30 } })
+    // Aspect real del logo oficial (1526x330 ~= 4.62); se respeta para no deformarlo.
+    ws.addImage(imgId, { tl: { col: 0.12, row: 0.12 }, ext: { width: 111, height: 24 } })
   } catch { /* si falla la imagen, queda la banda negra */ }
 
   // Fila 2 izquierda (cols 1-3): nombre del proyecto + GO-LIVE resaltado (en vez del inicio).
