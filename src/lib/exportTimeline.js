@@ -34,6 +34,8 @@ const thin = { style: 'thin', color: { argb: GRID } }
 const border = { top: thin, left: thin, bottom: thin, right: thin }
 const medGreen = { style: 'medium', color: { argb: GREEN } }
 const medToday = { style: 'medium', color: { argb: TODAY_LINE } }
+// Marco grueso para separar secciones (tabla vs. referencias).
+const section = { style: 'medium', color: { argb: 'FF000000' } }
 
 // Finde / feriado: negro con rayas diagonales (no gris).
 const NONWORK_FILL = { type: 'pattern', pattern: 'darkDown', fgColor: { argb: 'FF000000' }, bgColor: { argb: 'FFFFFFFF' } }
@@ -59,6 +61,31 @@ function markCell(cell, letter, color = MARK_COLOR) {
 // Superpone un borde vertical de color a una celda sin perder el resto del borde fino.
 function vLine(cell, side) {
   cell.border = { ...(cell.border || border), left: side, right: side }
+}
+
+// Dibuja una linea vertical de color en una columna, REFORZANDO los bordes
+// compartidos con las celdas vecinas. Sin esto, el borde izquierdo se "rompe":
+// el borde derecho (fino) de la celda previa pisa el borde izquierdo de color.
+function vLineAt(ws, row, col, side) {
+  vLine(ws.getCell(row, col), side)
+  if (col > 1) {
+    const pv = ws.getCell(row, col - 1)
+    pv.border = { ...(pv.border || border), right: side }
+  }
+  const nx = ws.getCell(row, col + 1)
+  nx.border = { ...(nx.border || border), left: side }
+}
+
+// Marco (borde exterior) alrededor de un rango, sin pisar el resto de bordes.
+function boxOutline(ws, r1, c1, r2, c2, edge) {
+  for (let c = c1; c <= c2; c++) {
+    const t = ws.getCell(r1, c); t.border = { ...(t.border || border), top: edge }
+    const b = ws.getCell(r2, c); b.border = { ...(b.border || border), bottom: edge }
+  }
+  for (let r = r1; r <= r2; r++) {
+    const l = ws.getCell(r, c1); l.border = { ...(l.border || border), left: edge }
+    const rt = ws.getCell(r, c2); rt.border = { ...(rt.border || border), right: edge }
+  }
 }
 
 // Fecha de GO-LIVE del proyecto: la del task que se llame GO-LIVE, o el market_launch.
@@ -156,6 +183,9 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     ws.getCell(row, 2).border = border
     row++
   }
+
+  // Marco grueso alrededor de toda la leyenda para que sea una seccion aparte.
+  boxOutline(ws, startRow, 1, row - 1, 2, section)
 }
 
 // Fecha de GO-LIVE ORIGINAL (segun el plan, sin proyeccion ni atraso): el fin
@@ -392,13 +422,19 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     }
   })
 
-  // --- Lineas verticales: GO-LIVE (verde) y HOY (violeta, fecha real de exportacion) ---
+  // --- Marco grueso alrededor de toda la tabla (header + timeline + tareas) para
+  // que se lea como una seccion aparte de las referencias de abajo. Se dibuja ANTES
+  // de las lineas verticales para que estas ganen en los bordes compartidos. ---
   const lastRow = 3 + sorted.length
+  const lastDayCol = C0 + days.length - 1
+  boxOutline(ws, 1, 1, lastRow, lastDayCol, section)
+
+  // --- Lineas verticales: GO-LIVE (verde) y HOY (violeta, fecha real de exportacion) ---
   const todayIdx = days.indexOf(toISO(new Date()))
   const todayCol = todayIdx >= 0 ? C0 + todayIdx : -1
   for (let row = 2; row <= lastRow; row++) {
-    for (const col of goLiveCols) vLine(ws.getCell(row, col), medGreen)
-    if (todayCol > 0 && !goLiveCols.has(todayCol)) vLine(ws.getCell(row, todayCol), medToday)
+    for (const col of goLiveCols) vLineAt(ws, row, col, medGreen)
+    if (todayCol > 0 && !goLiveCols.has(todayCol)) vLineAt(ws, row, todayCol, medToday)
   }
 
   // Leyenda de colores + listado de feriados y retrasos (debajo de la ultima tarea).
