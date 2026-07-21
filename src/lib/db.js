@@ -189,6 +189,12 @@ export async function updateTask(id, t) {
   return data
 }
 
+// Actualiza SOLO el orden de una tarea (sin tocar el resto de sus campos).
+export async function updateTaskOrder(id, sort_order) {
+  const { error } = await supabase.from('tasks').update({ sort_order }).eq('id', id)
+  throwIf(error)
+}
+
 export async function deleteTask(id) {
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   throwIf(error)

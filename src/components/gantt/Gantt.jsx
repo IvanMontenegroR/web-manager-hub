@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore, ChevronUp, ChevronDown } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -36,7 +36,7 @@ export default function Gantt({
   emptyLabel,
   zoom = 'day',
   showGhosts = false,
-  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onExportProject, onHideProject,
+  onEditProject, onDeleteProject, onArchiveProject, onAddTask, onEditTask, onDeleteTask, onMoveTask, onExportProject, onHideProject,
 }) {
   const { partners, enriched, conflictIds, launchesByProject, holidays } = useData()
   const [tip, setTip] = useState(null)
@@ -309,7 +309,7 @@ export default function Gantt({
                   </div>
                 </div>
 
-                {tks.map((t) => {
+                {tks.map((t, ti) => {
                   const color = partnerColor(partners, t.partner_id) // punto del partner en la etiqueta
                   const barColor = statusColor(t.status) // color de la barra segun estado
                   const isConflict = conflictIds.has(t.id)
@@ -351,6 +351,16 @@ export default function Gantt({
                         <span className="t-name">{t.action_name}</span>
                         <span className="t-partner">{partnerName(partners, t.partner_id)}</span>
                         <div className="task-actions">
+                          {onMoveTask && (
+                            <>
+                              <button className="btn btn-ghost btn-sm btn-icon" title="Subir tarea" disabled={ti === 0} onClick={() => onMoveTask(t, project, 'up')}>
+                                <ChevronUp size={13} />
+                              </button>
+                              <button className="btn btn-ghost btn-sm btn-icon" title="Bajar tarea" disabled={ti === tks.length - 1} onClick={() => onMoveTask(t, project, 'down')}>
+                                <ChevronDown size={13} />
+                              </button>
+                            </>
+                          )}
                           <button className="btn btn-ghost btn-sm btn-icon" title="Editar tarea" onClick={() => onEditTask(t, project)}>
                             <Pencil size={13} />
                           </button>

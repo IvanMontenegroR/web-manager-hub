@@ -9,7 +9,7 @@ import TaskModal from '../components/modals/TaskModal.jsx'
 import PartnersModal from '../components/modals/PartnersModal.jsx'
 import HolidaysModal from '../components/modals/HolidaysModal.jsx'
 import LaunchWidget from '../components/panels/LaunchWidget.jsx'
-import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
+import { deleteProject, deleteTask, setProjectArchived, updateTaskOrder } from '../lib/db'
 import { exportGlobal, exportProject } from '../lib/exportTimeline'
 
 export default function WebProjects() {
@@ -55,6 +55,26 @@ export default function WebProjects() {
   async function handleDeleteTask(task, project) {
     if (!confirm(`Borrar la tarea "${task.action_name}" de ${project.name}?`)) return
     await deleteTask(task.id)
+    await refresh()
+  }
+
+  // Mueve una tarea arriba/abajo dentro de su proyecto. Reasigna sort_order
+  // secuencial (0..n-1) y persiste solo las que cambian.
+  async function handleMoveTask(task, project, dir) {
+    const siblings = tasks
+      .filter((t) => t.project_id === project.id)
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    const i = siblings.findIndex((t) => t.id === task.id)
+    const j = dir === 'up' ? i - 1 : i + 1
+    if (i < 0 || j < 0 || j >= siblings.length) return
+    const arr = [...siblings]
+    const [moved] = arr.splice(i, 1)
+    arr.splice(j, 0, moved)
+    await Promise.all(
+      arr
+        .map((t, idx) => ((t.sort_order || 0) === idx ? null : updateTaskOrder(t.id, idx)))
+        .filter(Boolean)
+    )
     await refresh()
   }
 
@@ -178,6 +198,7 @@ export default function WebProjects() {
               onAddTask={(p) => setModal({ type: 'task', project: p })}
               onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
               onDeleteTask={handleDeleteTask}
+              onMoveTask={handleMoveTask}
               onExportProject={handleExportProject}
             />
 
@@ -207,6 +228,7 @@ export default function WebProjects() {
                       onAddTask={(p) => setModal({ type: 'task', project: p })}
                       onEditTask={(t, p) => setModal({ type: 'task', task: t, project: p })}
                       onDeleteTask={handleDeleteTask}
+                      onMoveTask={handleMoveTask}
                       onExportProject={handleExportProject}
                     />
                   </div>
