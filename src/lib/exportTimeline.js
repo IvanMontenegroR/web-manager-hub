@@ -2,7 +2,7 @@
 // barras), findes/feriados con rayas negras, ASSIGNED TO y STATUS con color, bandas de
 // mes/dia. Brandeado Purina (negro + rojo de marca, con logo). Usa ExcelJS.
 import ExcelJS from 'exceljs'
-import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO } from './dates'
+import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo } from './dates'
 import { partnerColor, partnerName, textOn } from './colors'
 import { countryName } from './countries'
 import { PURINA_LOGO_B64 } from './purinaLogo'
@@ -47,6 +47,23 @@ function barFill(status) {
 // Superpone un borde vertical de color a una celda sin perder el resto del borde fino.
 function vLine(cell, side) {
   cell.border = { ...(cell.border || border), left: side, right: side }
+}
+
+// Nota (comentario) con caja de tamano fijo y legible. `editAs:'twoCells'` hace que
+// ExcelJS NO emita SizeWithCells, asi la caja no se encoge al ancho de la columna
+// (evita que el texto quede en vertical, una letra por linea).
+function mkNote(text) {
+  return { texts: [{ text }], editAs: 'twoCells' }
+}
+
+// Fecha de GO-LIVE del proyecto: la del task que se llame GO-LIVE, o el market_launch.
+function goLiveDate(tasks, project) {
+  const gl = tasks.find((t) => isGoLive(t.action_name))
+  if (gl) {
+    const realEnd = gl.isDelayed ? gl.delayEnd : gl.renderEnd
+    return gl.actual_end || realEnd || gl.planned_end || null
+  }
+  return project?.market_launch || null
 }
 
 // Detecta la tarea de lanzamiento por nombre: "GO-Live", "Go Live", "GoLive", "GO LIVE".
@@ -158,12 +175,17 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     ws.addImage(imgId, { tl: { col: 0.12, row: 0.12 }, ext: { width: 168, height: 30 } })
   } catch { /* si falla la imagen, queda la banda negra */ }
 
-  // Fila 2 izquierda (cols 1-3): nombre del proyecto.
+  // Fila 2 izquierda (cols 1-3): nombre del proyecto + GO-LIVE resaltado (en vez del inicio).
   ws.mergeCells(2, 1, 2, 3)
   const title = ws.getCell(2, 1)
-  title.value = `${project.name}${project.start_date ? '   ·   ' + project.start_date : ''}`
+  const glDate = goLiveDate(tasks, project)
+  title.value = {
+    richText: [
+      { text: `${project.name}`, font: { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 } },
+      ...(glDate ? [{ text: `     ► GO-LIVE: ${fmtLargo(glDate)}`, font: { bold: true, color: { argb: 'FF4ADE80' }, size: 12 } }] : []),
+    ],
+  }
   title.fill = solidFill(BRAND_BG)
-  title.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }
   title.alignment = { horizontal: 'left', vertical: 'middle' }
   title.border = border
 
@@ -207,9 +229,10 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     numCell.font = { size: 8 }
     numCell.alignment = { horizontal: 'center', vertical: 'middle' }
     numCell.border = border
+    // Fila 3: en dia = letra del dia; en semana = numero de dia bien chico (para que entre).
     const dowCell = ws.getCell(3, col)
-    dowCell.value = week ? '' : DOW[d.getDay()]
-    dowCell.font = { size: 7, bold: wknd, color: { argb: wknd ? 'FF000000' : 'FF888888' } }
+    dowCell.value = week ? d.getDate() : DOW[d.getDay()]
+    dowCell.font = { size: week ? 5 : 7, bold: wknd && !week, color: { argb: wknd ? 'FF000000' : 'FF888888' } }
     dowCell.alignment = { horizontal: 'center', vertical: 'middle' }
     dowCell.border = border
   })
@@ -270,25 +293,26 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       const col = C0 + i
       const cell = ws.getCell(row, col)
       cell.border = border
-      const isHoliday = t.holidaysSet && t.holidaysSet.has(iso)
-      const nonWorking = isWeekendISO(iso) || isHoliday
+      const wknd = isWeekendISO(iso)
+      const isHoliday = !wknd && t.holidaysSet && t.holidaysSet.has(iso)
+      const nonWorking = wknd || (t.holidaysSet && t.holidaysSet.has(iso))
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
       const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
       if (nonWorking) cell.fill = NONWORK_FILL
       else if (isOverrun) cell.fill = solidFill(OVERRUN)
       else if (inReal) cell.fill = solidFill(barFill(t.status))
-      // Nota en la celda de feriado: que feriado y de que pais/calendario.
+      // Nota en la celda de feriado (solo si NO cae en finde): que feriado y de que pais.
       if (isHoliday) {
         const name = holByKey.get(`${t.country}|${iso}`) || 'Feriado'
         const place = countryName(t.country)
-        cell.note = `${name}${place && place !== '—' ? ` — ${place}` : ''}`
+        cell.note = mkNote(`${name}${place && place !== '—' ? ` — ${place}` : ''}`)
       }
     })
 
     // Nota con la razon del retraso en la ultima celda del delay.
     if (t.isDelayed && t.delay_reason && t.delayEnd) {
       const di = days.indexOf(t.delayEnd)
-      if (di >= 0) ws.getCell(row, C0 + di).note = `Retraso: ${t.delay_reason}`
+      if (di >= 0) ws.getCell(row, C0 + di).note = mkNote(`Retraso: ${t.delay_reason}`)
     }
 
     // GO-LIVE: check VERDE en el nombre y en el dia exacto del lanzamiento.
