@@ -22,7 +22,18 @@ export function withDerived(task, holidays, today) {
     delayDays = businessDaysBetween(pEnd, delayRef, holidays)
     delayEnd = delayRef
   }
-  return { ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0, delayEnd }
+  // Adelanto (espejo del atraso): cerro ANTES del fin plan. Solo con entrega REAL
+  // (actual_end). Los dias ahorrados van de actual_end a planned_end.
+  let aheadDays = 0
+  let aheadStart = null
+  if (task.actual_end && daysBetween(task.actual_end, pEnd) > 0) {
+    aheadDays = businessDaysBetween(task.actual_end, pEnd, holidays)
+    aheadStart = task.actual_end
+  }
+  return {
+    ...task, planned_end: pEnd, delayDays, isDelayed: delayDays > 0, delayEnd,
+    aheadDays, isAhead: aheadDays > 0, aheadStart,
+  }
 }
 
 function maxISO(a, b) {

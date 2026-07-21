@@ -104,11 +104,19 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   delta en **dias habiles** se dibuja como extension rayada (de `planned_end` a `delayEnd`).
 - La razon de retraso es **obligatoria** en el form cuando `actual_end > planned_end`
   (`src/components/modals/TaskModal.jsx`).
+- **Adelantos** (espejo del atraso, `withDerived`): una tarea que cerro ANTES de su fin plan
+  (`actual_end < planned_end`) marca los dias ahorrados en **verde** (`.bar-ahead`, "-Nd" en dias
+  habiles, de `actual_end` a `planned_end`) — mismo tratamiento que el rojo pero al reves. Solo cuenta
+  con entrega REAL (`actual_end`), nunca por proyeccion. En el Excel: relleno verde en esas celdas +
+  `Nd (-Nd)` verde en la columna DÍAS + entrada "Adelanto" en Referencias.
 - **Proyeccion / forecast** (`src/lib/projection.js` -> `computeProjection`): NO destructiva. El
-  baseline (`planned_start`/`planned_days`) no se toca. Por dependencias (`depends_on`) se calcula
-  `projStart = max(inicio_baseline, dia habil siguiente al fin efectivo de las predecesoras)`. Fin
-  efectivo = `actual_end` si termino, si no `max(plannedEnd(projStart), hoy)` (una tarea abierta y
-  vencida empuja desde hoy). En el Gantt la **barra solida es la realidad/proyeccion**
+  baseline (`planned_start`/`planned_days`) no se toca. `computeProjection` indexa TODAS las tareas,
+  asi que resuelve dependencias **entre proyectos** (rollouts regionales). Por dependencias
+  (`depends_on`) se calcula `projStart`: si la predecesora que manda termina DESPUES del baseline, se
+  **empuja** (`pushed`); si YA cerro de verdad ANTES (predecesora firme = con `actual_end`), se
+  **adelanta** (`pulled`) por debajo del baseline. Sin entrega real no se adelanta (se mantiene el
+  worst-case). Fin efectivo = `actual_end` si termino, si no `max(plannedEnd(projStart), hoy)` (una
+  tarea abierta y vencida empuja desde hoy). En el Gantt la **barra solida es la realidad/proyeccion**
   (`renderStart..renderEnd`, color por estado; el tramo pasado del plan va rayado rojo si hay atraso)
   y el **plan original** se dibuja como **fantasma** hueco (`.bar-ghost`) solo cuando la realidad se
   corrio. El tooltip muestra Plan, Real y la predecesora culpable (`pushedByName`). Las tareas tipo

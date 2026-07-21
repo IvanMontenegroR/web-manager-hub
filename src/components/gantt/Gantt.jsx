@@ -193,7 +193,9 @@ export default function Gantt({
         : null,
       conflict: conflictIds.has(t.id),
       delay: t.isDelayed ? t.delayDays : 0,
+      ahead: t.isAhead ? t.aheadDays : 0,
       pushed: t.pushed && !t.actual_end,
+      pulled: t.pulled && !t.actual_end,
       pushedBy: t.pushedByName,
       real:
         t.projStart !== t.planned_start || (t.isDelayed ? t.delayEnd : t.renderEnd) !== t.planned_end
@@ -331,6 +333,13 @@ export default function Gantt({
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip
                   const delayWidth = Math.max(dEndPx - dClip - 2, 8)
+                  // Adelanto (espejo verde): del dia siguiente al fin real hasta el fin plan.
+                  const aStartPx = t.isAhead ? (idxOf(t.aheadStart) + 1) * dayW : 0
+                  const aEndPx = t.isAhead ? (idxOf(t.planned_end) + 1) * dayW : 0
+                  const aClip = Math.max(aStartPx, 0)
+                  const aheadVisible = t.isAhead && aEndPx > 0
+                  const aheadLeft = aClip
+                  const aheadWidth = Math.max(aEndPx - aClip - 2, 8)
                   // Fantasma del plan original: cuando la realidad se corrio del plan.
                   const startMoved = idxOf(t.projStart) !== idxOf(t.planned_start)
                   const endMoved = !t.isDelayed && idxOf(t.renderEnd) !== idxOf(t.planned_end)
@@ -409,6 +418,17 @@ export default function Gantt({
                             +{t.delayDays}d
                           </div>
                         )}
+                        {aheadVisible && (
+                          <div
+                            className="bar-ahead"
+                            style={{ left: aheadLeft, width: aheadWidth }}
+                            onMouseEnter={(e) => showTip(e, t, project)}
+                            onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
+                            onMouseLeave={() => setTip(null)}
+                          >
+                            -{t.aheadDays}d
+                          </div>
+                        )}
                         <OverlayLayer holidaysSet={t.holidaysSet} country={t.country} />
                       </div>
                     </div>
@@ -442,9 +462,15 @@ export default function Gantt({
           {tip.real && <div className="tt-row"><span>Real</span><b>{tip.real}</b></div>}
           {tip.conflict && <div className="tt-flag danger">Solapamiento de partner</div>}
           {tip.delay > 0 && <div className="tt-flag warn">Retraso de {tip.delay} dia{tip.delay > 1 ? 's' : ''}</div>}
+          {tip.ahead > 0 && <div className="tt-flag ok">Adelanto de {tip.ahead} dia{tip.ahead > 1 ? 's' : ''}</div>}
           {tip.pushed && (
             <div className="tt-flag info">
               Empujada por dependencia{tip.pushedBy ? `: ${tip.pushedBy}` : ''}
+            </div>
+          )}
+          {tip.pulled && (
+            <div className="tt-flag ok">
+              Adelantada por dependencia{tip.pushedBy ? `: ${tip.pushedBy}` : ''}
             </div>
           )}
         </div>

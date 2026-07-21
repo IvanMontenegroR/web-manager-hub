@@ -41,6 +41,8 @@ const LEGEND_SUBHEAD = 'FFEDEDED'
 const NONWORK_FILL = { type: 'pattern', pattern: 'darkDown', fgColor: { argb: 'FF000000' }, bgColor: { argb: 'FFFFFFFF' } }
 // Atraso: rayas diagonales ROJAS (se diferencia por textura del durazno de "En curso").
 const OVERRUN_FILL = { type: 'pattern', pattern: 'darkUp', fgColor: { argb: 'FFD0432F' }, bgColor: { argb: 'FFFFFFFF' } }
+// Adelanto: rayas diagonales VERDES (espejo del atraso; dias ahorrados).
+const AHEAD_FILL = { type: 'pattern', pattern: 'darkUp', fgColor: { argb: 'FF2F8F5B' }, bgColor: { argb: 'FFFFFFFF' } }
 const solidFill = (a) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: a } })
 
 function barFill(status) {
@@ -98,6 +100,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     ['En curso', solidFill(BAR['En curso']), null],
     ['Pendiente', solidFill(BAR.Pendiente), null],
     ['Atraso (X)', OVERRUN_FILL, 'X'],
+    ['Adelanto (-Nd)', AHEAD_FILL, null],
     ['Finde / feriado (F)', NONWORK_FILL, 'F'],
     ['Reunión', null, '👥'],
   ]
@@ -370,12 +373,17 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     stCell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + sBar.slice(2))) } }
     stCell.alignment = { horizontal: 'center', vertical: 'middle' }
     stCell.border = border
-    // DÍAS habiles del plan; si hay atraso, se agrega "(+Nd)" en rojo.
+    // DÍAS habiles del plan; con atraso "(+Nd)" en rojo, con adelanto "(-Nd)" en verde.
     const dCell = ws.getCell(row, 4)
     dCell.value = t.isDelayed
       ? { richText: [
           { text: `${t.planned_days}d`, font: { size: 9 } },
           { text: ` (+${t.delayDays}d)`, font: { size: 9, bold: true, color: { argb: PURINA_RED } } },
+        ] }
+      : t.isAhead
+      ? { richText: [
+          { text: `${t.planned_days}d`, font: { size: 9 } },
+          { text: ` (-${t.aheadDays}d)`, font: { size: 9, bold: true, color: { argb: GREEN } } },
         ] }
       : `${t.planned_days}d`
     dCell.font = { size: 9 }
@@ -393,8 +401,11 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       const nonWorking = wknd || (t.holidaysSet && t.holidaysSet.has(iso))
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
       const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
+      // Adelanto: dias ahorrados (del fin real al fin plan) pintados en verde.
+      const isSaved = t.isAhead && t.aheadStart && t.planned_end && iso > t.aheadStart && iso <= t.planned_end
       if (nonWorking) cell.fill = NONWORK_FILL
       else if (isOverrun) cell.fill = OVERRUN_FILL
+      else if (isSaved) cell.fill = AHEAD_FILL
       else if (inReal) cell.fill = solidFill(barFill(t.status))
       // Feriado (solo si NO cae en finde): "F" en la celda + se agrega al listado de Referencias.
       if (isHoliday) {

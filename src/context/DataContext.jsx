@@ -77,6 +77,7 @@ export function DataProvider({ children }) {
       t.projEnd = p.projEnd
       t.effEnd = p.effEnd
       t.pushed = p.pushed
+      t.pulled = p.pulled
       t.pushedBy = p.pushedBy
       t.pushedByName = p.pushedBy ? byId.get(p.pushedBy)?.action_name || null : null
       // Fin de la barra REAL/proyectada: si arranco, hasta el fin efectivo (o hoy);

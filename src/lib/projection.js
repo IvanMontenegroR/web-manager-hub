@@ -27,38 +27,50 @@ export function computeProjection(tasks, todayISO) {
         effEnd: t.actual_end || t.planned_end,
         pushed: false,
         pushedBy: null,
+        pulled: false,
+        firm: !!t.actual_end,
       }
       return base
     }
     stack.add(t.id)
 
-    // Fin efectivo mas tardio entre las predecesoras.
+    // Fin efectivo mas tardio entre las predecesoras. `bindingFirm` = si esa
+    // predecesora que manda YA cerro de verdad (actual_end); solo asi se adelanta.
     let predEnd = null
     let pushedBy = null
+    let bindingFirm = false
     for (const depId of Array.isArray(t.depends_on) ? t.depends_on : []) {
       const dep = byId.get(depId)
       if (!dep) continue
-      const de = eff(dep).effEnd
-      if (de && (!predEnd || daysBetween(predEnd, de) > 0)) {
-        predEnd = de
+      const de = eff(dep)
+      if (de.effEnd && (!predEnd || daysBetween(predEnd, de.effEnd) > 0)) {
+        predEnd = de.effEnd
         pushedBy = dep.id
+        bindingFirm = de.firm
       }
     }
 
-    // Inicio proyectado. Si la tarea YA empezo, su inicio real es un hecho (no se
-    // arrastra). Si no empezo, se empuja al dia habil siguiente al fin de la predecesora.
+    // Inicio proyectado. Si la tarea YA empezo, su inicio real es un hecho.
+    // Si no empezo: se EMPUJA al dia habil siguiente al fin de la predecesora
+    // (siempre que caiga despues del baseline); o se ADELANTA si la predecesora
+    // ya cerro antes (solo con entrega real, para no romper el worst-case).
     let projStart = t.planned_start
     let pushed = false
+    let pulled = false
     if (t.actual_start) {
       projStart = t.actual_start
     } else if (predEnd) {
       const earliest = nextBusinessDay(predEnd, t.holidaysSet)
-      if (daysBetween(projStart, earliest) > 0) {
+      const delta = daysBetween(projStart, earliest) // earliest - baseline
+      if (delta > 0) {
         projStart = earliest
         pushed = true
+      } else if (delta < 0 && bindingFirm) {
+        projStart = earliest
+        pulled = true
       }
     }
-    if (!pushed) pushedBy = null
+    if (!pushed && !pulled) pushedBy = null
 
     // Fin proyectado y fin efectivo (para empujar a las siguientes).
     let projEnd
@@ -72,7 +84,7 @@ export function computeProjection(tasks, todayISO) {
       effEnd = daysBetween(projEnd, todayISO) > 0 ? todayISO : projEnd
     }
 
-    const res = { projStart, projEnd, effEnd, pushed, pushedBy }
+    const res = { projStart, projEnd, effEnd, pushed, pushedBy, pulled, firm: !!t.actual_end }
     memo.set(t.id, res)
     stack.delete(t.id)
     return res

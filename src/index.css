@@ -537,6 +537,32 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   font-weight: 700;
   color: var(--danger);
 }
+/* Adelanto: espejo VERDE del retraso (dias ahorrados = fin real antes del plan). */
+.bar-ahead {
+  position: absolute;
+  top: 6px;
+  height: calc(var(--row-h) - 12px);
+  border-radius: 0 5px 5px 0;
+  z-index: 4;
+  background-color: var(--ok-tint);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(47, 143, 91, 0.55) 0,
+    rgba(47, 143, 91, 0.55) 5px,
+    rgba(47, 143, 91, 0.18) 5px,
+    rgba(47, 143, 91, 0.18) 10px
+  );
+  border: 1px solid var(--ok);
+  border-left: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ok);
+}
+.proj-group.finished .bar-ahead { opacity: 0.55; }
 
 /* Forecast: barra proyectada (arrastre por dependencias). Contorno punteado, translucida. */
 .bar-forecast {
@@ -601,6 +627,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .tooltip .tt-flag.danger { color: #ff9d8f; }
 .tooltip .tt-flag.warn { color: #ffca7a; }
 .tooltip .tt-flag.info { color: #8fc2ff; }
+.tooltip .tt-flag.ok { color: #7ee0a6; }
 
 /* ---------- Paneles overlap / delay ---------- */
 .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
