@@ -29,7 +29,10 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
 
 - `partners(id, name, color, country, created_at)` (incluye a **Purina** como partner, color rojo de
   marca `#ED1C24`; `country` = codigo de calendario de feriados, ej. MX/CO/PY/AR/BR/BR-SP.
-  Purina tiene `country` NULL a proposito: sus tareas usan el `market` del proyecto)
+  Purina esta dividida en dos partners, ambos con `country` NULL a proposito: **Purina Mercado** usa el
+  `market` del proyecto, y **Purina Región** usa `project.region_country` (elegible por proyecto, con
+  fallback al `market`). La distincion es por nombre: `isPurinaRegion` en `src/lib/countries.js` matchea
+  "Región" en el nombre. Ver `sql/2026_purina_region_y_panama.sql` para el setup)
 - `sla_definitions(id, action_name, sla_days, created_at)` (`sla_days` = dias HABILES; fases internas del
   cronograma que autocompletan `planned_days` al crear una tarea. Se editan en el modulo **SLAs**, pestaña
   General)
@@ -40,8 +43,10 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   RLS abierta. Solo BNN y NBS cargados hoy)
 - `holidays(id, country, date, name, created_at)` (feriados **por pais/calendario**, unique(country,date).
   Codigos en `src/lib/countries.js`. Datos 2026 best-effort, editables desde el modal Feriados)
-- `projects(id, name, brand, market, start_date, market_launch, status, archived, created_at)`
-  (`market` = codigo de pais/mercado, se usa como calendario de feriados para las tareas de Purina.
+- `projects(id, name, brand, market, region_country, start_date, market_launch, status, archived, created_at)`
+  (`market` = codigo de pais/mercado, se usa como calendario de feriados para las tareas de Purina Mercado.
+  `region_country` = codigo de calendario opcional para las tareas de **Purina Región** en ese proyecto
+  (si es NULL cae al `market`); se elige en el ProjectModal.
   `market_launch` = fecha objetivo de lanzamiento del mercado, opcional; deadline visual en el Gantt.
   `archived` = bool; los archivados se ocultan del cronograma activo y del analisis, y se muestran
   en un acordeon con su propio Gantt al final)

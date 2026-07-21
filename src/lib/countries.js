@@ -27,8 +27,20 @@ export function countryName(code) {
   return COUNTRIES.find((c) => c.code === code)?.name || code
 }
 
-// Calendario que aplica a una tarea: el pais del partner responsable, o si el
-// partner no tiene pais (ej. Purina), el market del proyecto.
+// True si el partner es "Purina Región" (nombre contiene "region"/"región").
+// Purina se divide en dos: "Purina Región" (feriados del pais elegido por
+// proyecto) y "Purina Mercado" (feriados del market del proyecto).
+export function isPurinaRegion(partner) {
+  return !partner?.country && /regi[oó]n/i.test(partner?.name || '')
+}
+
+// Calendario que aplica a una tarea:
+// - Partner con pais propio (agencias): su pais.
+// - Purina Región: el pais de feriados elegido en el proyecto (region_country),
+//   con fallback al market si no se cargo.
+// - Purina Mercado / cualquier otro sin pais: el market del proyecto.
 export function taskCountry(partner, project) {
-  return partner?.country || project?.market || null
+  if (partner?.country) return partner.country
+  if (isPurinaRegion(partner)) return project?.region_country || project?.market || null
+  return project?.market || null
 }

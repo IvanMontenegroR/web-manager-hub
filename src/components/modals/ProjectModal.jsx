@@ -20,6 +20,7 @@ export default function ProjectModal({ project, onClose }) {
     name: project?.name || '',
     brand: project?.brand || '',
     market: project?.market || '',
+    region_country: project?.region_country || '',
     start_date: project?.start_date || toISO(new Date()),
     status: project?.status || 'En curso',
   })
@@ -90,7 +91,7 @@ export default function ProjectModal({ project, onClose }) {
         <div className="field">
           <label>Mercado base</label>
           <input className="control" value={form.market} onChange={set('market')} placeholder="MX" />
-          <div className="hint">Calendario de trabajo (feriados de Purina).</div>
+          <div className="hint">Calendario de trabajo (feriados de Purina Mercado).</div>
         </div>
         <div className="field">
           <label>Status</label>
@@ -104,7 +105,14 @@ export default function ProjectModal({ project, onClose }) {
           <label>Fecha de inicio</label>
           <input type="date" className="control" value={form.start_date} onChange={set('start_date')} />
         </div>
-        <div className="field" />
+        <div className="field">
+          <label>País de feriados — Purina Región</label>
+          <select className="control" value={form.region_country} onChange={set('region_country')}>
+            <option value="">(usar mercado base)</option>
+            {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.code} — {c.name}</option>)}
+          </select>
+          <div className="hint">Calendario de las tareas de Purina Región en este proyecto.</div>
+        </div>
       </div>
 
       <div className="field">

@@ -77,7 +77,7 @@ function isGoLive(name) {
 }
 
 // Leyenda + listado de feriados y retrasos (columnas congeladas 1-2).
-function buildLegend(ws, startRow, holList = [], delayList = []) {
+function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
   const items = [
     ['Completado', solidFill(BAR.Completado), null],
     ['En curso', solidFill(BAR['En curso']), null],
@@ -86,11 +86,11 @@ function buildLegend(ws, startRow, holList = [], delayList = []) {
     ['Finde / feriado (F)', NONWORK_FILL, 'F'],
   ]
   let row = startRow
-  const setLabel = (r, text, bold = false) => {
+  const setLabel = (r, text, bold = false, wrap = false) => {
     const c = ws.getCell(r, 1)
     c.value = text
     c.font = { size: 9, bold }
-    c.alignment = { vertical: 'middle' }
+    c.alignment = { vertical: 'middle', wrapText: wrap }
     c.border = border
     return c
   }
@@ -136,17 +136,34 @@ function buildLegend(ws, startRow, holList = [], delayList = []) {
     }
   }
 
-  // RETRASOS: tarea, fechas y razon
+  // RETRASOS: tarea, dias habiles de atraso y razon (razon completa con wrap).
   if (delayList.length) {
     row++
     setLabel(row, 'RETRASOS', true); ws.getCell(row, 2).border = border; row++
     for (const d of delayList) {
-      const range = d.from && d.to ? `${fmtLargo(d.from)} → ${fmtLargo(d.to)}` : ''
-      setLabel(row, `${d.name}: ${range}${d.days ? ` (+${d.days}d)` : ''}${d.reason ? ` — ${d.reason}` : ''}`)
+      const dLabel = d.days ? `+${d.days} día${d.days === 1 ? '' : 's'} hábil${d.days === 1 ? '' : 'es'}` : 'atraso'
+      setLabel(row, `${d.name}: ${dLabel}${d.reason ? ` — ${d.reason}` : ''}`, false, true)
       setSwatch(row, OVERRUN_FILL, 'X')
       row++
     }
   }
+
+  // INFO: fecha de GO-LIVE original (segun el plan), como referencia al pie.
+  if (info.goLiveOriginal) {
+    row++
+    setLabel(row, 'INFO', true); ws.getCell(row, 2).border = border; row++
+    setLabel(row, `Go-live original (plan): ${fmtLargo(info.goLiveOriginal)}`)
+    ws.getCell(row, 2).border = border
+    row++
+  }
+}
+
+// Fecha de GO-LIVE ORIGINAL (segun el plan, sin proyeccion ni atraso): el fin
+// planeado del task GO-LIVE, o el market_launch del proyecto.
+function goLiveOriginal(tasks, project) {
+  const gl = tasks.find((t) => isGoLive(t.action_name))
+  if (gl) return gl.planned_end || project?.market_launch || null
+  return project?.market_launch || null
 }
 
 // Rango de dias a dibujar para un set de tareas de un proyecto.
@@ -386,7 +403,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
 
   // Leyenda de colores + listado de feriados y retrasos (debajo de la ultima tarea).
   const holList = [...holidaysSeen.values()].sort((a, b) => (a.date < b.date ? -1 : 1))
-  buildLegend(ws, 4 + sorted.length + 1, holList, delaysSeen)
+  buildLegend(ws, 4 + sorted.length + 1, holList, delaysSeen, { goLiveOriginal: goLiveOriginal(tasks, project) })
 
   return ws
 }

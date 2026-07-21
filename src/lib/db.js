@@ -92,6 +92,8 @@ export async function replaceProjectLaunches(projectId, launches) {
 }
 
 // ---- Projects ----
+// region_country (feriados de Purina Región) solo se manda cuando tiene valor,
+// para no romper el guardado si la columna todavia no existe en la DB.
 export async function createProject(p) {
   const { data, error } = await supabase
     .from('projects')
@@ -99,6 +101,7 @@ export async function createProject(p) {
       name: p.name,
       brand: p.brand,
       market: p.market,
+      ...(p.region_country ? { region_country: p.region_country } : {}),
       start_date: p.start_date,
       market_launch: p.market_launch || null,
       status: p.status || 'En curso',
@@ -116,6 +119,7 @@ export async function updateProject(id, p) {
       name: p.name,
       brand: p.brand,
       market: p.market,
+      ...(p.region_country ? { region_country: p.region_country } : {}),
       start_date: p.start_date,
       market_launch: p.market_launch || null,
       status: p.status,
