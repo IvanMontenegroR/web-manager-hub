@@ -4,6 +4,7 @@
 import ExcelJS from 'exceljs'
 import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO } from './dates'
 import { partnerColor, partnerName, textOn } from './colors'
+import { countryName } from './countries'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 
 const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
@@ -129,9 +130,9 @@ function safeSheetName(name, idx) {
   return (clean || `Proyecto ${idx + 1}`).slice(0, 31)
 }
 
-// Dibuja una hoja con el Gantt de un proyecto. week = columnas mas angostas y solo
-// se etiquetan los lunes (espeja el modo "Semanas" del cronograma).
-function buildSheet(wb, project, tasks, partners, idx, week = false) {
+// Dibuja una hoja con el Gantt de un proyecto. week = columnas mas angostas con las
+// fechas agrupadas por semana. holByKey = mapa country|date -> nombre de feriado.
+function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = new Map()) {
   const ws = wb.addWorksheet(safeSheetName(project.name, idx), {
     views: [{ state: 'frozen', xSplit: 3, ySplit: 3 }],
   })
@@ -199,13 +200,12 @@ function buildSheet(wb, project, tasks, partners, idx, week = false) {
   days.forEach((iso, i) => {
     const d = parseDay(iso)
     const wknd = isWeekendISO(iso)
-    const isMon = d.getDay() === 1
     const col = C0 + i
-    // En modo semana solo se etiquetan los lunes (d/m), en modo dia todos.
+    // Fila 2 = numero de dia. En modo semana se deja vacia y se rotula por semana (abajo).
     const numCell = ws.getCell(2, col)
-    numCell.value = week ? (isMon ? `${d.getDate()}/${d.getMonth() + 1}` : '') : d.getDate()
-    numCell.font = { size: 8, bold: week }
-    numCell.alignment = { horizontal: week ? 'left' : 'center', vertical: 'middle' }
+    numCell.value = week ? '' : d.getDate()
+    numCell.font = { size: 8 }
+    numCell.alignment = { horizontal: 'center', vertical: 'middle' }
     numCell.border = border
     const dowCell = ws.getCell(3, col)
     dowCell.value = week ? '' : DOW[d.getDay()]
@@ -213,6 +213,28 @@ function buildSheet(wb, project, tasks, partners, idx, week = false) {
     dowCell.alignment = { horizontal: 'center', vertical: 'middle' }
     dowCell.border = border
   })
+
+  // Modo semana: fila 2 agrupa las fechas por semana (corta en lunes o cambio de mes),
+  // celdas mergeadas y centradas => se leen claras bajo la banda de mes.
+  if (week) {
+    let gs = 0
+    for (let i = 1; i <= days.length; i++) {
+      const cur = i < days.length ? parseDay(days[i]) : null
+      const prev = parseDay(days[i - 1])
+      const boundary = i === days.length || cur.getDay() === 1 || cur.getMonth() !== prev.getMonth()
+      if (boundary) {
+        const c1 = C0 + gs, c2 = C0 + i - 1
+        if (c2 > c1) ws.mergeCells(2, c1, 2, c2)
+        const cell = ws.getCell(2, c1)
+        const d1 = parseDay(days[gs]).getDate(), d2 = prev.getDate()
+        cell.value = d1 === d2 ? `${d1}` : `${d1}–${d2}`
+        cell.font = { size: 9, bold: true, color: { argb: 'FF444444' } }
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        cell.border = border
+        gs = i
+      }
+    }
+  }
 
   // --- Filas de tareas ---
   const sorted = [...tasks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
@@ -248,13 +270,26 @@ function buildSheet(wb, project, tasks, partners, idx, week = false) {
       const col = C0 + i
       const cell = ws.getCell(row, col)
       cell.border = border
-      const nonWorking = isWeekendISO(iso) || (t.holidaysSet && t.holidaysSet.has(iso))
+      const isHoliday = t.holidaysSet && t.holidaysSet.has(iso)
+      const nonWorking = isWeekendISO(iso) || isHoliday
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
       const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
       if (nonWorking) cell.fill = NONWORK_FILL
       else if (isOverrun) cell.fill = solidFill(OVERRUN)
       else if (inReal) cell.fill = solidFill(barFill(t.status))
+      // Nota en la celda de feriado: que feriado y de que pais/calendario.
+      if (isHoliday) {
+        const name = holByKey.get(`${t.country}|${iso}`) || 'Feriado'
+        const place = countryName(t.country)
+        cell.note = `${name}${place && place !== '—' ? ` — ${place}` : ''}`
+      }
     })
+
+    // Nota con la razon del retraso en la ultima celda del delay.
+    if (t.isDelayed && t.delay_reason && t.delayEnd) {
+      const di = days.indexOf(t.delayEnd)
+      if (di >= 0) ws.getCell(row, C0 + di).note = `Retraso: ${t.delay_reason}`
+    }
 
     // GO-LIVE: check VERDE en el nombre y en el dia exacto del lanzamiento.
     if (isGoLive(t.action_name)) {
@@ -309,23 +344,31 @@ function safeFileName(name) {
   return (name || 'Proyecto').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim()
 }
 
+// Lookup nombre de feriado por `country|date` (para las notas de feriado).
+function holidayMap(holidays) {
+  const m = new Map()
+  for (const h of holidays || []) m.set(`${h.country}|${h.date}`, h.name || 'Feriado')
+  return m
+}
+
 // Exporta TODOS los proyectos (no archivados) -> una hoja por proyecto.
 // week: dibuja en modo semana (segun el toggle del cronograma).
-export async function exportGlobal(enriched, projects, partners, week = false) {
+export async function exportGlobal(enriched, projects, partners, week = false, holidays = []) {
   const wb = new ExcelJS.Workbook()
+  const holByKey = holidayMap(holidays)
   const active = projects.filter((p) => !p.archived)
   active.forEach((project, idx) => {
     const tasks = enriched.filter((t) => t.project_id === project.id)
-    buildSheet(wb, project, tasks, partners, idx, week)
+    buildSheet(wb, project, tasks, partners, idx, week, holByKey)
   })
-  if (active.length === 0) buildSheet(wb, { name: 'Sin proyectos' }, [], partners, 0, week)
+  if (active.length === 0) buildSheet(wb, { name: 'Sin proyectos' }, [], partners, 0, week, holByKey)
   await download(wb, 'Gantt Timeline.xlsx')
 }
 
 // Exporta UN proyecto. Nombre: "Project Name - Gantt Timeline.xlsx".
-export async function exportProject(project, enriched, partners, week = false) {
+export async function exportProject(project, enriched, partners, week = false, holidays = []) {
   const wb = new ExcelJS.Workbook()
   const tasks = enriched.filter((t) => t.project_id === project.id)
-  buildSheet(wb, project, tasks, partners, 0, week)
+  buildSheet(wb, project, tasks, partners, 0, week, holidayMap(holidays))
   await download(wb, `${safeFileName(project.name)} - Gantt Timeline.xlsx`)
 }

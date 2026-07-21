@@ -13,7 +13,7 @@ import { deleteProject, deleteTask, setProjectArchived } from '../lib/db'
 import { exportGlobal, exportProject } from '../lib/exportTimeline'
 
 export default function WebProjects() {
-  const { loading, error, projects, tasks, partners, enriched, refresh } = useData()
+  const { loading, error, projects, tasks, partners, enriched, holidays, refresh } = useData()
   const [modal, setModal] = useState(null) // {type, project?, task?}
   // Preferencias de vista: todas se recuerdan entre sesiones (localStorage).
   const [hidePast, setHidePast] = useState(() => localStorage.getItem('wmh_hidepast') === '1')
@@ -59,7 +59,7 @@ export default function WebProjects() {
   }
 
   function handleExportProject(project) {
-    exportProject(project, enriched, partners, zoom === 'week')
+    exportProject(project, enriched, partners, zoom === 'week', holidays)
   }
 
   return (
@@ -101,7 +101,7 @@ export default function WebProjects() {
               <EyeOff size={16} /> {hiddenExisting.length} oculto{hiddenExisting.length > 1 ? 's' : ''}
             </button>
           )}
-          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners, zoom === 'week')} disabled={tasks.length === 0}>
+          <button className="btn" onClick={() => exportGlobal(enriched, projects, partners, zoom === 'week', holidays)} disabled={tasks.length === 0}>
             <Download size={16} /> Exportar
           </button>
           <div className="dropdown">
