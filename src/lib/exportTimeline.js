@@ -2,7 +2,7 @@
 // barras), findes/feriados con rayas negras, ASSIGNED TO y STATUS con color, bandas de
 // mes/dia. Brandeado Purina (negro + rojo de marca, con logo). Usa ExcelJS.
 import ExcelJS from 'exceljs'
-import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo, addDaysISO } from './dates'
+import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo, fmtCorto, addDaysISO } from './dates'
 import { partnerColor, partnerName, textOn } from './colors'
 import { countryName } from './countries'
 import { PURINA_LOGO_B64 } from './purinaLogo'
@@ -503,8 +503,6 @@ export async function exportProject(project, enriched, partners, week = false, h
 }
 
 // --- Resumen semanal (1 celda = 1 semana) de varios proyectos ---
-// Colores de las barras de proyecto (se ciclan por proyecto).
-const SUMMARY_COLORS = ['FF9DC3F0', 'FFF7C7AC', 'FFC6E6C0', 'FFE0B7E8', 'FFF0DDA0', 'FFA0D8D8', 'FFF2B8C6']
 
 // Lunes de la semana que contiene a `iso` (semana = lunes a domingo).
 function mondayOfISO(iso) {
@@ -525,13 +523,42 @@ function projectSpan(tasks) {
   return { min, max, goLive }
 }
 
-// Hoja "Resumen (semanas)": una fila por proyecto, columnas = semanas, cada
-// celda = una semana. La barra cubre las semanas activas del proyecto; la
-// semana del GO-LIVE lleva un check verde. Linea violeta en la semana de hoy.
-function buildSummarySheet(wb, projects, enriched) {
-  const ws = wb.addWorksheet('Resumen (semanas)', { views: [{ state: 'frozen', xSplit: 1, ySplit: 2 }] })
+// Segmentos {start, end, partner_id} de un proyecto (rango efectivo por tarea).
+function projectSegments(tasks) {
+  const segs = []
+  for (const t of tasks) {
+    const start = t.renderStart || t.planned_start
+    const end = t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)
+    if (start && end && t.partner_id) segs.push({ start, end, partner_id: t.partner_id })
+  }
+  return segs
+}
+
+// Partner que MAS trabaja en la semana [wk, wkEnd] (mas dias de solape). null si ninguno.
+function dominantPartner(segs, wk, wkEnd) {
+  const tally = new Map()
+  for (const s of segs) {
+    const lo = s.start > wk ? s.start : wk
+    const hi = s.end < wkEnd ? s.end : wkEnd
+    const d = daysBetween(lo, hi)
+    if (d >= 0) tally.set(s.partner_id, (tally.get(s.partner_id) || 0) + d + 1)
+  }
+  let best = null, bestD = -1
+  for (const [pid, d] of tally) if (d > bestD) { best = pid; bestD = d }
+  return best
+}
+
+// Hoja "Resumen (semanas)": una fila por proyecto, columnas = semanas (1 celda =
+// 1 semana). Cada semana se pinta con el color de la AGENCIA que mas trabaja esa
+// semana, asi el mismo color en 2 filas la misma semana = posible solapamiento.
+// Columnas de Inicio y GO-LIVE + leyenda de agencias. Linea violeta = semana de hoy.
+function buildSummarySheet(wb, projects, enriched, partners) {
+  const ws = wb.addWorksheet('Resumen (semanas)', { views: [{ state: 'frozen', xSplit: 3, ySplit: 2 }] })
   const spans = projects
-    .map((p) => ({ project: p, ...projectSpan(enriched.filter((t) => t.project_id === p.id)) }))
+    .map((p) => {
+      const tasks = enriched.filter((t) => t.project_id === p.id)
+      return { project: p, ...projectSpan(tasks), segs: projectSegments(tasks) }
+    })
     .filter((s) => s.min && s.max)
   if (spans.length === 0) { ws.getCell(1, 1).value = 'Sin datos'; return ws }
 
@@ -540,19 +567,24 @@ function buildSummarySheet(wb, projects, enriched) {
   const weeks = []
   for (let iso = mondayOfISO(gmin); iso <= mondayOfISO(gmax); iso = addDaysISO(iso, 7)) weeks.push(iso)
 
-  const C0 = 2
-  ws.getColumn(1).width = 30
+  const C0 = 4 // col1 Proyecto, col2 Inicio, col3 GO-LIVE, luego semanas
+  ws.getColumn(1).width = 24
+  ws.getColumn(2).width = 10
+  ws.getColumn(3).width = 10
   for (let i = 0; i < weeks.length; i++) ws.getColumn(C0 + i).width = 4
 
-  // Esquina (rows 1-2, col 1)
-  ws.mergeCells(1, 1, 2, 1)
-  const corner = ws.getCell(1, 1)
-  corner.value = 'Proyecto'
-  corner.fill = solidFill(PURINA_RED)
-  corner.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } }
-  corner.alignment = { horizontal: 'left', vertical: 'middle' }
-  corner.border = border
-  ws.getRow(1).height = 18
+  // Encabezados fijos (Proyecto / Inicio / GO-LIVE), merge vertical rows 1-2.
+  const heads = ['Proyecto', 'Inicio', 'GO-LIVE']
+  heads.forEach((h, i) => {
+    ws.mergeCells(1, 1 + i, 2, 1 + i)
+    const c = ws.getCell(1, 1 + i)
+    c.value = h
+    c.fill = solidFill(PURINA_RED)
+    c.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+    c.alignment = { horizontal: i === 0 ? 'left' : 'center', vertical: 'middle' }
+    c.border = border
+  })
+  ws.getRow(1).height = 16
 
   // Fila 1: bandas de mes. Fila 2: dia (numero) del lunes de cada semana.
   let mStart = 0
@@ -578,25 +610,28 @@ function buildSummarySheet(wb, projects, enriched) {
     }
   })
 
-  // Filas de proyecto
+  // Filas de proyecto: cada semana con el color de la agencia dominante.
+  const usedPartners = new Set()
   const todayMon = mondayOfISO(toISO(new Date()))
   spans.forEach((s, r) => {
     const row = 3 + r
-    const color = SUMMARY_COLORS[r % SUMMARY_COLORS.length]
     const nameCell = ws.getCell(row, 1)
     nameCell.value = `${s.project.name}${s.project.market ? ` (${s.project.market})` : ''}`
     nameCell.font = { size: 9, bold: true }
     nameCell.alignment = { vertical: 'middle' }
-    nameCell.border = { ...border, left: { style: 'medium', color: { argb: color } } }
+    nameCell.border = border
+    const dCell = ws.getCell(row, 2); dCell.value = fmtCorto(s.min); dCell.font = { size: 9 }; dCell.alignment = { horizontal: 'center', vertical: 'middle' }; dCell.border = border
+    const gCell = ws.getCell(row, 3); gCell.value = s.goLive ? fmtCorto(s.goLive) : '—'; gCell.font = { size: 9, bold: true, color: { argb: GREEN } }; gCell.alignment = { horizontal: 'center', vertical: 'middle' }; gCell.border = border
     const glMon = s.goLive ? mondayOfISO(s.goLive) : null
     weeks.forEach((wk, i) => {
       const cell = ws.getCell(row, C0 + i)
       cell.border = border
       const wkEnd = addDaysISO(wk, 6)
-      if (s.min <= wkEnd && s.max >= wk) cell.fill = solidFill(color)
+      const pid = dominantPartner(s.segs, wk, wkEnd)
+      if (pid) { cell.fill = solidFill(argb(partnerColor(partners, pid))); usedPartners.add(pid) }
       if (glMon && glMon === wk) {
         cell.value = '✔'
-        cell.font = { bold: true, size: 10, color: { argb: GREEN } }
+        cell.font = { bold: true, size: 10, color: { argb: 'FF000000' } }
         cell.alignment = { horizontal: 'center', vertical: 'middle' }
       }
     })
@@ -607,6 +642,24 @@ function buildSummarySheet(wb, projects, enriched) {
   if (todayIdx >= 0) {
     for (let row = 2; row <= 2 + spans.length; row++) vLineAt(ws, row, C0 + todayIdx, medToday)
   }
+
+  // Leyenda de agencias (color -> nombre) + nota de lectura.
+  let lr = 3 + spans.length + 1
+  const title = ws.getCell(lr, 1); title.value = 'AGENCIAS'; title.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }; title.fill = solidFill(PURINA_RED); title.border = border
+  ws.getCell(lr, 2).fill = solidFill(PURINA_RED); ws.getCell(lr, 2).border = border
+  lr++
+  for (const pid of usedPartners) {
+    const sw = ws.getCell(lr, 1); sw.fill = solidFill(argb(partnerColor(partners, pid))); sw.border = border
+    const nm = ws.getCell(lr, 2); nm.value = partnerName(partners, pid, '—'); nm.font = { size: 9 }; nm.alignment = { vertical: 'middle' }; nm.border = border
+    ws.mergeCells(lr, 2, lr, 3)
+    lr++
+  }
+  lr++
+  const note = ws.getCell(lr, 1)
+  note.value = 'Cada semana = agencia que más trabaja esa semana. Mismo color en 2 filas la misma semana = posible solapamiento. ✔ = semana de GO-LIVE.'
+  note.font = { size: 8, italic: true, color: { argb: 'FF666666' } }
+  note.alignment = { vertical: 'middle', wrapText: true }
+  ws.mergeCells(lr, 1, lr, Math.min(C0 + 8, C0 + weeks.length - 1))
   return ws
 }
 
@@ -619,7 +672,7 @@ export async function exportSelection(selected, enriched, partners, week = false
     const tasks = enriched.filter((t) => t.project_id === project.id)
     buildSheet(wb, project, tasks, partners, idx, week, holByKey)
   })
-  if (selected.length >= 2) buildSummarySheet(wb, selected, enriched)
+  if (selected.length >= 2) buildSummarySheet(wb, selected, enriched, partners)
   const name = selected.length === 1
     ? `${safeFileName(selected[0].name)} - Gantt Timeline.xlsx`
     : 'Gantt Timeline (seleccion).xlsx'
