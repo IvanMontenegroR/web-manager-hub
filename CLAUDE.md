@@ -97,7 +97,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 - **Solapamientos** (`src/lib/analysis.js` -> `detectOverlaps`): comparacion por pares de
   todas las tasks. Conflicto = mismo `partner_id`, `project_id` distinto, y la interseccion de
   sus rangos **REALES/proyectados** (`renderStart..renderEnd`) contiene al menos un dia **habil**
-  (findes/feriados del partner no cuentan).
+  (findes/feriados del partner no cuentan). Las tareas **GO-LIVE** son hitos de 1 dia y **NO
+  cuentan** para solapamiento (se excluyen del detector). El Excel muestra la lista completa de
+  solapamientos al pie de la hoja "Resumen (semanas)".
 - **Retrasos** (`detectDelays`): una tarea esta atrasada si cerro tarde (`actual_end > planned_end`)
   O sigue abierta y ya paso su fin planeado (se mide contra HOY). Ambos casos son "atraso" y se
   tratan/pintan IGUAL (mismo rojo). El fin de referencia es `delayEnd` (= `actual_end` o HOY). El

@@ -43,11 +43,17 @@ function minISO(a, b) {
   return daysBetween(a, b) >= 0 ? a : b
 }
 
+// Detecta la tarea de lanzamiento por nombre (hito, no cuenta para solapamiento).
+function isGoLive(name) {
+  return /go[\s_-]*live/i.test(name || '')
+}
+
 // Solapamiento: mismo partner, proyectos DISTINTOS, y la interseccion de sus rangos
 // REALES/proyectados (renderStart..renderEnd) contiene al menos un dia HABIL (los
 // findes/feriados no cuentan). Usa el set de feriados efectivo (a.holidaysSet).
+// Las GO-LIVE son hitos (1 dia) y NO cuentan para solapamiento.
 export function detectOverlaps(enriched) {
-  const list = enriched.filter((t) => t.partner_id && t.planned_start && t.planned_days)
+  const list = enriched.filter((t) => t.partner_id && t.planned_start && t.planned_days && !isGoLive(t.action_name))
   const pairs = []
   const conflictIds = new Set()
   const s0 = (t) => t.renderStart || t.planned_start
