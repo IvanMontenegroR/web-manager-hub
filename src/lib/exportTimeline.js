@@ -523,21 +523,31 @@ function projectSpan(tasks) {
   return { min, max, goLive }
 }
 
-// Segmentos {start, end, partner_id} de un proyecto (rango efectivo por tarea).
+// Detecta la tarea de implementacion por nombre ("Implementanción"/"Implementación").
+function isImplementation(name) {
+  return /implementa/i.test(name || '')
+}
+
+// Segmentos {start, end, partner_id, isImpl} de un proyecto (rango efectivo por tarea).
 function projectSegments(tasks) {
   const segs = []
   for (const t of tasks) {
     const start = t.renderStart || t.planned_start
     const end = t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)
-    if (start && end && t.partner_id) segs.push({ start, end, partner_id: t.partner_id })
+    if (start && end && t.partner_id) {
+      segs.push({ start, end, partner_id: t.partner_id, isImpl: isImplementation(t.action_name) })
+    }
   }
   return segs
 }
 
 // Partner que MAS trabaja en la semana [wk, wkEnd] (mas dias de solape). null si ninguno.
-function dominantPartner(segs, wk, wkEnd) {
+// `nbsIds`: NBS solo cuenta con su tarea de IMPLEMENTACION (sus tareas chicas —Figma,
+// Revisión Ticket, Ajustes Finales— no pintan la semana).
+function dominantPartner(segs, wk, wkEnd, nbsIds) {
   const tally = new Map()
   for (const s of segs) {
+    if (nbsIds && nbsIds.has(s.partner_id) && !s.isImpl) continue
     const lo = s.start > wk ? s.start : wk
     const hi = s.end < wkEnd ? s.end : wkEnd
     const d = daysBetween(lo, hi)
@@ -611,6 +621,8 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   })
 
   // Filas de proyecto: cada semana con el color de la agencia dominante.
+  // NBS solo pinta con su implementacion (sus tareas chicas no cuentan).
+  const nbsIds = new Set((partners || []).filter((p) => /nbs/i.test(p.name || '')).map((p) => p.id))
   const usedPartners = new Set()
   const todayMon = mondayOfISO(toISO(new Date()))
   spans.forEach((s, r) => {
@@ -627,7 +639,7 @@ function buildSummarySheet(wb, projects, enriched, partners) {
       const cell = ws.getCell(row, C0 + i)
       cell.border = border
       const wkEnd = addDaysISO(wk, 6)
-      const pid = dominantPartner(s.segs, wk, wkEnd)
+      const pid = dominantPartner(s.segs, wk, wkEnd, nbsIds)
       if (pid) { cell.fill = solidFill(argb(partnerColor(partners, pid))); usedPartners.add(pid) }
       if (glMon && glMon === wk) {
         cell.value = '✔'
