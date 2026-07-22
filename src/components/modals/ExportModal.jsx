@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext.jsx'
 import { exportSelection } from '../../lib/exportTimeline'
 
 // Modal para elegir qué proyectos exportar a Excel. Cada proyecto va en su
-// pestaña; con 2 o más se agrega una pestaña "Resumen (semanas)".
+// pestaña; con 2 o más se agrega una pestaña "Timeline unificado".
 export default function ExportModal({ zoom, onClose }) {
   const { projects, enriched, partners, holidays } = useData()
   const active = projects.filter((p) => !p.archived)
@@ -67,7 +67,8 @@ export default function ExportModal({ zoom, onClose }) {
     >
       <div className="hint" style={{ marginBottom: 10 }}>
         Cada proyecto va en su propia pestaña. Si elegís <b>2 o más</b>, se agrega una pestaña
-        <b> “Resumen (semanas)”</b> con el timeline de todos (1 cuadrito = 1 semana).
+        <b> “Timeline unificado”</b> con todos los proyectos y tareas en un eje común (semanas),
+        y los solapamientos de agencia marcados en rojo.
       </div>
 
       {active.length > 0 && (

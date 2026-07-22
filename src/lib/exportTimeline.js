@@ -511,97 +511,54 @@ function mondayOfISO(iso) {
   return addDaysISO(iso, -((dow + 6) % 7))
 }
 
-// Rango [min, max] real/proyectado de un proyecto + fecha de su GO-LIVE.
-function projectSpan(tasks) {
-  let min = null, max = null, goLive = null
-  for (const t of tasks) {
-    const s = t.renderStart || t.planned_start
-    const e = t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)
-    if (s && (!min || s < min)) min = s
-    if (e && (!max || e > max)) max = e
-    if (isGoLive(t.action_name)) goLive = t.actual_end || (t.isDelayed ? t.delayEnd : t.renderEnd) || t.planned_end
-  }
-  return { min, max, goLive }
-}
-
-// Detecta la tarea de implementacion por nombre ("Implementanción"/"Implementación").
-function isImplementation(name) {
-  return /implementa/i.test(name || '')
-}
-
-// Segmentos {start, end, partner_id, isImpl} de un proyecto (rango efectivo por tarea).
-function projectSegments(tasks) {
-  const segs = []
-  for (const t of tasks) {
-    const start = t.renderStart || t.planned_start
-    const end = t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)
-    if (start && end && t.partner_id) {
-      segs.push({ start, end, partner_id: t.partner_id, isImpl: isImplementation(t.action_name) })
-    }
-  }
-  return segs
-}
-
-// Partner que MAS trabaja en la semana [wk, wkEnd] (mas dias de solape). null si ninguno.
-// `nbsIds`: NBS solo cuenta con su tarea de IMPLEMENTACION (sus tareas chicas —Figma,
-// Revisión Ticket, Ajustes Finales— no pintan la semana).
-function dominantPartner(segs, wk, wkEnd, nbsIds) {
-  const tally = new Map()
-  for (const s of segs) {
-    if (nbsIds && nbsIds.has(s.partner_id) && !s.isImpl) continue
-    const lo = s.start > wk ? s.start : wk
-    const hi = s.end < wkEnd ? s.end : wkEnd
-    const d = daysBetween(lo, hi)
-    if (d >= 0) tally.set(s.partner_id, (tally.get(s.partner_id) || 0) + d + 1)
-  }
-  let best = null, bestD = -1
-  for (const [pid, d] of tally) if (d > bestD) { best = pid; bestD = d }
-  return best
-}
-
-// Hoja "Resumen (semanas)": una fila por proyecto, columnas = semanas (1 celda =
-// 1 semana). Cada semana se pinta con el color de la AGENCIA que mas trabaja esa
-// semana, asi el mismo color en 2 filas la misma semana = posible solapamiento.
-// Columnas de Inicio y GO-LIVE + leyenda de agencias. Linea violeta = semana de hoy.
+// Hoja "Timeline unificado": TODOS los proyectos y TODAS sus tareas en un solo eje
+// de semanas (1 celda = 1 semana), apilados bajo un titulo. Cada barra = una tarea,
+// coloreada por su agencia. Solapamientos (mismo partner, distinto proyecto) con
+// borde rojo en las semanas en conflicto. Linea violeta = semana de hoy.
 function buildSummarySheet(wb, projects, enriched, partners) {
-  const ws = wb.addWorksheet('Resumen (semanas)', { views: [{ state: 'frozen', xSplit: 3, ySplit: 2 }] })
-  const spans = projects
-    .map((p) => {
-      const tasks = enriched.filter((t) => t.project_id === p.id)
-      return { project: p, ...projectSpan(tasks), segs: projectSegments(tasks) }
-    })
-    .filter((s) => s.min && s.max)
-  if (spans.length === 0) { ws.getCell(1, 1).value = 'Sin datos'; return ws }
+  const ws = wb.addWorksheet('Timeline unificado', { views: [{ state: 'frozen', xSplit: 1, ySplit: 3 }] })
+  const projData = projects
+    .map((p) => ({ project: p, tasks: enriched.filter((t) => t.project_id === p.id).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)) }))
+    .filter((pd) => pd.tasks.length)
+  if (projData.length === 0) { ws.getCell(1, 1).value = 'Sin datos'; return ws }
 
-  let gmin = spans[0].min, gmax = spans[0].max
-  for (const s of spans) { if (s.min < gmin) gmin = s.min; if (s.max > gmax) gmax = s.max }
+  // Rango efectivo por tarea + rango global de semanas.
+  const rng = (t) => [t.renderStart || t.planned_start, t.isDelayed ? t.delayEnd : (t.renderEnd || t.planned_end)]
+  let gmin = null, gmax = null
+  for (const pd of projData) for (const t of pd.tasks) {
+    const [s, e] = rng(t)
+    if (s && (!gmin || s < gmin)) gmin = s
+    if (e && (!gmax || e > gmax)) gmax = e
+  }
   const weeks = []
   for (let iso = mondayOfISO(gmin); iso <= mondayOfISO(gmax); iso = addDaysISO(iso, 7)) weeks.push(iso)
 
-  const C0 = 4 // col1 Proyecto, col2 Inicio, col3 GO-LIVE, luego semanas
-  ws.getColumn(1).width = 24
-  ws.getColumn(2).width = 10
-  ws.getColumn(3).width = 10
-  for (let i = 0; i < weeks.length; i++) ws.getColumn(C0 + i).width = 4
+  const C0 = 2
+  const lastCol = C0 + weeks.length - 1
+  ws.getColumn(1).width = 38
+  for (let i = 0; i < weeks.length; i++) ws.getColumn(C0 + i).width = 3.6
 
-  // Encabezados fijos (Proyecto / Inicio / GO-LIVE), merge vertical rows 1-2.
-  const heads = ['Proyecto', 'Inicio', 'GO-LIVE']
-  heads.forEach((h, i) => {
-    ws.mergeCells(1, 1 + i, 2, 1 + i)
-    const c = ws.getCell(1, 1 + i)
-    c.value = h
-    c.fill = solidFill(PURINA_RED)
-    c.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
-    c.alignment = { horizontal: i === 0 ? 'left' : 'center', vertical: 'middle' }
-    c.border = border
-  })
-  ws.getRow(1).height = 16
+  // Fila 1: titulo unico. Fila 2: bandas de mes. Fila 3: numero de semana + "Proyecto / Tarea".
+  ws.mergeCells(1, 1, 1, lastCol)
+  const t1 = ws.getCell(1, 1)
+  t1.value = 'TIMELINE UNIFICADO'
+  t1.fill = solidFill(BRAND_BG)
+  t1.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
+  t1.alignment = { horizontal: 'left', vertical: 'middle' }
+  t1.border = border
+  ws.getRow(1).height = 22
+  ws.getCell(2, 1).fill = solidFill(PURINA_RED); ws.getCell(2, 1).border = border
+  const corner = ws.getCell(3, 1)
+  corner.value = 'Proyecto / Tarea'
+  corner.fill = solidFill(PURINA_RED)
+  corner.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+  corner.alignment = { horizontal: 'left', vertical: 'middle' }
+  corner.border = border
 
-  // Fila 1: bandas de mes. Fila 2: dia (numero) del lunes de cada semana.
   let mStart = 0
   weeks.forEach((wk, i) => {
     const d = parseDay(wk)
-    const wc = ws.getCell(2, C0 + i)
+    const wc = ws.getCell(3, C0 + i)
     wc.value = d.getDate()
     wc.font = { size: 7, color: { argb: 'FF666666' } }
     wc.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -610,8 +567,8 @@ function buildSummarySheet(wb, projects, enriched, partners) {
     const boundary = !next || parseDay(next).getMonth() !== d.getMonth() || parseDay(next).getFullYear() !== d.getFullYear()
     if (boundary) {
       const c1 = C0 + mStart, c2 = C0 + i
-      if (c2 > c1) ws.mergeCells(1, c1, 1, c2)
-      const mc = ws.getCell(1, c1)
+      if (c2 > c1) ws.mergeCells(2, c1, 2, c2)
+      const mc = ws.getCell(2, c1)
       mc.value = `${MESES[d.getMonth()]} ${d.getFullYear()}`
       mc.font = { bold: true, size: 8, color: { argb: 'FF333333' } }
       mc.fill = solidFill('FFEDEDED')
@@ -621,41 +578,52 @@ function buildSummarySheet(wb, projects, enriched, partners) {
     }
   })
 
-  // Filas de proyecto: cada semana con el color de la agencia dominante.
-  // NBS solo pinta con su implementacion (sus tareas chicas no cuentan).
-  const nbsIds = new Set((partners || []).filter((p) => /nbs/i.test(p.name || '')).map((p) => p.id))
+  // Filas: por proyecto, un encabezado + una fila por tarea (barra por agencia).
   const usedPartners = new Set()
-  const todayMon = mondayOfISO(toISO(new Date()))
-  spans.forEach((s, r) => {
-    const row = 3 + r
-    const nameCell = ws.getCell(row, 1)
-    nameCell.value = `${s.project.name}${s.project.market ? ` (${s.project.market})` : ''}`
-    nameCell.font = { size: 9, bold: true }
-    nameCell.alignment = { vertical: 'middle' }
-    nameCell.border = border
-    const dCell = ws.getCell(row, 2); dCell.value = fmtCorto(s.min); dCell.font = { size: 9 }; dCell.alignment = { horizontal: 'center', vertical: 'middle' }; dCell.border = border
-    const gCell = ws.getCell(row, 3); gCell.value = s.goLive ? fmtCorto(s.goLive) : '—'; gCell.font = { size: 9, bold: true, color: { argb: GREEN } }; gCell.alignment = { horizontal: 'center', vertical: 'middle' }; gCell.border = border
-    const glMon = s.goLive ? mondayOfISO(s.goLive) : null
-    weeks.forEach((wk, i) => {
-      const cell = ws.getCell(row, C0 + i)
-      cell.border = border
-      const wkEnd = addDaysISO(wk, 6)
-      const pid = dominantPartner(s.segs, wk, wkEnd, nbsIds)
-      if (pid) { cell.fill = solidFill(argb(partnerColor(partners, pid))); usedPartners.add(pid) }
-      if (glMon && glMon === wk) {
-        cell.value = '✔'
-        cell.font = { bold: true, size: 10, color: { argb: 'FF000000' } }
-        cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      }
-    })
-    ws.getRow(row).height = 16
-  })
+  const taskRow = new Map()
+  let row = 4
+  for (const pd of projData) {
+    ws.mergeCells(row, 1, row, lastCol)
+    const gl = pd.tasks.find((t) => isGoLive(t.action_name))
+    const glDate = gl ? (gl.actual_end || (gl.isDelayed ? gl.delayEnd : gl.renderEnd) || gl.planned_end) : null
+    const hc = ws.getCell(row, 1)
+    hc.value = `${pd.project.name}${pd.project.market ? ` (${pd.project.market})` : ''}${glDate ? `    ·    GO-LIVE ${fmtCorto(glDate)}` : ''}`
+    hc.fill = solidFill('FF444444')
+    hc.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+    hc.alignment = { horizontal: 'left', vertical: 'middle' }
+    hc.border = border
+    row++
+    for (const t of pd.tasks) {
+      taskRow.set(t.id, row)
+      const nameCell = ws.getCell(row, 1)
+      nameCell.value = `    ${t.action_name || ''}`
+      nameCell.font = { size: 9 }
+      nameCell.alignment = { vertical: 'middle' }
+      nameCell.border = border
+      const [s, e] = rng(t)
+      const pc = argb(partnerColor(partners, t.partner_id))
+      if (t.partner_id) usedPartners.add(t.partner_id)
+      const glMon = isGoLive(t.action_name) && s ? mondayOfISO(s) : null
+      weeks.forEach((wk, i) => {
+        const cell = ws.getCell(row, C0 + i)
+        cell.border = border
+        const wkEnd = addDaysISO(wk, 6)
+        if (s && e && s <= wkEnd && e >= wk) cell.fill = solidFill(pc)
+        if (glMon && glMon === wk) {
+          cell.value = '✔'
+          cell.font = { bold: true, size: 9, color: { argb: 'FF000000' } }
+          cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        }
+      })
+      row++
+    }
+  }
+  const lastDataRow = row - 1
 
-  // --- Solapamientos (mismo partner, distinto proyecto; GO-LIVE ya excluidas) ---
+  // Solapamientos: borde rojo en las semanas en conflicto (ambas filas del par).
   const selIds = new Set(projects.map((p) => p.id))
   const s0 = (t) => t.renderStart || t.planned_start
   const e0 = (t) => t.renderEnd || t.planned_end
-  const rowOf = new Map(spans.map((sp, r) => [sp.project.id, 3 + r]))
   const ovRows = detectOverlaps(enriched.filter((t) => selIds.has(t.project_id))).pairs
     .map(({ a, b, partner_id }) => ({
       partner_id,
@@ -664,50 +632,46 @@ function buildSummarySheet(wb, projects, enriched, partners) {
       a, b,
     }))
     .sort((x, y) => (x.s < y.s ? -1 : x.s > y.s ? 1 : 0))
-  // Borde rojo en las semanas en conflicto (ambas filas del par).
   const redB = { style: 'medium', color: { argb: PURINA_RED } }
   for (const o of ovRows) {
     for (let i = 0; i < weeks.length; i++) {
       const wk = weeks[i]
       if (o.s <= addDaysISO(wk, 6) && o.e >= wk) {
-        for (const pid of [o.a.project_id, o.b.project_id]) {
-          const rr = rowOf.get(pid)
+        for (const id of [o.a.id, o.b.id]) {
+          const rr = taskRow.get(id)
           if (rr) ws.getCell(rr, C0 + i).border = { top: redB, bottom: redB, left: redB, right: redB }
         }
       }
     }
   }
 
-  // Linea violeta en la semana de hoy (si esta en rango).
-  const todayIdx = weeks.indexOf(todayMon)
-  if (todayIdx >= 0) {
-    for (let row = 2; row <= 2 + spans.length; row++) vLineAt(ws, row, C0 + todayIdx, medToday)
-  }
+  // Linea violeta en la semana de hoy.
+  const todayIdx = weeks.indexOf(mondayOfISO(toISO(new Date())))
+  if (todayIdx >= 0) for (let r = 3; r <= lastDataRow; r++) vLineAt(ws, r, C0 + todayIdx, medToday)
 
-  // Leyenda de agencias (color -> nombre) + nota de lectura.
-  let lr = 3 + spans.length + 1
-  const title = ws.getCell(lr, 1); title.value = 'AGENCIAS'; title.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }; title.fill = solidFill(PURINA_RED); title.border = border
-  ws.getCell(lr, 2).fill = solidFill(PURINA_RED); ws.getCell(lr, 2).border = border
+  // Leyenda de agencias + nota + lista corta de solapamientos.
+  const legCols = Math.min(C0 + 12, lastCol)
+  let lr = lastDataRow + 2
+  ws.mergeCells(lr, 1, lr, Math.min(C0 + 4, lastCol))
+  const legTitle = ws.getCell(lr, 1); legTitle.value = 'AGENCIAS'; legTitle.fill = solidFill(PURINA_RED); legTitle.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }; legTitle.border = border
   lr++
   for (const pid of usedPartners) {
     const sw = ws.getCell(lr, 1); sw.fill = solidFill(argb(partnerColor(partners, pid))); sw.border = border
     const nm = ws.getCell(lr, 2); nm.value = partnerName(partners, pid, '—'); nm.font = { size: 9 }; nm.alignment = { vertical: 'middle' }; nm.border = border
-    ws.mergeCells(lr, 2, lr, 3)
+    ws.mergeCells(lr, 2, lr, Math.min(C0 + 6, lastCol))
     lr++
   }
   lr++
   const note = ws.getCell(lr, 1)
-  note.value = 'Cada semana = agencia que más trabaja esa semana. Borde rojo = solapamiento de agencia entre proyectos (mismo partner en 2). ✔ = semana de GO-LIVE.'
+  note.value = 'Cada barra = una tarea, con el color de su agencia. Borde rojo = solapamiento de agencia entre proyectos. ✔ = GO-LIVE (no cuenta como solapamiento).'
   note.font = { size: 8, italic: true, color: { argb: 'FF666666' } }
   note.alignment = { vertical: 'middle', wrapText: true }
-  const lastCol = C0 + Math.min(10, weeks.length - 1)
-  ws.mergeCells(lr, 1, lr, lastCol)
-
-  // --- SOLAPAMIENTOS: marcados con borde rojo arriba; aca la lista corta (wrap) ---
+  ws.mergeCells(lr, 1, lr, legCols)
   lr += 2
-  ws.mergeCells(lr, 1, lr, lastCol)
+
+  ws.mergeCells(lr, 1, lr, legCols)
   const ovh = ws.getCell(lr, 1)
-  ovh.value = 'SOLAPAMIENTOS (borde rojo en la grilla)'
+  ovh.value = 'SOLAPAMIENTOS'
   ovh.fill = solidFill(PURINA_RED)
   ovh.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
   ovh.alignment = { horizontal: 'left', vertical: 'middle' }
@@ -715,7 +679,7 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   lr++
   const mkt = (pid) => { const p = projects.find((x) => x.id === pid); return (p && (p.market || p.name)) || '?' }
   if (ovRows.length === 0) {
-    ws.mergeCells(lr, 1, lr, lastCol)
+    ws.mergeCells(lr, 1, lr, legCols)
     const c = ws.getCell(lr, 1)
     c.value = 'Sin solapamientos de agencia.'
     c.font = { size: 9, italic: true, color: { argb: 'FF666666' } }
@@ -730,7 +694,7 @@ function buildSummarySheet(wb, projects, enriched, partners) {
       pcell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + pc.slice(2))) } }
       pcell.alignment = { horizontal: 'center', vertical: 'middle' }
       pcell.border = border
-      ws.mergeCells(lr, 2, lr, lastCol)
+      ws.mergeCells(lr, 2, lr, legCols)
       const desc = ws.getCell(lr, 2)
       const same = o.a.action_name === o.b.action_name
       desc.value = same
@@ -746,7 +710,7 @@ function buildSummarySheet(wb, projects, enriched, partners) {
 }
 
 // Exporta una SELECCION de proyectos: una hoja por proyecto + (si son 2 o mas)
-// una hoja "Resumen (semanas)" con el timeline semanal de todos.
+// una hoja "Timeline unificado" con todos los proyectos y tareas en un eje comun.
 export async function exportSelection(selected, enriched, partners, week = false, holidays = []) {
   const wb = new ExcelJS.Workbook()
   const holByKey = holidayMap(holidays)
