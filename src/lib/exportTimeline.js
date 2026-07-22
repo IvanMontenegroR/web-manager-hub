@@ -648,7 +648,35 @@ function buildSummarySheet(wb, projects, enriched, partners) {
         cell.alignment = { horizontal: 'center', vertical: 'middle' }
       }
     })
+    ws.getRow(row).height = 16
   })
+
+  // --- Solapamientos (mismo partner, distinto proyecto; GO-LIVE ya excluidas) ---
+  const selIds = new Set(projects.map((p) => p.id))
+  const s0 = (t) => t.renderStart || t.planned_start
+  const e0 = (t) => t.renderEnd || t.planned_end
+  const rowOf = new Map(spans.map((sp, r) => [sp.project.id, 3 + r]))
+  const ovRows = detectOverlaps(enriched.filter((t) => selIds.has(t.project_id))).pairs
+    .map(({ a, b, partner_id }) => ({
+      partner_id,
+      s: daysBetween(s0(a), s0(b)) >= 0 ? s0(b) : s0(a), // inicio mas tardio
+      e: daysBetween(e0(a), e0(b)) >= 0 ? e0(a) : e0(b), // fin mas temprano
+      a, b,
+    }))
+    .sort((x, y) => (x.s < y.s ? -1 : x.s > y.s ? 1 : 0))
+  // Borde rojo en las semanas en conflicto (ambas filas del par).
+  const redB = { style: 'medium', color: { argb: PURINA_RED } }
+  for (const o of ovRows) {
+    for (let i = 0; i < weeks.length; i++) {
+      const wk = weeks[i]
+      if (o.s <= addDaysISO(wk, 6) && o.e >= wk) {
+        for (const pid of [o.a.project_id, o.b.project_id]) {
+          const rr = rowOf.get(pid)
+          if (rr) ws.getCell(rr, C0 + i).border = { top: redB, bottom: redB, left: redB, right: redB }
+        }
+      }
+    }
+  }
 
   // Linea violeta en la semana de hoy (si esta en rango).
   const todayIdx = weeks.indexOf(todayMon)
@@ -669,39 +697,27 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   }
   lr++
   const note = ws.getCell(lr, 1)
-  note.value = 'Cada semana = agencia que más trabaja esa semana. Mismo color en 2 filas la misma semana = posible solapamiento. ✔ = semana de GO-LIVE.'
+  note.value = 'Cada semana = agencia que más trabaja esa semana. Borde rojo = solapamiento de agencia entre proyectos (mismo partner en 2). ✔ = semana de GO-LIVE.'
   note.font = { size: 8, italic: true, color: { argb: 'FF666666' } }
   note.alignment = { vertical: 'middle', wrapText: true }
   const lastCol = C0 + Math.min(10, weeks.length - 1)
   ws.mergeCells(lr, 1, lr, lastCol)
 
-  // --- SOLAPAMIENTOS: mismo partner en 2 proyectos, dias habiles (lista completa) ---
+  // --- SOLAPAMIENTOS: marcados con borde rojo arriba; aca la lista corta (wrap) ---
   lr += 2
   ws.mergeCells(lr, 1, lr, lastCol)
   const ovh = ws.getCell(lr, 1)
-  ovh.value = 'SOLAPAMIENTOS DE AGENCIA'
+  ovh.value = 'SOLAPAMIENTOS (borde rojo en la grilla)'
   ovh.fill = solidFill(PURINA_RED)
   ovh.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
   ovh.alignment = { horizontal: 'left', vertical: 'middle' }
   ovh.border = border
   lr++
-  const selIds = new Set(projects.map((p) => p.id))
-  const projLabel = new Map(projects.map((p) => [p.id, `${p.name}${p.market ? ` (${p.market})` : ''}`]))
-  const s0 = (t) => t.renderStart || t.planned_start
-  const e0 = (t) => t.renderEnd || t.planned_end
-  const { pairs } = detectOverlaps(enriched.filter((t) => selIds.has(t.project_id)))
-  const ovRows = pairs
-    .map(({ a, b, partner_id }) => ({
-      partner_id,
-      s: daysBetween(s0(a), s0(b)) >= 0 ? s0(b) : s0(a), // inicio mas tardio
-      e: daysBetween(e0(a), e0(b)) >= 0 ? e0(a) : e0(b), // fin mas temprano
-      a, b,
-    }))
-    .sort((x, y) => (x.s < y.s ? -1 : x.s > y.s ? 1 : 0))
+  const mkt = (pid) => { const p = projects.find((x) => x.id === pid); return (p && (p.market || p.name)) || '?' }
   if (ovRows.length === 0) {
     ws.mergeCells(lr, 1, lr, lastCol)
     const c = ws.getCell(lr, 1)
-    c.value = 'Sin solapamientos de agencia entre los proyectos exportados.'
+    c.value = 'Sin solapamientos de agencia.'
     c.font = { size: 9, italic: true, color: { argb: 'FF666666' } }
     c.alignment = { vertical: 'middle' }
     c.border = border
@@ -716,9 +732,12 @@ function buildSummarySheet(wb, projects, enriched, partners) {
       pcell.border = border
       ws.mergeCells(lr, 2, lr, lastCol)
       const desc = ws.getCell(lr, 2)
-      desc.value = `${fmtCorto(o.s)}–${fmtCorto(o.e)}   ·   ${projLabel.get(o.a.project_id)}: ${o.a.action_name}   ↔   ${projLabel.get(o.b.project_id)}: ${o.b.action_name}`
+      const same = o.a.action_name === o.b.action_name
+      desc.value = same
+        ? `${mkt(o.a.project_id)} ↔ ${mkt(o.b.project_id)} · ${o.a.action_name} · ${fmtCorto(o.s)}–${fmtCorto(o.e)}`
+        : `${mkt(o.a.project_id)}: ${o.a.action_name} ↔ ${mkt(o.b.project_id)}: ${o.b.action_name} · ${fmtCorto(o.s)}–${fmtCorto(o.e)}`
       desc.font = { size: 9 }
-      desc.alignment = { vertical: 'middle' }
+      desc.alignment = { vertical: 'middle', wrapText: true }
       desc.border = border
       lr++
     }
