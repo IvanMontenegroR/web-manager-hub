@@ -4,6 +4,7 @@
 import ExcelJS from 'exceljs'
 import { eachDayISO, isWeekendISO, parseDay, daysBetween, toISO, fmtLargo, fmtCorto, addDaysISO } from './dates'
 import { partnerColor, partnerName, textOn } from './colors'
+import { detectOverlaps } from './analysis'
 import { countryName } from './countries'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 
@@ -671,7 +672,57 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   note.value = 'Cada semana = agencia que más trabaja esa semana. Mismo color en 2 filas la misma semana = posible solapamiento. ✔ = semana de GO-LIVE.'
   note.font = { size: 8, italic: true, color: { argb: 'FF666666' } }
   note.alignment = { vertical: 'middle', wrapText: true }
-  ws.mergeCells(lr, 1, lr, Math.min(C0 + 8, C0 + weeks.length - 1))
+  const lastCol = C0 + Math.min(10, weeks.length - 1)
+  ws.mergeCells(lr, 1, lr, lastCol)
+
+  // --- SOLAPAMIENTOS: mismo partner en 2 proyectos, dias habiles (lista completa) ---
+  lr += 2
+  ws.mergeCells(lr, 1, lr, lastCol)
+  const ovh = ws.getCell(lr, 1)
+  ovh.value = 'SOLAPAMIENTOS DE AGENCIA'
+  ovh.fill = solidFill(PURINA_RED)
+  ovh.font = { bold: true, size: 9, color: { argb: 'FFFFFFFF' } }
+  ovh.alignment = { horizontal: 'left', vertical: 'middle' }
+  ovh.border = border
+  lr++
+  const selIds = new Set(projects.map((p) => p.id))
+  const projLabel = new Map(projects.map((p) => [p.id, `${p.name}${p.market ? ` (${p.market})` : ''}`]))
+  const s0 = (t) => t.renderStart || t.planned_start
+  const e0 = (t) => t.renderEnd || t.planned_end
+  const { pairs } = detectOverlaps(enriched.filter((t) => selIds.has(t.project_id)))
+  const ovRows = pairs
+    .map(({ a, b, partner_id }) => ({
+      partner_id,
+      s: daysBetween(s0(a), s0(b)) >= 0 ? s0(b) : s0(a), // inicio mas tardio
+      e: daysBetween(e0(a), e0(b)) >= 0 ? e0(a) : e0(b), // fin mas temprano
+      a, b,
+    }))
+    .sort((x, y) => (x.s < y.s ? -1 : x.s > y.s ? 1 : 0))
+  if (ovRows.length === 0) {
+    ws.mergeCells(lr, 1, lr, lastCol)
+    const c = ws.getCell(lr, 1)
+    c.value = 'Sin solapamientos de agencia entre los proyectos exportados.'
+    c.font = { size: 9, italic: true, color: { argb: 'FF666666' } }
+    c.alignment = { vertical: 'middle' }
+    c.border = border
+  } else {
+    for (const o of ovRows) {
+      const pc = argb(partnerColor(partners, o.partner_id))
+      const pcell = ws.getCell(lr, 1)
+      pcell.value = partnerName(partners, o.partner_id, '—')
+      pcell.fill = solidFill(pc)
+      pcell.font = { bold: true, size: 9, color: { argb: argb(textOn('#' + pc.slice(2))) } }
+      pcell.alignment = { horizontal: 'center', vertical: 'middle' }
+      pcell.border = border
+      ws.mergeCells(lr, 2, lr, lastCol)
+      const desc = ws.getCell(lr, 2)
+      desc.value = `${fmtCorto(o.s)}–${fmtCorto(o.e)}   ·   ${projLabel.get(o.a.project_id)}: ${o.a.action_name}   ↔   ${projLabel.get(o.b.project_id)}: ${o.b.action_name}`
+      desc.font = { size: 9 }
+      desc.alignment = { vertical: 'middle' }
+      desc.border = border
+      lr++
+    }
+  }
   return ws
 }
 
