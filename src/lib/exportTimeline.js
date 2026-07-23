@@ -538,15 +538,21 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   ws.getColumn(1).width = 38
   for (let i = 0; i < weeks.length; i++) ws.getColumn(C0 + i).width = 3.6
 
-  // Fila 1: titulo unico. Fila 2: bandas de mes. Fila 3: numero de semana + "Proyecto / Tarea".
-  ws.mergeCells(1, 1, 1, lastCol)
+  // Fila 1: titulo (col1) + disclaimer (resto). Fila 2: bandas de mes. Fila 3: semana + "Proyecto / Tarea".
   const t1 = ws.getCell(1, 1)
   t1.value = 'TIMELINE UNIFICADO'
   t1.fill = solidFill(BRAND_BG)
   t1.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
   t1.alignment = { horizontal: 'left', vertical: 'middle' }
   t1.border = border
-  ws.getRow(1).height = 22
+  ws.mergeCells(1, C0, 1, lastCol)
+  const disc = ws.getCell(1, C0)
+  disc.value = '⚠ Esta pestaña es solo una ayuda visual (semanal). Para información precisa, ver los timelines completos de cada proyecto.'
+  disc.fill = solidFill(BRAND_BG)
+  disc.font = { italic: true, size: 8, color: { argb: 'FFF0C040' } }
+  disc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true }
+  disc.border = border
+  ws.getRow(1).height = 24
   ws.getCell(2, 1).fill = solidFill(PURINA_RED); ws.getCell(2, 1).border = border
   const corner = ws.getCell(3, 1)
   corner.value = 'Proyecto / Tarea'
@@ -621,10 +627,14 @@ function buildSummarySheet(wb, projects, enriched, partners) {
   const lastDataRow = row - 1
 
   // Solapamientos: borde rojo en las semanas en conflicto (ambas filas del par).
+  // Para NBS solo cuenta el solapamiento de IMPLEMENTACION (sus tareas chicas no).
   const selIds = new Set(projects.map((p) => p.id))
+  const nbsIds = new Set((partners || []).filter((p) => /nbs/i.test(p.name || '')).map((p) => p.id))
+  const isImpl = (t) => /implementa/i.test(t.action_name || '')
   const s0 = (t) => t.renderStart || t.planned_start
   const e0 = (t) => t.renderEnd || t.planned_end
   const ovRows = detectOverlaps(enriched.filter((t) => selIds.has(t.project_id))).pairs
+    .filter(({ a, b, partner_id }) => !nbsIds.has(partner_id) || (isImpl(a) && isImpl(b)))
     .map(({ a, b, partner_id }) => ({
       partner_id,
       s: daysBetween(s0(a), s0(b)) >= 0 ? s0(b) : s0(a), // inicio mas tardio
