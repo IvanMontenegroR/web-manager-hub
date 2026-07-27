@@ -5,13 +5,23 @@ Un unico usuario (el Websites Expert). Gestiona landings ejecutadas por 5 agenci
 partner (BNN, F5, Hive, MSE, NBS) en 12 mercados.
 
 Construidos: **Web Projects** (Gantt/cronograma), **Calendario** (lanzamientos por mercado),
-**SLAs** (fases internas + tablas de SLA por agencia), **Tareas** (Kanban de coordinacion de la migracion;
-antes vivia dentro de Ecosystem 2.0) y **Ecosystem 2.0** (hub de la migracion: documentacion — playbooks
-del backend v2.0 — y modulos futuros como creacion de paginas). **Daily Ops** sigue como placeholder en el
-shell. El modulo **SLAs** tiene
-pestanas: General (edita `sla_definitions`, el autofill de tareas; antes vivia en Admin → SLAs) + una
-pestana por agencia (BNN, NBS) que renderiza `partner_slas` (BNN como lista por categoria; NBS pivoteado
-en matriz por volumen de paginas). El tab activo se recuerda en `localStorage['wmh_sla_tab']`.
+**Referencias** (hub de info de consulta: SLAs + Marcas + Stakeholders; antes era el modulo **SLAs**),
+**Tareas** (Kanban de coordinacion de la migracion; antes vivia dentro de Ecosystem 2.0) y **Ecosystem 2.0**
+(hub de la migracion: documentacion — playbooks del backend v2.0 — y modulos futuros como creacion de
+paginas). **Daily Ops** sigue como placeholder en el shell.
+
+El modulo **Referencias** (`src/modules/Referencias.jsx`) tiene un nav de secciones (persistido en
+`localStorage['wmh_ref_section']`):
+- **SLAs**: la seccion original — pestanas General (edita `sla_definitions`, el autofill de tareas; antes
+  vivia en Admin → SLAs) + una pestana por agencia (BNN, NBS) que renderiza `partner_slas` (BNN como lista
+  por categoria; NBS pivoteado en matriz por volumen de paginas). El sub-tab activo sigue en
+  `localStorage['wmh_sla_tab']`.
+- **Marcas**: ficha por marca (`directory_brands`) — responsable(s), especie, guidelines, links, notas.
+- **Stakeholders**: directorio de personas (`directory_stakeholders`) — quien se encarga de que (marcas o
+  temas libres), rol, contacto. NO esta atado por FK a las marcas: el link es por nombre (loose coupling),
+  para poder buscar contactos de cualquier cosa. Ambas secciones hacen su propio fetch tolerante (si la
+  tabla no existe muestran el SETUP_SQL) y traen un boton de seed inicial. Ver `src/lib/directoryDb.js` y
+  `src/components/directory/`.
 
 ## Stack (decisiones)
 
@@ -75,6 +85,13 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   por fecha asc), luego la prioridad (alta>media>baja), y `sort_order` como desempate. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
   -> `SETUP_SQL`; si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace
   su propio fetch y tolera que la tabla no exista, para no romper el resto de la app)
+- `directory_brands(id, name, owners jsonb, species, color, guidelines, links jsonb, notes, sort_order,
+  created_at)` y `directory_stakeholders(id, name, role, areas jsonb, email, phone, notes, sort_order,
+  created_at)` (tablas del hub **Referencias**, secciones Marcas y Stakeholders. `owners`/`areas` = arrays
+  de nombres en TEXTO — el link marca↔persona es por nombre, NO por FK, a proposito (loose coupling, para
+  buscar contactos de cualquier cosa). `links` = jsonb `[{label,url}]`. RLS abierta. Igual que
+  `ecosystem_tasks`: NO van en `fetchAll`; cada vista hace su propio fetch tolerante y muestra el
+  `SETUP_SQL` de `src/lib/directoryDb.js` si la tabla falta, con boton de seed inicial)
 
 CRITICO: `planned_end` es una **columna generada** en Postgres (`planned_start + planned_days - 1`,
 dias CALENDARIO) que **se ignora en la app**: la UI recalcula `planned_end` en **dias habiles**
@@ -160,7 +177,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 
 ```
 src/
-  lib/         supabase, db (CRUD), ecosystemDb (Kanban CRUD + seed + SETUP_SQL), dates,
+  lib/         supabase, db (CRUD), ecosystemDb (Kanban CRUD + seed + SETUP_SQL),
+               directoryDb (Marcas + Stakeholders CRUD + seed + SETUP_SQL), dates,
                analysis (overlaps/delays/control), colors, exportTimeline (Excel), countries, flags
   data/        playbooks (metadata) + intro-playbook.json / component-playbook.json (bloques
                extraidos de los .docx: texto + imagenes; assets en public/docs/)
@@ -170,9 +188,10 @@ src/
     panels/    ControlPanel (foco del dia), DelayPanel, LaunchWidget
     modals/    ProjectModal, TaskModal, PartnersModal, HolidaysModal, EcoTaskModal, SlaItemModal
     docs/      DocViewer (render de playbooks: TOC, figuras, tablas, lightbox)
+    directory/ BrandsView, StakeholdersView, BrandModal, StakeholderModal, SetupNotice
     ui/        Modal
   modules/     WebProjects (orquesta todo), Calendar, Tareas (Kanban), Ecosystem (hub docs +
-               modulos futuros), Slas (fases + agencias), Placeholder (modulos futuros)
+               modulos futuros), Referencias (SLAs + Marcas + Stakeholders), Placeholder
 ```
 
 ## Variables de entorno
