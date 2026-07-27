@@ -1,0 +1,1485 @@
+[
+{
+"type": "p",
+"text": "Purina Ecosystem v2.0 – Component page playbook"
+},
+{
+"type": "p",
+"text": "Before starting using this guide, go through Purina V2.0 - Introduction playbook.doc for further information."
+},
+{
+"type": "h1",
+"text": "Create / edit component pages"
+},
+{
+"type": "p",
+"text": "The instructions below will demonstrate how to create a component page or edit an existing one."
+},
+{
+"type": "p",
+"text": "Steps:"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Login on the site backend\nClick on Contenido  Añadir contenido  Component page\nor use URL /node/add/dsu_component_page",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image1.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "On “Crear component page”, enter the following data:"
+},
+{
+"type": "p",
+"text": "Título\t\t\tpage title"
+},
+{
+"type": "p",
+"text": "Brand"
+},
+{
+"type": "h2",
+"text": "How to add / remove a block / component on the component page:"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image2.png"
+]
+},
+{
+"text": "To add a block look for the “Components” area as showed here:",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image3.png"
+]
+},
+{
+"text": "Select the component type to be added to the page using the drop-down\nClick on “Add another component”\nComponent fields to be fulfilled will be displayed.",
+"imgs": []
+}
+],
+[
+{
+"text": "To remove one block, look for the block to be deleted, click on the 3 small points on the right and click on “Eliminar”",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image4.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Component BANNER – single banner"
+},
+{
+"type": "p",
+"text": "There are 5 different banner types which will need different sets of information to be fulfilled. See below examples of each banner type."
+},
+{
+"type": "p",
+"text": "Type\tPromotional banner (Only image)"
+},
+{
+"type": "img",
+"src": "docs/comp-image5.png"
+},
+{
+"type": "p",
+"text": "Type\tSecondary Hero"
+},
+{
+"type": "img",
+"src": "docs/comp-image6.png"
+},
+{
+"type": "p",
+"text": "Type \tFull image + box content"
+},
+{
+"type": "img",
+"src": "docs/comp-image7.png"
+},
+{
+"type": "p",
+"text": "See below table field required by each banner type."
+},
+{
+"type": "img",
+"src": "docs/comp-image8.png"
+},
+{
+"type": "p",
+"text": "Avanzado – Banner align content – to be used only on banner type = Secondary hero"
+},
+{
+"type": "p",
+"text": "This parameter will define the position of the text + description + buttons. See below the positional diagram."
+},
+{
+"type": "img",
+"src": "docs/comp-image9.png"
+},
+{
+"type": "h1",
+"text": "Component Banner wrapper – carrousel with “n” banners"
+},
+{
+"type": "p",
+"text": "Select component type = “Banner wrapper” and click on “Add another component”"
+},
+{
+"type": "h2",
+"text": "Banner slider configuration;"
+},
+{
+"type": "p",
+"text": "Slider buttons\t\tarrows indicating there are more than 1 banner (left/right)"
+},
+{
+"type": "p",
+"text": "Slider position buttons\tarrows position – use only center inside/outside the banner"
+},
+{
+"type": "p",
+"text": "Slider dots\t\t\tdots show there are more than 1 banner"
+},
+{
+"type": "p",
+"text": "Slider position dots\t\tdots position – inside or outside the banner"
+},
+{
+"type": "p",
+"text": "Slider overflow"
+},
+{
+"type": "p",
+"text": "After configuring the slider settings, the component banner (described above) is available to be fulfilled the same way how described above."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "To add the next banner, click on the button “Añadir banner” and follow the same steps.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image10.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Brand logos carousel"
+},
+{
+"type": "p",
+"text": "Component used on the home page which will list brands logos as a carousel. Published brands listed on the brand taxonomy.   (/admin/structure/taxonomy/manage/brand/overview) will be considered on this block."
+},
+{
+"type": "img",
+"src": "docs/comp-image11.png"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "On the “Component type” dropdown, selects “Block” and click on “Add another component”.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image12.png"
+]
+}
+],
+[
+{
+"text": "",
+"imgs": []
+},
+{
+"text": "",
+"imgs": []
+}
+],
+[
+{
+"text": "Block name to be selected on the dropdown",
+"imgs": []
+},
+{
+"text": "Brands: Carousel all brands",
+"imgs": [
+"docs/comp-image13.png"
+]
+}
+],
+[
+{
+"text": "Mostrar título",
+"imgs": []
+},
+{
+"text": "Flag the field if the field “Titulo” must be displayed on the page. If unflagged, none title be displayed.",
+"imgs": []
+}
+],
+[
+{
+"text": "Elementos por Bloque: define the number of brands to be displayed on the carousel.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image14.png"
+]
+}
+],
+[
+{
+"text": "Sobrescribir título\nIt will mostly flagged. If flagged, title informed on field “Titulo” will be displayed. Otherwise, the name of the block will be displayed.",
+"imgs": []
+},
+{
+"text": "If like this:\ntitle “Brands: Carousel all brands” will be displayed.",
+"imgs": [
+"docs/comp-image15.png"
+]
+}
+],
+[
+{
+"text": "Optional fields:\nTitle\nTitle size\nSubtitle\nSubtitle size",
+"imgs": []
+},
+{
+"text": "",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": []
+},
+{
+"text": "",
+"imgs": []
+}
+],
+[
+{
+"text": "Area  “Avanzado”\nFlag “Show “See more” button” if it should be displayed.\nIn this case, also inform:\nButton text\nURL to be called",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image16.png"
+]
+}
+],
+[
+{
+"text": "Area  “Avanzado”\nFlag “Enable visibility control” if the content to be displayed will be related only for cats or only for dogs.\nIf unflagged, there will be no content filter and all brands will be shown.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image17.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "Small / Small – H2"
+},
+{
+"type": "img",
+"src": "docs/comp-image18.png"
+},
+{
+"type": "p",
+"text": "Medium / medium – H2"
+},
+{
+"type": "img",
+"src": "docs/comp-image19.png"
+},
+{
+"type": "p",
+"text": "Large / large – H2"
+},
+{
+"type": "img",
+"src": "docs/comp-image20.png"
+},
+{
+"type": "h1",
+"text": "Blocks for listing articles"
+},
+{
+"type": "h2",
+"text": "Article: Featured: Block"
+},
+{
+"type": "h2",
+"text": "Article: Highlighed block"
+},
+{
+"type": "h2",
+"text": "Article: Recommendation List: Block"
+},
+{
+"type": "h2",
+"text": "Article: All others – Block"
+},
+{
+"type": "h2",
+"text": "Block:\tArticle latest"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Blocks",
+"imgs": []
+},
+{
+"text": "Content to be displayed",
+"imgs": []
+}
+],
+[
+{
+"text": "Article: Featured: Block\nThe latest article will be displayed. Only one.",
+"imgs": []
+},
+{
+"text": "Parameters that can be used, if required:\nOptional fields: for adding a title\nAvanzado: to define spacing before/after the block",
+"imgs": [
+"docs/comp-image21.png"
+]
+}
+],
+[
+{
+"text": "Layout columns 50: composed by 2 blocks:\nArticle: Highlighed block\nArticle: Recommendation List: Block",
+"imgs": []
+},
+{
+"text": "Pay attention: these 2 blocks must be used only on the page “Artículos destacados” (article list page)\nDisplay the two most recent articles, excluding the very most recent one.\nDisplay the four most recent articles, excluding the 3 already displayed on this page.",
+"imgs": [
+"docs/comp-image22.png",
+"docs/comp-image23.png"
+]
+}
+],
+[
+{
+"text": "Article: All others – Block",
+"imgs": []
+},
+{
+"text": "Pay attention: this block must be used only on the page “Artículos destacados”\nDisplay all articles except the 7 articles shown on the blocks:\nArticle: Featured: Block\nArticle: Highlighed block\nArticle: Recommendation List: Block",
+"imgs": [
+"docs/comp-image24.png"
+]
+}
+]
+]
+},
+{
+"type": "h2",
+"text": "Block:\tArticle latest"
+},
+{
+"type": "img",
+"src": "docs/comp-image25.png"
+},
+{
+"type": "p",
+"text": "This block will allow to list “n” articles sorted by descendent creation date. “n” will be configurable."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image26.png"
+]
+},
+{
+"text": "By default, the title to be displayed on the frontend will be “Article: Latest”.\nClick on “Mostrar título” to define if the title (default or title informed below) will be displayed or not.\nSelect on the drop-down the number of articles to be displayed.\nClick on “Sobrescribir titulo” to define if the informed title should use instead of the  default one.\nTitle to be displayed on the frontend if “Mostrar titulo’ and “Sobrescribir titulo” are “ON”.",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": []
+},
+{
+"text": "Optional fields\nDefinition of titles and sub titles and respective sizes.",
+"imgs": []
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Block: Articles by Pet type"
+},
+{
+"type": "p",
+"text": "Block used to list articles of a specific pet type (cat or dog). Select block “Articles by pet type” under Purina list. There are 2 different layouts selected on “Modo de vista” field:"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Card mini",
+"imgs": []
+},
+{
+"text": "",
+"imgs": []
+}
+],
+[
+{
+"text": "Resumem",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image27.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "Parameters:"
+},
+{
+"type": "p",
+"text": "Pet type\t\t\tGato / perro"
+},
+{
+"type": "p",
+"text": "Modo de vista\t\t\tas showed above"
+},
+{
+"type": "p",
+"text": "Elementos que mostrar\tnumber of cards to be displayed"
+},
+{
+"type": "p",
+"text": "Optional fields\t\t\tfor the title and sub-title"
+},
+{
+"type": "p",
+"text": "Title and sub title size"
+},
+{
+"type": "h1",
+"text": "Block: Selected articles"
+},
+{
+"type": "p",
+"text": "Used for adding a set of articles chosen by the user. Select block “Selected articles” under Purina list."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Step 1",
+"imgs": [
+"docs/comp-image28.png"
+]
+},
+{
+"text": "Step 2",
+"imgs": [
+"docs/comp-image29.png"
+]
+},
+{
+"text": "Step 3\nIf selected mode = Manual selection, enter the articles to be displayed. Enter part of the article title to select one.",
+"imgs": [
+"docs/comp-image30.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "Selection mode = Automatic (by taxonomy)"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "System will show articles based on the field (vocabulary) chosen:\nIn this case also inform how many articles must be displayed and the type of sort.",
+"imgs": [
+"docs/comp-image31.png"
+]
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image32.png"
+]
+}
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "View modes available for this block:",
+"imgs": []
+}
+],
+[
+{
+"text": "Default",
+"imgs": []
+},
+{
+"text": "= Resumen",
+"imgs": []
+}
+],
+[
+{
+"text": "Card home\n(layout is the same of view Article: latest)",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image33.png"
+]
+}
+],
+[
+{
+"text": "Resumen",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image34.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Block: Selected products"
+},
+{
+"type": "p",
+"text": "This block will be used to add a list of specific products selected by the user. Each product must be added manually on the order to be displayed."
+},
+{
+"type": "p",
+"text": "Mode de vista\t\tit must be Resumem"
+},
+{
+"type": "p",
+"text": "Example of list of products:"
+},
+{
+"type": "img",
+"src": "docs/comp-image35.png"
+},
+{
+"type": "p",
+"text": "Example list of products with an image (uploaded as background image):"
+},
+{
+"type": "img",
+"src": "docs/comp-image36.png"
+},
+{
+"type": "h1",
+"text": "Block: Products by brand filter and others (under Listas – Views)"
+},
+{
+"type": "p",
+"text": "This block will be used on the product list page, where it shows all products, and will allow them to filter products by brand / food type / life stage / pet size."
+},
+{
+"type": "img",
+"src": "docs/comp-image37.png"
+},
+{
+"type": "h1",
+"text": "Block: Products by contextual Brand filter (under Listas – Views)"
+},
+{
+"type": "p",
+"text": "This block will show the list of products of a specific brand. The brand will be defined by the brand name parameter on the page."
+},
+{
+"type": "img",
+"src": "docs/comp-image38.png"
+},
+{
+"type": "h1",
+"text": "Block: Selected FAQs Block"
+},
+{
+"type": "p",
+"text": "Used for adding a FAQ section on the page. Pre-requisite: questions must be previously created as component type FAQ. Go to Administrar  Contenido  Añadir contenido  FAQ or using URL /node/add/faq."
+},
+{
+"type": "p",
+"text": "Select “Block” as Component type and click on “Add another component”."
+},
+{
+"type": "p",
+"text": "On the Block dropdown, select Selected FAQs Block"
+},
+{
+"type": "h1",
+"text": "Menus"
+},
+{
+"type": "p",
+"text": "There are different types of menus:"
+},
+{
+"type": "li",
+"text": "Navegación principal \t\tmenu to be displayed on all pages with the main CTAs"
+},
+{
+"type": "li",
+"text": "Footer\t\t\t\tmenu to be displayed on the bottom of the page"
+},
+{
+"type": "li",
+"text": "Copyright\t\t\tmenu to be displayed below the footer with T&C, privacidad, cookies CTAs"
+},
+{
+"type": "li",
+"text": "Menu per brand \t\teach brand will have its won sub-menu"
+},
+{
+"type": "p",
+"text": "To create or edit one of the menus listed above, go to Administrar  Estructura  Menus and look for the menu to be updated. URL /admin/structure/menu/manage/"
+},
+{
+"type": "p",
+"text": "Click on “Añadir enlace” to add a new CTA or click on “Editar” to change the existing one."
+},
+{
+"type": "img",
+"src": "docs/comp-image39.png"
+},
+{
+"type": "p",
+"text": "Enter the following data:"
+},
+{
+"type": "p",
+"text": "Titulo del enlace del menú\ttext to be displayed on the menu"
+},
+{
+"type": "p",
+"text": "Enlace\t\t\t\tIf this entry is just a ‘title” without link, enter the text <nolink> as shown above."
+},
+{
+"type": "img",
+"src": "docs/comp-image40.png"
+},
+{
+"type": "p",
+"text": "Enlace\t\t\t\tIf this entry is to call a specific URL, enter the URL here. It can be a URL from the site or an external one. In case of being an URL from the site, always enter the URL without the domain, as shown above."
+},
+{
+"type": "p",
+"text": "Enlace Padre\t\t\tif this CTA has an actual URL, this field must be filled with the group (enlace padre) that this new entry will be part of."
+},
+{
+"type": "p",
+"text": "To move the position of a CTA on the menu, click on the entry to be moved and drag it up or down to the desired position."
+},
+{
+"type": "img",
+"src": "docs/comp-image41.png"
+},
+{
+"type": "p",
+"text": "To unpublish a CTA (remove from the main menu or from footer), unflag the field “Activado”."
+},
+{
+"type": "h2",
+"text": "Main menu – Navegación principal"
+},
+{
+"type": "p",
+"text": "1st level"
+},
+{
+"type": "img",
+"src": "docs/comp-image42.png"
+},
+{
+"type": "p",
+"text": "2nd level – after clicking on one of the main CTA´s"
+},
+{
+"type": "img",
+"src": "docs/comp-image43.png"
+},
+{
+"type": "p",
+"text": "Access the URL /admin/structure/menu/manage/ and look for the menu Navegación principal."
+},
+{
+"type": "p",
+"text": "Do not use the icon the menu 1st level. Only on the 2nd level."
+},
+{
+"type": "p",
+"text": "Banner Card"
+},
+{
+"type": "p",
+"text": "The 2nd level of this menu allows you to add 2 CTAs with images like the example above. Important: it is mandatory to have at least one “simple” CTA without images when using this feature."
+},
+{
+"type": "p",
+"text": "To add this kind of CTA with image + title + description, click on “Añadir nuevo” on the “Banner” area, so on the drop-down select “Banner menu”. Enter the following data:"
+},
+{
+"type": "li",
+"text": "Title\t\t\tTitle to be displayed on the card"
+},
+{
+"type": "li",
+"text": "HTML tag\t\tAlways H3"
+},
+{
+"type": "li",
+"text": "Description\t\tText to be displayed on the card just below the title"
+},
+{
+"type": "li",
+"text": "Image\t\t\tupload image*"
+},
+{
+"type": "li",
+"text": "Link URL\t\tURL to be called when clicking"
+},
+{
+"type": "li",
+"text": "Texto del enlace\tnot used"
+},
+{
+"type": "p",
+"text": "After entering all these data DO NOT forget to click on “Actualizar párrafo”."
+},
+{
+"type": "img",
+"src": "docs/comp-image44.png"
+},
+{
+"type": "h2",
+"text": "Menu – per brand"
+},
+{
+"type": "p",
+"text": "Each brand must have a specific sub-menu."
+},
+{
+"type": "p",
+"text": "Click on “+Añadir menu” and on the field “titulo” inform the name of the brand."
+},
+{
+"type": "p",
+"text": "Click on “+Añadir enlace” and on “Título del enlace del menú.” Inform the CTA text to be displayed on the menu. On the field “Enlace”, inform the URL. Save the data."
+},
+{
+"type": "img",
+"src": "docs/comp-image45.png"
+},
+{
+"type": "h2",
+"text": "Menu Footer"
+},
+{
+"type": "img",
+"src": "docs/comp-image46.png"
+},
+{
+"type": "p",
+"text": "Content to be displayed on the footer of the site. Each CTA must be manually added to the footer. There isn´t any automatic update here. Maximum number of columns = 6."
+},
+{
+"type": "p",
+"text": "Access the URL /admin/structure/menu/manage/ and look for the menu Footer."
+},
+{
+"type": "img",
+"src": "docs/comp-image47.png"
+},
+{
+"type": "p",
+"text": "The backend will be shown like that:"
+},
+{
+"type": "p",
+"text": "Enlaces padreEnlaces with linksEnlaces padreEnlaces with links"
+},
+{
+"type": "img",
+"src": "docs/comp-image48.png"
+},
+{
+"type": "h2",
+"text": "Menu Copyright – to be displayed on the footer"
+},
+{
+"type": "img",
+"src": "docs/comp-image50.png"
+},
+{
+"type": "p",
+"text": "To edit the CTAs displayed on the footer of the site, go to Administrar  Estructura  Menus  Menu Copyright or use the URL /admin/structure/menu/manage/menu-copyright."
+},
+{
+"type": "img",
+"src": "docs/comp-image51.png"
+},
+{
+"type": "p",
+"text": "Click on “Añadir enlace” to add a new CTA or click on “Editar” to change the existing one."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Fields:\n“Titulo del enlace del menu”: text to be showed on the footer\n“Enlace’: respective link",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image52.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "To unpublish a CTA (remove from the footer), unflag the field “Activado”."
+},
+{
+"type": "h1",
+"text": "Component TABS"
+},
+{
+"type": "p",
+"text": "It should be used to alternate content among different panels on the same component. On the example below, articles will be displayed according to the selected pet type (gatos/perros)."
+},
+{
+"type": "img",
+"src": "docs/comp-image53.png"
+},
+{
+"type": "p",
+"text": "Component will be composed by:"
+},
+{
+"type": "p",
+"text": "Definition of TAB type:"
+},
+{
+"type": "li",
+"text": "Only tabs\t\twithout any background"
+},
+{
+"type": "li",
+"text": "Full background\twith full image as background as the print above."
+},
+{
+"type": "p",
+"text": "Next fields:"
+},
+{
+"type": "li",
+"text": "Background image\tonly if TAB type = full background"
+},
+{
+"type": "li",
+"text": "Title\t\t\toptional field. However, if there is more than 1 TAB, the title will be used as a link (filter)."
+},
+{
+"type": "li",
+"text": "Description \t\toptional field"
+},
+{
+"type": "p",
+"text": "Click on “Add block” and select a block according to the content to be displayed."
+},
+{
+"type": "p",
+"text": "Example: Articles by Pet Type \tlike the ones shown on the image above"
+},
+{
+"type": "h1",
+"text": "Content: Card Grid"
+},
+{
+"type": "p",
+"text": "Used to add different types of cards. It is possible to add a general title and subtitles for the block and individual ones for each card. IMPORTANT: colors (background, texts, icons, etc) will be the same for each block, it is not possible to set different colors for each individual card."
+},
+{
+"type": "p",
+"text": "Avanzado fields must be set up only for the whole block, not for each card. See more information on the document Purina V2.0 - Introduction playbook.docx"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Card grid types",
+"imgs": []
+},
+{
+"text": "Examples",
+"imgs": []
+}
+],
+[
+{
+"text": "Cards Icons\nFields: Icon / title / description\nCTA can be added, if applicable.",
+"imgs": [
+"docs/comp-image54.png"
+]
+},
+{
+"text": "Icon will be selected from a pre-defined list.",
+"imgs": [
+"docs/comp-image55.png"
+]
+}
+],
+[
+{
+"text": "Cards Numbers\nImage / subtitles not applicable for this kind of card.\nCTA can be added, if applicable.\nThe numbering will be added automatically.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image56.png",
+"docs/comp-image57.png"
+]
+}
+],
+[
+{
+"text": "Grid cards (Max 3 cards)\nNo image background.\nIt is possible to add (for each card grid: image + box with text):\n- title and brief description, if applicable\n- link; but there will not be buttons.\n- subtitles are not used here.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image58.png"
+]
+}
+],
+[
+{
+"text": "Box image + card icons",
+"imgs": []
+},
+{
+"text": "",
+"imgs": []
+}
+],
+[
+{
+"text": "Cards simple (only image + title)\nCard description not applicable for this kind of card.\nCTA can be added, if applicable.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image59.png",
+"docs/comp-image60.png"
+]
+}
+],
+[
+{
+"text": "Full background card icons (Without box – Max 3 cards)\nImage background (whole component) is optional. It can have a colored background. Warning: Texts will be always white.\nCard images are not applicable for this kind of card.\nIt is possible to add a title and subtitle, if required.\nEach card must have:\nOne icon selected\nTitle\nDescription\nCTA (optional)\nCTA text (besides being mandatory will not be displayed)",
+"imgs": []
+},
+{
+"text": "Maximum of 3 cards.",
+"imgs": [
+"docs/comp-image61.png"
+]
+}
+],
+[
+{
+"text": "Full background card icons – (Max 3 cards)\nIt must have a background image.\nTitle is mandatory. Subtitles are optional.\nEach card must have:\nOne icon selected\nTitle\nDescription\nCTA (if applicable)\nCard images are not applicable for this kind of card.",
+"imgs": []
+},
+{
+"text": "Maximum of 3 cards.",
+"imgs": [
+"docs/comp-image62.png"
+]
+}
+],
+[
+{
+"text": "Slider cards default\nIt is possible to add a title and subtitle for the whole component, if required.\nCard fields:\nImage (mandatory)\nTitle (mandatory)\nDescription (optional)\nCTA (if applicable)",
+"imgs": []
+},
+{
+"text": "Cards will be displayed with opacity.",
+"imgs": [
+"docs/comp-image63.png"
+]
+}
+],
+[
+{
+"text": "Slider background cards default (Max 3 cards)\nImage background should not be used on this kind of card.\nIt is possible to add a title and subtitle for the whole component, if required.\nCard fields:\nImage (mandatory)\nTitle (mandatory)\nDescription (optional)\nCTA (if applicable)\nColor gradient must be defined on Avanzado area. See more information on the document Purina V2.0 - Introduction playbook.docx",
+"imgs": []
+},
+{
+"text": "Cards will be displayed with opacity.",
+"imgs": [
+"docs/comp-image64.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Content TEXT"
+},
+{
+"type": "p",
+"text": "Used to add a text to the page. It can have a title or not. Title and subtitle must be added on the optional fields. Title will be always aligned to the left."
+},
+{
+"type": "p",
+"text": "Component type: Content: TEXT"
+},
+{
+"type": "img",
+"src": "docs/comp-image65.png"
+},
+{
+"type": "h2",
+"text": "Configuration on “Avanzado” area and examples"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Text style = Two column expansive space texts\nContent text with title, sub-title and description.\nParagraph text style = Two columns expansive space texts",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image66.png"
+]
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image67.png"
+]
+}
+],
+[
+{
+"text": "Text style = One column texts\nContent text with title, sub-title and description.\nParagraph text style = One column text",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image68.png"
+]
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image69.png"
+]
+}
+],
+[
+{
+"text": "Text styles = Two column texts\nContent text with title, sub-title and description.\nParagraph text style = Two columns texts",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image70.png"
+]
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image71.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Content image"
+},
+{
+"type": "p",
+"text": "Used to add an image to the page. If required, it can be added a title, which can be displayed above or below the image, a description, which will be shown below the image and a button with a link."
+},
+{
+"type": "p",
+"text": "Component type: Content: IMAGE"
+},
+{
+"type": "p",
+"text": "Fields:"
+},
+{
+"type": "p",
+"text": "Image\t\tmandatory field."
+},
+{
+"type": "p",
+"text": "Optional fields:"
+},
+{
+"type": "li",
+"text": "Titulo \t\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Subtitulo\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Description \tif needed"
+},
+{
+"type": "li",
+"text": "CTA URL"
+},
+{
+"type": "li",
+"text": "Texto del enlace"
+},
+{
+"type": "p",
+"text": "Avanzado:"
+},
+{
+"type": "p",
+"text": "Imagem position"
+},
+{
+"type": "p",
+"text": "Image bottom\t- image will be shown after the title, description and button."
+},
+{
+"type": "p",
+"text": "Image center\t- order of the elements: title, image, description and button."
+},
+{
+"type": "p",
+"text": "Illustration using position = image center:"
+},
+{
+"type": "img",
+"src": "docs/comp-image72.png"
+},
+{
+"type": "h1",
+"text": "Content: Text + Image"
+},
+{
+"type": "p",
+"text": "Used for showing a text and an image in 2 columns as shown below. Image can be positioned on the right or on the left. CTA for calling a URL is also available, if needed."
+},
+{
+"type": "img",
+"src": "docs/comp-image73.png"
+},
+{
+"type": "p",
+"text": "Fields:"
+},
+{
+"type": "p",
+"text": "Image\t\tmandatory field."
+},
+{
+"type": "p",
+"text": "Optional fields:"
+},
+{
+"type": "li",
+"text": "Titulo \t\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Subtitulo\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Description \tif needed"
+},
+{
+"type": "li",
+"text": "CTA URL"
+},
+{
+"type": "li",
+"text": "Texto del enlace"
+},
+{
+"type": "p",
+"text": "Avanzado:"
+},
+{
+"type": "p",
+"text": "Image position\tRight or left"
+},
+{
+"type": "p",
+"text": "Spacing"
+},
+{
+"type": "h1",
+"text": "Content: External video"
+},
+{
+"type": "p",
+"text": "Used to make an external video available on the site. Video will start playing after clicking on the image."
+},
+{
+"type": "img",
+"src": "docs/comp-image74.png"
+},
+{
+"type": "p",
+"text": "Fields:"
+},
+{
+"type": "li",
+"text": "Titulo\t\ttitle to be shown just above the video"
+},
+{
+"type": "li",
+"text": "Multimedia\tURL of the video"
+},
+{
+"type": "li",
+"text": "Video thumb\timage to be shown on the frontend"
+},
+{
+"type": "p",
+"text": "To add the video click on “Añadir element multimedia:”"
+},
+{
+"type": "li",
+"text": "Inform the video URL (it should be Youtuve or Vimeo) and click on “agregar”"
+},
+{
+"type": "img",
+"src": "docs/comp-image75.png"
+},
+{
+"type": "li",
+"text": "Upload the thumb image and click on Guardar – size width = 2784 px"
+},
+{
+"type": "img",
+"src": "docs/comp-image76.png"
+},
+{
+"type": "li",
+"text": "Click on “Insertar seleccionado”"
+},
+{
+"type": "h1",
+"text": "Content: Big number grid"
+},
+{
+"type": "p",
+"text": "Use to illustrate the page with important figures about the brand."
+},
+{
+"type": "p",
+"text": "Fields:"
+},
+{
+"type": "li",
+"text": "Titulo \t\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Subtitulo\tif needed and respective HTML tag"
+},
+{
+"type": "li",
+"text": "Items:"
+},
+{
+"type": "li",
+"text": "Title\t\twhat is the value about it"
+},
+{
+"type": "li",
+"text": "Number\tvalue"
+},
+{
+"type": "li",
+"text": "Prefix\t\tif needed. To be used for indicating currency, for instance: $, USD, EUR, etc"
+},
+{
+"type": "li",
+"text": "Suffix\t\tif needed. To complement the figure"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image77.png"
+]
+},
+{
+"text": "",
+"imgs": [
+"docs/comp-image78.png"
+]
+}
+],
+[
+{
+"text": "How it will look like:",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image79.png"
+]
+}
+],
+[
+{
+"text": "How it will look like with more than 4 entries: (2 lines)",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/comp-image80.png"
+]
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Layout_50_25_25"
+},
+{
+"type": "p",
+"text": "Component which will show the content on 3 different columns. In this case 50_25_25, the 1st column will occupy half of the space and the remaining two will split the rest."
+},
+{
+"type": "p",
+"text": "IMPORTANT: Avanzado parameters must be filled in for the whole component, not for column by column."
+}
+]

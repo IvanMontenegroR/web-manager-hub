@@ -3,6 +3,7 @@ import { LayoutGrid, CalendarDays, Timer, ClipboardList, ListChecks, Boxes, Pane
 import WebProjects from './modules/WebProjects.jsx'
 import Calendar from './modules/Calendar.jsx'
 import Ecosystem from './modules/Ecosystem.jsx'
+import Tareas from './modules/Tareas.jsx'
 import Slas from './modules/Slas.jsx'
 import Placeholder from './modules/Placeholder.jsx'
 
@@ -12,10 +13,10 @@ const MODULES = [
   { id: 'slas', label: 'SLAs', icon: Timer, ready: true },
   { id: 'ops', label: 'Daily Ops', icon: ClipboardList, ready: false,
     desc: 'Tracker de tickets y pedidos con owner (yo o partner), bloqueos y stakeholder.' },
-  { id: 'tasks', label: 'Tareas', icon: ListChecks, ready: false,
-    desc: 'Lista unificada cross modulo con tags de mercado y proyecto, y flag Status a Helo exportable.' },
+  { id: 'tasks', label: 'Tareas', icon: ListChecks, ready: true,
+    desc: 'Tablero Kanban de coordinacion. Incluye tareas de Ecosystem 2.0.' },
   { id: 'eco', label: 'Ecosystem 2.0', icon: Boxes, ready: true,
-    desc: 'Tracker de status de implementaciones: CIAM, Conversational AI, Web Content.' },
+    desc: 'Documentacion y modulos de la migracion.' },
 ]
 
 export default function App() {
@@ -68,6 +69,8 @@ export default function App() {
           <Calendar />
         ) : mod.id === 'eco' ? (
           <Ecosystem />
+        ) : mod.id === 'tasks' ? (
+          <Tareas />
         ) : mod.id === 'slas' ? (
           <Slas />
         ) : (
