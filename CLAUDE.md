@@ -5,8 +5,10 @@ Un unico usuario (el Websites Expert). Gestiona landings ejecutadas por 5 agenci
 partner (BNN, F5, Hive, MSE, NBS) en 12 mercados.
 
 Construidos: **Web Projects** (Gantt/cronograma), **Calendario** (lanzamientos por mercado),
-**SLAs** (fases internas + tablas de SLA por agencia) y **Ecosystem 2.0** (Kanban de coordinacion de la
-migracion). **Daily Ops** y **Tareas** siguen como placeholders en el shell. El modulo **SLAs** tiene
+**SLAs** (fases internas + tablas de SLA por agencia), **Tareas** (Kanban de coordinacion de la migracion;
+antes vivia dentro de Ecosystem 2.0) y **Ecosystem 2.0** (hub de la migracion: documentacion — playbooks
+del backend v2.0 — y modulos futuros como creacion de paginas). **Daily Ops** sigue como placeholder en el
+shell. El modulo **SLAs** tiene
 pestanas: General (edita `sla_definitions`, el autofill de tareas; antes vivia en Admin → SLAs) + una
 pestana por agencia (BNN, NBS) que renderiza `partner_slas` (BNN como lista por categoria; NBS pivoteado
 en matriz por volumen de paginas). El tab activo se recuerda en `localStorage['wmh_sla_tab']`.
@@ -57,8 +59,9 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
   icono (Users / 👥) en el Gantt y en el export a Excel)
 - `ecosystem_tasks(id, section, topic, issue, action, owner, status, priority, notes, deadline,
-  checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del modulo **Ecosystem 2.0**, Kanban de
-  coordinacion de la migracion; independiente de projects/tasks. `status` = Open|In Progress|On Hold|Done.
+  checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
+  migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.
+  `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
   "Resumen <tag>" (`buildTagSummary`) genera un texto plano de las tarjetas de ese tag (agrupadas por
@@ -134,8 +137,15 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Feriados) viven en un menu desplegable **Admin** (`.dropdown`) en vez de sueltos en la topbar.
   Tambien se recuerdan `hidePast` (`wmh_hidepast`) y el acordeon de archivados (`wmh_archived_open`).
   Otras preferencias persistidas: la vista del Calendario (`wmh_cal_view`, default mes; el cursor
-  arranca en hoy) y el filtro de seccion de Ecosystem (`wmh_eco_filter`; cae a "Todas" si la seccion
-  guardada ya no existe). Los popovers transitorios (dropdown Admin, barra de ocultos) NO se recuerdan.
+  arranca en hoy) y el filtro de seccion del Kanban de **Tareas** (`wmh_eco_filter`, key heredada de cuando
+  vivia en Ecosystem; cae a "Todas" si la seccion guardada ya no existe). Los popovers transitorios
+  (dropdown Admin, barra de ocultos) NO se recuerdan.
+- **Ecosystem 2.0 = hub** (`src/modules/Ecosystem.jsx`): ya no es el Kanban (se mudo a **Tareas**). Es un
+  landing con dos secciones — Documentacion (playbooks del backend v2.0, ver `src/data/playbooks.js`) y
+  Modulos (placeholders de features futuras). Los playbooks se renderizan con `DocViewer`
+  (`src/components/docs/`): TOC por H1, figuras con lightbox, tablas y filas termino/definicion. El
+  contenido sale de los `.docx` originales parseados a bloques JSON en `src/data/`; las imagenes viven en
+  `public/docs/` y se referencian con `import.meta.env.BASE_URL`.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
@@ -152,14 +162,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 src/
   lib/         supabase, db (CRUD), ecosystemDb (Kanban CRUD + seed + SETUP_SQL), dates,
                analysis (overlaps/delays/control), colors, exportTimeline (Excel), countries, flags
+  data/        playbooks (metadata) + intro-playbook.json / component-playbook.json (bloques
+               extraidos de los .docx: texto + imagenes; assets en public/docs/)
   context/     DataContext (carga todo + refresh, expone derivados memoizados)
   components/
     gantt/     Gantt.jsx (header por dia/semana, findes, hoy, barras, tooltip)
     panels/    ControlPanel (foco del dia), DelayPanel, LaunchWidget
     modals/    ProjectModal, TaskModal, PartnersModal, HolidaysModal, EcoTaskModal, SlaItemModal
+    docs/      DocViewer (render de playbooks: TOC, figuras, tablas, lightbox)
     ui/        Modal
-  modules/     WebProjects (orquesta todo), Calendar, Ecosystem (Kanban), Slas (fases + agencias),
-               Placeholder (modulos futuros)
+  modules/     WebProjects (orquesta todo), Calendar, Tareas (Kanban), Ecosystem (hub docs +
+               modulos futuros), Slas (fases + agencias), Placeholder (modulos futuros)
 ```
 
 ## Variables de entorno

@@ -1,0 +1,443 @@
+[
+{
+"type": "p",
+"text": "Purina Ecosystem v2.0 – Introduction playbook"
+},
+{
+"type": "p",
+"text": "This document will show features / actions which are used on most of the backend transactions used on Purina V2.0 Ecosystem. Before starting using the specific playbooks read carefully this document."
+},
+{
+"type": "p",
+"text": "All transactions described on this document and all other playbooks will required access to the site backend."
+},
+{
+"type": "h1",
+"text": "Backend access"
+},
+{
+"type": "p",
+"text": "Ask for the administrator access to the site backend"
+},
+{
+"type": "p",
+"text": "To access the backend, enter the domain + “/user” , for example: https://dev-ef5-purina-latam-mx.pantheonsite.io/user/."
+},
+{
+"type": "p",
+"text": "Enter user and password."
+},
+{
+"type": "h1",
+"text": "Upload images"
+},
+{
+"type": "p",
+"text": "This feature will be used on all components and blocks where an image needs to be uploaded. It does not matter what kind of image, if desktop, mobile, background, article, product, for a card or hover, the procedure will be the same."
+},
+{
+"type": "p",
+"text": "There are 2 options:"
+},
+{
+"type": "p",
+"text": "Añadir nuevo elemento multimedia\t\tselect a new image which was not uploaded previously"
+},
+{
+"type": "p",
+"text": "Añadir elemento multimedia existente\tselect a image which was uploaded previously. In this case, it is required to know the name of the file uploaded."
+},
+{
+"type": "img",
+"src": "docs/intro-image1.png"
+},
+{
+"type": "p",
+"text": "Clicking on “Añadir nuevo elemento multimedia”:"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "",
+"imgs": [
+"docs/intro-image2.png"
+]
+},
+{
+"text": "Nombre: file name which can be used later if the image can be used on another component or block.\nUpload desktop and mobile image, if required.\nFor both, inform the “alternative text”.",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/intro-image3.png"
+]
+},
+{
+"text": "Before moving forward, it is mandatory to click on “Crear element multimedia”, otherwise the image will not be saved.",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/intro-image4.png"
+]
+},
+{
+"text": "After clicking on “Crear…” file name informed will be displayed like shown here with 2 actions available: “Editar” or “Eliminar”.",
+"imgs": []
+}
+]
+]
+},
+{
+"type": "h1",
+"text": "Saving pages / content types / taxonomies"
+},
+{
+"type": "p",
+"text": "To create or change any new content, it is mandatory to save it. For that, click on “Guardar” on the top of the page. It does not matter the type of content."
+},
+{
+"type": "img",
+"src": "docs/intro-image5.png"
+},
+{
+"type": "h1",
+"text": "Make content available (Published or unpublished)"
+},
+{
+"type": "p",
+"text": "To make the content available on the site or available to be used, it is mandatory, to click on  “Publicado” button to turn it on. See below."
+},
+{
+"type": "img",
+"src": "docs/intro-image6.png"
+},
+{
+"type": "p",
+"text": "To unpublish it, click on “Publicado” to turn off."
+},
+{
+"type": "img",
+"src": "docs/intro-image7.png"
+},
+{
+"type": "h1",
+"text": "Titles sizes"
+},
+{
+"type": "p",
+"text": "Title size = large / Subtitle = large"
+},
+{
+"type": "img",
+"src": "docs/intro-image8.png"
+},
+{
+"type": "p",
+"text": "Title size = medium / Subtitle = medium"
+},
+{
+"type": "img",
+"src": "docs/intro-image9.png"
+},
+{
+"type": "p",
+"text": "Title size = small / Subtitle = small"
+},
+{
+"type": "img",
+"src": "docs/intro-image10.png"
+},
+{
+"type": "h1",
+"text": "Optional fields"
+},
+{
+"type": "p",
+"text": "Title"
+},
+{
+"type": "p",
+"text": "Subtitle"
+},
+{
+"type": "p",
+"text": "Background image"
+},
+{
+"type": "h1",
+"text": "Avanzado configuration"
+},
+{
+"type": "h2",
+"text": "Text alignment – including titles"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "",
+"imgs": [
+"docs/intro-image11.png"
+]
+},
+{
+"text": "How the text will be positioned on the component.\nDefault = aligned left",
+"imgs": []
+}
+]
+]
+},
+{
+"type": "h2",
+"text": "Style buttons"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Default – always red with white color\nOutline – always white with black text\nSecondary – always black with white text\nText – always black text",
+"imgs": [
+"docs/intro-image12.png",
+"docs/intro-image13.png",
+"docs/intro-image14.png",
+"docs/intro-image15.png"
+]
+},
+{
+"text": "",
+"imgs": [
+"docs/intro-image16.png"
+]
+}
+]
+]
+},
+{
+"type": "h2",
+"text": "Background position"
+},
+{
+"type": "p",
+"text": "Define how the colored background will be shown. It can be a full background considering the whole screen extension or a “box” around the component."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "BOXED",
+"imgs": []
+}
+],
+[
+{
+"text": "",
+"imgs": [
+"docs/intro-image17.png"
+]
+}
+],
+[
+{
+"text": "FULL SCREEN (full width)",
+"imgs": []
+}
+],
+[
+{
+"text": "Example 1 – with spacing 4px.",
+"imgs": [
+"docs/intro-image18.png"
+]
+}
+],
+[
+{
+"text": "Example 2 – with spacing 120px.",
+"imgs": [
+"docs/intro-image19.png"
+]
+}
+]
+]
+},
+{
+"type": "p",
+"text": "Warning: to define the background height, use parameter “Spacing”. See more explanation on chapter “Spacing”."
+},
+{
+"type": "h2",
+"text": "Spacing"
+},
+{
+"type": "p",
+"text": "This parameter allows us to define the spacing before and after the component itself. Pre-defined spacing rules:"
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "How it works",
+"imgs": []
+},
+{
+"text": "Site parameters",
+"imgs": []
+}
+],
+[
+{
+"text": "Without spacing",
+"imgs": []
+},
+{
+"text": "Sem espaço vertical",
+"imgs": []
+}
+],
+[
+{
+"text": "Default",
+"imgs": []
+},
+{
+"text": "Espaçemento de Seção: Médio",
+"imgs": []
+}
+],
+[
+{
+"text": "Pre-defined spacing – same spacing will be applied before and after the component.\nEach entry listed on the right is configured to have a specific component spacing which is showed as “ Xpx” where X is the number of pixels.",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/intro-image20.png"
+]
+}
+],
+[
+{
+"text": "Pre-defined spacing – margins before/after will vary, including different values for desktop and mobile\nReference table on the right.\nExample:\nEspaçamento de seção: Grande will have the following spacing on:\nDesktop: before = 40px / after = 80px\nMobile: before: 32px / after = 60px",
+"imgs": []
+},
+{
+"text": "",
+"imgs": [
+"docs/intro-image21.png"
+]
+}
+]
+]
+},
+{
+"type": "h2",
+"text": "Colors"
+},
+{
+"type": "p",
+"text": "Colors must be defined only when applicable."
+},
+{
+"type": "table",
+"rows": [
+[
+{
+"text": "Card – background colors",
+"imgs": []
+},
+{
+"text": "Color of cards background. Example: card grid.",
+"imgs": []
+}
+],
+[
+{
+"text": "Background color",
+"imgs": []
+},
+{
+"text": "Color of the background of the entire component.",
+"imgs": []
+}
+],
+[
+{
+"text": "Card – icon color",
+"imgs": []
+},
+{
+"text": "Color of the icons. On the product page, it will define the color of:\nSmall star (R&R)\nText of the flavors available",
+"imgs": [
+"docs/intro-image22.png"
+]
+}
+],
+[
+{
+"text": "Card – text color",
+"imgs": []
+},
+{
+"text": "Color of the card description",
+"imgs": []
+}
+],
+[
+{
+"text": "Text color",
+"imgs": []
+},
+{
+"text": "Color of the component title",
+"imgs": []
+}
+],
+[
+{
+"text": "Card – title color",
+"imgs": []
+},
+{
+"text": "Color of the card title and the color hover of the card",
+"imgs": []
+}
+],
+[
+{
+"text": "Background Degrade Color Cards Grid",
+"imgs": []
+},
+{
+"text": "Color used to set the background color on the block “card grid”:\nFull background card icons – (Max 3 cards)\nFull background card icons (Without box – Max 3 cards)",
+"imgs": []
+}
+]
+]
+},
+{
+"type": "p",
+"text": "."
+},
+{
+"type": "img",
+"src": "docs/intro-image23.png"
+},
+{
+"type": "p",
+"text": "Position arrows"
+}
+]
