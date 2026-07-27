@@ -1,10 +1,78 @@
 import { useEffect, useState } from 'react'
-import { Timer, RotateCw, Plus, Check, Trash2, Pencil } from 'lucide-react'
+import { Timer, RotateCw, Plus, Check, Trash2, Pencil, Tag, Users } from 'lucide-react'
 import { useData } from '../context/DataContext.jsx'
 import { createSla, updateSla, deleteSla } from '../lib/db'
+import { SEED_BRANDS, SEED_STAKEHOLDERS } from '../lib/directoryDb'
 import SlaItemModal from '../components/modals/SlaItemModal.jsx'
+import BrandsView from '../components/directory/BrandsView.jsx'
+import StakeholdersView from '../components/directory/StakeholdersView.jsx'
 
-export default function Slas() {
+// Hub de Referencias: info de consulta siempre a mano. Tres secciones:
+//   - SLAs: fases internas (General) + tablas por agencia (lo que antes era el modulo SLAs)
+//   - Marcas: ficha por marca (responsables, guidelines, links, notas)
+//   - Stakeholders: directorio de personas y de que se encargan
+const SECTIONS = [
+  { id: 'slas', label: 'SLAs', icon: Timer },
+  { id: 'brands', label: 'Marcas', icon: Tag },
+  { id: 'people', label: 'Stakeholders', icon: Users },
+]
+
+// Sugerencias base para los datalists de los modales (marcas <-> responsables).
+const SEED_BRAND_NAMES = SEED_BRANDS.map((b) => b.name)
+const SEED_OWNER_NAMES = SEED_STAKEHOLDERS.map((s) => s.name)
+
+export default function Referencias() {
+  const [section, setSection] = useState(() => localStorage.getItem('wmh_ref_section') || 'slas')
+  useEffect(() => { localStorage.setItem('wmh_ref_section', section) }, [section])
+  // Handlers "nuevo" que exponen las vistas de Marcas/Stakeholders para la topbar.
+  const [newBrand, setNewBrand] = useState(null)
+  const [newPerson, setNewPerson] = useState(null)
+
+  const sub = section === 'slas'
+    ? 'Fases internas y tablas por agencia'
+    : section === 'brands'
+      ? 'Responsables, guidelines y links por marca'
+      : 'Quién se encarga de qué — contactos'
+
+  return (
+    <>
+      <div className="topbar">
+        <div>
+          <h1>Referencias</h1>
+          <div className="sub">{sub}</div>
+        </div>
+        <div className="topbar-actions">
+          {section === 'brands' && newBrand && (
+            <button className="btn btn-primary" onClick={newBrand}><Plus size={16} /> Nueva marca</button>
+          )}
+          {section === 'people' && newPerson && (
+            <button className="btn btn-primary" onClick={newPerson}><Plus size={16} /> Nueva persona</button>
+          )}
+        </div>
+      </div>
+
+      <div className="content">
+        <div className="ref-nav">
+          {SECTIONS.map((s) => {
+            const Icon = s.icon
+            return (
+              <button key={s.id} className={`ref-nav-btn${section === s.id ? ' active' : ''}`} onClick={() => setSection(s.id)}>
+                <Icon size={15} /> {s.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {section === 'slas' && <SlasSection />}
+        {section === 'brands' && <BrandsView registerNewHandler={setNewBrand} ownerNames={SEED_OWNER_NAMES} />}
+        {section === 'people' && <StakeholdersView registerNewHandler={setNewPerson} brandNames={SEED_BRAND_NAMES} />}
+      </div>
+    </>
+  )
+}
+
+// --- Seccion SLAs: lo que antes era el modulo completo (General + agencias). ---
+function SlasSection() {
   const { partners, slas, partnerSlas, loading, error, refresh } = useData()
   const slaPartners = partners.filter((p) => ['BNN', 'NBS'].includes(p.name))
   const [tab, setTab] = useState(() => localStorage.getItem('wmh_sla_tab') || 'general')
@@ -17,56 +85,42 @@ export default function Slas() {
   const openNew = (p, prefill) => setModal({ partnerId: p.id, partnerName: p.name, prefill })
   const nextSort = partnerSlas.reduce((m, s) => Math.max(m, s.sort_order || 0), 0) + 1
 
+  if (loading) return <div className="center-state"><div className="spinner" /><div>Cargando SLAs...</div></div>
+  if (error) return (
+    <div className="center-state">
+      <div style={{ color: 'var(--danger)', fontWeight: 600 }}>No se pudo cargar</div>
+      <div style={{ fontSize: 13 }}>{error}</div>
+      <button className="btn" onClick={refresh}><RotateCw size={15} /> Reintentar</button>
+    </div>
+  )
+
   return (
     <>
-      <div className="topbar">
-        <div>
-          <h1>SLAs</h1>
-          <div className="sub">Tiempos comprometidos: fases internas y por agencia</div>
-        </div>
-        <div className="topbar-actions">
-          <button className="btn btn-icon" title="Recargar" onClick={refresh}><RotateCw size={16} /></button>
-          {validTab !== 'general' && (
-            <button className="btn btn-primary" onClick={() => openNew(slaPartners.find((p) => p.id === validTab))}>
-              <Plus size={16} /> Nueva fila
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="content">
-        {loading ? (
-          <div className="center-state"><div className="spinner" /><div>Cargando SLAs...</div></div>
-        ) : error ? (
-          <div className="center-state">
-            <div style={{ color: 'var(--danger)', fontWeight: 600 }}>No se pudo cargar</div>
-            <div style={{ fontSize: 13 }}>{error}</div>
-            <button className="btn" onClick={refresh}><RotateCw size={15} /> Reintentar</button>
-          </div>
-        ) : (
-          <>
-            <div className="sla-tabs">
-              <button className={`sla-tab${validTab === 'general' ? ' active' : ''}`} onClick={() => setTab('general')}>
-                General <span className="sla-tab-sub">fases / autofill</span>
-              </button>
-              {slaPartners.map((p) => (
-                <button
-                  key={p.id}
-                  className={`sla-tab${validTab === p.id ? ' active' : ''}`}
-                  style={validTab === p.id ? { borderBottomColor: p.color } : undefined}
-                  onClick={() => setTab(p.id)}
-                >
-                  <span className="sla-tab-dot" style={{ background: p.color }} /> {p.name}
-                </button>
-              ))}
-            </div>
-
-            {validTab === 'general'
-              ? <GeneralTab slas={slas} refresh={refresh} />
-              : <PartnerTab rows={partnerSlas.filter((s) => s.partner_id === validTab)} partner={slaPartners.find((p) => p.id === validTab)} openEdit={openEdit} openNew={openNew} />}
-          </>
+      <div className="sla-tabs">
+        <button className={`sla-tab${validTab === 'general' ? ' active' : ''}`} onClick={() => setTab('general')}>
+          General <span className="sla-tab-sub">fases / autofill</span>
+        </button>
+        {slaPartners.map((p) => (
+          <button
+            key={p.id}
+            className={`sla-tab${validTab === p.id ? ' active' : ''}`}
+            style={validTab === p.id ? { borderBottomColor: p.color } : undefined}
+            onClick={() => setTab(p.id)}
+          >
+            <span className="sla-tab-dot" style={{ background: p.color }} /> {p.name}
+          </button>
+        ))}
+        <button className="btn btn-icon sla-reload" title="Recargar" onClick={refresh}><RotateCw size={15} /></button>
+        {validTab !== 'general' && (
+          <button className="btn btn-primary btn-sm" onClick={() => openNew(slaPartners.find((p) => p.id === validTab))}>
+            <Plus size={15} /> Nueva fila
+          </button>
         )}
       </div>
+
+      {validTab === 'general'
+        ? <GeneralTab slas={slas} refresh={refresh} />
+        : <PartnerTab rows={partnerSlas.filter((s) => s.partner_id === validTab)} partner={slaPartners.find((p) => p.id === validTab)} openEdit={openEdit} openNew={openNew} />}
 
       {modal && (
         <SlaItemModal
