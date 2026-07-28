@@ -12,11 +12,13 @@ import Modal from '../components/ui/Modal.jsx'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 
 // Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag.
-// Cada tarjeta muestra solo el nombre (tema) y la accion a tomar; sin agrupar por estado.
-// Al pie agrega un bloque "STATUS DE PROYECTOS" con los proyectos (deduplicados por marca,
-// una sola linea por marca aunque haya varios mercados) para completar el status a mano.
+// Arranca con un saludo para el 1:1 (usa el nombre del tag). Cada tarjeta muestra solo el
+// nombre (tema) y la accion a tomar; sin agrupar por estado. Al pie agrega un bloque
+// "STATUS DE PROYECTOS" con los proyectos (deduplicados por marca, una sola linea por marca
+// aunque haya varios mercados) para completar el status a mano.
 function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const oneLine = (s) => String(s || '').replace(/\s*\n\s*/g, ' ').trim()
+  const greeting = `Hola ${tag}!!\n\nTe paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenes en mente y no esta acá.`
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
     .filter((t) => (t.tags || []).includes(tag))
@@ -26,7 +28,7 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
     .filter((t) => t.fields.length > 0)
     .sort(ecoOrder)
 
-  const parts = []
+  const parts = [greeting, '']
   if (rows.length === 0) {
     parts.push(`${header}\n\nSin tareas con contenido para el tag "${tag}".`)
   } else {
