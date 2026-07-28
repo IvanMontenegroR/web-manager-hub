@@ -29,6 +29,30 @@ function parseBannerAlign(value, isHero) {
 }
 
 const RENDERERS = {
+  // Breadcrumb real (.breadcrumb): fs-caption, links #454545 (hover rojo), actual negro,
+  // separador #797777. El ultimo item es la pagina actual (sin link).
+  breadcrumb: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [{ label: 'Inicio' }]
+    return (
+      <nav className="cp-breadcrumb">
+        <ol>
+          {arr.map((it, i) => {
+            const isLast = i === arr.length - 1
+            return (
+              <li key={i}>
+                {i > 0 && <span className="cp-bc-sep">/</span>}
+                {it.url && !isLast
+                  ? <a className="cp-bc-link">{T(it.label, '—')}</a>
+                  : <span className={isLast ? 'cp-bc-current' : 'cp-bc-link'}>{T(it.label, '—')}</span>}
+              </li>
+            )
+          })}
+        </ol>
+      </nav>
+    )
+  },
+
   banner: (c) => {
     const type = c.type || 'Main Hero'
     const promo = /only image|promotional/i.test(type)
