@@ -108,3 +108,36 @@ export async function seedPages() {
   throwIf(error)
   return data
 }
+
+// ---- Componentes de una pagina (el "armado") ----
+export async function fetchPageComponents(pageId) {
+  const { data, error } = await supabase
+    .from('page_components').select('*').eq('page_id', pageId).order('sort_order')
+  if (error) return { data: [], error, tableMissing: isMissingTable(error) }
+  return { data: data ?? [], error: null, tableMissing: false }
+}
+
+export async function addPageComponent(pageId, componentKey, sort_order) {
+  const { data, error } = await supabase
+    .from('page_components')
+    .insert({ page_id: pageId, component_key: componentKey, content: {}, sort_order: sort_order ?? 0 })
+    .select().single()
+  throwIf(error)
+  return data
+}
+
+export async function updatePageComponentContent(id, content) {
+  const { data, error } = await supabase
+    .from('page_components').update({ content: content || {} }).eq('id', id).select().single()
+  throwIf(error)
+  return data
+}
+
+export async function deletePageComponent(id) {
+  const { error } = await supabase.from('page_components').delete().eq('id', id)
+  throwIf(error)
+}
+
+export async function persistComponentOrder(components) {
+  await Promise.all(components.map((c, i) => supabase.from('page_components').update({ sort_order: i }).eq('id', c.id)))
+}

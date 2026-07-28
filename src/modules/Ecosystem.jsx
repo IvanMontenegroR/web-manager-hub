@@ -3,6 +3,7 @@ import { Boxes, BookOpen, FileText, ChevronRight, LayoutTemplate, Sparkles } fro
 import { PLAYBOOKS } from '../data/playbooks'
 import DocViewer from '../components/docs/DocViewer.jsx'
 import PagesTracker from '../components/pages/PagesTracker.jsx'
+import PageBuilder from '../components/pages/PageBuilder.jsx'
 
 // Ecosystem 2.0 = hub de la migracion. Hoy: documentacion (playbooks del backend
 // v2.0) y el modulo "Creacion de paginas" (tracker de paginas + builder/export).
@@ -20,7 +21,22 @@ const FUTURE = [
 export default function Ecosystem() {
   const [openId, setOpenId] = useState(null)
   const [view, setView] = useState(null) // null | 'pages'
+  const [builderPage, setBuilderPage] = useState(null)
   const doc = openId ? PLAYBOOKS.find((d) => d.id === openId) : null
+
+  if (builderPage) {
+    return (
+      <>
+        <div className="topbar">
+          <div>
+            <h1>Armar: {builderPage.name}</h1>
+            <div className="sub">Builder de pagina — componentes y contenido</div>
+          </div>
+        </div>
+        <PageBuilder page={builderPage} onBack={() => setBuilderPage(null)} />
+      </>
+    )
+  }
 
   if (view === 'pages') {
     return (
@@ -31,7 +47,7 @@ export default function Ecosystem() {
             <div className="sub">Paginas a armar — estado y prioridad</div>
           </div>
         </div>
-        <PagesTracker onBack={() => setView(null)} />
+        <PagesTracker onBack={() => setView(null)} onOpenBuilder={setBuilderPage} />
       </>
     )
   }
