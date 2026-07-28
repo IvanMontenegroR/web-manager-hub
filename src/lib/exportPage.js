@@ -26,11 +26,13 @@ async function download(wb, filename) {
 }
 
 // Captura un nodo del DOM a PNG (dataURL). Devuelve null si falla.
-async function snapshot(node) {
+async function snapshot(node, forceWidth) {
   if (!node) return null
-  const w = node.offsetWidth || 800
+  const w = forceWidth || node.offsetWidth || 800
   // Fijamos el ancho en px durante la captura: html2canvas resuelve los width:%
   // contra un ancestro con ancho explicito; sin esto, los width:100% colapsan.
+  // forceWidth ademas fuerza el layout desktop (ej. header, que a ancho angosto
+  // desborda su nav).
   const prevWidth = node.style.width
   node.style.width = w + 'px'
   try {
@@ -49,7 +51,8 @@ async function snapshot(node) {
 
 // components = [{ id, component_key, content }] en orden.
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
-export async function exportPageMatrix(page, components, getNode) {
+// headerNode = nodo del Header global (opcional), se pone como contexto arriba.
+export async function exportPageMatrix(page, components, getNode, headerNode) {
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
@@ -75,6 +78,32 @@ export async function exportPageMatrix(page, components, getNode) {
   ws.getCell(2, 1).font = { italic: true, size: 10, color: { argb: 'FF868E99' } }
 
   let row = 4
+
+  // Header global (contexto): imagen + nota. Se configura una vez para todo el sitio.
+  if (headerNode) {
+    const durl = await snapshot(headerNode, 1180)
+    if (durl) {
+      ws.mergeCells(row, 1, row, 4)
+      const hh = ws.getCell(row, 1)
+      hh.value = 'Header — global (en todas las paginas)'
+      hh.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
+      hh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
+      hh.alignment = { vertical: 'middle', indent: 1 }
+      ws.getRow(row).height = 22
+      row++
+      const imgId = wb.addImage({ base64: durl, extension: 'png' })
+      const probe = await loadSize(durl)
+      const w = 720
+      const h2 = probe ? Math.round((probe.h / probe.w) * w) : 60
+      ws.addImage(imgId, { tl: { col: 0.05, row: row - 1 + 0.1 }, ext: { width: w, height: h2 }, editAs: 'oneCell' })
+      row += Math.ceil(h2 / 18) + 1
+      ws.getCell(row, 1).value = 'El header es global: se configura una sola vez para todo el sitio, no por pagina.'
+      ws.mergeCells(row, 1, row, 4)
+      ws.getCell(row, 1).font = { italic: true, size: 10, color: { argb: 'FF868E99' } }
+      row += 2
+    }
+  }
+
   let idx = 0
   for (const comp of components) {
     idx++

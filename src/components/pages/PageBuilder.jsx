@@ -8,6 +8,7 @@ import {
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
+import SiteHeader from './preview/SiteHeader.jsx'
 import ContentForm from './ContentForm.jsx'
 
 export default function PageBuilder({ page, onBack }) {
@@ -20,6 +21,7 @@ export default function PageBuilder({ page, onBack }) {
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
   const nodes = useRef(new Map())
+  const headerRef = useRef(null)
 
   async function load() {
     setLoading(true)
@@ -87,7 +89,7 @@ export default function PageBuilder({ page, onBack }) {
       await exportPageMatrix(page, current, (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
-      })
+      }, headerRef.current)
     } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
   }
 
@@ -119,6 +121,10 @@ export default function PageBuilder({ page, onBack }) {
 
         {/* Canvas / preview */}
         <div className="pb-canvas">
+          {/* Header global — presente en todas las paginas (no editable, va en el export). */}
+          <div className="pb-globaltag">Header — global (en todas las paginas)</div>
+          <div ref={headerRef} className="pb-header-host"><SiteHeader /></div>
+
           {loading ? (
             <div className="center-state"><div className="spinner" /></div>
           ) : comps.length === 0 ? (
