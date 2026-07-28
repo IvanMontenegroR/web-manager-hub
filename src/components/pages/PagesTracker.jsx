@@ -32,7 +32,7 @@ function SetupBlock() {
   )
 }
 
-export default function PagesTracker({ onBack }) {
+export default function PagesTracker({ onBack, onOpenBuilder }) {
   const [rows, setRows] = useState([])
   const [state, setState] = useState('loading') // loading | ok | missing | error
   const [errMsg, setErrMsg] = useState(null)
@@ -106,12 +106,12 @@ export default function PagesTracker({ onBack }) {
                 <button className="ic-btn" disabled={i === rows.length - 1} onClick={() => move(i, 1)} title="Bajar"><ChevronDown size={15} /></button>
               </div>
               <div className="page-idx">{i + 1}</div>
-              <div className="page-main" onClick={() => setModal(p)}>
+              <div className="page-main" onClick={() => onOpenBuilder?.(p)} title="Abrir el builder">
                 <div className="page-name">{p.name}</div>
                 {p.path && <div className="page-path">{p.path}</div>}
                 {p.notes && <div className="page-notes">{p.notes}</div>}
               </div>
-              <div className="page-comp"><Layers size={13} /> {(p.componentCount ?? 0)} comp.</div>
+              <button className="btn btn-sm page-build" onClick={() => onOpenBuilder?.(p)}><Layers size={13} /> Armar</button>
               <select
                 className={`page-status ${STATUS_CLASS[p.status]}`}
                 value={p.status}

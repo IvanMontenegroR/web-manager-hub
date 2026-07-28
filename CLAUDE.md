@@ -166,13 +166,22 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   bloques JSON en `src/data/`; las imagenes viven en `public/docs/` y se referencian con
   `import.meta.env.BASE_URL`.
 - **Creacion de paginas** (`src/components/pages/`, se abre desde la seccion Modulos de Ecosystem 2.0):
-  modulo para armar las paginas de la migracion. Hoy: el **tracker** (`PagesTracker`) — lista de paginas
-  (`pages`) con estado (Not started|In progress|On hold|Done, ver `PAGE_STATUS_LABEL`) y orden por
-  prioridad (reordenable con flechas, persiste `sort_order`). Fetch tolerante + SETUP_SQL (`src/lib/pagesDb.js`).
-  A futuro (en diseño): builder visual con paleta de componentes (de la documentacion) que rellena su
-  contenido, y export de "matriz de contenido" (pagina → componente con imagen del render + columnas con
-  el contenido por campo de Drupal) para los editores del CMS. Ese contenido vive en `page_components`
-  (page_id, component_key, content jsonb).
+  modulo para armar las paginas de la migracion. Dos capas:
+  1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|In progress|On hold|
+     Done, ver `PAGE_STATUS_LABEL`) y orden por prioridad (reordenable, persiste `sort_order`). El boton
+     "Armar" abre el builder de esa pagina.
+  2. **Builder** (`PageBuilder`) — 3 paneles: paleta de componentes | canvas con el preview EN VIVO de la
+     pagina armandose | editor de contenido del componente seleccionado. Cada componente sale del catalogo
+     `src/data/components.js` (define sus CAMPOS de Drupal: text|textarea|url|select|image|list). Los
+     mockups se renderizan en `ComponentPreview` (`preview/`); agregar un componente = una entrada en el
+     catalogo + un render ahi. Los componentes colocados viven en `page_components` (page_id, component_key,
+     content jsonb, sort_order).
+  3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): por pagina, una seccion por componente
+     con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
+     para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
+     el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
+  Fetch tolerante + SETUP_SQL en `src/lib/pagesDb.js`. Catalogo inicial (piloto): banner, brand_logos,
+  card_grid, text, text_image, big_number_grid, external_video, article_list.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
@@ -188,10 +197,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 ```
 src/
   lib/         supabase, db (CRUD), ecosystemDb (Kanban CRUD + seed + SETUP_SQL),
-               directoryDb (Marcas + Stakeholders CRUD + seed + SETUP_SQL), dates,
-               analysis (overlaps/delays/control), colors, exportTimeline (Excel), countries, flags
-  data/        playbooks (metadata) + intro-playbook.json / component-playbook.json (bloques
-               extraidos de los .docx: texto + imagenes; assets en public/docs/)
+               directoryDb (Marcas + Stakeholders CRUD + seed + SETUP_SQL),
+               pagesDb (paginas + page_components CRUD + SETUP_SQL), dates,
+               analysis (overlaps/delays/control), colors, exportTimeline + exportPage (Excel),
+               countries, flags
+  data/        playbooks (metadata) + intro/component-playbook.json (bloques de los .docx),
+               components (catalogo de componentes del builder: campos por componente)
   context/     DataContext (carga todo + refresh, expone derivados memoizados)
   components/
     gantt/     Gantt.jsx (header por dia/semana, findes, hoy, barras, tooltip)
@@ -199,7 +210,8 @@ src/
     modals/    ProjectModal, TaskModal, PartnersModal, HolidaysModal, EcoTaskModal, SlaItemModal
     docs/      DocViewer (render de playbooks: TOC, figuras, tablas, lightbox)
     directory/ BrandsView, StakeholdersView, BrandModal, StakeholderModal, SetupNotice
-    pages/     PagesTracker (lista de paginas: estado + orden), PageModal
+    pages/     PagesTracker (lista), PageModal, PageBuilder (paleta+canvas+editor),
+               ContentForm, preview/ComponentPreview (mockups por componente)
     ui/        Modal
   modules/     WebProjects (orquesta todo), Calendar, Tareas (Kanban), Ecosystem (hub docs +
                modulos futuros), Referencias (SLAs + Marcas + Stakeholders), Placeholder
