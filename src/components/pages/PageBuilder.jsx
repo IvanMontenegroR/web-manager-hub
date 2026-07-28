@@ -152,7 +152,7 @@ export default function PageBuilder({ page, onBack }) {
               comps.map((c, i) => (
                 <div
                   key={c.id}
-                  className={`pb-block${selId === c.id ? ' sel' : ''}`}
+                  className={`pb-block pb-block--${c.component_key}${selId === c.id ? ' sel' : ''}`}
                   ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
                   onClick={() => editMode && select(c)}
                 >
