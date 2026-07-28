@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LayoutGrid, CalendarDays, Library, ClipboardList, ListChecks, Boxes, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import WebProjects from './modules/WebProjects.jsx'
 import Calendar from './modules/Calendar.jsx'
@@ -20,9 +20,14 @@ const MODULES = [
 ]
 
 export default function App() {
-  const [active, setActive] = useState('web')
+  // Recuerda el ultimo modulo abierto (cae a 'web' si el guardado ya no existe).
+  const [active, setActive] = useState(() => {
+    const saved = localStorage.getItem('wmh_active_module')
+    return MODULES.some((m) => m.id === saved) ? saved : 'web'
+  })
   const [collapsed, setCollapsed] = useState(false)
-  const mod = MODULES.find((m) => m.id === active)
+  useEffect(() => { localStorage.setItem('wmh_active_module', active) }, [active])
+  const mod = MODULES.find((m) => m.id === active) || MODULES[0]
 
   return (
     <div className={`app${collapsed ? ' nav-collapsed' : ''}`}>
