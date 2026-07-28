@@ -161,10 +161,18 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   (dropdown Admin, barra de ocultos) NO se recuerdan.
 - **Ecosystem 2.0 = hub** (`src/modules/Ecosystem.jsx`): ya no es el Kanban (se mudo a **Tareas**). Es un
   landing con dos secciones — Documentacion (playbooks del backend v2.0, ver `src/data/playbooks.js`) y
-  Modulos (placeholders de features futuras). Los playbooks se renderizan con `DocViewer`
-  (`src/components/docs/`): TOC por H1, figuras con lightbox, tablas y filas termino/definicion. El
-  contenido sale de los `.docx` originales parseados a bloques JSON en `src/data/`; las imagenes viven en
-  `public/docs/` y se referencian con `import.meta.env.BASE_URL`.
+  Modulos. Los playbooks se renderizan con `DocViewer` (`src/components/docs/`): TOC por H1, figuras con
+  lightbox, tablas y filas termino/definicion. El contenido sale de los `.docx` originales parseados a
+  bloques JSON en `src/data/`; las imagenes viven en `public/docs/` y se referencian con
+  `import.meta.env.BASE_URL`.
+- **Creacion de paginas** (`src/components/pages/`, se abre desde la seccion Modulos de Ecosystem 2.0):
+  modulo para armar las paginas de la migracion. Hoy: el **tracker** (`PagesTracker`) — lista de paginas
+  (`pages`) con estado (Not started|In progress|On hold|Done, ver `PAGE_STATUS_LABEL`) y orden por
+  prioridad (reordenable con flechas, persiste `sort_order`). Fetch tolerante + SETUP_SQL (`src/lib/pagesDb.js`).
+  A futuro (en diseño): builder visual con paleta de componentes (de la documentacion) que rellena su
+  contenido, y export de "matriz de contenido" (pagina → componente con imagen del render + columnas con
+  el contenido por campo de Drupal) para los editores del CMS. Ese contenido vive en `page_components`
+  (page_id, component_key, content jsonb).
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
@@ -191,6 +199,7 @@ src/
     modals/    ProjectModal, TaskModal, PartnersModal, HolidaysModal, EcoTaskModal, SlaItemModal
     docs/      DocViewer (render de playbooks: TOC, figuras, tablas, lightbox)
     directory/ BrandsView, StakeholdersView, BrandModal, StakeholderModal, SetupNotice
+    pages/     PagesTracker (lista de paginas: estado + orden), PageModal
     ui/        Modal
   modules/     WebProjects (orquesta todo), Calendar, Tareas (Kanban), Ecosystem (hub docs +
                modulos futuros), Referencias (SLAs + Marcas + Stakeholders), Placeholder

@@ -2,18 +2,14 @@ import { useState } from 'react'
 import { Boxes, BookOpen, FileText, ChevronRight, LayoutTemplate, Sparkles } from 'lucide-react'
 import { PLAYBOOKS } from '../data/playbooks'
 import DocViewer from '../components/docs/DocViewer.jsx'
+import PagesTracker from '../components/pages/PagesTracker.jsx'
 
 // Ecosystem 2.0 = hub de la migracion. Hoy: documentacion (playbooks del backend
-// v2.0). A futuro: modulos mas especificos (creacion de paginas, componentes, etc.).
+// v2.0) y el modulo "Creacion de paginas" (tracker de paginas + builder/export).
 // El Kanban de tareas se mudo al modulo "Tareas".
 
 // Modulos futuros (placeholders visuales, aun no construidos).
 const FUTURE = [
-  {
-    icon: LayoutTemplate,
-    title: 'Creacion de paginas',
-    desc: 'Asistente guiado para armar component pages: elegir bloques, precargar campos y generar el checklist de publicacion.',
-  },
   {
     icon: Sparkles,
     title: 'Mas modulos',
@@ -23,7 +19,22 @@ const FUTURE = [
 
 export default function Ecosystem() {
   const [openId, setOpenId] = useState(null)
+  const [view, setView] = useState(null) // null | 'pages'
   const doc = openId ? PLAYBOOKS.find((d) => d.id === openId) : null
+
+  if (view === 'pages') {
+    return (
+      <>
+        <div className="topbar">
+          <div>
+            <h1>Creacion de paginas</h1>
+            <div className="sub">Paginas a armar — estado y prioridad</div>
+          </div>
+        </div>
+        <PagesTracker onBack={() => setView(null)} />
+      </>
+    )
+  }
 
   if (doc) {
     return (
@@ -71,9 +82,17 @@ export default function Ecosystem() {
         <section className="eco-hub-section">
           <div className="eco-hub-h">
             <Boxes size={16} /> Modulos
-            <span className="eco-hub-sub">En construccion</span>
           </div>
           <div className="eco-hub-grid">
+            <button className="eco-doc-card" onClick={() => setView('pages')}>
+              <div className="eco-doc-icon"><LayoutTemplate size={20} /></div>
+              <div className="eco-doc-body">
+                <div className="eco-doc-tag">Builder</div>
+                <h3>Creacion de paginas</h3>
+                <p>Lista de paginas a armar (estado + prioridad). Proximamente: builder visual con componentes y export de matriz de contenido para editores.</p>
+              </div>
+              <ChevronRight size={18} className="eco-doc-arrow" />
+            </button>
             {FUTURE.map((f) => {
               const Icon = f.icon
               return (
