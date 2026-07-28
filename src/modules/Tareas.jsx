@@ -396,7 +396,7 @@ export default function Tareas() {
             <>
               <a
                 className="btn"
-                href={`mailto:?subject=${encodeURIComponent(`Resumen ${summary.tag} — ${fmtLargo(today)}`)}&body=${encodeURIComponent(summary.text)}`}
+                href={`mailto:?subject=${encodeURIComponent(`1:1 Status Websites — ${fmtLargo(today)}`)}&body=${encodeURIComponent(summary.text)}`}
               >
                 <Mail size={15} /> Abrir email
               </a>
