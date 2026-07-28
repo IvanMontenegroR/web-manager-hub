@@ -18,7 +18,7 @@ import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 // aunque haya varios mercados) para completar el status a mano.
 function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const oneLine = (s) => String(s || '').replace(/\s*\n\s*/g, ' ').trim()
-  const greeting = `Hola ${tag}!!\n\nTe paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenes en mente y no esta acá.`
+  const greeting = `Hola ${tag}!!\n\nTe paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenés en mente y no esta acá.`
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
     .filter((t) => (t.tags || []).includes(tag))
@@ -32,7 +32,7 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
   if (rows.length === 0) {
     parts.push(`${header}\n\nSin tareas con contenido para el tag "${tag}".`)
   } else {
-    parts.push(`${header} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`)
+    parts.push(header)
     rows.forEach((t, i) => {
       parts.push(`${i + 1}. ${t.fields[0]}`)
       for (const f of t.fields.slice(1)) parts.push(`   ${f}`)
@@ -50,6 +50,9 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
     parts.push('\nSTATUS DE PROYECTOS')
     for (const b of brands) parts.push(`- ${b}: `)
   }
+
+  // Cierre. La firma de Outlook va despues, a mano.
+  parts.push('\nSaludos,')
 
   return parts.join('\n')
 }
