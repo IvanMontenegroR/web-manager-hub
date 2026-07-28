@@ -1489,8 +1489,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 .cp-header { background: #e91c24; color: #fff; height: 68px; display: flex; align-items: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .cp-header-inner { display: flex; align-items: center; gap: 22px; width: 100%; padding: 0 24px; }
-.cp-header-logo { font-weight: 800; font-size: 20px; letter-spacing: 0.5px; color: #fff; flex: none; }
-.cp-header-logo sup { font-size: 9px; }
+.cp-header-logo-img { height: 34px; width: auto; display: block; flex: none; }
 .cp-header-nav { display: flex; align-items: center; gap: 18px; flex: 1; }
 .cp-header-navitem { display: inline-flex; align-items: center; gap: 3px; font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; }
 .cp-header-navitem svg { opacity: 0.9; }
