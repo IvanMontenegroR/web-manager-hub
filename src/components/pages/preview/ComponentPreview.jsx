@@ -18,44 +18,52 @@ function Img({ src, h = 160, className = '' }) {
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 const list = (v) => (Array.isArray(v) ? v : [])
 
+// "Banner Align Content" (opcion del CMS) -> posicion horizontal + vertical.
+// Por defecto = centro/centro (asi se ve el Main Hero real). Ej: "Banner Left Bottom".
+function parseBannerAlign(value, isHero) {
+  const s = String(value || '').toLowerCase()
+  if (!s || /por defecto/.test(s)) return { h: 'center', v: isHero ? 'center' : 'center' }
+  const h = s.includes('left') ? 'left' : s.includes('right') ? 'right' : 'center'
+  const v = s.includes('top') ? 'top' : s.includes('bottom') ? 'bottom' : 'center'
+  return { h, v }
+}
+
 const RENDERERS = {
   banner: (c) => {
     const type = c.type || 'Main Hero'
-    const promo = /promotional/i.test(type)
-    const mainHero = /main hero/i.test(type)
-    const align = /centro/i.test(c.align) ? 'center' : /derecha/i.test(c.align) ? 'right' : 'left'
+    const promo = /only image|promotional/i.test(type)
+    const mainHero = /main hero|brand hero/i.test(type)
+    const cta = c.link_text
+    const { h, v } = parseBannerAlign(c.banner_align, mainHero)
 
     // Solo imagen.
     if (promo) return <div className="cp-banner"><Img src={c.image} h={300} /></div>
 
-    // Main Hero: imagen a sangre (bordes redondeados) + overlay oscuro uniforme
-    // rgba(0,0,0,.3) + contenido blanco CENTRADO. Modela el markup/estilos reales
-    // (.main-hero, --banner-bg, .main-hero__title fs-display-sm, .btn-primary).
+    // Main Hero / Brand Hero: imagen a sangre (bordes redondeados) + overlay oscuro
+    // uniforme rgba(0,0,0,.3) + contenido blanco posicionado por Banner Align Content.
+    // Modela el markup/estilos reales (.main-hero, --banner-bg, .btn-primary; CTA mt-6).
     if (mainHero) {
-      const halign = /izquierda/i.test(c.align) ? 'left' : /derecha/i.test(c.align) ? 'right' : 'center'
       return (
         <div className="cp-hero">
           {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
           <div className="cp-hero-scrim" />
-          <div className={`cp-hero-content ${halign}`}>
-            {c.subtitle && <div className="cp-hero-eyebrow">{c.subtitle}</div>}
+          <div className={`cp-hero-content h-${h} v-${v}`}>
             <div className="cp-hero-title">{T(c.title, 'Main Hero')}</div>
             {c.description && <p className="cp-hero-desc">{c.description}</p>}
-            {c.cta_label && <span className="cp-hero-cta">{c.cta_label}</span>}
+            {cta && <span className="cp-hero-cta">{cta}</span>}
           </div>
         </div>
       )
     }
 
-    // Secondary Hero / Full image + box content: caja blanca sobre la imagen.
+    // Secondary Hero / Banner Card / Full Image + Box Content: caja blanca sobre la imagen.
     return (
-      <div className="cp-banner" style={{ textAlign: align }}>
+      <div className="cp-banner" style={{ textAlign: h }}>
         <Img src={c.image} h={300} />
-        <div className={`cp-banner-box ${align}`}>
-          {c.subtitle && <div className="cp-eyebrow">{c.subtitle}</div>}
+        <div className={`cp-banner-box ${h}`}>
           <div className="cp-h1">{T(c.title, 'Titulo del banner')}</div>
           {c.description && <p className="cp-p">{c.description}</p>}
-          {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
+          {cta && <span className="cp-cta">{cta}</span>}
         </div>
       </div>
     )
