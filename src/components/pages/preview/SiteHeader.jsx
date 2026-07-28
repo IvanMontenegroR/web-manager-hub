@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { ChevronDown, Search } from 'lucide-react'
 
 // Logo real de Purina (public/purina-logo.png). Su marco rojo se funde con la barra.
 const LOGO = (import.meta.env.BASE_URL || '/') + 'purina-logo.png'
+// Logo de Pet Club: si existe public/petclub-logo.png se muestra; si no, cae al texto.
+const PETCLUB = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 
 // Header global del sitio (purina:header-main). Barra roja fija, presente en TODAS
 // las paginas. Es config global (no contenido por pagina), por eso se muestra como
@@ -17,6 +20,7 @@ const NAV = [
 ]
 
 export default function SiteHeader() {
+  const [petErr, setPetErr] = useState(false)
   return (
     <header className="cp-header">
       <div className="cp-header-inner">
@@ -30,7 +34,12 @@ export default function SiteHeader() {
         </nav>
         <div className="cp-header-actions">
           <span className="cp-header-search"><Search size={18} strokeWidth={2.5} /></span>
-          <span className="cp-header-petclub">Participa de <b>Pet&nbsp;Club</b></span>
+          <span className="cp-header-petclub">
+            Participa de{' '}
+            {petErr
+              ? <b>Pet&nbsp;Club</b>
+              : <img className="cp-header-petclub-img" src={PETCLUB} alt="Pet Club" onError={() => setPetErr(true)} />}
+          </span>
         </div>
       </div>
     </header>
