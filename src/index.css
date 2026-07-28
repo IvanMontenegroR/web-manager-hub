@@ -1381,6 +1381,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-pal-item:hover:not(:disabled) svg { color: var(--purina); }
 
 .pb-canvas { border: 1px solid var(--border); border-radius: var(--radius); background: var(--proj-bg); padding: 16px; overflow: auto; display: flex; flex-direction: column; gap: 14px; }
+/* Los hijos del canvas NO se comprimen (si no, el header con overflow-y:hidden se
+   aplasta a una tira cuando el contenido no entra). El canvas scrollea. */
+.pb-canvas > *, .pb-page > * { flex-shrink: 0; }
 .pb-empty, .pb-editor-empty { text-align: center; color: var(--ink-3); margin: auto; max-width: 340px; padding: 40px 10px; }
 .pb-empty p { font-size: 13px; line-height: 1.5; }
 
