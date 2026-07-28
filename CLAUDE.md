@@ -74,9 +74,11 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
-  "Resumen <tag>" (`buildTagSummary`) genera un texto plano de las tarjetas de ese tag (agrupadas por
-  estado; cada una muestra tema=titulo, problema=descripcion, accion y nota, saltando vacios) para copiar
-  o abrir en el email semanal (`mailto:`). `checklist` = jsonb array de
+  "Resumen <tag>" (`buildTagSummary`) genera un texto plano de las tarjetas de ese tag (lista plana, sin
+  agrupar por estado; cada una muestra solo nombre=tema + accion a tomar) para copiar o abrir en el email
+  semanal (`mailto:`). Al pie agrega un bloque "STATUS DE PROYECTOS" con una linea por proyecto deduplicado
+  por `brand` (los archivados se excluyen; ej. los 5 Fancy Feast quedan en una sola linea "Fancy Feast"),
+  con el status en blanco para completar a mano; usa `projects` de `DataContext`. `checklist` = jsonb array de
   {text, done, deadline?} (cada sub-item puede tener su
   propia deadline). El **deadline efectivo** (`effectiveDeadline`) = la fecha mas temprana entre el
   `deadline` propio y las deadlines de los items del checklist NO hechos; manda para el color y el orden.

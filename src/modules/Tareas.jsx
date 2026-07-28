@@ -7,32 +7,48 @@ import {
   fetchEcoTasks, seedEcoTasks, moveEcoTask, deleteEcoTask,
 } from '../lib/ecosystemDb'
 import { daysBetween, businessDaysBetween, fmtCorto, fmtLargo, toISO } from '../lib/dates'
+import { useData } from '../context/DataContext.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 
-// Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag,
-// agrupadas por estado. Cada tarjeta muestra: titulo (tema), descripcion (problema/situacion),
-// accion y nota; los campos vacios no se muestran. Sin prioridad/tags/deadline/checklist.
-function buildTagSummary(tasks, tag, todayISO) {
+// Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag.
+// Cada tarjeta muestra solo el nombre (tema) y la accion a tomar; sin agrupar por estado.
+// Al pie agrega un bloque "STATUS DE PROYECTOS" con los proyectos (deduplicados por marca,
+// una sola linea por marca aunque haya varios mercados) para completar el status a mano.
+function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const oneLine = (s) => String(s || '').replace(/\s*\n\s*/g, ' ').trim()
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
     .filter((t) => (t.tags || []).includes(tag))
-    // titulo = tema, descripcion = problema/situacion, luego accion y nota.
+    // nombre = tema, y la accion a tomar; nada mas.
     .map((t) => ({ status: t.status, sort_order: t.sort_order, deadline: t.deadline, checklist: t.checklist,
-      fields: [oneLine(t.topic), oneLine(t.issue), oneLine(t.action), oneLine(t.notes)].filter(Boolean) }))
+      fields: [oneLine(t.topic), oneLine(t.action)].filter(Boolean) }))
     .filter((t) => t.fields.length > 0)
-  if (rows.length === 0) return `${header}\n\nSin tareas con contenido para el tag "${tag}".`
-  const parts = [`${header} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`]
-  for (const st of ECO_STATUSES) {
-    const group = rows.filter((t) => t.status === st).sort(ecoOrder)
-    if (!group.length) continue
-    parts.push(`\n${st.toUpperCase()} (${group.length})`)
-    group.forEach((t, i) => {
+    .sort(ecoOrder)
+
+  const parts = []
+  if (rows.length === 0) {
+    parts.push(`${header}\n\nSin tareas con contenido para el tag "${tag}".`)
+  } else {
+    parts.push(`${header} (${rows.length} tarea${rows.length === 1 ? '' : 's'})`)
+    rows.forEach((t, i) => {
       parts.push(`${i + 1}. ${t.fields[0]}`)
       for (const f of t.fields.slice(1)) parts.push(`   ${f}`)
     })
   }
+
+  // Status de proyectos: una linea por marca (deduplicada), activos, para llenar a mano.
+  const brands = []
+  for (const p of projects) {
+    if (p.archived) continue
+    const b = (p.brand || p.name || '').trim()
+    if (b && !brands.includes(b)) brands.push(b)
+  }
+  if (brands.length) {
+    parts.push('\nSTATUS DE PROYECTOS')
+    for (const b of brands) parts.push(`- ${b}: `)
+  }
+
   return parts.join('\n')
 }
 
@@ -75,6 +91,7 @@ const COLUMN_HINT = {
 }
 
 export default function Tareas() {
+  const { projects } = useData()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -244,7 +261,7 @@ export default function Tareas() {
                   const target = activeTag === '__all__' ? 'Helo' : activeTag
                   return (
                     <button className="btn btn-sm" style={{ marginLeft: 4 }}
-                      onClick={() => { setSumCopied(false); setSummary({ tag: target, text: buildTagSummary(tasks, target, today) }) }}>
+                      onClick={() => { setSumCopied(false); setSummary({ tag: target, text: buildTagSummary(tasks, target, today, projects) }) }}>
                       <FileText size={14} /> Resumen {target}
                     </button>
                   )
