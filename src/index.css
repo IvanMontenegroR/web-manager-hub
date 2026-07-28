@@ -1497,7 +1497,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-header-search { display: inline-flex; color: #fff; }
 .cp-header-petclub { background: #fff; color: #1b252e; font-size: 12.5px; font-weight: 600; padding: 8px 16px; border-radius: 9999px; white-space: nowrap; }
 .cp-header-petclub b { color: #e91c24; font-weight: 800; }
-.cp-header-petclub-img { height: 20px; width: auto; display: inline-block; vertical-align: middle; }
+.cp-header-petclub-img { height: 30px; width: auto; display: inline-block; vertical-align: middle; margin-left: 2px; }
 
 /* ===== Builder — vista previa (pagina tal cual, sin toolbars ni espacios) ===== */
 .pb-main.preview { grid-template-columns: 1fr; }
