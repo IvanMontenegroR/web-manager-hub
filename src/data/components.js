@@ -18,7 +18,7 @@ export const COMPONENTS = [
     category: 'Hero',
     help: 'Banner principal. Segun el tipo cambia que campos aplican.',
     fields: [
-      { key: 'type', label: 'Tipo', type: 'select', options: ['Promotional (solo imagen)', 'Secondary Hero', 'Full image + box content'] },
+      { key: 'type', label: 'Tipo', type: 'select', options: ['Main Hero', 'Promotional (solo imagen)', 'Secondary Hero', 'Full image + box content'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'description', label: 'Descripcion', type: 'textarea' },
