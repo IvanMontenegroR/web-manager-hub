@@ -134,34 +134,37 @@ export default function PageBuilder({ page, onBack }) {
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
           <div ref={headerRef} className="pb-header-host"><SiteHeader /></div>
 
-          {loading ? (
-            <div className="center-state"><div className="spinner" /></div>
-          ) : comps.length === 0 ? (
-            <div className="pb-empty">
-              <LayoutGrid size={26} />
-              <div className="dir-empty-t">Pagina vacia</div>
-              <p>Agregá componentes desde la paleta de la izquierda. Se van apilando acá y podés cargar su contenido.</p>
-            </div>
-          ) : (
-            comps.map((c, i) => (
-              <div
-                key={c.id}
-                className={`pb-block${selId === c.id ? ' sel' : ''}`}
-                ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
-                onClick={() => editMode && select(c)}
-              >
-                <div className="pb-block-bar">
-                  <span className="pb-block-name">{getComponent(c.component_key)?.name || c.component_key}</span>
-                  <div className="pb-block-actions">
-                    <button className="ic-btn" disabled={i === 0} onClick={(e) => { e.stopPropagation(); move(i, -1) }} title="Subir"><ChevronUp size={14} /></button>
-                    <button className="ic-btn" disabled={i === comps.length - 1} onClick={(e) => { e.stopPropagation(); move(i, 1) }} title="Bajar"><ChevronDown size={14} /></button>
-                    <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
-                  </div>
-                </div>
-                <ComponentPreview componentKey={c.component_key} content={contentFor(c)} />
+          {/* Container: replica el gutter lateral de la pagina real. */}
+          <div className="pb-page">
+            {loading ? (
+              <div className="center-state"><div className="spinner" /></div>
+            ) : comps.length === 0 ? (
+              <div className="pb-empty">
+                <LayoutGrid size={26} />
+                <div className="dir-empty-t">Pagina vacia</div>
+                <p>Agregá componentes desde la paleta de la izquierda. Se van apilando acá y podés cargar su contenido.</p>
               </div>
-            ))
-          )}
+            ) : (
+              comps.map((c, i) => (
+                <div
+                  key={c.id}
+                  className={`pb-block${selId === c.id ? ' sel' : ''}`}
+                  ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
+                  onClick={() => editMode && select(c)}
+                >
+                  <div className="pb-block-bar">
+                    <span className="pb-block-name">{getComponent(c.component_key)?.name || c.component_key}</span>
+                    <div className="pb-block-actions">
+                      <button className="ic-btn" disabled={i === 0} onClick={(e) => { e.stopPropagation(); move(i, -1) }} title="Subir"><ChevronUp size={14} /></button>
+                      <button className="ic-btn" disabled={i === comps.length - 1} onClick={(e) => { e.stopPropagation(); move(i, 1) }} title="Bajar"><ChevronDown size={14} /></button>
+                      <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
+                    </div>
+                  </div>
+                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} />
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Editor de contenido */}

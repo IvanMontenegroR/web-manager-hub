@@ -13,6 +13,18 @@
 
 export const COMPONENTS = [
   {
+    key: 'breadcrumb',
+    name: 'Breadcrumb',
+    category: 'Navegacion',
+    help: 'Ruta de navegacion (Inicio / ...). El ultimo item es la pagina actual.',
+    fields: [
+      { key: 'items', label: 'Items (en orden)', type: 'list', item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'url', label: 'Link (opcional)', type: 'url' },
+      ] },
+    ],
+  },
+  {
     key: 'banner',
     name: 'Banner',
     category: 'Hero',
