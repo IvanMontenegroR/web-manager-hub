@@ -1517,7 +1517,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-page { width: 100%; max-width: 1600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 /* En vista previa: gutter lateral + espacio vertical entre secciones y respecto al
    header/footer, como la pagina real (secciones con su padding vertical). */
-.pb-canvas.preview .pb-page { padding: 40px 32px 56px; gap: 40px; }
+.pb-canvas.preview .pb-page { padding: 12px 32px 56px; gap: 40px; }
+/* El breadcrumb es nav (no seccion): va pegado al header y al componente siguiente. */
+.pb-canvas.preview .pb-block--breadcrumb { margin-bottom: -28px; }
 
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }
