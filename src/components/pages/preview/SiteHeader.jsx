@@ -1,5 +1,8 @@
 import { ChevronDown, Search } from 'lucide-react'
 
+// Logo real de Purina (public/purina-logo.png). Su marco rojo se funde con la barra.
+const LOGO = (import.meta.env.BASE_URL || '/') + 'purina-logo.png'
+
 // Header global del sitio (purina:header-main). Barra roja fija, presente en TODAS
 // las paginas. Es config global (no contenido por pagina), por eso se muestra como
 // contexto arriba del builder y del export, no como componente editable.
@@ -17,7 +20,7 @@ export default function SiteHeader() {
   return (
     <header className="cp-header">
       <div className="cp-header-inner">
-        <div className="cp-header-logo">PURINA<sup>®</sup></div>
+        <img className="cp-header-logo-img" src={LOGO} alt="Purina" />
         <nav className="cp-header-nav">
           {NAV.map((n) => (
             <span key={n.label} className="cp-header-navitem">
