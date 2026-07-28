@@ -182,6 +182,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
   Fetch tolerante + SETUP_SQL en `src/lib/pagesDb.js`. Catalogo inicial (piloto): banner, brand_logos,
   card_grid, text, text_image, big_number_grid, external_video, article_list.
+  El **Header** del sitio (`preview/SiteHeader.jsx`) es GLOBAL (mismo en todas las paginas): se renderiza
+  fijo arriba del canvas y se incluye como seccion arriba del export (imagen), NO es un componente editable
+  por pagina. Para capturarlo bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:
