@@ -32,23 +32,26 @@ const RENDERERS = {
   banner: (c) => {
     const type = c.type || 'Main Hero'
     const promo = /only image|promotional/i.test(type)
-    const mainHero = /main hero|brand hero/i.test(type)
+    const secondary = /secondary hero|title-description/i.test(type)
+    // Main Hero, Brand Hero y Secondary Hero comparten el tratamiento "hero":
+    // imagen a sangre + overlay rgba(0,0,0,.3) + texto blanco centrado + CTA.
+    const heroLike = /main hero|brand hero/i.test(type) || secondary
     const cta = c.link_text
-    const { h, v } = parseBannerAlign(c.banner_align, mainHero)
+    const { h, v } = parseBannerAlign(c.banner_align, heroLike)
 
     // Solo imagen.
     if (promo) return <div className="cp-banner"><Img src={c.image} h={300} /></div>
 
-    // Main Hero / Brand Hero: imagen a sangre (bordes redondeados) + overlay oscuro
-    // uniforme rgba(0,0,0,.3) + contenido blanco posicionado por Banner Align Content.
-    // Modela el markup/estilos reales (.main-hero, --banner-bg, .btn-primary; CTA mt-6).
-    if (mainHero) {
+    // Hero (Main / Brand / Secondary). Modela el markup real (.main-hero / .banner,
+    // --banner-bg, .btn-primary; CTA mt-6). Secondary = ratio mas ancho/bajo (3:1) y
+    // sin bordes redondeados; Main = 2:1 con esquinas redondeadas.
+    if (heroLike) {
       return (
-        <div className="cp-hero">
+        <div className={`cp-hero${secondary ? ' cp-hero--wide' : ''}`}>
           {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
           <div className="cp-hero-scrim" />
           <div className={`cp-hero-content h-${h} v-${v}`}>
-            <div className="cp-hero-title">{T(c.title, 'Main Hero')}</div>
+            <div className="cp-hero-title">{T(c.title, secondary ? 'Secondary Hero' : 'Main Hero')}</div>
             {c.description && <p className="cp-hero-desc">{c.description}</p>}
             {cta && <span className="cp-hero-cta">{cta}</span>}
           </div>
@@ -56,7 +59,7 @@ const RENDERERS = {
       )
     }
 
-    // Secondary Hero / Banner Card / Full Image + Box Content: caja blanca sobre la imagen.
+    // Banner Card / Full Image + Box Content: caja blanca sobre la imagen.
     return (
       <div className="cp-banner" style={{ textAlign: h }}>
         <Img src={c.image} h={300} />
