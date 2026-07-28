@@ -20,20 +20,43 @@ const list = (v) => (Array.isArray(v) ? v : [])
 
 const RENDERERS = {
   banner: (c) => {
-    const type = c.type || ''
+    const type = c.type || 'Main Hero'
     const promo = /promotional/i.test(type)
+    const mainHero = /main hero/i.test(type)
     const align = /centro/i.test(c.align) ? 'center' : /derecha/i.test(c.align) ? 'right' : 'left'
+
+    // Solo imagen.
+    if (promo) return <div className="cp-banner"><Img src={c.image} h={300} /></div>
+
+    // Main Hero: imagen a sangre + contenido blanco superpuesto (abajo), con scrim.
+    // Modela el markup real: .main-hero__title / _description / .btn-primary.
+    if (mainHero) {
+      return (
+        <div className="cp-hero">
+          <div className="cp-hero-media">
+            {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
+            <div className="cp-hero-scrim" />
+          </div>
+          <div className={`cp-hero-content ${align}`}>
+            {c.subtitle && <div className="cp-hero-eyebrow">{c.subtitle}</div>}
+            <div className="cp-hero-title">{T(c.title, 'Main Hero')}</div>
+            {c.description && <p className="cp-hero-desc">{c.description}</p>}
+            {c.cta_label && <span className="cp-hero-cta">{c.cta_label}</span>}
+          </div>
+        </div>
+      )
+    }
+
+    // Secondary Hero / Full image + box content: caja blanca sobre la imagen.
     return (
       <div className="cp-banner" style={{ textAlign: align }}>
-        <Img src={c.image} h={240} />
-        {!promo && (
-          <div className={`cp-banner-box ${align}`}>
-            {c.subtitle && <div className="cp-eyebrow">{c.subtitle}</div>}
-            <div className="cp-h1">{T(c.title, 'Titulo del banner')}</div>
-            {c.description && <p className="cp-p">{c.description}</p>}
-            {(c.cta_label) && <span className="cp-cta">{c.cta_label}</span>}
-          </div>
-        )}
+        <Img src={c.image} h={300} />
+        <div className={`cp-banner-box ${align}`}>
+          {c.subtitle && <div className="cp-eyebrow">{c.subtitle}</div>}
+          <div className="cp-h1">{T(c.title, 'Titulo del banner')}</div>
+          {c.description && <p className="cp-p">{c.description}</p>}
+          {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
+        </div>
       </div>
     )
   },
