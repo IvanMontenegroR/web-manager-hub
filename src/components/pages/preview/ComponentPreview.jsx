@@ -28,16 +28,16 @@ const RENDERERS = {
     // Solo imagen.
     if (promo) return <div className="cp-banner"><Img src={c.image} h={300} /></div>
 
-    // Main Hero: imagen a sangre + contenido blanco superpuesto (abajo), con scrim.
-    // Modela el markup real: .main-hero__title / _description / .btn-primary.
+    // Main Hero: imagen a sangre (bordes redondeados) + overlay oscuro uniforme
+    // rgba(0,0,0,.3) + contenido blanco CENTRADO. Modela el markup/estilos reales
+    // (.main-hero, --banner-bg, .main-hero__title fs-display-sm, .btn-primary).
     if (mainHero) {
+      const halign = /izquierda/i.test(c.align) ? 'left' : /derecha/i.test(c.align) ? 'right' : 'center'
       return (
         <div className="cp-hero">
-          <div className="cp-hero-media">
-            {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
-            <div className="cp-hero-scrim" />
-          </div>
-          <div className={`cp-hero-content ${align}`}>
+          {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
+          <div className="cp-hero-scrim" />
+          <div className={`cp-hero-content ${halign}`}>
             {c.subtitle && <div className="cp-hero-eyebrow">{c.subtitle}</div>}
             <div className="cp-hero-title">{T(c.title, 'Main Hero')}</div>
             {c.description && <p className="cp-hero-desc">{c.description}</p>}
