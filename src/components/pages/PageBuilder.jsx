@@ -9,6 +9,7 @@ import {
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
 import SiteHeader from './preview/SiteHeader.jsx'
+import SiteFooter from './preview/SiteFooter.jsx'
 import ContentForm from './ContentForm.jsx'
 
 export default function PageBuilder({ page, onBack }) {
@@ -23,6 +24,7 @@ export default function PageBuilder({ page, onBack }) {
   const [editMode, setEditMode] = useState(true) // false = vista previa (pagina real, sin toolbars)
   const nodes = useRef(new Map())
   const headerRef = useRef(null)
+  const footerRef = useRef(null)
 
   async function load() {
     setLoading(true)
@@ -90,7 +92,7 @@ export default function PageBuilder({ page, onBack }) {
       await exportPageMatrix(page, current, (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
-      }, headerRef.current)
+      }, headerRef.current, footerRef.current)
     } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
   }
 
@@ -165,6 +167,10 @@ export default function PageBuilder({ page, onBack }) {
               ))
             )}
           </div>
+
+          {/* Footer global — presente en todas las paginas (no editable, va en el export). */}
+          <div className="pb-globaltag">Footer — global (en todas las paginas)</div>
+          <div ref={footerRef} className="pb-footer-host"><SiteFooter /></div>
         </div>
 
         {/* Editor de contenido */}

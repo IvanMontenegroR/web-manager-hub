@@ -185,9 +185,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   se renderizan dentro de un container (`.pb-page`, gutter lateral que replica el `.container` real).
   El builder tiene toggle Editar/Vista previa: en preview oculta paleta/editor/toolbars y muestra la
   pagina a sangre con el gutter real (sin los espacios de edicion).
-  El **Header** del sitio (`preview/SiteHeader.jsx`) es GLOBAL (mismo en todas las paginas): se renderiza
-  fijo arriba del canvas y se incluye como seccion arriba del export (imagen), NO es un componente editable
-  por pagina. Para capturarlo bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+  El **Header** (`preview/SiteHeader.jsx`) y el **Footer** (`preview/SiteFooter.jsx`) del sitio son
+  GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
+  secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
+  bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:

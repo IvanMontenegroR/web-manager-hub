@@ -51,8 +51,8 @@ async function snapshot(node, forceWidth) {
 
 // components = [{ id, component_key, content }] en orden.
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
-// headerNode = nodo del Header global (opcional), se pone como contexto arriba.
-export async function exportPageMatrix(page, components, getNode, headerNode) {
+// headerNode / footerNode = nodos del Header/Footer global (opcionales), como contexto.
+export async function exportPageMatrix(page, components, getNode, headerNode, footerNode) {
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
@@ -178,6 +178,31 @@ export async function exportPageMatrix(page, components, getNode, headerNode) {
     }
 
     row += 2 // separacion entre componentes
+  }
+
+  // Footer global (contexto), al final.
+  if (footerNode) {
+    const durl = await snapshot(footerNode, 1180)
+    if (durl) {
+      ws.mergeCells(row, 1, row, 4)
+      const fh = ws.getCell(row, 1)
+      fh.value = 'Footer — global (en todas las paginas)'
+      fh.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
+      fh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
+      fh.alignment = { vertical: 'middle', indent: 1 }
+      ws.getRow(row).height = 22
+      row++
+      const imgId = wb.addImage({ base64: durl, extension: 'png' })
+      const probe = await loadSize(durl)
+      const w = 720
+      const h2 = probe ? Math.round((probe.h / probe.w) * w) : 200
+      ws.addImage(imgId, { tl: { col: 0.05, row: row - 1 + 0.1 }, ext: { width: w, height: h2 }, editAs: 'oneCell' })
+      row += Math.ceil(h2 / 18) + 1
+      ws.getCell(row, 1).value = 'El footer es global: se configura una sola vez para todo el sitio, no por pagina.'
+      ws.mergeCells(row, 1, row, 4)
+      ws.getCell(row, 1).font = { italic: true, size: 10, color: { argb: 'FF868E99' } }
+      row += 2
+    }
   }
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
