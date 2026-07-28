@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid,
+  ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil,
 } from 'lucide-react'
 import { COMPONENTS, getComponent } from '../../data/components'
 import {
@@ -20,6 +20,7 @@ export default function PageBuilder({ page, onBack }) {
   const [dirty, setDirty] = useState(false)
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [editMode, setEditMode] = useState(true) // false = vista previa (pagina real, sin toolbars)
   const nodes = useRef(new Map())
   const headerRef = useRef(null)
 
@@ -101,14 +102,22 @@ export default function PageBuilder({ page, onBack }) {
       <div className="pb-bar">
         <button className="btn btn-sm" onClick={onBack}><ArrowLeft size={14} /> Paginas</button>
         <div className="pb-title">{page.name}</div>
-        <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={exportExcel} disabled={exporting || !comps.length}>
+        <button
+          className={`btn btn-sm${editMode ? ' active' : ''}`}
+          style={{ marginLeft: 'auto' }}
+          title={editMode ? 'Modo edicion (click para ver la pagina)' : 'Vista previa (click para editar)'}
+          onClick={() => { setEditMode((v) => !v); if (editMode) setSelId(null) }}
+        >
+          <Pencil size={14} /> {editMode ? 'Editando' : 'Vista previa'}
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={exportExcel} disabled={exporting || !comps.length}>
           <FileSpreadsheet size={15} /> {exporting ? 'Generando...' : 'Exportar a Excel'}
         </button>
       </div>
 
       {errMsg && <div className="form-error" style={{ margin: '0 0 10px' }}>{errMsg}</div>}
 
-      <div className="pb-main">
+      <div className={`pb-main${editMode ? '' : ' preview'}`}>
         {/* Paleta */}
         <div className="pb-palette">
           <div className="pb-palette-h">Componentes</div>
@@ -120,7 +129,7 @@ export default function PageBuilder({ page, onBack }) {
         </div>
 
         {/* Canvas / preview */}
-        <div className="pb-canvas">
+        <div className={`pb-canvas${editMode ? '' : ' preview'}`}>
           {/* Header global — presente en todas las paginas (no editable, va en el export). */}
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
           <div ref={headerRef} className="pb-header-host"><SiteHeader /></div>
@@ -139,7 +148,7 @@ export default function PageBuilder({ page, onBack }) {
                 key={c.id}
                 className={`pb-block${selId === c.id ? ' sel' : ''}`}
                 ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
-                onClick={() => select(c)}
+                onClick={() => editMode && select(c)}
               >
                 <div className="pb-block-bar">
                   <span className="pb-block-name">{getComponent(c.component_key)?.name || c.component_key}</span>
