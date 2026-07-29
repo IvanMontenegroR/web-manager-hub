@@ -1491,7 +1491,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-header-host .cp-header { min-width: 900px; }
 
 .cp-header { background: #e91c24; color: #fff; height: 68px; display: flex; align-items: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-.cp-header-inner { display: flex; align-items: center; gap: 22px; width: 100%; max-width: 1600px; margin: 0 auto; padding: 0 32px; }
+.cp-header-inner { display: flex; align-items: center; gap: 22px; width: 100%; max-width: 1680px; margin: 0 auto; padding: 0 60px; }
 .cp-header-logo-img { height: 34px; width: auto; display: block; flex: none; }
 .cp-header-nav { display: flex; align-items: center; gap: 18px; flex: 1; }
 .cp-header-navitem { display: inline-flex; align-items: center; gap: 3px; font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; }
@@ -1514,10 +1514,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .btn.active { background: var(--purina-tint); border-color: var(--purina); color: var(--purina-ink); }
 
 /* ===== Page container (gutter lateral, replica el .container real) ===== */
-.pb-page { width: 100%; max-width: 1600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+.pb-page { width: 100%; max-width: 1680px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 /* En vista previa: gutter lateral + espacio vertical entre secciones y respecto al
-   header/footer, como la pagina real (secciones con su padding vertical). */
-.pb-canvas.preview .pb-page { padding: 12px 32px 56px; gap: 40px; }
+   header/footer, como la pagina real (container--padding-lg: max-width 1680, padding 0 60). */
+.pb-canvas.preview .pb-page { padding: 12px 60px 56px; gap: 40px; }
 /* El breadcrumb es nav (no seccion): va pegado al header y al componente siguiente. */
 .pb-canvas.preview .pb-block--breadcrumb { margin-bottom: -28px; }
 
@@ -1536,7 +1536,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-footer-host { margin: 0; box-shadow: none; }
 
 .cp-footer { background: #2b2b2b; color: #fff; width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-.cp-footer-inner { max-width: 1600px; margin: 0 auto; padding: 40px 32px 22px; }
+.cp-footer-inner { max-width: 1680px; margin: 0 auto; padding: 40px 60px 22px; }
 .cp-footer-main { display: flex; gap: 48px; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid #454545; padding-bottom: 28px; }
 .cp-footer-logo img { height: 34px; width: auto; display: block; }
 .cp-footer-menu { display: flex; flex-wrap: wrap; gap: 26px 40px; flex: 1; justify-content: flex-end; }
