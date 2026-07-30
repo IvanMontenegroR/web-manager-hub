@@ -1484,33 +1484,76 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-feat-bar { color: #c3c9d2; }
 
 /* ===== Services carousel (Aliados y Servicios) ===== */
-.cp-svc { position: relative; overflow: hidden; }
-.cp-svc-bg { width: 100%; height: 460px; object-fit: cover; display: block; }
+.cp-svc { position: relative; overflow: hidden; min-height: 560px; }
+.cp-svc-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .cp-svc-bg-ph { background: linear-gradient(120deg, #6a5648, #43352c); }
-.cp-svc-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.45), rgba(0,0,0,.1)); }
-.cp-svc-inner { position: absolute; inset: 0; padding: 40px 44px; display: flex; flex-direction: column; justify-content: flex-end; color: #fff; }
+.cp-svc-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,.15) 55%, rgba(0,0,0,.05) 100%); }
+.cp-svc-head { position: absolute; left: 44px; right: 44px; top: 40%; transform: translateY(-100%); color: #fff; }
 .cp-svc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
-.cp-svc-sub { font-size: 15px; opacity: .92; margin: 6px 0 18px; }
-.cp-svc-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.cp-svc-card { position: relative; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 16px; padding: 18px; min-height: 150px; color: #1f2530; }
+.cp-svc-sub { font-size: 15px; opacity: .92; margin-top: 6px; max-width: 640px; }
+.cp-svc-arrows { position: absolute; right: 44px; top: 40%; transform: translateY(-50%); display: flex; gap: 12px; }
+.cp-svc-nav { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.85); color: #fff; display: grid; place-items: center; font-size: 22px; }
+.cp-svc-cards { position: absolute; left: 44px; right: 44px; bottom: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.cp-svc-card { position: relative; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 18px; padding: 20px; min-height: 190px; color: #1f2530; }
 .cp-svc-card.hl { background: var(--purina); color: #fff; }
-.cp-svc-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--purina); margin-bottom: 40px; }
-.cp-svc-card.hl .cp-svc-ico { background: rgba(255,255,255,.3); }
-.cp-svc-card-t { font-size: 17px; font-weight: 700; }
-.cp-svc-card-s { font-size: 12.5px; line-height: 1.4; margin-top: 4px; opacity: .82; }
-.cp-svc-arrow { position: absolute; right: 16px; bottom: 16px; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--purina); display: grid; place-items: center; font-size: 15px; }
-.cp-svc-card.hl .cp-svc-arrow { background: #fff; }
+.cp-svc-ico { width: 34px; height: 34px; color: var(--purina); display: inline-grid; place-items: center; }
+.cp-svc-ico-img { width: 34px; height: 34px; object-fit: contain; }
+.cp-svc-card-t { font-size: 18px; font-weight: 700; margin-top: 46px; }
+.cp-svc-card.hl .cp-svc-card-t { margin-top: 0; }
+.cp-svc-card-s { font-size: 12.5px; line-height: 1.45; margin-top: 6px; opacity: .82; padding-right: 40px; }
+.cp-svc-arrow { position: absolute; right: 18px; bottom: 18px; width: 34px; height: 34px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; font-size: 15px; }
+.cp-svc-card.hl .cp-svc-arrow { background: #fff; color: var(--purina); }
 
 /* ===== Brand cards ===== */
-.cp-brandcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 26px 30px; }
-.cp-brandcard { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 1 / 1.35; background: #14110f; }
-.cp-brandcard-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cp-brandcard-ph { background: linear-gradient(180deg, #2a2521, #100d0b); }
-.cp-brandcard-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.05) 40%, rgba(0,0,0,.75) 100%); }
-.cp-brandcard-body { position: absolute; inset: 0; padding: 24px; display: flex; flex-direction: column; color: #fff; }
-.cp-brandcard-t { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; color: #e8c78c; }
-.cp-brandcard-d { margin-top: auto; font-size: 13.5px; line-height: 1.45; padding-right: 44px; }
-.cp-brandcard-arrow { position: absolute; right: 22px; bottom: 22px; width: 40px; height: 40px; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; font-size: 16px; }
+/* ===== Cabecera compartida de carruseles (Marcas / Blog) ===== */
+.cp-brands { padding: 26px 30px; }
+.cp-brands-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.cp-brands-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; color: #1b252e; }
+.cp-brands-sub { font-size: 15px; color: #545c67; margin-top: 6px; }
+
+/* ===== Carrusel de marcas (Marcas Purina®) ===== */
+.cp-brands-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.cp-brandc { border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
+.cp-brandc-media { position: relative; }
+.cp-brandc-img.cp-img { border-radius: 0; object-fit: cover; }
+.cp-brandc-pets { position: absolute; top: 14px; right: 14px; display: flex; gap: 8px; }
+.cp-brandc-pet { width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #1b252e; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.cp-brandc-body { background: #f5f5f5; padding: 20px 22px 24px; text-align: center; }
+.cp-brandc-name { font-size: 16px; font-weight: 700; color: #1b252e; }
+.cp-brandc-desc { font-size: 13.5px; color: #454545; line-height: 1.5; margin-top: 8px; }
+
+/* ===== Carrusel de articulos (Nuestro Blog) ===== */
+.cp-artc-row { display: flex; gap: 20px; align-items: flex-start; }
+.cp-artc-card { position: relative; flex: 1; height: 260px; border-radius: 16px; overflow: hidden; }
+.cp-artc-card.feat { flex: 1.35; height: 460px; }
+.cp-artc-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-artc-ph { background: linear-gradient(160deg, #c8cfd8, #9aa4af); }
+.cp-artc-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 40%, rgba(0,0,0,.72) 100%); }
+.cp-artc-cat { position: absolute; top: 16px; left: 16px; font-size: 12px; font-weight: 600; color: #fff; padding: 5px 13px; border-radius: 20px; }
+.cp-artc-ttl { position: absolute; left: 20px; right: 60px; bottom: 20px; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: -0.3px; }
+.cp-artc-card:not(.feat) .cp-artc-ttl { font-size: 16px; }
+.cp-artc-plus { position: absolute; right: 18px; bottom: 18px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.85); color: #1b252e; display: grid; place-items: center; font-size: 22px; font-weight: 400; }
+
+/* ===== Footer banner (Pet Club) ===== */
+.cp-fb { position: relative; margin: 20px; min-height: 420px; background: #1b252e; border-radius: 9999px / 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.cp-fb-inner { text-align: center; color: #fff; padding: 40px 12%; max-width: 640px; }
+.cp-fb-logo { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-bottom: 20px; }
+.cp-fb-logo-mark { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #fff; background: var(--purina); padding: 2px 8px; border-radius: 2px; }
+.cp-fb-logo-club { font-size: 20px; font-weight: 600; font-style: italic; }
+.cp-fb-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+.cp-fb-desc { font-size: 14.5px; line-height: 1.55; margin-top: 14px; opacity: .92; }
+.cp-fb-btn { display: inline-block; margin-top: 24px; background: var(--purina); color: #fff; font-size: 15px; font-weight: 600; padding: 14px 30px; border-radius: 9999px; }
+.cp-fb-side { position: absolute; top: 0; bottom: 0; width: 22%; }
+.cp-fb-side.left { left: 4%; } .cp-fb-side.right { right: 4%; }
+.cp-fb-pet { position: absolute; width: 72px; height: 72px; border-radius: 4px; overflow: hidden; box-shadow: 6px 6px 0 var(--purina); }
+.cp-fb-pet img { width: 100%; height: 100%; object-fit: cover; }
+.cp-fb-pet-ph { width: 100%; height: 100%; display: grid; place-items: center; background: #35404b; color: #7d8894; }
+.cp-fb-pet--l0 { top: 12%; left: 34%; }
+.cp-fb-pet--l1 { top: 32%; left: 4%; }
+.cp-fb-pet--l2 { bottom: 12%; left: 20%; }
+.cp-fb-pet--r0 { top: 20%; right: 8%; }
+.cp-fb-pet--r1 { bottom: 26%; right: 30%; }
+.cp-fb-pet--r2 { bottom: 8%; right: 4%; }
 
 /* ===== Product cards (A/B/C) ===== */
 .cp-prodcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 12px; }
@@ -1560,7 +1603,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* ===== Header menu cards ===== */
 .cp-hmenu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 26px 30px; }
 .cp-hmenu-card { position: relative; display: flex; flex-direction: column; border: 1px solid #eceff3; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
-.cp-hmenu-img.cp-img { border-radius: 0; margin: 12px 12px 0; width: auto; border-radius: 12px; }
+.cp-hmenu-img.cp-img { border-radius: 0; }
 .cp-hmenu-body { padding: 12px 16px 18px; }
 .cp-hmenu-t { font-size: 16px; font-weight: 700; }
 .cp-hmenu-s { font-size: 12.5px; color: #545c67; line-height: 1.4; margin-top: 3px; }

@@ -1,15 +1,17 @@
-import { ImageIcon } from 'lucide-react'
+import { ImageIcon, Dog, Cat, PawPrint } from 'lucide-react'
 
 // Mockups aproximados de cada componente. Se llenan con el contenido cargado, asi
 // se ve la pagina armandose. La MISMA imagen renderizada se captura para el export.
 // Agregar un componente = un case nuevo aca + su entrada en src/data/components.js.
 
-// Alto FIJO (no aspect-ratio): html2canvas rasteriza aspect-ratio de forma poco
-// confiable, y con alto fijo el preview y el export coinciden.
-function Img({ src, h = 160, className = '' }) {
-  if (src) return <img className={`cp-img ${className}`} src={src} alt="" crossOrigin="anonymous" style={{ height: h }} />
+// Por defecto alto FIJO (h). Si se pasa `aspect` (ej. '1/1', '4/3'), el placeholder y
+// la imagen respetan esa relacion de aspecto (el placeholder "tiene el tamaño" real
+// del componente) usando aspect-ratio con ancho 100%.
+function Img({ src, h = 160, aspect, className = '' }) {
+  const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' } : { height: h }
+  if (src) return <img className={`cp-img ${className}`} src={src} alt="" crossOrigin="anonymous" style={style} />
   return (
-    <div className={`cp-img cp-img-ph ${className}`} style={{ height: h }}>
+    <div className={`cp-img cp-img-ph ${className}`} style={style}>
       <ImageIcon size={22} />
     </div>
   )
@@ -209,50 +211,146 @@ const RENDERERS = {
     </div>
   ),
 
-  // Carrusel de servicios: titulo/subtitulo sobre una imagen de fondo + tarjetas
-  // (la marcada como destacada va en rojo Purina). Aliados y Servicios.
+  // Aliados y Servicios: imagen de fondo a sangre con titulo + subtitulo y flechas
+  // arriba; fila de tarjetas abajo (Pet ID roja destacada; el resto frosted con
+  // icono, titulo, texto y flecha).
   services_carousel: (c) => {
     const cards = list(c.cards)
-    const arr = cards.length ? cards : [{ title: 'Pet ID', text: 'Crea tu Pet ID y obtén una experiencia personalizada.', highlighted: 'Si' }, { title: 'Razas', text: 'Todo sobre las razas.' }, { title: 'Adopción', text: 'El match ideal.' }, { title: 'Tiendas', text: 'Encuentra productos cerca.' }]
+    const arr = cards.length ? cards : [
+      { title: 'Pet ID', text: 'Crea tu Pet ID y obtén una experiencia personalizada para ti y tu mascota.', highlighted: 'Si' },
+      { title: 'Adopción', text: 'El match ideal para compartir grandes momentos.' },
+      { title: 'Tiendas', text: 'Encuentra productos Purina® cerca de ti.' },
+      { title: 'Cuidadores', text: 'Una red completa de hoteles y cuidadores.' },
+    ]
     return (
       <div className="cp-svc">
         {c.background ? <img className="cp-svc-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-svc-bg cp-svc-bg-ph" />}
         <div className="cp-svc-scrim" />
-        <div className="cp-svc-inner">
+        <div className="cp-svc-head">
           <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
-          {c.subtitle && <div className="cp-svc-sub">{c.subtitle}</div>}
-          <div className="cp-svc-cards">
-            {arr.map((card, i) => (
-              <div key={i} className={`cp-svc-card${/si|sí/i.test(card.highlighted) ? ' hl' : ''}`}>
-                <div className="cp-svc-ico" />
+          <div className="cp-svc-sub">{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</div>
+        </div>
+        <div className="cp-svc-arrows">
+          <span className="cp-svc-nav">‹</span><span className="cp-svc-nav">›</span>
+        </div>
+        <div className="cp-svc-cards">
+          {arr.map((card, i) => {
+            const hl = /si|sí/i.test(card.highlighted)
+            return (
+              <div key={i} className={`cp-svc-card${hl ? ' hl' : ''}`}>
+                {!hl && (card.icon
+                  ? <img className="cp-svc-ico-img" src={card.icon} alt="" crossOrigin="anonymous" />
+                  : <span className="cp-svc-ico"><PawPrint size={22} /></span>)}
                 <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
                 {card.text && <div className="cp-svc-card-s">{card.text}</div>}
                 <span className="cp-svc-arrow">→</span>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </div>
     )
   },
 
-  // Brand cards: tarjetas verticales oscuras (imagen a sangre) con titulo dorado.
+  // Marcas Purina®: cabecera (titulo + subtitulo + flechas) y carrusel de marcas.
+  // Cada card: imagen de marca (con toggles perro/gato) + pie gris (nombre + bajada).
   brand_cards: (c) => {
     const cards = list(c.cards)
-    const arr = cards.length ? cards : [{ title: 'Perros' }, { title: 'Gatos' }, { title: 'Dietas veterinarias' }]
+    const arr = cards.length ? cards : [
+      { name: 'Purina® Pro Plan®', description: 'Dale una nutrición avanzada para cuidar y satisfacer cada una de sus necesidades.', pets: 'Perro + Gato' },
+      { name: 'Purina® Dog Chow®', description: 'Conoce nuestra línea de alimentos que ayudan a maximizar la vida de tu perro.', pets: 'Perro' },
+      { name: 'Purina® Felix®', description: 'Sorpréndelo todos los días con nuestra variedad de alimento húmedo.', pets: 'Gato' },
+    ]
+    const moreText = c.see_more_text == null ? 'Ver todas' : c.see_more_text
     return (
-      <div className="cp-brandcards">
-        {arr.map((card, i) => (
-          <div key={i} className="cp-brandcard">
-            {card.image ? <img className="cp-brandcard-img" src={card.image} alt="" crossOrigin="anonymous" /> : <div className="cp-brandcard-img cp-brandcard-ph" />}
-            <div className="cp-brandcard-scrim" />
-            <div className="cp-brandcard-body">
-              <div className="cp-brandcard-t">{T(card.title, 'Marca')}</div>
-              {card.description && <p className="cp-brandcard-d">{card.description}</p>}
-              <span className="cp-brandcard-arrow">→</span>
-            </div>
+      <div className="cp-brands">
+        <div className="cp-brands-head">
+          <div>
+            <div className="cp-brands-title">{T(c.title, 'Marcas Purina®')}</div>
+            <div className="cp-brands-sub">{T(c.subtitle, 'La variedad que buscas, con la confianza de Purina®')}</div>
           </div>
-        ))}
+          <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
+        </div>
+        <div className="cp-brands-row">
+          {arr.map((card, i) => {
+            const pets = card.pets || 'Perro + Gato'
+            return (
+              <div key={i} className="cp-brandc">
+                <div className="cp-brandc-media">
+                  <Img src={card.image} aspect="4/3" className="cp-brandc-img" />
+                  <div className="cp-brandc-pets">
+                    {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><Dog size={15} /></span>}
+                    {/gato/i.test(pets) && <span className="cp-brandc-pet"><Cat size={15} /></span>}
+                  </div>
+                </div>
+                <div className="cp-brandc-body">
+                  <div className="cp-brandc-name">{T(card.name, 'Marca Purina®')}</div>
+                  {card.description && <div className="cp-brandc-desc">{card.description}</div>}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {moreText && <div className="cp-plist-more"><span className="cp-plist-more-btn">{moreText}</span></div>}
+      </div>
+    )
+  },
+
+  // Nuestro Blog: cabecera + carrusel de articulos. Cada card = imagen con chip de
+  // categoria y titulo superpuestos + boton +. La primera card es la destacada (grande).
+  articles_carousel: (c) => {
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [
+      { category: 'Nutrición y cuidados', category_color: '#582d84', title: 'Rutina diaria para mascotas saludables' },
+      { category: 'Mascota activa', category_color: '#dd440a', title: 'Actividades ideales para mascotas activas y felices' },
+      { category: 'Mascota activa', category_color: '#dd440a', title: 'Tips para disfrutar al aire libre con tu mascota' },
+    ]
+    const moreText = c.see_more_text == null ? 'Explora más artículos' : c.see_more_text
+    return (
+      <div className="cp-brands">
+        <div className="cp-brands-head">
+          <div>
+            <div className="cp-brands-title"><span className="cp-spark">✦</span> {T(c.title, 'Nuestro Blog')}</div>
+            <div className="cp-brands-sub">{T(c.subtitle, 'Artículos pensados para ti y tu mascota')}</div>
+          </div>
+          <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
+        </div>
+        <div className="cp-artc-row">
+          {arr.map((a, i) => (
+            <div key={i} className={`cp-artc-card${i === 0 ? ' feat' : ''}`}>
+              {a.image ? <img className="cp-artc-img" src={a.image} alt="" crossOrigin="anonymous" /> : <div className="cp-artc-img cp-artc-ph" />}
+              <div className="cp-artc-scrim" />
+              {a.category && <span className="cp-artc-cat" style={{ background: a.category_color || '#582d84' }}>{a.category}</span>}
+              <div className="cp-artc-ttl">{T(a.title, 'Título del artículo')}</div>
+              <span className="cp-artc-plus">+</span>
+            </div>
+          ))}
+        </div>
+        {moreText && <div className="cp-plist-more"><span className="cp-plist-more-btn">{moreText}</span></div>}
+      </div>
+    )
+  },
+
+  // Footer banner Pet Club: pastilla oscura con logo + titulo + texto + boton, y
+  // fotos de mascotas decorativas (con acento rojo) a los lados.
+  footer_banner: (c) => {
+    const pets = list(c.pets)
+    const arr = pets.length ? pets : [{}, {}, {}, {}, {}, {}]
+    const petSquare = (p, i, side) => (
+      <div key={i} className={`cp-fb-pet cp-fb-pet--${side}${i}`}>
+        {p && p.image ? <img src={p.image} alt="" crossOrigin="anonymous" /> : <div className="cp-fb-pet-ph"><ImageIcon size={14} /></div>}
+      </div>
+    )
+    return (
+      <div className="cp-fb">
+        <div className="cp-fb-side left">{arr.slice(0, 3).map((p, i) => petSquare(p, i, 'l'))}</div>
+        <div className="cp-fb-inner">
+          <div className="cp-fb-logo"><span className="cp-fb-logo-mark">PURINA</span><span className="cp-fb-logo-club">Pet club</span></div>
+          <div className="cp-fb-title">{T(c.title, 'Lo mejor para tu mascota empieza aquí')}</div>
+          <p className="cp-fb-desc">{T(c.subtitle, 'Forma parte de Purina® Pet Club y descubre beneficios, recomendaciones y contenido pensado especialmente para ustedes.')}</p>
+          <span className="cp-fb-btn">{T(c.button_text, 'Unirme al club')}</span>
+        </div>
+        <div className="cp-fb-side right">{arr.slice(3, 6).map((p, i) => petSquare(p, i, 'r'))}</div>
       </div>
     )
   },
@@ -345,7 +443,7 @@ const RENDERERS = {
       <div className="cp-hmenu">
         {arr.map((it, i) => (
           <div key={i} className="cp-hmenu-card">
-            <Img src={it.image} h={140} className="cp-hmenu-img" />
+            <Img src={it.image} aspect="4/3" className="cp-hmenu-img" />
             <div className="cp-hmenu-body">
               <div className="cp-hmenu-t">{T(it.title, 'Título')}</div>
               {it.description && <div className="cp-hmenu-s">{it.description}</div>}
@@ -384,7 +482,7 @@ const RENDERERS = {
 
   post_image: (c) => (
     <div className="cp-block">
-      <Img src={c.image} h={300} />
+      <Img src={c.image} aspect="4/3" />
       {c.alt && <div className="cp-sub cp-center">{c.alt}</div>}
     </div>
   ),
@@ -421,7 +519,7 @@ const RENDERERS = {
           {arr.map((p, i) => (
             <div key={i} className="cp-plist-card">
               {p.tag && <span className="cp-plist-tag" style={{ '--tag-bg': p.tag_color || '#895731' }}>{p.tag}</span>}
-              <div className="cp-plist-imgwrap"><Img src={p.image} h={190} className="cp-plist-img" /></div>
+              <div className="cp-plist-imgwrap"><Img src={p.image} aspect="1/1" className="cp-plist-img" /></div>
               <div className="cp-plist-title">{T(p.title, 'Nombre del producto')}</div>
             </div>
           ))}
