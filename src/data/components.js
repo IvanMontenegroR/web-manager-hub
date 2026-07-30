@@ -224,16 +224,11 @@ export const COMPONENTS = [
     key: 'species_selector',
     name: 'Selector de especie',
     category: 'Contenido',
-    help: 'Selector de mascota (Gato / Perro): título + subtítulo y pastillas con avatar. Personaliza la experiencia del sitio.',
+    help: 'Selector de mascota Gato / Perro (estático, con los íconos de gato y perro). Solo se editan el título y el subtítulo.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Elige tu mascota para personalizar tu experiencia:' },
-      { key: 'options', label: 'Opciones', type: 'list', item: [
-        { key: 'label', label: 'Nombre', type: 'text' },
-        { key: 'image', label: 'Avatar (imagen)', type: 'image' },
-      ] },
     ],
-    specs: [{ label: 'Avatar', ratio: '1:1', desktop: '120×120px', mobile: '120×120px', max: '100kb', format: 'JPG / PNG' }],
   },
   {
     key: 'brand_cards',
