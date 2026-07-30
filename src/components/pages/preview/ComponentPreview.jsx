@@ -242,6 +242,7 @@ const RENDERERS = {
     const cards = list(c.cards)
     const arr = cards.length ? cards : [
       { title: 'Pet ID', text: 'Crea tu Pet ID y obtén una experiencia personalizada para ti y tu mascota.', highlighted: 'Si' },
+      { title: 'Razas', text: 'Todo sobre las razas que mejor se adaptan a tu estilo de vida.' },
       { title: 'Adopción', text: 'El match ideal para compartir grandes momentos.' },
       { title: 'Tiendas', text: 'Encuentra productos Purina® cerca de ti.' },
       { title: 'Cuidadores', text: 'Una red completa de hoteles y cuidadores.' },
@@ -250,27 +251,31 @@ const RENDERERS = {
       <div className="cp-svc">
         {c.background ? <MediaEl className="cp-svc-bg" src={c.background} /> : <div className="cp-svc-bg cp-svc-bg-ph"><span className="cp-dim-badge">Fondo 2160×1212px</span></div>}
         <div className="cp-svc-scrim" />
-        <div className="cp-svc-head">
-          <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
-          <div className="cp-svc-sub">{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</div>
-        </div>
-        <div className="cp-svc-arrows">
-          <span className="cp-svc-nav">‹</span><span className="cp-svc-nav">›</span>
-        </div>
-        <div className="cp-svc-cards">
-          {arr.map((card, i) => {
-            const hl = /si|sí/i.test(card.highlighted)
-            return (
-              <div key={i} className={`cp-svc-card${hl ? ' hl' : ''}`}>
-                {!hl && (card.icon
-                  ? <img className="cp-svc-ico-img" src={card.icon} alt="" />
-                  : <span className="cp-svc-ico"><PawPrint size={22} /></span>)}
-                <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
-                {card.text && <div className="cp-svc-card-s">{card.text}</div>}
-                <span className="cp-svc-arrow">→</span>
-              </div>
-            )
-          })}
+        <div className="cp-svc-bottom">
+          <div className="cp-svc-headrow">
+            <div className="cp-svc-head">
+              <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
+              <div className="cp-svc-sub">{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</div>
+            </div>
+            <div className="cp-svc-arrows">
+              <span className="cp-svc-nav">‹</span><span className="cp-svc-nav">›</span>
+            </div>
+          </div>
+          <div className="cp-svc-cards">
+            {arr.map((card, i) => {
+              const hl = /si|sí/i.test(card.highlighted)
+              return (
+                <div key={i} className={`cp-svc-card${hl ? ' hl' : ''}`}>
+                  {!hl && (card.icon
+                    ? <img className="cp-svc-ico-img" src={card.icon} alt="" />
+                    : <span className="cp-svc-ico"><PawPrint size={22} /></span>)}
+                  <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
+                  {card.text && <div className="cp-svc-card-s">{card.text}</div>}
+                  <span className="cp-svc-arrow">→</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     )
