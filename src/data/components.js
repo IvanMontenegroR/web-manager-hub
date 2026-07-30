@@ -194,17 +194,13 @@ export const COMPONENTS = [
     key: 'footer_banner',
     name: 'Footer banner (Pet Club)',
     category: 'Hero',
-    help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón, con fotos de mascotas decorativas en los lados.',
+    help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
       { key: 'subtitle', label: 'Texto', type: 'textarea' },
       { key: 'button_text', label: 'Botón — texto', type: 'text', placeholder: 'Unirme al club' },
       { key: 'button_url', label: 'Botón — link', type: 'url' },
-      { key: 'pets', label: 'Fotos de mascotas (decorativas)', type: 'list', item: [
-        { key: 'image', label: 'Imagen', type: 'image' },
-      ] },
     ],
-    specs: [{ label: 'Fotos de mascotas', ratio: '1:1', desktop: '240×240px', mobile: '160×160px', max: '300kb', format: 'JPG' }],
   },
   {
     key: 'testimonials',

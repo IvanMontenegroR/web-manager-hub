@@ -20,6 +20,7 @@ function Img({ src, h = 160, aspect, dim, className = '' }) {
 
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 const list = (v) => (Array.isArray(v) ? v : [])
+const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 
 // "Banner Align Content" (opcion del CMS) -> posicion horizontal + vertical.
 // Por defecto = centro/centro (asi se ve el Main Hero real). Ej: "Banner Left Bottom".
@@ -346,23 +347,20 @@ const RENDERERS = {
   // Footer banner Pet Club: pastilla oscura con logo + titulo + texto + boton, y
   // fotos de mascotas decorativas (con acento rojo) a los lados.
   footer_banner: (c) => {
-    const pets = list(c.pets)
-    const arr = pets.length ? pets : [{}, {}, {}, {}, {}, {}]
-    const petSquare = (p, i, side) => (
-      <div key={i} className={`cp-fb-pet cp-fb-pet--${side}${i}`}>
-        {p && p.image ? <img src={p.image} alt="" crossOrigin="anonymous" /> : <div className="cp-fb-pet-ph"><ImageIcon size={14} /></div>}
-      </div>
-    )
+    // Cuadros decorativos fijos (blancos con acento rojo), no editables.
+    const squares = ['l0', 'l1', 'l2', 'r0', 'r1', 'r2']
     return (
       <div className="cp-fb">
-        <div className="cp-fb-side left">{arr.slice(0, 3).map((p, i) => petSquare(p, i, 'l'))}</div>
+        {squares.map((s) => <div key={s} className={`cp-fb-sq cp-fb-sq--${s}`} />)}
         <div className="cp-fb-inner">
-          <div className="cp-fb-logo"><span className="cp-fb-logo-mark">PURINA</span><span className="cp-fb-logo-club">Pet club</span></div>
+          <div className="cp-fb-logo">
+            <img className="cp-fb-logo-img" src={PETCLUB_LOGO} alt="Purina" />
+            <span className="cp-fb-logo-club">Pet club</span>
+          </div>
           <div className="cp-fb-title">{T(c.title, 'Lo mejor para tu mascota empieza aquí')}</div>
           <p className="cp-fb-desc">{T(c.subtitle, 'Forma parte de Purina® Pet Club y descubre beneficios, recomendaciones y contenido pensado especialmente para ustedes.')}</p>
           <span className="cp-fb-btn">{T(c.button_text, 'Unirme al club')}</span>
         </div>
-        <div className="cp-fb-side right">{arr.slice(3, 6).map((p, i) => petSquare(p, i, 'r'))}</div>
       </div>
     )
   },
