@@ -1491,14 +1491,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-svc-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .cp-svc-bg-ph { background: linear-gradient(120deg, #6a5648, #43352c); }
 .cp-svc-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,.15) 55%, rgba(0,0,0,.05) 100%); }
-.cp-svc-head { position: absolute; left: 44px; right: 44px; top: 40%; transform: translateY(-100%); color: #fff; }
+/* Bloque inferior anclado abajo: cabecera (titulo+subtitulo+flechas) PEGADA a las
+   cards (poco gap), y la fila de cards debajo. */
+.cp-svc-bottom { position: absolute; left: 0; right: 0; bottom: 40px; color: #fff; }
+.cp-svc-headrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 0 44px; margin-bottom: 20px; }
 .cp-svc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
 .cp-svc-sub { font-size: 15px; opacity: .92; margin-top: 6px; max-width: 640px; }
-.cp-svc-arrows { position: absolute; right: 44px; top: 40%; transform: translateY(-50%); display: flex; gap: 12px; }
+.cp-svc-arrows { display: flex; gap: 12px; flex: none; }
 .cp-svc-nav { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.85); color: #fff; display: grid; place-items: center; font-size: 22px; }
 /* Fila horizontal (nowrap) de cards anchas que sangra al borde derecho (carrusel).
-   right:auto + .cp-svc overflow hidden = las cards se cortan en el borde. */
-.cp-svc-cards { position: absolute; left: 44px; right: auto; bottom: 40px; display: flex; flex-wrap: nowrap; gap: 18px; }
+   Sin restriccion a la derecha + .cp-svc overflow hidden = se cortan en el borde. */
+.cp-svc-cards { display: flex; flex-wrap: nowrap; gap: 18px; padding-left: 44px; }
 .cp-svc-card { position: relative; flex: 0 0 380px; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 18px; padding: 20px; min-height: 190px; color: #1f2530; }
 /* Pet ID (destacada roja): más delgada que el resto. */
 .cp-svc-card.hl { flex: 0 0 230px; background: var(--purina); color: #fff; }
