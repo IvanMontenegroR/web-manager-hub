@@ -1496,9 +1496,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-svc-sub { font-size: 15px; opacity: .92; margin-top: 6px; max-width: 640px; }
 .cp-svc-arrows { position: absolute; right: 44px; top: 40%; transform: translateY(-50%); display: flex; gap: 12px; }
 .cp-svc-nav { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.85); color: #fff; display: grid; place-items: center; font-size: 22px; }
-.cp-svc-cards { position: absolute; left: 44px; right: 44px; bottom: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.cp-svc-card { position: relative; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 18px; padding: 20px; min-height: 190px; color: #1f2530; }
-.cp-svc-card.hl { background: var(--purina); color: #fff; }
+/* Fila horizontal (nowrap) de cards anchas que sangra al borde derecho (carrusel).
+   right:auto + .cp-svc overflow hidden = las cards se cortan en el borde. */
+.cp-svc-cards { position: absolute; left: 44px; right: auto; bottom: 40px; display: flex; flex-wrap: nowrap; gap: 18px; }
+.cp-svc-card { position: relative; flex: 0 0 380px; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 18px; padding: 20px; min-height: 190px; color: #1f2530; }
+/* Pet ID (destacada roja): más delgada que el resto. */
+.cp-svc-card.hl { flex: 0 0 230px; background: var(--purina); color: #fff; }
 .cp-svc-ico { width: 34px; height: 34px; color: var(--purina); display: inline-grid; place-items: center; }
 .cp-svc-ico-img { width: 34px; height: 34px; object-fit: contain; }
 .cp-svc-card-t { font-size: 18px; font-weight: 700; margin-top: 46px; }
