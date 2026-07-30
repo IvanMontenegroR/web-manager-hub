@@ -392,6 +392,29 @@ const RENDERERS = {
     )
   },
 
+  // Selector de especie "Quién manda en tu casa": titulo + subtitulo y pastillas
+  // (avatar circular + label) para elegir Gato / Perro.
+  species_selector: (c) => {
+    const opts = list(c.options)
+    const arr = opts.length ? opts : [{ label: 'Gato' }, { label: 'Perro' }]
+    return (
+      <div className="cp-species">
+        <div className="cp-species-title">{T(c.title, 'Quién manda en tu casa')}</div>
+        <div className="cp-species-sub">{T(c.subtitle, 'Elige tu mascota para personalizar tu experiencia:')}</div>
+        <div className="cp-species-opts">
+          {arr.map((o, i) => (
+            <div key={i} className="cp-species-opt">
+              {o.image
+                ? <img className="cp-species-av" src={o.image} alt="" crossOrigin="anonymous" />
+                : <div className="cp-species-av cp-species-av-ph"><ImageIcon size={16} /></div>}
+              <span className="cp-species-label">{T(o.label, 'Mascota')}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
   // Cards de producto (A ingrediente / B producto / C marca). Grilla de tarjetas
   // blancas con imagen + titulo + texto; la variante C usa fondo oscuro.
   product_cards: (c) => {
