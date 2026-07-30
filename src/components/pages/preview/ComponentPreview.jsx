@@ -7,12 +7,13 @@ import { ImageIcon, Dog, Cat, PawPrint } from 'lucide-react'
 // Por defecto alto FIJO (h). Si se pasa `aspect` (ej. '1/1', '4/3'), el placeholder y
 // la imagen respetan esa relacion de aspecto (el placeholder "tiene el tamaño" real
 // del componente) usando aspect-ratio con ancho 100%.
-function Img({ src, h = 160, aspect, className = '' }) {
+function Img({ src, h = 160, aspect, dim, className = '' }) {
   const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' } : { height: h }
   if (src) return <img className={`cp-img ${className}`} src={src} alt="" crossOrigin="anonymous" style={style} />
   return (
     <div className={`cp-img cp-img-ph ${className}`} style={style}>
       <ImageIcon size={22} />
+      {dim && <span className="cp-ph-dim">{dim}</span>}
     </div>
   )
 }
@@ -59,14 +60,21 @@ const RENDERERS = {
     const type = c.type || 'Main Hero'
     const promo = /only image|promotional/i.test(type)
     const secondary = /secondary hero|title-description/i.test(type)
+    const fullbox = /full image|box content/i.test(type)
     // Main Hero, Brand Hero y Secondary Hero comparten el tratamiento "hero":
     // imagen a sangre + overlay rgba(0,0,0,.3) + texto blanco centrado + CTA.
     const heroLike = /main hero|brand hero/i.test(type) || secondary
     const cta = c.link_text
     const { h, v } = parseBannerAlign(c.banner_align, heroLike)
+    // Dimension recomendada (desktop) segun el Banner Type, para el placeholder.
+    const dim = /brand hero/i.test(type) ? '2088×835px'
+      : secondary ? '2100×700px'
+      : promo ? '2088×696px'
+      : fullbox ? '1680×820px'
+      : '2100×1050px'
 
     // Solo imagen.
-    if (promo) return <div className="cp-banner"><Img src={c.image} h={300} /></div>
+    if (promo) return <div className="cp-banner"><Img src={c.image} aspect="3/1" dim={dim} /></div>
 
     // Hero (Main / Brand / Secondary). Modela el markup real (.main-hero / .banner,
     // --banner-bg, .btn-primary; CTA mt-6). Secondary = ratio mas ancho/bajo (3:1) y
@@ -74,7 +82,9 @@ const RENDERERS = {
     if (heroLike) {
       return (
         <div className={`cp-hero${secondary ? ' cp-hero--wide' : ''}`}>
-          {c.image ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-hero-img cp-hero-ph" />}
+          {c.image
+            ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" />
+            : <div className="cp-hero-img cp-hero-ph"><span className="cp-dim-badge">{dim}</span></div>}
           <div className="cp-hero-scrim" />
           <div className={`cp-hero-content h-${h} v-${v}`}>
             <div className="cp-hero-title">{T(c.title, secondary ? 'Secondary Hero' : 'Main Hero')}</div>
@@ -85,10 +95,27 @@ const RENDERERS = {
       )
     }
 
-    // Banner Card / Full Image + Box Content: caja blanca sobre la imagen.
+    // Full Image + Box Content: imagen a sangre (radius 1rem) con una card frosted
+    // (rgba blanco .25 + blur) abajo a la izquierda: h2 blanco + texto + CTA pill claro.
+    if (fullbox) {
+      return (
+        <div className="cp-fib">
+          {c.image
+            ? <img className="cp-fib-img cp-img" src={c.image} alt="" crossOrigin="anonymous" />
+            : <div className="cp-fib-img cp-img cp-img-ph"><ImageIcon size={22} /><span className="cp-ph-dim">{dim}</span></div>}
+          <div className="cp-fib-card">
+            <div className="cp-fib-title">{T(c.title, 'Full Image + Box Content')}</div>
+            <p className="cp-fib-desc">{T(c.description, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</p>
+            <span className="cp-fib-cta">{T(cta, 'CTA')}</span>
+          </div>
+        </div>
+      )
+    }
+
+    // Banner Card: caja blanca sobre la imagen.
     return (
       <div className="cp-banner" style={{ textAlign: h }}>
-        <Img src={c.image} h={300} />
+        <Img src={c.image} h={300} dim={dim} />
         <div className={`cp-banner-box ${h}`}>
           <div className="cp-h1">{T(c.title, 'Titulo del banner')}</div>
           {c.description && <p className="cp-p">{c.description}</p>}
@@ -182,7 +209,7 @@ const RENDERERS = {
   // de categoria (morado), titulo, bajada y autor con fecha.
   featured_articles: (c) => (
     <div className="cp-feat">
-      <div className="cp-feat-img"><Img src={c.image} h={300} /></div>
+      <div className="cp-feat-img"><Img src={c.image} h={300} dim="1216×912px" /></div>
       <div className="cp-feat-card">
         {c.category && <span className="cp-feat-cat">{c.category}</span>}
         <div className="cp-feat-title">{T(c.title, 'Título del artículo destacado')}</div>
@@ -209,7 +236,7 @@ const RENDERERS = {
     ]
     return (
       <div className="cp-svc">
-        {c.background ? <img className="cp-svc-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-svc-bg cp-svc-bg-ph" />}
+        {c.background ? <img className="cp-svc-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-svc-bg cp-svc-bg-ph"><span className="cp-dim-badge">Fondo 2160×1212px</span></div>}
         <div className="cp-svc-scrim" />
         <div className="cp-svc-head">
           <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
@@ -262,7 +289,7 @@ const RENDERERS = {
             return (
               <div key={i} className="cp-brandc">
                 <div className="cp-brandc-media">
-                  <Img src={card.image} aspect="4/3" className="cp-brandc-img" />
+                  <Img src={card.image} aspect="4/3" dim="822×616px" className="cp-brandc-img" />
                   <div className="cp-brandc-pets">
                     {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><Dog size={15} /></span>}
                     {/gato/i.test(pets) && <span className="cp-brandc-pet"><Cat size={15} /></span>}
@@ -303,7 +330,7 @@ const RENDERERS = {
         <div className="cp-artc-row">
           {arr.map((a, i) => (
             <div key={i} className={`cp-artc-card${i === 0 ? ' feat' : ''}`}>
-              {a.image ? <img className="cp-artc-img" src={a.image} alt="" crossOrigin="anonymous" /> : <div className="cp-artc-img cp-artc-ph" />}
+              {a.image ? <img className="cp-artc-img" src={a.image} alt="" crossOrigin="anonymous" /> : <div className="cp-artc-img cp-artc-ph"><span className="cp-dim-badge">1216×912px</span></div>}
               <div className="cp-artc-scrim" />
               {a.category && <span className="cp-artc-cat" style={{ background: a.category_color || '#582d84' }}>{a.category}</span>}
               <div className="cp-artc-ttl">{T(a.title, 'Título del artículo')}</div>
@@ -340,6 +367,33 @@ const RENDERERS = {
     )
   },
 
+  // Carrusel de testimonios "Historias que inspiran": imagen ovalada a la izquierda +
+  // eyebrow con flechas, cita, autor y boton "Compartir mi historia" a la derecha.
+  testimonials: (c) => {
+    const items = list(c.items)
+    const it = items[0] || { quote: 'Romeo fue rescatado a los 2 años y hoy es el compañero más feliz que podría desear.', author: 'Enzina Musk, mamá orgullosa de Romeo' }
+    return (
+      <div className="cp-testi">
+        <div className="cp-testi-media">
+          {it.image
+            ? <img className="cp-testi-img" src={it.image} alt="" crossOrigin="anonymous" />
+            : <div className="cp-testi-img cp-testi-ph"><ImageIcon size={22} /><span className="cp-ph-dim">900×840px</span></div>}
+          {it.image_title && <div className="cp-testi-overlay">{it.image_title}</div>}
+          <span className="cp-testi-dot" />
+        </div>
+        <div className="cp-testi-body">
+          <div className="cp-testi-head">
+            <div className="cp-testi-eyebrow">{T(c.eyebrow, 'Historias que inspiran')}</div>
+            <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
+          </div>
+          <div className="cp-testi-quote">“{T(it.quote, 'Testimonio de la persona sobre su experiencia con su mascota.')}”</div>
+          {it.author && <div className="cp-testi-author">{it.author}</div>}
+          <span className="cp-testi-btn">{T(c.button_text, 'Compartir mi historia')}</span>
+        </div>
+      </div>
+    )
+  },
+
   // Cards de producto (A ingrediente / B producto / C marca). Grilla de tarjetas
   // blancas con imagen + titulo + texto; la variante C usa fondo oscuro.
   product_cards: (c) => {
@@ -366,7 +420,7 @@ const RENDERERS = {
   // Banner IA: forma de pastilla (stadium) con imagen de fondo + titulo + buscador.
   banner_ia: (c) => (
     <div className="cp-banneria">
-      {c.image ? <img className="cp-banneria-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-banneria-img cp-banneria-ph" />}
+      {c.image ? <img className="cp-banneria-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-banneria-img cp-banneria-ph"><span className="cp-dim-badge">1552×1014px</span></div>}
       <div className="cp-banneria-scrim" />
       <div className="cp-banneria-inner">
         <div className="cp-banneria-title">{T(c.title, '¿Estás pensando en adoptar una mascota?')}</div>
@@ -381,7 +435,9 @@ const RENDERERS = {
     const arr = cards.length ? cards : [{ title: 'Dorem ipsum' }, { title: 'Adipiscing elit' }, { title: 'Forem ipsum' }]
     return (
       <div className="cp-section">
-        {c.background && <img className="cp-section-bg" src={c.background} alt="" crossOrigin="anonymous" />}
+        {c.background
+          ? <img className="cp-section-bg" src={c.background} alt="" crossOrigin="anonymous" />
+          : <span className="cp-dim-badge">Fondo 2784×1994px</span>}
         <div className="cp-section-inner">
           <div className="cp-section-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
           {c.subtitle && <div className="cp-section-sub">{c.subtitle}</div>}
@@ -428,7 +484,7 @@ const RENDERERS = {
       <div className="cp-hmenu">
         {arr.map((it, i) => (
           <div key={i} className="cp-hmenu-card">
-            <Img src={it.image} aspect="4/3" className="cp-hmenu-img" />
+            <Img src={it.image} aspect="4/3" dim="670×502px" className="cp-hmenu-img" />
             <div className="cp-hmenu-body">
               <div className="cp-hmenu-t">{T(it.title, 'Título')}</div>
               {it.description && <div className="cp-hmenu-s">{it.description}</div>}
@@ -447,7 +503,7 @@ const RENDERERS = {
     const step = steps[0] || { day: 'Día 1 - 3', description: 'Ofrece 1/4 de producto junto a su comida regular.' }
     return (
       <div className="cp-tut">
-        {c.background ? <img className="cp-tut-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-tut-bg cp-tut-ph" />}
+        {c.background ? <img className="cp-tut-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-tut-bg cp-tut-ph"><span className="cp-dim-badge">Fondo 2784×1772px</span></div>}
         <div className="cp-tut-scrim" />
         <div className="cp-tut-inner">
           <div className="cp-tut-left">
@@ -457,7 +513,7 @@ const RENDERERS = {
           </div>
           <div className="cp-tut-step">
             <div className="cp-tut-day">{T(step.day, 'Día 1 - 3')}</div>
-            <div className="cp-tut-stepimg"><Img src={step.image} h={120} /></div>
+            <div className="cp-tut-stepimg"><Img src={step.image} h={120} dim="624×624px" /></div>
             <div className="cp-tut-stepd">{T(step.description, 'Descripción del paso.')}</div>
           </div>
         </div>
@@ -467,7 +523,7 @@ const RENDERERS = {
 
   post_image: (c) => (
     <div className="cp-block">
-      <Img src={c.image} aspect="4/3" />
+      <Img src={c.image} aspect="4/3" dim="1570×1177px" />
       {c.alt && <div className="cp-sub cp-center">{c.alt}</div>}
     </div>
   ),
@@ -504,7 +560,7 @@ const RENDERERS = {
           {arr.map((p, i) => (
             <div key={i} className="cp-plist-card">
               {p.tag && <span className="cp-plist-tag" style={{ '--tag-bg': p.tag_color || '#895731' }}>{p.tag}</span>}
-              <div className="cp-plist-imgwrap"><Img src={p.image} aspect="1/1" className="cp-plist-img" /></div>
+              <div className="cp-plist-imgwrap"><Img src={p.image} aspect="1/1" dim="600×600px" className="cp-plist-img" /></div>
               <div className="cp-plist-title">{T(p.title, 'Nombre del producto')}</div>
             </div>
           ))}

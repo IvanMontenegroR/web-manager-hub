@@ -1423,7 +1423,11 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-p { font-size: 14px; line-height: 1.6; color: #3a424e; margin: 6px 0; }
 .cp-cta { display: inline-block; margin-top: 12px; background: var(--purina); color: #fff; font-weight: 700; font-size: 13px; padding: 9px 20px; border-radius: 24px; }
 .cp-img { width: 100%; object-fit: cover; display: block; background: #e5e9f0; }
-.cp-img-ph { display: grid; place-items: center; color: #aab2bd; }
+.cp-img-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aab2bd; }
+/* Dimension recomendada dentro del placeholder de imagen. */
+.cp-ph-dim { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: #97a0ab; }
+/* Badge de dimension para placeholders de fondo (esquina). */
+.cp-dim-badge { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: rgba(0,0,0,0.45); padding: 3px 9px; border-radius: 6px; }
 
 .cp-banner { position: relative; }
 .cp-banner .cp-img { border-radius: 0; }
@@ -1550,6 +1554,29 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-fb-pet--r0 { top: 20%; right: 8%; }
 .cp-fb-pet--r1 { bottom: 26%; right: 30%; }
 .cp-fb-pet--r2 { bottom: 8%; right: 4%; }
+
+/* ===== Banner Full Image + Box Content (card frosted) ===== */
+.cp-fib { position: relative; }
+.cp-fib-img.cp-img { border-radius: 16px; object-fit: cover; aspect-ratio: 1680 / 820; }
+.cp-fib-card { position: absolute; left: 40px; bottom: 40px; max-width: 42%; background: rgba(255,255,255,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 14px; padding: 26px 28px; color: #fff; }
+.cp-fib-title { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+.cp-fib-desc { font-size: 14px; line-height: 1.5; margin-top: 8px; opacity: .95; }
+.cp-fib-cta { display: inline-block; margin-top: 20px; background: #fff; color: #1b252e; font-size: 13px; font-weight: 700; padding: 11px 26px; border-radius: 9999px; }
+
+/* ===== Carrusel de testimonios (Historias que inspiran) ===== */
+.cp-testi { display: flex; align-items: center; gap: 44px; padding: 30px 30px; }
+.cp-testi-media { position: relative; flex: 0 0 44%; }
+.cp-testi-img { width: 100%; aspect-ratio: 1.07 / 1; object-fit: cover; border-radius: 44% / 46%; display: block; }
+.cp-testi-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: linear-gradient(150deg, #cfd6df, #aab3bd); color: #7d8894; }
+.cp-testi-overlay { position: absolute; left: 0; right: 0; bottom: 26%; text-align: center; color: #fff; font-size: 21px; font-weight: 700; letter-spacing: -0.3px; padding: 0 14%; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.cp-testi-dot { position: absolute; left: -30px; top: 62%; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--purina); background: #fff; }
+.cp-testi-dot::before { content: ''; position: absolute; right: 100%; top: 50%; width: 30px; height: 2px; background: var(--purina); }
+.cp-testi-body { flex: 1; }
+.cp-testi-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cp-testi-eyebrow { font-size: 17px; color: #1b252e; }
+.cp-testi-quote { font-size: 27px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.22; color: #1b252e; margin-top: 26px; }
+.cp-testi-author { font-size: 14px; color: #545c67; margin-top: 18px; }
+.cp-testi-btn { display: inline-block; margin-top: 26px; background: #111; color: #fff; font-size: 14px; font-weight: 600; padding: 12px 26px; border-radius: 9999px; }
 
 /* ===== Product cards (A/B/C) ===== */
 .cp-prodcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 12px; }

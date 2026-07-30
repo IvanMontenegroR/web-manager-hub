@@ -52,7 +52,7 @@ export const COMPONENTS = [
       'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 10MB', format: 'JPG / MP4' }],
       'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 10MB', format: 'JPG / MP4' }],
       'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
-      'Full Image + Box Content': [{ ratio: 'Desktop 2:1 · Mobile 2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
+      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~9:14', desktop: '1680×820px', mobile: '430×694px', max: '500kb', format: 'JPG / MP4' }],
       'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb', format: 'JPG / MP4' }],
     },
   },
@@ -205,6 +205,24 @@ export const COMPONENTS = [
       ] },
     ],
     specs: [{ label: 'Fotos de mascotas', ratio: '1:1', desktop: '240×240px', mobile: '160×160px', max: '300kb', format: 'JPG' }],
+  },
+  {
+    key: 'testimonials',
+    name: 'Carrusel de testimonios (Historias que inspiran)',
+    category: 'Carruseles',
+    help: 'Sección "Historias que inspiran": imagen ovalada a la izquierda + cita, autor y botón a la derecha, con flechas de carrusel.',
+    fields: [
+      { key: 'eyebrow', label: 'Antetítulo', type: 'text', placeholder: 'Historias que inspiran' },
+      { key: 'items', label: 'Testimonios', type: 'list', item: [
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'image_title', label: 'Texto sobre la imagen (opcional)', type: 'text' },
+        { key: 'quote', label: 'Cita', type: 'textarea' },
+        { key: 'author', label: 'Autor', type: 'text' },
+      ] },
+      { key: 'button_text', label: 'Botón — texto', type: 'text', placeholder: 'Compartir mi historia' },
+      { key: 'button_url', label: 'Botón — link', type: 'url' },
+    ],
+    specs: [{ label: 'Imagen', ratio: 'Desktop ≈1:1', desktop: '900×840px', mobile: '640×600px', max: '500kb', format: 'JPG' }],
   },
   {
     key: 'brand_cards',
