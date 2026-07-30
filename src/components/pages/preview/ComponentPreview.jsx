@@ -190,6 +190,204 @@ const RENDERERS = {
       </div>
     </div>
   ),
+
+  // Featured article: imagen grande a la izquierda + tarjeta a la derecha con chip
+  // de categoria (morado), titulo, bajada y autor con fecha.
+  featured_articles: (c) => (
+    <div className="cp-feat">
+      <div className="cp-feat-img"><Img src={c.image} h={300} /></div>
+      <div className="cp-feat-card">
+        {c.category && <span className="cp-feat-cat">{c.category}</span>}
+        <div className="cp-feat-title">{T(c.title, 'Título del artículo destacado')}</div>
+        <p className="cp-feat-desc">{T(c.description, 'Bajada del artículo con un resumen de dos o tres líneas para dar contexto al lector.')}</p>
+        <div className="cp-feat-meta">
+          <span className="cp-feat-avatar" />
+          <span className="cp-feat-author">{T(c.author, 'Autor')}</span>
+          {c.date && <><span className="cp-feat-bar">|</span><span className="cp-feat-date">{c.date}</span></>}
+        </div>
+      </div>
+    </div>
+  ),
+
+  // Carrusel de servicios: titulo/subtitulo sobre una imagen de fondo + tarjetas
+  // (la marcada como destacada va en rojo Purina). Aliados y Servicios.
+  services_carousel: (c) => {
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [{ title: 'Pet ID', text: 'Crea tu Pet ID y obtén una experiencia personalizada.', highlighted: 'Si' }, { title: 'Razas', text: 'Todo sobre las razas.' }, { title: 'Adopción', text: 'El match ideal.' }, { title: 'Tiendas', text: 'Encuentra productos cerca.' }]
+    return (
+      <div className="cp-svc">
+        {c.background ? <img className="cp-svc-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-svc-bg cp-svc-bg-ph" />}
+        <div className="cp-svc-scrim" />
+        <div className="cp-svc-inner">
+          <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
+          {c.subtitle && <div className="cp-svc-sub">{c.subtitle}</div>}
+          <div className="cp-svc-cards">
+            {arr.map((card, i) => (
+              <div key={i} className={`cp-svc-card${/si|sí/i.test(card.highlighted) ? ' hl' : ''}`}>
+                <div className="cp-svc-ico" />
+                <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
+                {card.text && <div className="cp-svc-card-s">{card.text}</div>}
+                <span className="cp-svc-arrow">→</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  },
+
+  // Brand cards: tarjetas verticales oscuras (imagen a sangre) con titulo dorado.
+  brand_cards: (c) => {
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [{ title: 'Perros' }, { title: 'Gatos' }, { title: 'Dietas veterinarias' }]
+    return (
+      <div className="cp-brandcards">
+        {arr.map((card, i) => (
+          <div key={i} className="cp-brandcard">
+            {card.image ? <img className="cp-brandcard-img" src={card.image} alt="" crossOrigin="anonymous" /> : <div className="cp-brandcard-img cp-brandcard-ph" />}
+            <div className="cp-brandcard-scrim" />
+            <div className="cp-brandcard-body">
+              <div className="cp-brandcard-t">{T(card.title, 'Marca')}</div>
+              {card.description && <p className="cp-brandcard-d">{card.description}</p>}
+              <span className="cp-brandcard-arrow">→</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  },
+
+  // Cards de producto (A ingrediente / B producto / C marca). Grilla de tarjetas
+  // blancas con imagen + titulo + texto; la variante C usa fondo oscuro.
+  product_cards: (c) => {
+    const cards = list(c.cards)
+    const dark = /marca|^c/i.test(c.variant || '')
+    const arr = cards.length ? cards : [{}, {}, {}]
+    return (
+      <div className="cp-block">
+        {c.title && <div className="cp-h2">{c.title}</div>}
+        <div className="cp-prodcards">
+          {arr.map((card, i) => (
+            <div key={i} className={`cp-prodcard${dark ? ' dark' : ''}`}>
+              {card.tags && <div className="cp-prodcard-tags">{String(card.tags).split(',').map((t, j) => <span key={j}>{t.trim()}</span>)}</div>}
+              <Img src={card.image} h={dark ? 130 : 150} className="cp-prodcard-img" />
+              <div className="cp-prodcard-t">{T(card.title, 'Producto')}</div>
+              {card.subtitle && <div className="cp-prodcard-s">{card.subtitle}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Banner IA: forma de pastilla (stadium) con imagen de fondo + titulo + buscador.
+  banner_ia: (c) => (
+    <div className="cp-banneria">
+      {c.image ? <img className="cp-banneria-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-banneria-img cp-banneria-ph" />}
+      <div className="cp-banneria-scrim" />
+      <div className="cp-banneria-inner">
+        <div className="cp-banneria-title">{T(c.title, '¿Estás pensando en adoptar una mascota?')}</div>
+        <div className="cp-banneria-search"><span className="cp-spark">✦</span>{T(c.placeholder, 'Escribe tus consultas aquí…')}</div>
+      </div>
+    </div>
+  ),
+
+  // Seccion con fondo: degradado/imagen a sangre + titulo/subtitulo + cards con icono.
+  section: (c) => {
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [{ title: 'Dorem ipsum' }, { title: 'Adipiscing elit' }, { title: 'Forem ipsum' }]
+    return (
+      <div className="cp-section">
+        {c.background && <img className="cp-section-bg" src={c.background} alt="" crossOrigin="anonymous" />}
+        <div className="cp-section-inner">
+          <div className="cp-section-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
+          {c.subtitle && <div className="cp-section-sub">{c.subtitle}</div>}
+          <div className="cp-section-cards">
+            {arr.map((card, i) => (
+              <div key={i} className="cp-section-card">
+                {card.icon ? <img className="cp-section-ico" src={card.icon} alt="" crossOrigin="anonymous" /> : <div className="cp-section-ico cp-section-ico-ph" />}
+                <div className="cp-section-card-t">{T(card.title, 'Título')}</div>
+                {card.text && <div className="cp-section-card-s">{card.text}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  },
+
+  // Categorias populares: tarjetas horizontales con imagen de fondo + label + flecha.
+  category_grid: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [{ label: 'Alimentación' }, { label: 'Comportamiento' }, { label: 'Adopción' }]
+    return (
+      <div className="cp-block">
+        <div className="cp-h2">{T(c.title, 'Categorías populares')}</div>
+        <div className="cp-cats">
+          {arr.map((it, i) => (
+            <div key={i} className="cp-cat">
+              {it.image ? <img className="cp-cat-img" src={it.image} alt="" crossOrigin="anonymous" /> : <div className="cp-cat-img cp-cat-ph" />}
+              <div className="cp-cat-scrim" />
+              <span className="cp-cat-label">{T(it.label, 'Categoría')}</span>
+              <span className="cp-cat-arrow">→</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Header menu: tarjetas del desplegable (imagen + titulo + bajada + chevron).
+  header_menu: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [{ title: 'Título banner' }, { title: 'Newsletter Purina®' }]
+    return (
+      <div className="cp-hmenu">
+        {arr.map((it, i) => (
+          <div key={i} className="cp-hmenu-card">
+            <Img src={it.image} h={140} className="cp-hmenu-img" />
+            <div className="cp-hmenu-body">
+              <div className="cp-hmenu-t">{T(it.title, 'Título')}</div>
+              {it.description && <div className="cp-hmenu-s">{it.description}</div>}
+            </div>
+            <span className="cp-hmenu-arrow">›</span>
+          </div>
+        ))}
+      </div>
+    )
+  },
+
+  // Banner tutorial: fondo oscuro con titulo + asistente a la izquierda y un card
+  // de paso (dia + imagen + texto) a la derecha.
+  banner_tutorial: (c) => {
+    const steps = list(c.steps)
+    const step = steps[0] || { day: 'Día 1 - 3', description: 'Ofrece 1/4 de producto junto a su comida regular.' }
+    return (
+      <div className="cp-tut">
+        {c.background ? <img className="cp-tut-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-tut-bg cp-tut-ph" />}
+        <div className="cp-tut-scrim" />
+        <div className="cp-tut-inner">
+          <div className="cp-tut-left">
+            <div className="cp-tut-title">{T(c.title, 'Cómo introducir el producto en la dieta de tu mascota')}</div>
+            <div className="cp-tut-assist"><span className="cp-spark">✦</span> El asistente de nutrición de {T(c.assistant_name, 'tu mascota')}</div>
+            <div className="cp-tut-search">Escribe tu consulta…</div>
+          </div>
+          <div className="cp-tut-step">
+            <div className="cp-tut-day">{T(step.day, 'Día 1 - 3')}</div>
+            <div className="cp-tut-stepimg"><Img src={step.image} h={120} /></div>
+            <div className="cp-tut-stepd">{T(step.description, 'Descripción del paso.')}</div>
+          </div>
+        </div>
+      </div>
+    )
+  },
+
+  post_image: (c) => (
+    <div className="cp-block">
+      <Img src={c.image} h={300} />
+      {c.alt && <div className="cp-sub cp-center">{c.alt}</div>}
+    </div>
+  ),
 }
 
 export default function ComponentPreview({ componentKey, content }) {

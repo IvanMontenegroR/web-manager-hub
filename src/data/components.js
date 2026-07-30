@@ -46,6 +46,15 @@ export const COMPONENTS = [
       { key: 'section_id', label: 'Section ID', type: 'text' },
       { key: 'css_class', label: 'Custom CSS classes', type: 'text' },
     ],
+    // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
+    specKey: 'type',
+    specsByType: {
+      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 10MB', format: 'JPG / MP4' }],
+      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 10MB', format: 'JPG / MP4' }],
+      'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
+      'Full Image + Box Content': [{ ratio: 'Desktop 2:1 · Mobile 2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
+      'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb', format: 'JPG / MP4' }],
+    },
   },
   {
     key: 'brand_logos',
@@ -139,12 +148,189 @@ export const COMPONENTS = [
       { key: 'note', label: 'Nota para el editor', type: 'textarea' },
     ],
   },
+
+  // ===== Nuevos componentes del Design Guidelines 2026 (homepage + reusables) =====
+  {
+    key: 'featured_articles',
+    name: 'Featured articles',
+    category: 'Articulos',
+    help: 'Articulo destacado: imagen grande + tarjeta con categoria, titulo, bajada y autor.',
+    fields: [
+      { key: 'category', label: 'Categoria (chip)', type: 'text' },
+      { key: 'title', label: 'Titulo del articulo', type: 'text' },
+      { key: 'description', label: 'Bajada', type: 'textarea' },
+      { key: 'image', label: 'Imagen', type: 'image' },
+      { key: 'author', label: 'Autor', type: 'text' },
+      { key: 'date', label: 'Fecha', type: 'text' },
+      { key: 'link_url', label: 'Link del articulo', type: 'url' },
+    ],
+    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1216×912px', mobile: '303×454px', max: '500kb', format: 'JPG / MP4' }],
+  },
+  {
+    key: 'services_carousel',
+    name: 'Carrusel de servicios',
+    category: 'Carruseles',
+    help: 'Bloque "Aliados y Servicios": titulo sobre una imagen de fondo + tarjetas de servicio (una destacada).',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'subtitle', label: 'Subtitulo', type: 'text' },
+      { key: 'background', label: 'Imagen de fondo', type: 'image' },
+      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+        { key: 'url', label: 'Link', type: 'url' },
+        { key: 'highlighted', label: 'Destacada (roja)', type: 'select', options: ['No', 'Si'] },
+      ] },
+    ],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9 · Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'brand_cards',
+    name: 'Brand cards',
+    category: 'Marcas',
+    help: 'Tarjetas verticales oscuras (Perros / Gatos / Dietas veterinarias): imagen a sangre + titulo dorado + bajada.',
+    fields: [
+      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'description', label: 'Bajada', type: 'textarea' },
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 1:1.5 · Mobile 1:1.5', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'product_cards',
+    name: 'Cards de producto',
+    category: 'Marcas',
+    help: 'Grilla de cards de producto. El tipo define el tamano de imagen: A ingrediente, B producto, C marca.',
+    fields: [
+      { key: 'variant', label: 'Tipo de card', type: 'select', options: ['A · Ingrediente', 'B · Producto', 'C · Marca'] },
+      { key: 'title', label: 'Titulo de la seccion', type: 'text' },
+      { key: 'cards', label: 'Cards', type: 'list', item: [
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'subtitle', label: 'Texto / subtitulo', type: 'textarea' },
+        { key: 'tags', label: 'Tags (separados por coma)', type: 'text' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specKey: 'variant',
+    specsByType: {
+      'A · Ingrediente': [{ ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG' }],
+      'B · Producto': [{ ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '540×540px', mobile: '540×540px', max: '500kb', format: 'JPG' }],
+      'C · Marca': [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG' }],
+    },
+  },
+  {
+    key: 'banner_ia',
+    name: 'Banner IA',
+    category: 'Hero',
+    help: 'Banner con forma de pastilla (stadium): imagen de fondo + titulo + barra de busqueda del asistente.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'placeholder', label: 'Texto del buscador', type: 'text', placeholder: 'Escribe tus consultas aquí…' },
+      { key: 'image', label: 'Imagen de fondo', type: 'image' },
+    ],
+    specs: [{ ratio: 'Desktop 1.5:1 · Mobile 1.5:1', desktop: '1552×1014px', mobile: '670×446px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'section',
+    name: 'Seccion con fondo',
+    category: 'Contenido',
+    help: 'Seccion con imagen/degradado de fondo a sangre: titulo + subtitulo arriba y tarjetas con icono abajo.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'subtitle', label: 'Subtitulo', type: 'text' },
+      { key: 'background', label: 'Imagen de fondo', type: 'image' },
+      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+        { key: 'icon', label: 'Icono (imagen)', type: 'image' },
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+      ] },
+    ],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 1:1 · Mobile 9:16', desktop: '2784×1994px', mobile: '702×1248px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'category_grid',
+    name: 'Categorias',
+    category: 'Navegacion',
+    help: 'Bloque "Categorias populares": tarjetas horizontales con imagen de fondo y titulo por categoria.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Categorías populares' },
+      { key: 'items', label: 'Categorias', type: 'list', item: [
+        { key: 'label', label: 'Nombre', type: 'text' },
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 3:1 · Mobile 2.25:1', desktop: '758×252px', mobile: '320×142px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'header_menu',
+    name: 'Header menu (cards)',
+    category: 'Navegacion',
+    help: 'Tarjetas promocionales del menu desplegable del header: imagen + titulo + bajada + flecha.',
+    fields: [
+      { key: 'items', label: 'Tarjetas', type: 'list', item: [
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'description', label: 'Bajada', type: 'textarea' },
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'banner_tutorial',
+    name: 'Banner tutorial',
+    category: 'Hero',
+    help: 'Banner "Cómo introducir…": fondo con asistente a la izquierda + carrusel de pasos (dia + imagen + texto) a la derecha.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'assistant_name', label: 'Nombre del asistente', type: 'text', placeholder: 'Pandora' },
+      { key: 'background', label: 'Imagen de fondo', type: 'image' },
+      { key: 'steps', label: 'Pasos', type: 'list', item: [
+        { key: 'day', label: 'Etiqueta (ej. Día 1 - 3)', type: 'text' },
+        { key: 'description', label: 'Descripcion', type: 'textarea' },
+        { key: 'image', label: 'Imagen del paso', type: 'image' },
+      ] },
+    ],
+    specs: [
+      { label: 'Fondo', ratio: 'Desktop 2.5:1', desktop: '2784×1772px', mobile: '540×940px', max: '500kb', format: 'JPG' },
+      { label: 'Pasos', ratio: 'Desktop 1:1', desktop: '624×624px', mobile: '400×400px', max: '500kb', format: 'JPG' },
+    ],
+  },
+  {
+    key: 'post_image',
+    name: 'Imagen de post',
+    category: 'Articulos',
+    help: 'Imagen dentro del cuerpo de un articulo.',
+    fields: [
+      { key: 'image', label: 'Imagen', type: 'image' },
+      { key: 'alt', label: 'Texto alternativo', type: 'text' },
+    ],
+    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1570×1177px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
+  },
 ]
 
 export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key, c]))
 
 export function getComponent(key) {
   return COMPONENT_BY_KEY[key] || null
+}
+
+// Tamanos de imagen recomendados (Design Guidelines) de un componente, segun su
+// contenido: si el componente tiene specsByType, se resuelve por el campo specKey
+// (ej. Banner Type o variante de card); si no, devuelve specs fijas. Array vacio
+// si el componente no maneja imagenes con tamano definido.
+export function getSpecs(component, content) {
+  if (!component) return []
+  if (component.specsByType) {
+    const key = content?.[component.specKey || 'type']
+    return component.specsByType[key] || []
+  }
+  return component.specs || []
 }
 
 // Valor legible de un campo para el export/preview (list -> texto multilinea).

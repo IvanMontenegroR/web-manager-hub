@@ -4,7 +4,7 @@
 // con alto explicito para que no se superpongan) y la tabla campo -> contenido abajo.
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText } from '../data/components'
+import { getComponent, fieldToText, getSpecs } from '../data/components'
 
 const PURINA_RED = 'FFED1C24'
 const HEAD_BG = 'FF1F2530'
@@ -133,6 +133,26 @@ export async function exportPageMatrix(page, components, getNode, headerNode, fo
 
     const dataUrl = await snapshot(getNode(comp.id))
     if (dataUrl) row = await placeImage(dataUrl, row, 680)
+
+    // Tamanos de imagen recomendados (Design Guidelines), si aplica.
+    const specs = getSpecs(def, comp.content)
+    if (specs.length) {
+      for (const s of specs) {
+        const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
+        const parts = [
+          s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`,
+          s.max && `Max ${s.max}`, s.format,
+        ].filter(Boolean).join('  ·  ')
+        ws.getCell(row, 2).value = label
+        ws.getCell(row, 2).font = { bold: true, size: 10, color: { argb: PURINA_RED } }
+        ws.getCell(row, 2).alignment = { vertical: 'top', wrapText: true }
+        ws.getCell(row, 3).value = parts
+        ws.getCell(row, 3).font = { size: 10, italic: true }
+        ws.getCell(row, 3).alignment = { vertical: 'top', wrapText: true }
+        for (const col of [2, 3]) ws.getCell(row, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+        row++
+      }
+    }
 
     // Cabecera de la tabla de campos.
     ws.getCell(row, 2).value = 'Campo'
