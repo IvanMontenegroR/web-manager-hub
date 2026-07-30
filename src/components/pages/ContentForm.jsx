@@ -1,4 +1,5 @@
-import { Plus, X, Image as ImageIcon } from 'lucide-react'
+import { Plus, X, Image as ImageIcon, Ruler } from 'lucide-react'
+import { getSpecs } from '../../data/components'
 
 // Formulario de contenido de un componente: renderiza un input por campo del
 // catalogo (incluye campos 'list' repetibles). Es controlado: draft + onChange(key,val).
@@ -52,10 +53,35 @@ function ListField({ f, value, onChange }) {
   )
 }
 
+// Panel de tamanos de imagen recomendados (Design Guidelines). Se muestra arriba
+// del form; si el componente resuelve sus specs por tipo (banner, product cards),
+// se actualiza al cambiar ese campo.
+function SpecsPanel({ specs }) {
+  if (!specs.length) return null
+  return (
+    <div className="cf-specs">
+      <div className="cf-specs-h"><Ruler size={13} /> Tamaños de imagen recomendados</div>
+      {specs.map((s, i) => (
+        <div key={i} className="cf-spec">
+          {s.label && <div className="cf-spec-label">{s.label}</div>}
+          {s.ratio && <div className="cf-spec-ratio">{s.ratio}</div>}
+          <div className="cf-spec-grid">
+            {s.desktop && <div><span>Desktop</span> {s.desktop}</div>}
+            {s.mobile && <div><span>Mobile</span> {s.mobile}</div>}
+            {s.max && <div><span>Max</span> {s.max}</div>}
+            {s.format && <div><span>Formato</span> {s.format}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ContentForm({ component, draft, onChange }) {
   const set = (key) => (val) => onChange({ ...draft, [key]: val })
   return (
     <div className="cf">
+      <SpecsPanel specs={getSpecs(component, draft)} />
       {component.fields.map((f) => (
         <div key={f.key} className="field">
           <label>{f.label}</label>

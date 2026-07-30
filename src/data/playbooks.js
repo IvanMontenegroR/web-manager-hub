@@ -1,5 +1,6 @@
 import introBlocks from './intro-playbook.json'
 import componentBlocks from './component-playbook.json'
+import designBlocks from './design-playbook.json'
 
 // Documentacion de la migracion Purina Ecosystem v2.0. El contenido (texto +
 // imagenes en orden) se extrae de los playbooks .docx originales; las imagenes
@@ -19,6 +20,13 @@ export const PLAYBOOKS = [
     subtitle: 'Creacion y edicion de component pages, bloques y componentes',
     tag: 'Componentes',
     blocks: componentBlocks,
+  },
+  {
+    id: 'design',
+    title: 'Platform Design Guidelines',
+    subtitle: 'Tamanos de imagen por componente, formatos y reglas de espaciado',
+    tag: 'Diseno',
+    blocks: designBlocks,
   },
 ]
 

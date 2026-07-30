@@ -1,0 +1,106 @@
+[
+{ "type": "p", "text": "Platform Design Guidelines del ecosistema Purina v2.0 (2026). Referencia visual de cada componente con su relacion de aspecto y los tamanos de imagen (desktop / mobile), el peso maximo y el formato. Usala al preparar los assets antes de cargarlos en el CMS." },
+{ "type": "p", "text": "Regla general de peso: 500kb por imagen (los heroes con video aceptan hasta 10MB en MP4). Formato: JPG salvo donde se indique MP4 para fondos animados." },
+
+{ "type": "h1", "text": "Heroes y banners" },
+
+{ "type": "h2", "text": "Main hero" },
+{ "type": "p", "text": "Desktop 2:1 — 2100x1050px  ·  Mobile 9:16 — 526x936px  ·  Max 500kb / 10MB  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/01-main-hero.jpg" },
+
+{ "type": "h2", "text": "Informational banner" },
+{ "type": "p", "text": "Desktop 2:1 — 2088x1044px  ·  Mobile 2:3 — 526x789px  ·  Max 500kb  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/02-informational-banner.jpg" },
+
+{ "type": "h2", "text": "Secondary hero" },
+{ "type": "p", "text": "Desktop 3:1 — 2100x700px  ·  Mobile 1:1 — 526x526px  ·  Max 500kb / 10MB  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/03-secondary-hero.jpg" },
+
+{ "type": "h2", "text": "Brand hero" },
+{ "type": "p", "text": "Desktop 2.5:1 — 2088x835px  ·  Mobile 2:3 — 526x789px  ·  Max 500kb  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/04-brand-hero.jpg" },
+
+{ "type": "h2", "text": "Promotional banner carousel" },
+{ "type": "p", "text": "Desktop 3:1 — 2088x696px  ·  Mobile 2:3 — 465x675px  ·  Max 500kb  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/05-promotional-carousel.jpg" },
+
+{ "type": "h2", "text": "Banner IA" },
+{ "type": "p", "text": "Desktop 1.5:1 — 1552x1014px  ·  Mobile 1.5:1 — 670x446px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/09-banner-ia.jpg" },
+
+{ "type": "h2", "text": "Banner tutorial" },
+{ "type": "p", "text": "Fondo Desktop 2.5:1 — 2784x1772px / Mobile 540x940px  ·  Pasos 1:1 — 624x624px / Mobile 400x400px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/14-banner-tutorial.jpg" },
+
+{ "type": "h1", "text": "Carruseles y grillas" },
+
+{ "type": "h2", "text": "Services carousel background" },
+{ "type": "p", "text": "Fondo Desktop 16:9 — 2160x1212px  ·  Mobile 9:16 — 562x999px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/06-services-carousel.jpg" },
+
+{ "type": "h2", "text": "Brand cards" },
+{ "type": "p", "text": "Desktop 1:1.5 — 822x1230px  ·  Mobile 1:1.5 — 670x1004px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/13-brand-cards.jpg" },
+
+{ "type": "h2", "text": "Cards de producto" },
+{ "type": "p", "text": "A (ingrediente) 1:1 — 600x600px  ·  B (producto) 1:1 — 540x540px  ·  C (marca) 4:3 — 822x616px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/08-product-cards.jpg" },
+
+{ "type": "h2", "text": "Category (categorias populares)" },
+{ "type": "p", "text": "Desktop 3:1 — 758x252px  ·  Mobile 2.25:1 — 320x142px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/17-category.jpg" },
+
+{ "type": "h2", "text": "Header menu" },
+{ "type": "p", "text": "Desktop 4:3 — 670x502px  ·  Mobile 4:3 — 670x502px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/18-header-menu.jpg" },
+
+{ "type": "h1", "text": "Articulos y contenido" },
+
+{ "type": "h2", "text": "Featured articles" },
+{ "type": "p", "text": "Desktop 4:3 — 1216x912px  ·  Mobile 4:3 — 303x454px  ·  Max 500kb  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/07-featured-articles.jpg" },
+
+{ "type": "h2", "text": "Post image" },
+{ "type": "p", "text": "Desktop 4:3 — 1570x1177px  ·  Mobile 4:3 — 670x502px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/15-post-image.jpg" },
+
+{ "type": "h2", "text": "Section (fondo + cards)" },
+{ "type": "p", "text": "Desktop 1:1 — 2784x1994px  ·  Mobile 9:16 — 702x1248px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/12-section.jpg" },
+
+{ "type": "h1", "text": "Paginas de producto y mascota" },
+{ "type": "p", "text": "Estructuras especificas de otras plantillas (no homepage). Se documentan como referencia; sus componentes aun no estan en el builder." },
+
+{ "type": "h2", "text": "Carrossel destaque (pagina de producto / mascota)" },
+{ "type": "p", "text": "Desktop 1:1 — 1136x1136px  ·  Mobile 1:1 — 670x670px  ·  Max 500kb  ·  JPG" },
+{ "type": "img", "src": "docs/design/10-product-detail.jpg" },
+
+{ "type": "h2", "text": "Pet page (adopcion / petshop)" },
+{ "type": "p", "text": "Petshop 16:9 — 540x304px / 228x228px  ·  Mascota 1.5:1 — 822x856px / 670x738px  ·  Max 500kb  ·  JPG / MP4" },
+{ "type": "img", "src": "docs/design/11-pet-cards.jpg" },
+
+{ "type": "h2", "text": "Modal Purina Club" },
+{ "type": "img", "src": "docs/design/16-modal-club.jpg" },
+
+{ "type": "h1", "text": "Espaciado y ritmo" },
+
+{ "type": "h2", "text": "Spacing tokens" },
+{ "type": "p", "text": "Escala de espaciado usada en todo el sitio: 4, 8, 12, 16, 20, 24, 32, 40, 60, 80, 120 px. Da un ritmo visual consistente y decisiones de diseno escalables." },
+{ "type": "img", "src": "docs/design/spacing-tokens.jpg" },
+
+{ "type": "h2", "text": "Espaciado entre secciones — Desktop" },
+{ "type": "p", "text": "Regla proporcional: top X y bottom ~2X. Ej: seccion top 32px, bottom 60px. Cuando el valor exacto no existe se usa el token mas cercano." },
+{ "type": "img", "src": "docs/design/spacing-sections-desktop.jpg" },
+
+{ "type": "h2", "text": "Espaciado entre secciones — Mobile" },
+{ "type": "p", "text": "Misma regla en mobile a menor escala: top 20px, bottom 40px." },
+{ "type": "img", "src": "docs/design/spacing-sections-mobile.jpg" },
+
+{ "type": "h2", "text": "Secciones con fondo o banners — Desktop" },
+{ "type": "p", "text": "Cuando la seccion tiene fondo propio: top X y bottom ~X (120px). La seccion siguiente arranca con ~0.5X (60px) para una transicion suave." },
+{ "type": "img", "src": "docs/design/spacing-bg-desktop.jpg" },
+
+{ "type": "h2", "text": "Secciones con fondo o banners — Mobile" },
+{ "type": "p", "text": "En mobile: top y bottom 60px; la seccion siguiente arranca con 32px." },
+{ "type": "img", "src": "docs/design/spacing-bg-mobile.jpg" }
+]

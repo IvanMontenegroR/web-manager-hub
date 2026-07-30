@@ -1460,6 +1460,127 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-badge { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: var(--info-tint); color: var(--info); padding: 2px 9px; border-radius: 20px; margin-bottom: 8px; }
 .cp-unknown { padding: 20px; color: var(--ink-3); font-size: 13px; }
 
+/* ===== Specs panel (tamanos recomendados en el editor) ===== */
+.cf-specs { border: 1px solid var(--border); border-radius: 8px; padding: 10px 11px; margin-bottom: 12px; background: var(--surface-2); }
+.cf-specs-h { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--purina); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
+.cf-spec { border-top: 1px dashed var(--border); padding-top: 7px; margin-top: 7px; }
+.cf-spec:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.cf-spec-label { font-size: 10.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; }
+.cf-spec-ratio { font-size: 12px; font-weight: 600; color: var(--ink-1); margin-bottom: 4px; }
+.cf-spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+.cf-spec-grid > div { font-size: 12px; color: var(--ink-1); }
+.cf-spec-grid span { color: var(--ink-3); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px; }
+
+/* ===== Featured articles ===== */
+.cp-feat { display: flex; gap: 22px; padding: 26px 30px; align-items: stretch; }
+.cp-feat-img { flex: 0 0 44%; } .cp-feat-img .cp-img { border-radius: 14px; height: 100%; }
+.cp-feat-card { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.cp-feat-cat { align-self: flex-start; font-size: 12px; font-weight: 600; color: #fff; background: #5b2a86; padding: 4px 13px; border-radius: 20px; margin-bottom: 14px; }
+.cp-feat-title { font-size: 26px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.18; margin-bottom: 10px; }
+.cp-feat-desc { font-size: 14px; line-height: 1.55; color: #3a424e; margin-bottom: 18px; }
+.cp-feat-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #545c67; }
+.cp-feat-avatar { width: 26px; height: 26px; border-radius: 50%; background: #cfd6df; flex: none; }
+.cp-feat-author { font-weight: 600; color: #1f2530; }
+.cp-feat-bar { color: #c3c9d2; }
+
+/* ===== Services carousel (Aliados y Servicios) ===== */
+.cp-svc { position: relative; overflow: hidden; }
+.cp-svc-bg { width: 100%; height: 460px; object-fit: cover; display: block; }
+.cp-svc-bg-ph { background: linear-gradient(120deg, #6a5648, #43352c); }
+.cp-svc-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.45), rgba(0,0,0,.1)); }
+.cp-svc-inner { position: absolute; inset: 0; padding: 40px 44px; display: flex; flex-direction: column; justify-content: flex-end; color: #fff; }
+.cp-svc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
+.cp-svc-sub { font-size: 15px; opacity: .92; margin: 6px 0 18px; }
+.cp-svc-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.cp-svc-card { position: relative; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 16px; padding: 18px; min-height: 150px; color: #1f2530; }
+.cp-svc-card.hl { background: var(--purina); color: #fff; }
+.cp-svc-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--purina); margin-bottom: 40px; }
+.cp-svc-card.hl .cp-svc-ico { background: rgba(255,255,255,.3); }
+.cp-svc-card-t { font-size: 17px; font-weight: 700; }
+.cp-svc-card-s { font-size: 12.5px; line-height: 1.4; margin-top: 4px; opacity: .82; }
+.cp-svc-arrow { position: absolute; right: 16px; bottom: 16px; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--purina); display: grid; place-items: center; font-size: 15px; }
+.cp-svc-card.hl .cp-svc-arrow { background: #fff; }
+
+/* ===== Brand cards ===== */
+.cp-brandcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 26px 30px; }
+.cp-brandcard { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 1 / 1.35; background: #14110f; }
+.cp-brandcard-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-brandcard-ph { background: linear-gradient(180deg, #2a2521, #100d0b); }
+.cp-brandcard-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.05) 40%, rgba(0,0,0,.75) 100%); }
+.cp-brandcard-body { position: absolute; inset: 0; padding: 24px; display: flex; flex-direction: column; color: #fff; }
+.cp-brandcard-t { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; color: #e8c78c; }
+.cp-brandcard-d { margin-top: auto; font-size: 13.5px; line-height: 1.45; padding-right: 44px; }
+.cp-brandcard-arrow { position: absolute; right: 22px; bottom: 22px; width: 40px; height: 40px; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; font-size: 16px; }
+
+/* ===== Product cards (A/B/C) ===== */
+.cp-prodcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 12px; }
+.cp-prodcard { position: relative; background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(23,31,43,0.07); text-align: center; }
+.cp-prodcard.dark { background: #111; color: #fff; }
+.cp-prodcard-img.cp-img { border-radius: 10px; object-fit: contain; background: transparent; }
+.cp-prodcard.dark .cp-prodcard-img.cp-img { background: transparent; }
+.cp-prodcard-t { font-weight: 700; font-size: 15px; margin-top: 12px; }
+.cp-prodcard-s { font-size: 13px; color: #545c67; margin-top: 3px; line-height: 1.4; }
+.cp-prodcard.dark .cp-prodcard-s { color: #cfd3d8; }
+.cp-prodcard-tags { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
+.cp-prodcard-tags span { font-size: 10.5px; font-weight: 700; color: #fff; background: #4f9a3f; padding: 2px 8px; border-radius: 12px; }
+.cp-prodcard-tags span:nth-child(2) { background: #6b4a2a; }
+
+/* ===== Banner IA (stadium) ===== */
+.cp-banneria { position: relative; max-width: 720px; margin: 14px auto; aspect-ratio: 1.5 / 1; border-radius: 999px / 50%; overflow: hidden; }
+.cp-banneria-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-banneria-ph { background: linear-gradient(150deg, #8a94a0, #4c5661); }
+.cp-banneria-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.28); }
+.cp-banneria-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px 12%; color: #fff; text-align: center; }
+.cp-banneria-title { font-size: 26px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.2; }
+.cp-banneria-search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 440px; background: rgba(255,255,255,.22); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,.5); color: #f2f4f7; font-size: 13.5px; padding: 12px 20px; border-radius: 999px; }
+.cp-spark { color: var(--purina); }
+
+/* ===== Section (fondo + cards con icono) ===== */
+.cp-section { position: relative; overflow: hidden; padding: 60px 40px 44px; background: linear-gradient(180deg, #fff 0%, #f6cfd0 55%, var(--purina) 100%); }
+.cp-section-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-section-inner { position: relative; }
+.cp-section-title { text-align: center; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+.cp-section-sub { text-align: center; font-size: 14.5px; color: #3a424e; margin-top: 6px; }
+.cp-section-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 120px; }
+.cp-section-card { background: #fff; border-radius: 16px; padding: 30px 22px; text-align: center; box-shadow: 0 3px 14px rgba(0,0,0,0.1); }
+.cp-section-ico { width: 34px; height: 34px; margin: 0 auto 12px; object-fit: contain; }
+.cp-section-ico-ph { border-radius: 8px; background: #f4d3d4; }
+.cp-section-card-t { font-size: 17px; font-weight: 700; color: var(--purina); }
+.cp-section-card-s { font-size: 12.5px; color: #545c67; line-height: 1.45; margin-top: 6px; }
+
+/* ===== Category (categorias populares) ===== */
+.cp-cats { display: flex; flex-direction: column; gap: 16px; margin-top: 12px; max-width: 420px; }
+.cp-cat { position: relative; height: 92px; border-radius: 12px; overflow: hidden; background: #e5e9f0; }
+.cp-cat-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-cat-ph { background: linear-gradient(90deg, #cfd6df, #eef1f5); }
+.cp-cat-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,.85) 30%, rgba(255,255,255,0) 90%); }
+.cp-cat-label { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 700; color: #1f2530; }
+.cp-cat-arrow { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--purina); display: grid; place-items: center; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+
+/* ===== Header menu cards ===== */
+.cp-hmenu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 26px 30px; }
+.cp-hmenu-card { position: relative; display: flex; flex-direction: column; border: 1px solid #eceff3; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
+.cp-hmenu-img.cp-img { border-radius: 0; margin: 12px 12px 0; width: auto; border-radius: 12px; }
+.cp-hmenu-body { padding: 12px 16px 18px; }
+.cp-hmenu-t { font-size: 16px; font-weight: 700; }
+.cp-hmenu-s { font-size: 12.5px; color: #545c67; line-height: 1.4; margin-top: 3px; }
+.cp-hmenu-arrow { position: absolute; right: 16px; bottom: 16px; color: #6b7280; font-size: 18px; }
+
+/* ===== Banner tutorial ===== */
+.cp-tut { position: relative; overflow: hidden; border-radius: 18px; margin: 14px 20px; }
+.cp-tut-bg { width: 100%; height: 420px; object-fit: cover; display: block; }
+.cp-tut-ph { background: linear-gradient(120deg, #2a2622, #16130f); }
+.cp-tut-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,.2)); }
+.cp-tut-inner { position: absolute; inset: 0; display: flex; gap: 24px; padding: 40px 44px; color: #fff; }
+.cp-tut-left { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.cp-tut-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.15; max-width: 420px; }
+.cp-tut-assist { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin: 22px 0 12px; }
+.cp-tut-search { background: rgba(255,255,255,.14); border: 1px solid rgba(230,190,120,.6); border-radius: 999px; padding: 12px 20px; font-size: 13px; color: #e9ecf0; max-width: 440px; }
+.cp-tut-step { flex: 0 0 42%; background: rgba(255,255,255,.14); backdrop-filter: blur(8px); border-radius: 18px; padding: 20px; text-align: center; display: flex; flex-direction: column; }
+.cp-tut-day { font-size: 18px; font-weight: 700; }
+.cp-tut-stepimg { margin: 12px 0; } .cp-tut-stepimg .cp-img { border-radius: 12px; background: transparent; object-fit: contain; }
+.cp-tut-stepd { font-size: 13px; opacity: .9; line-height: 1.4; }
+
 @media (max-width: 1100px) { .pb-main { grid-template-columns: 160px 1fr; } .pb-editor { grid-column: 1 / -1; position: static; max-height: none; } }
 
 /* Banner — Main Hero. Modela el componente real de Drupal:
