@@ -172,7 +172,7 @@ export const COMPONENTS = [
   },
   {
     key: 'articles_carousel',
-    name: 'Carrusel de articulos (Nuestro Blog)',
+    name: 'Carrusel de articulos',
     category: 'Carruseles',
     help: 'Sección "Nuestro Blog": cabecera + carrusel de artículos (imagen con chip de categoría y título superpuestos, botón +). Card destacada más grande a la izquierda.',
     fields: [
@@ -192,7 +192,7 @@ export const COMPONENTS = [
   },
   {
     key: 'footer_banner',
-    name: 'Footer banner (Pet Club)',
+    name: 'Footer banner',
     category: 'Hero',
     help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
     fields: [
@@ -204,7 +204,7 @@ export const COMPONENTS = [
   },
   {
     key: 'testimonials',
-    name: 'Carrusel de testimonios (Historias que inspiran)',
+    name: 'Carrusel de testimonios',
     category: 'Carruseles',
     help: 'Sección "Historias que inspiran": imagen ovalada a la izquierda + cita, autor y botón a la derecha, con flechas de carrusel.',
     fields: [
@@ -221,8 +221,23 @@ export const COMPONENTS = [
     specs: [{ label: 'Imagen', ratio: 'Desktop ≈1:1', desktop: '900×840px', mobile: '640×600px', max: '500kb', format: 'JPG' }],
   },
   {
+    key: 'species_selector',
+    name: 'Selector de especie',
+    category: 'Contenido',
+    help: 'Selector de mascota (Gato / Perro): título + subtítulo y pastillas con avatar. Personaliza la experiencia del sitio.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
+      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Elige tu mascota para personalizar tu experiencia:' },
+      { key: 'options', label: 'Opciones', type: 'list', item: [
+        { key: 'label', label: 'Nombre', type: 'text' },
+        { key: 'image', label: 'Avatar (imagen)', type: 'image' },
+      ] },
+    ],
+    specs: [{ label: 'Avatar', ratio: '1:1', desktop: '120×120px', mobile: '120×120px', max: '100kb', format: 'JPG / PNG' }],
+  },
+  {
     key: 'brand_cards',
-    name: 'Carrusel de marcas (Marcas Purina®)',
+    name: 'Carrusel de marcas',
     category: 'Marcas',
     help: 'Sección "Marcas Purina®": cabecera + carrusel de marcas. Cada card = imagen de marca (con toggles perro/gato) + pie gris con nombre y bajada. Botón "Ver todas".',
     fields: [
@@ -265,7 +280,7 @@ export const COMPONENTS = [
   },
   {
     key: 'product_list',
-    name: 'Listado de productos (con filtros)',
+    name: 'Listado de productos',
     category: 'Marcas',
     help: 'Sección "Más populares": tabs de filtro + carrusel de card-products. Card promo (ej. Pet ID) opcional y botón "Ver todos". Sin imagen usa placeholder. En el CMS los productos los popula la vista; acá cargás ejemplos.',
     fields: [

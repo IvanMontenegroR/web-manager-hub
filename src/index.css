@@ -1575,6 +1575,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-testi-author { font-size: 14px; color: #545c67; margin-top: 18px; }
 .cp-testi-btn { display: inline-block; margin-top: 26px; background: #111; color: #fff; font-size: 14px; font-weight: 600; padding: 12px 26px; border-radius: 9999px; }
 
+/* ===== Selector de especie (Quién manda en tu casa) ===== */
+.cp-species { padding: 34px 30px 40px; text-align: center; }
+.cp-species-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; color: #1b252e; }
+.cp-species-sub { font-size: 14px; color: #797777; margin-top: 8px; }
+.cp-species-opts { display: flex; justify-content: center; gap: 22px; margin-top: 26px; }
+.cp-species-opt { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #efefef; border-radius: 9999px; padding: 8px 30px 8px 8px; box-shadow: 0 3px 12px rgba(23,31,43,0.09); }
+.cp-species-av { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex: none; }
+.cp-species-av-ph { display: grid; place-items: center; background: #eceff3; color: #aab2bd; }
+.cp-species-label { font-size: 20px; color: #1b252e; }
+
 /* ===== Product cards (A/B/C) ===== */
 .cp-prodcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 12px; }
 .cp-prodcard { position: relative; background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(23,31,43,0.07); text-align: center; }
