@@ -1564,7 +1564,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-fib-cta { display: inline-block; margin-top: 20px; background: #fff; color: #1b252e; font-size: 13px; font-weight: 700; padding: 11px 26px; border-radius: 9999px; }
 
 /* ===== Carrusel de testimonios (Historias que inspiran) ===== */
-.cp-testi { display: flex; align-items: center; gap: 44px; padding: 30px 30px; }
+.cp-testi { display: flex; align-items: center; gap: 44px; padding: 44px 30px; background: #ffe8e9; }
 .cp-testi-media { position: relative; flex: 0 0 44%; }
 .cp-testi-img { width: 100%; aspect-ratio: 1.07 / 1; object-fit: cover; border-radius: 44% / 46%; display: block; }
 .cp-testi-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: linear-gradient(150deg, #cfd6df, #aab3bd); color: #7d8894; }
@@ -1584,8 +1584,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-species-sub { font-size: 14px; color: #797777; margin-top: 8px; }
 .cp-species-opts { display: flex; justify-content: center; gap: 22px; margin-top: 26px; }
 .cp-species-opt { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #efefef; border-radius: 9999px; padding: 8px 30px 8px 8px; box-shadow: 0 3px 12px rgba(23,31,43,0.09); }
-.cp-species-av { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex: none; }
-.cp-species-av-ph { display: grid; place-items: center; background: #eceff3; color: #aab2bd; }
+.cp-species-av { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--color-reds-000, #ffe8e9); color: var(--purina); }
 .cp-species-label { font-size: 20px; color: #1b252e; }
 
 /* ===== Product cards (A/B/C) ===== */
@@ -1739,6 +1738,13 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-page { padding: 12px 60px 56px; gap: 40px; }
 /* El breadcrumb es nav (no seccion): va pegado al header y al componente siguiente. */
 .pb-canvas.preview .pb-block--breadcrumb { margin-bottom: -28px; }
+/* Banners: casi a sangre, a 24px del borde del container (rompen el gutter de 60px). */
+.pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
+/* Carrusel de servicios: FULL BLEED (0 del borde del container). */
+.pb-canvas.preview .pb-block--services_carousel { margin-inline: -60px; }
+/* Carrusel de testimonios: full bleed con fondo rosado; el contenido vuelve al gutter. */
+.pb-canvas.preview .pb-block--testimonials { margin-inline: -60px; }
+.pb-canvas.preview .pb-block--testimonials .cp-testi { padding-inline: 60px; }
 
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }

@@ -406,19 +406,17 @@ const RENDERERS = {
   // Selector de especie "Quién manda en tu casa": titulo + subtitulo y pastillas
   // (avatar circular + label) para elegir Gato / Perro.
   species_selector: (c) => {
-    const opts = list(c.options)
-    const arr = opts.length ? opts : [{ label: 'Gato' }, { label: 'Perro' }]
+    // Estatico: Gato / Perro con los iconos de gato y perro (reusa Cat / Dog).
+    const opts = [{ label: 'Gato', Icon: Cat }, { label: 'Perro', Icon: Dog }]
     return (
       <div className="cp-species">
         <div className="cp-species-title">{T(c.title, 'Quién manda en tu casa')}</div>
         <div className="cp-species-sub">{T(c.subtitle, 'Elige tu mascota para personalizar tu experiencia:')}</div>
         <div className="cp-species-opts">
-          {arr.map((o, i) => (
-            <div key={i} className="cp-species-opt">
-              {o.image
-                ? <img className="cp-species-av" src={o.image} alt="" />
-                : <div className="cp-species-av cp-species-av-ph"><ImageIcon size={16} /></div>}
-              <span className="cp-species-label">{T(o.label, 'Mascota')}</span>
+          {opts.map((o) => (
+            <div key={o.label} className="cp-species-opt">
+              <span className="cp-species-av"><o.Icon size={26} /></span>
+              <span className="cp-species-label">{o.label}</span>
             </div>
           ))}
         </div>
