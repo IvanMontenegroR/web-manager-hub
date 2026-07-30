@@ -1535,25 +1535,22 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-artc-plus { position: absolute; right: 18px; bottom: 18px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.85); color: #1b252e; display: grid; place-items: center; font-size: 22px; font-weight: 400; }
 
 /* ===== Footer banner (Pet Club) ===== */
-.cp-fb { position: relative; margin: 20px; min-height: 420px; background: #1b252e; border-radius: 9999px / 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.cp-fb-inner { text-align: center; color: #fff; padding: 40px 12%; max-width: 640px; }
-.cp-fb-logo { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-bottom: 20px; }
-.cp-fb-logo-mark { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #fff; background: var(--purina); padding: 2px 8px; border-radius: 2px; }
-.cp-fb-logo-club { font-size: 20px; font-weight: 600; font-style: italic; }
+.cp-fb { position: relative; margin: 20px; min-height: 380px; background: #1b252e; border-radius: 9999px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.cp-fb-inner { position: relative; z-index: 1; text-align: center; color: #fff; padding: 40px 12%; max-width: 640px; }
+.cp-fb-logo { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 20px; }
+.cp-fb-logo-img { height: 22px; width: auto; }
+.cp-fb-logo-club { font-size: 22px; font-weight: 600; font-style: italic; color: #fff; }
 .cp-fb-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
 .cp-fb-desc { font-size: 14.5px; line-height: 1.55; margin-top: 14px; opacity: .92; }
 .cp-fb-btn { display: inline-block; margin-top: 24px; background: var(--purina); color: #fff; font-size: 15px; font-weight: 600; padding: 14px 30px; border-radius: 9999px; }
-.cp-fb-side { position: absolute; top: 0; bottom: 0; width: 22%; }
-.cp-fb-side.left { left: 4%; } .cp-fb-side.right { right: 4%; }
-.cp-fb-pet { position: absolute; width: 72px; height: 72px; border-radius: 4px; overflow: hidden; box-shadow: 6px 6px 0 var(--purina); }
-.cp-fb-pet img { width: 100%; height: 100%; object-fit: cover; }
-.cp-fb-pet-ph { width: 100%; height: 100%; display: grid; place-items: center; background: #35404b; color: #7d8894; }
-.cp-fb-pet--l0 { top: 12%; left: 34%; }
-.cp-fb-pet--l1 { top: 32%; left: 4%; }
-.cp-fb-pet--l2 { bottom: 12%; left: 20%; }
-.cp-fb-pet--r0 { top: 20%; right: 8%; }
-.cp-fb-pet--r1 { bottom: 26%; right: 30%; }
-.cp-fb-pet--r2 { bottom: 8%; right: 4%; }
+/* Cuadros decorativos fijos: blancos con acento rojo desplazado. */
+.cp-fb-sq { position: absolute; width: 74px; height: 74px; border-radius: 4px; background: #fff; box-shadow: 9px 9px 0 var(--purina); }
+.cp-fb-sq--l0 { top: 8%; left: 17%; }
+.cp-fb-sq--l1 { top: 33%; left: 5%; }
+.cp-fb-sq--l2 { bottom: 12%; left: 14%; }
+.cp-fb-sq--r0 { top: 12%; right: 15%; }
+.cp-fb-sq--r1 { bottom: 32%; right: 5%; }
+.cp-fb-sq--r2 { bottom: 9%; right: 15%; }
 
 /* ===== Banner Full Image + Box Content (card frosted) ===== */
 .cp-fib { position: relative; }
