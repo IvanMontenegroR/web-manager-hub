@@ -57,21 +57,6 @@ export const COMPONENTS = [
     },
   },
   {
-    key: 'brand_logos',
-    name: 'Carrusel de logos de marca',
-    category: 'Marcas',
-    help: 'Lista de logos de marca como carrusel (home).',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'title_size', label: 'Tamano del titulo', type: 'select', options: ['Small', 'Medium', 'Large'] },
-      { key: 'logos', label: 'Logos', type: 'list', item: [
-        { key: 'name', label: 'Marca', type: 'text' },
-        { key: 'image', label: 'Logo (imagen)', type: 'image' },
-        { key: 'url', label: 'Link', type: 'url' },
-      ] },
-    ],
-  },
-  {
     key: 'card_grid',
     name: 'Card grid',
     category: 'Contenido',

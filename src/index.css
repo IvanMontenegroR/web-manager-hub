@@ -1431,10 +1431,6 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-banner-box.center { left: 50%; transform: translate(-50%, -50%); text-align: center; }
 .cp-banner-box.right { right: 40px; left: auto; }
 
-.cp-logos { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-.cp-logo { width: 110px; }
-.cp-logo .cp-img { border-radius: 8px; border: 1px solid #eceff3; }
-.cp-logo-name { font-size: 11px; color: #868e99; text-align: center; margin-top: 4px; }
 
 .cp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
 .cp-card { background: #fff; border: 1px solid #eceff3; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(23,31,43,0.06); }

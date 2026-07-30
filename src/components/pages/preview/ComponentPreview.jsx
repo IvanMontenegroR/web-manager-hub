@@ -98,21 +98,6 @@ const RENDERERS = {
     )
   },
 
-  brand_logos: (c) => {
-    const size = /large/i.test(c.title_size) ? 26 : /small/i.test(c.title_size) ? 15 : 20
-    const logos = list(c.logos)
-    return (
-      <div className="cp-block cp-center">
-        <div className="cp-h2" style={{ fontSize: size }}>{T(c.title, 'Nuestras marcas')}</div>
-        <div className="cp-logos">
-          {(logos.length ? logos : [{}, {}, {}, {}, {}]).map((l, i) => (
-            <div key={i} className="cp-logo"><Img src={l.image} h={64} /><div className="cp-logo-name">{l.name || ''}</div></div>
-          ))}
-        </div>
-      </div>
-    )
-  },
-
   card_grid: (c) => {
     const cards = list(c.cards)
     const icons = /icons?/i.test(c.type)
