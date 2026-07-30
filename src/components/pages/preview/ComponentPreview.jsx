@@ -389,31 +389,44 @@ const RENDERERS = {
     </div>
   ),
 
-  // Listado de productos (view-products-list): barra de filtros por tipo + grilla de
-  // card-products. Sin productos cargados, muestra placeholders; sin imagen, la card
-  // usa el placeholder del componente Img.
+  // Listado de productos "Más populares": tabs de filtro (activo en rojo) + flechas,
+  // carrusel de card-products (fondo gris, imagen contenida, titulo debajo). Card promo
+  // (Pet ID) opcional en rojo + boton "Ver todos". Sin imagen usa placeholder.
   product_list: (c) => {
-    const filters = String(c.filters && c.filters.trim() ? c.filters : 'Todos los productos, Húmedo, Latas, Seco, Snacks, Sobres')
+    const filters = String(c.filters && c.filters.trim() ? c.filters : 'Más populares, Seco, Húmedo, Snacks')
       .split(',').map((s) => s.trim()).filter(Boolean)
     const products = list(c.products)
-    const arr = products.length ? products : [{}, {}, {}, {}, {}]
+    const hasPromo = c.promo_title && c.promo_title.trim()
+    const arr = products.length ? products : [{}, {}, {}]
+    const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
-      <div className="cp-block">
-        {c.title && <div className="cp-h2">{c.title}</div>}
-        <div className="cp-plist-filters">
-          {filters.map((f, i) => (
-            <span key={i} className={`cp-plist-filter${i === 0 ? ' active' : ''}`}>{f}</span>
-          ))}
+      <div className="cp-plist">
+        <div className="cp-plist-head">
+          <div className="cp-plist-tabs">
+            {filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
+          </div>
+          <div className="cp-plist-arrows">
+            <span className="cp-plist-arrow disabled">‹</span>
+            <span className="cp-plist-arrow">›</span>
+          </div>
         </div>
-        <div className="cp-plist">
+        <div className="cp-plist-row">
+          {hasPromo && (
+            <div className="cp-plist-promo">
+              <div className="cp-plist-promo-t">{c.promo_title}</div>
+              <p className="cp-plist-promo-d">{T(c.promo_text, 'Crea tu Pet ID y obtén sugerencias de alimentos y cuidados personalizados para tu mascota.')}</p>
+              <span className="cp-plist-promo-arrow">→</span>
+            </div>
+          )}
           {arr.map((p, i) => (
             <div key={i} className="cp-plist-card">
               {p.tag && <span className="cp-plist-tag" style={{ '--tag-bg': p.tag_color || '#895731' }}>{p.tag}</span>}
-              <Img src={p.image} h={170} className="cp-plist-img" />
+              <div className="cp-plist-imgwrap"><Img src={p.image} h={190} className="cp-plist-img" /></div>
               <div className="cp-plist-title">{T(p.title, 'Nombre del producto')}</div>
             </div>
           ))}
         </div>
+        {moreText && <div className="cp-plist-more"><span className="cp-plist-more-btn">{moreText}</span></div>}
       </div>
     )
   },
