@@ -1581,6 +1581,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-tut-stepimg { margin: 12px 0; } .cp-tut-stepimg .cp-img { border-radius: 12px; background: transparent; object-fit: contain; }
 .cp-tut-stepd { font-size: 13px; opacity: .9; line-height: 1.4; }
 
+/* ===== Listado de productos con filtros (view-products-list) ===== */
+.cp-plist-filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 20px; }
+.cp-plist-filter { font-size: 13px; color: #454545; padding: 8px 17px; border: 1px solid #d8d8d8; border-radius: 9999px; background: #fff; white-space: nowrap; }
+.cp-plist-filter.active { background: var(--purina); color: #fff; border-color: var(--purina); font-weight: 600; }
+.cp-plist { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.cp-plist-card { position: relative; background: #fff; border: 1px solid #efefef; border-radius: 20px; padding: 14px 14px 18px; text-align: center; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
+.cp-plist-tag { position: absolute; top: 12px; left: 12px; z-index: 1; font-size: 11px; font-weight: 700; color: #fff; background: var(--tag-bg, #895731); padding: 3px 10px; border-radius: 9999px; }
+.cp-plist-img.cp-img { border-radius: 12px; object-fit: contain; background: transparent; }
+.cp-plist-title { font-size: 15px; font-weight: 700; margin-top: 12px; line-height: 1.3; color: #2b2b2b; }
+
 @media (max-width: 1100px) { .pb-main { grid-template-columns: 160px 1fr; } .pb-editor { grid-column: 1 / -1; position: static; max-height: none; } }
 
 /* Banner — Main Hero. Modela el componente real de Drupal:

@@ -223,6 +223,24 @@ export const COMPONENTS = [
     },
   },
   {
+    key: 'product_list',
+    name: 'Listado de productos (con filtros)',
+    category: 'Marcas',
+    help: 'Carrusel de productos (card-products) con barra de filtros por tipo de alimento. En el CMS los productos los popula la vista; acá cargás ejemplos o dejás placeholders.',
+    fields: [
+      { key: 'title', label: 'Titulo (opcional)', type: 'text' },
+      { key: 'filters', label: 'Filtros (separados por coma)', type: 'text', placeholder: 'Todos los productos, Húmedo, Latas, Seco, Snacks, Sobres' },
+      { key: 'products', label: 'Productos', type: 'list', item: [
+        { key: 'image', label: 'Imagen del producto', type: 'image' },
+        { key: 'title', label: 'Nombre', type: 'text' },
+        { key: 'tag', label: 'Tag (opcional)', type: 'text' },
+        { key: 'tag_color', label: 'Color del tag (hex)', type: 'text', placeholder: '#895731' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ label: 'Imagen de producto', ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG / PNG' }],
+  },
+  {
     key: 'banner_ia',
     name: 'Banner IA',
     category: 'Hero',

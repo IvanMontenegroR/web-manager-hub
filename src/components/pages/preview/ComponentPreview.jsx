@@ -388,6 +388,35 @@ const RENDERERS = {
       {c.alt && <div className="cp-sub cp-center">{c.alt}</div>}
     </div>
   ),
+
+  // Listado de productos (view-products-list): barra de filtros por tipo + grilla de
+  // card-products. Sin productos cargados, muestra placeholders; sin imagen, la card
+  // usa el placeholder del componente Img.
+  product_list: (c) => {
+    const filters = String(c.filters && c.filters.trim() ? c.filters : 'Todos los productos, Húmedo, Latas, Seco, Snacks, Sobres')
+      .split(',').map((s) => s.trim()).filter(Boolean)
+    const products = list(c.products)
+    const arr = products.length ? products : [{}, {}, {}, {}, {}]
+    return (
+      <div className="cp-block">
+        {c.title && <div className="cp-h2">{c.title}</div>}
+        <div className="cp-plist-filters">
+          {filters.map((f, i) => (
+            <span key={i} className={`cp-plist-filter${i === 0 ? ' active' : ''}`}>{f}</span>
+          ))}
+        </div>
+        <div className="cp-plist">
+          {arr.map((p, i) => (
+            <div key={i} className="cp-plist-card">
+              {p.tag && <span className="cp-plist-tag" style={{ '--tag-bg': p.tag_color || '#895731' }}>{p.tag}</span>}
+              <Img src={p.image} h={170} className="cp-plist-img" />
+              <div className="cp-plist-title">{T(p.title, 'Nombre del producto')}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
 }
 
 export default function ComponentPreview({ componentKey, content }) {
