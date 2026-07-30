@@ -24,6 +24,7 @@ export function computeProjection(tasks, todayISO) {
       const base = {
         projStart: t.planned_start,
         projEnd: t.planned_end,
+        effPlanEnd: t.planned_end,
         effEnd: t.actual_end || t.planned_end,
         pushed: false,
         pushedBy: null,
@@ -72,6 +73,11 @@ export function computeProjection(tasks, todayISO) {
     }
     if (!pushed && !pulled) pushedBy = null
 
+    // Fin del PLAN EFECTIVO: el baseline (planned_days) corrido al arranque efectivo
+    // (projStart). Es la fecha contra la que se mide el atraso PROPIO del partner
+    // (SLA desde que realmente pudo/empezo a trabajar), no el planned_end original.
+    const effPlanEnd = plannedEnd(projStart, t.planned_days, t.holidaysSet)
+
     // Fin proyectado y fin efectivo (para empujar a las siguientes).
     let projEnd
     let effEnd
@@ -79,12 +85,12 @@ export function computeProjection(tasks, todayISO) {
       projEnd = t.actual_end
       effEnd = t.actual_end
     } else {
-      projEnd = plannedEnd(projStart, t.planned_days, t.holidaysSet)
+      projEnd = effPlanEnd
       // Una tarea abierta no puede terminar antes de hoy: si esta vencida, empuja desde hoy.
       effEnd = daysBetween(projEnd, todayISO) > 0 ? todayISO : projEnd
     }
 
-    const res = { projStart, projEnd, effEnd, pushed, pushedBy, pulled, firm: !!t.actual_end }
+    const res = { projStart, projEnd, effPlanEnd, effEnd, pushed, pushedBy, pulled, firm: !!t.actual_end }
     memo.set(t.id, res)
     stack.delete(t.id)
     return res

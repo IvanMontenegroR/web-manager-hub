@@ -66,6 +66,7 @@ export default function Gantt({
       // todo lo que se dibuja y no se corte.
       if (t.renderStart) dates.push(t.renderStart)
       if (t.renderEnd) dates.push(t.renderEnd)
+      if (t.effPlanEnd) dates.push(t.effPlanEnd)
       if (t.delayEnd) dates.push(t.delayEnd)
     }
     // Los lanzamientos por mercado deben quedar siempre dentro del rango visible.
@@ -315,27 +316,30 @@ export default function Gantt({
                   const color = partnerColor(partners, t.partner_id) // punto del partner en la etiqueta
                   const barColor = statusColor(t.status) // color de la barra segun estado
                   const isConflict = conflictIds.has(t.id)
+                  // Fin del plan EFECTIVO (baseline corrido al arranque efectivo). El atraso
+                  // y el adelanto se miden contra este, no contra el planned_end original.
+                  const effEndIso = t.effPlanEnd || t.planned_end
                   // Barra REAL/proyectada (solida): de projStart al fin real. Si hay atraso
-                  // propio, la porcion que pasa el fin del plan va rayada en rojo (bar-delay),
-                  // asi que la parte solida corta en planned_end.
-                  const barEndIso = t.isDelayed ? t.planned_end : t.renderEnd
+                  // propio, la porcion que pasa el fin del plan efectivo va rayada en rojo
+                  // (bar-delay), asi que la parte solida corta en ese fin efectivo.
+                  const barEndIso = t.isDelayed ? effEndIso : t.renderEnd
                   const startPx = idxOf(t.projStart) * dayW
                   const endPx = (idxOf(barEndIso) + 1) * dayW
                   const clipStart = Math.max(startPx, 0)
                   const barVisible = endPx > 0
                   const left = clipStart + 2
                   const width = Math.max(endPx - clipStart - 4, 12)
-                  // Extension de retraso: del dia siguiente al fin plan hasta delayEnd (fin real
-                  // o hoy). El numero (+Nd) es en dias habiles.
-                  const dStartPx = (idxOf(t.planned_end) + 1) * dayW
+                  // Extension de retraso: del dia siguiente al fin plan efectivo hasta delayEnd
+                  // (fin real o hoy). El numero (+Nd) es en dias habiles.
+                  const dStartPx = (idxOf(effEndIso) + 1) * dayW
                   const dEndPx = t.delayEnd ? (idxOf(t.delayEnd) + 1) * dayW : dStartPx
                   const dClip = Math.max(dStartPx, 0)
                   const delayVisible = t.isDelayed && dEndPx > 0
                   const delayLeft = dClip
                   const delayWidth = Math.max(dEndPx - dClip - 2, 8)
-                  // Adelanto (espejo verde): del dia siguiente al fin real hasta el fin plan.
+                  // Adelanto (espejo verde): del dia siguiente al fin real hasta el fin plan efectivo.
                   const aStartPx = t.isAhead ? (idxOf(t.aheadStart) + 1) * dayW : 0
-                  const aEndPx = t.isAhead ? (idxOf(t.planned_end) + 1) * dayW : 0
+                  const aEndPx = t.isAhead ? (idxOf(effEndIso) + 1) * dayW : 0
                   const aClip = Math.max(aStartPx, 0)
                   const aheadVisible = t.isAhead && aEndPx > 0
                   const aheadLeft = aClip

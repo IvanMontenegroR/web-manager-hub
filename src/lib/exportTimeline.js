@@ -400,10 +400,11 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       const wknd = isWeekendISO(iso)
       const isHoliday = !wknd && t.holidaysSet && t.holidaysSet.has(iso)
       const nonWorking = wknd || (t.holidaysSet && t.holidaysSet.has(iso))
+      const effEnd = t.effPlanEnd || t.planned_end
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
-      const isOverrun = t.isDelayed && t.planned_end && t.delayEnd && iso > t.planned_end && iso <= t.delayEnd
-      // Adelanto: dias ahorrados (del fin real al fin plan) pintados en verde.
-      const isSaved = t.isAhead && t.aheadStart && t.planned_end && iso > t.aheadStart && iso <= t.planned_end
+      const isOverrun = t.isDelayed && effEnd && t.delayEnd && iso > effEnd && iso <= t.delayEnd
+      // Adelanto: dias ahorrados (del fin real al fin plan efectivo) pintados en verde.
+      const isSaved = t.isAhead && t.aheadStart && effEnd && iso > t.aheadStart && iso <= effEnd
       if (nonWorking) cell.fill = NONWORK_FILL
       else if (isOverrun) cell.fill = OVERRUN_FILL
       else if (isSaved) cell.fill = AHEAD_FILL
@@ -425,7 +426,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     if (t.isDelayed && t.delayEnd) {
       delaysSeen.push({
         name: t.action_name || 'Tarea',
-        from: t.planned_end,
+        from: t.effPlanEnd || t.planned_end,
         to: t.delayEnd,
         days: t.delayDays,
         reason: t.delay_reason || '',

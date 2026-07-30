@@ -36,6 +36,40 @@ export function withDerived(task, holidays, today) {
   }
 }
 
+// Recalcula el atraso/adelanto de una tarea contra un fin de plan EFECTIVO
+// (el baseline corrido al arranque efectivo = projStart), no el planned_end original.
+// Asi el partner solo sale en rojo si se pasa de sus dias habiles contados desde que
+// realmente pudo/empezo a trabajar; el corrimiento heredado (predecesora demorada) NO
+// lo pinta en rojo. El baseline planned_end se conserva intacto (para el fantasma).
+// Muta y devuelve la task enriquecida.
+export function applyEffectiveDelay(t, effPlanEnd, today) {
+  const pe = effPlanEnd || t.planned_end
+  const hol = t.holidaysSet
+  const started = !!t.actual_start || !!t.actual_end || t.status === 'En curso'
+  const openOverdue = started && !t.actual_end && !!today && pe && daysBetween(pe, today) > 0
+  const delayRef = t.actual_end || (openOverdue ? today : null)
+  let delayDays = 0
+  let delayEnd = null
+  if (delayRef && pe && daysBetween(pe, delayRef) > 0) {
+    delayDays = businessDaysBetween(pe, delayRef, hol)
+    delayEnd = delayRef
+  }
+  let aheadDays = 0
+  let aheadStart = null
+  if (t.actual_end && pe && daysBetween(t.actual_end, pe) > 0) {
+    aheadDays = businessDaysBetween(t.actual_end, pe, hol)
+    aheadStart = t.actual_end
+  }
+  t.effPlanEnd = pe
+  t.delayDays = delayDays
+  t.isDelayed = delayDays > 0
+  t.delayEnd = delayEnd
+  t.aheadDays = aheadDays
+  t.isAhead = aheadDays > 0
+  t.aheadStart = aheadStart
+  return t
+}
+
 function maxISO(a, b) {
   return daysBetween(a, b) >= 0 ? b : a
 }
@@ -104,6 +138,10 @@ export function buildDailyControl(enriched, today) {
   for (const t of enriched) {
     if (!t.planned_start || !t.planned_end) continue
     const hol = t.holidaysSet
+    // Fecha comprometida EFECTIVA: el plan corrido al arranque efectivo (projStart).
+    // Asi una tarea que arranco tarde por una predecesora se clasifica contra su SLA
+    // real, no contra el planned_end original.
+    const pe = t.effPlanEnd || t.planned_end
 
     // Cerrada: bucket por la fecha REAL de cierre.
     if (t.actual_end) {
@@ -113,22 +151,22 @@ export function buildDailyControl(enriched, today) {
       continue
     }
 
-    // Abierta: SIEMPRE contra la fecha comprometida (planned_end), nunca el forecast.
-    const diff = daysBetween(today, t.planned_end) // >0 futuro, 0 hoy, <0 ya paso
+    // Abierta: SIEMPRE contra la fecha comprometida efectiva (pe), nunca el forecast.
+    const diff = daysBetween(today, pe) // >0 futuro, 0 hoy, <0 ya paso
     if (diff < 0) {
-      // Vencio el plan. Solo cuenta como atraso REAL si la tarea arranco (t.isDelayed).
+      // Vencio el plan efectivo. Solo cuenta como atraso REAL si arranco (t.isDelayed).
       // Si no arranco, su demora es heredada (la corrio una predecesora): no se muestra.
-      if (t.isDelayed) overdueOpen.push({ ...t, overDays: businessDaysBetween(t.planned_end, today, hol) })
+      if (t.isDelayed) overdueOpen.push({ ...t, overDays: businessDaysBetween(pe, today, hol) })
     } else if (diff === 0) {
       dueToday.push({ ...t, started: !!t.actual_start || t.status === 'En curso' })
     } else {
-      const aheadDays = businessDaysBetween(today, t.planned_end, hol)
+      const aheadDays = businessDaysBetween(today, pe, hol)
       if (aheadDays >= 1 && aheadDays <= 3) upcoming.push({ ...t, aheadDays })
     }
   }
 
   overdueOpen.sort((a, b) => b.overDays - a.overDays)
-  upcoming.sort((a, b) => a.aheadDays - b.aheadDays || daysBetween(b.planned_end, a.planned_end))
+  upcoming.sort((a, b) => a.aheadDays - b.aheadDays || daysBetween(b.effPlanEnd || b.planned_end, a.effPlanEnd || a.planned_end))
   recentlyDone.sort((a, b) => a.backDays - b.backDays)
   return { overdueOpen, dueToday, upcoming, recentlyDone }
 }
