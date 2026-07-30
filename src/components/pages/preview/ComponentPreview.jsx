@@ -7,9 +7,20 @@ import { ImageIcon, Dog, Cat, PawPrint } from 'lucide-react'
 // Por defecto alto FIJO (h). Si se pasa `aspect` (ej. '1/1', '4/3'), el placeholder y
 // la imagen respetan esa relacion de aspecto (el placeholder "tiene el tamaño" real
 // del componente) usando aspect-ratio con ancho 100%.
+// ¿La URL es un video? Los banners aceptan MP4/webm, se renderizan con <video>.
+const isVideo = (u) => /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(String(u || ''))
+
+// Imagen o video segun la URL (mismo className/estilo). Video en loop mudo.
+function MediaEl({ src, className = '', style }) {
+  if (isVideo(src)) {
+    return <video className={className} src={src} style={style} muted autoPlay loop playsInline crossOrigin="anonymous" />
+  }
+  return <img className={className} src={src} alt="" crossOrigin="anonymous" style={style} />
+}
+
 function Img({ src, h = 160, aspect, dim, className = '' }) {
   const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' } : { height: h }
-  if (src) return <img className={`cp-img ${className}`} src={src} alt="" crossOrigin="anonymous" style={style} />
+  if (src) return <MediaEl className={`cp-img ${className}`} src={src} style={style} />
   return (
     <div className={`cp-img cp-img-ph ${className}`} style={style}>
       <ImageIcon size={22} />
@@ -84,7 +95,7 @@ const RENDERERS = {
       return (
         <div className={`cp-hero${secondary ? ' cp-hero--wide' : ''}`}>
           {c.image
-            ? <img className="cp-hero-img" src={c.image} alt="" crossOrigin="anonymous" />
+            ? <MediaEl className="cp-hero-img" src={c.image} />
             : <div className="cp-hero-img cp-hero-ph"><span className="cp-dim-badge">{dim}</span></div>}
           <div className="cp-hero-scrim" />
           <div className={`cp-hero-content h-${h} v-${v}`}>
@@ -102,7 +113,7 @@ const RENDERERS = {
       return (
         <div className="cp-fib">
           {c.image
-            ? <img className="cp-fib-img cp-img" src={c.image} alt="" crossOrigin="anonymous" />
+            ? <MediaEl className="cp-fib-img cp-img" src={c.image} />
             : <div className="cp-fib-img cp-img cp-img-ph"><ImageIcon size={22} /><span className="cp-ph-dim">{dim}</span></div>}
           <div className="cp-fib-card">
             <div className="cp-fib-title">{T(c.title, 'Full Image + Box Content')}</div>
@@ -237,7 +248,7 @@ const RENDERERS = {
     ]
     return (
       <div className="cp-svc">
-        {c.background ? <img className="cp-svc-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-svc-bg cp-svc-bg-ph"><span className="cp-dim-badge">Fondo 2160×1212px</span></div>}
+        {c.background ? <MediaEl className="cp-svc-bg" src={c.background} /> : <div className="cp-svc-bg cp-svc-bg-ph"><span className="cp-dim-badge">Fondo 2160×1212px</span></div>}
         <div className="cp-svc-scrim" />
         <div className="cp-svc-head">
           <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
@@ -331,7 +342,7 @@ const RENDERERS = {
         <div className="cp-artc-row">
           {arr.map((a, i) => (
             <div key={i} className={`cp-artc-card${i === 0 ? ' feat' : ''}`}>
-              {a.image ? <img className="cp-artc-img" src={a.image} alt="" crossOrigin="anonymous" /> : <div className="cp-artc-img cp-artc-ph"><span className="cp-dim-badge">1216×912px</span></div>}
+              {a.image ? <MediaEl className="cp-artc-img" src={a.image} /> : <div className="cp-artc-img cp-artc-ph"><span className="cp-dim-badge">1216×912px</span></div>}
               <div className="cp-artc-scrim" />
               {a.category && <span className="cp-artc-cat" style={{ background: a.category_color || '#582d84' }}>{a.category}</span>}
               <div className="cp-artc-ttl">{T(a.title, 'Título del artículo')}</div>
@@ -374,7 +385,7 @@ const RENDERERS = {
       <div className="cp-testi">
         <div className="cp-testi-media">
           {it.image
-            ? <img className="cp-testi-img" src={it.image} alt="" crossOrigin="anonymous" />
+            ? <MediaEl className="cp-testi-img" src={it.image} />
             : <div className="cp-testi-img cp-testi-ph"><ImageIcon size={22} /><span className="cp-ph-dim">900×840px</span></div>}
           {it.image_title && <div className="cp-testi-overlay">{it.image_title}</div>}
           <span className="cp-testi-dot" />
@@ -441,7 +452,7 @@ const RENDERERS = {
   // Banner IA: forma de pastilla (stadium) con imagen de fondo + titulo + buscador.
   banner_ia: (c) => (
     <div className="cp-banneria">
-      {c.image ? <img className="cp-banneria-img" src={c.image} alt="" crossOrigin="anonymous" /> : <div className="cp-banneria-img cp-banneria-ph"><span className="cp-dim-badge">1552×1014px</span></div>}
+      {c.image ? <MediaEl className="cp-banneria-img" src={c.image} /> : <div className="cp-banneria-img cp-banneria-ph"><span className="cp-dim-badge">1552×1014px</span></div>}
       <div className="cp-banneria-scrim" />
       <div className="cp-banneria-inner">
         <div className="cp-banneria-title">{T(c.title, '¿Estás pensando en adoptar una mascota?')}</div>
@@ -457,7 +468,7 @@ const RENDERERS = {
     return (
       <div className="cp-section">
         {c.background
-          ? <img className="cp-section-bg" src={c.background} alt="" crossOrigin="anonymous" />
+          ? <MediaEl className="cp-section-bg" src={c.background} />
           : <span className="cp-dim-badge">Fondo 2784×1994px</span>}
         <div className="cp-section-inner">
           <div className="cp-section-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
@@ -524,7 +535,7 @@ const RENDERERS = {
     const step = steps[0] || { day: 'Día 1 - 3', description: 'Ofrece 1/4 de producto junto a su comida regular.' }
     return (
       <div className="cp-tut">
-        {c.background ? <img className="cp-tut-bg" src={c.background} alt="" crossOrigin="anonymous" /> : <div className="cp-tut-bg cp-tut-ph"><span className="cp-dim-badge">Fondo 2784×1772px</span></div>}
+        {c.background ? <MediaEl className="cp-tut-bg" src={c.background} /> : <div className="cp-tut-bg cp-tut-ph"><span className="cp-dim-badge">Fondo 2784×1772px</span></div>}
         <div className="cp-tut-scrim" />
         <div className="cp-tut-inner">
           <div className="cp-tut-left">

@@ -1402,10 +1402,13 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* content form */
 .cf .field { margin-bottom: 12px; }
 .cf label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 3px; }
-.cf-img { display: flex; gap: 8px; align-items: center; }
-.cf-img .control { flex: 1; }
-.cf-img-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex: none; }
-.cf-img-thumb.ph { display: grid; place-items: center; color: var(--ink-3); background: var(--surface-2); }
+.cf-img { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+.cf-img-row { display: flex; gap: 8px; align-items: center; }
+.cf-img-row .control { flex: 1; }
+.cf-upload { flex: none; white-space: nowrap; }
+.cf-img-err { font-size: 11.5px; color: var(--danger, #cc3d3d); }
+.cf-img-thumb { width: 100%; max-width: 220px; height: 88px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+.cf-img-thumb.ph { width: 40px; height: 40px; display: grid; place-items: center; color: var(--ink-3); background: var(--surface-2); }
 .cf-list { display: flex; flex-direction: column; gap: 8px; }
 .cf-list-item { border: 1px solid var(--border); border-radius: 8px; padding: 9px; background: var(--surface-2); }
 .cf-list-head { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; margin-bottom: 6px; }

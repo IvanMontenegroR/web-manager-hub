@@ -1,5 +1,49 @@
-import { Plus, X, Image as ImageIcon, Ruler } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Plus, X, Image as ImageIcon, Ruler, Upload } from 'lucide-react'
 import { getSpecs } from '../../data/components'
+import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
+
+// Campo de imagen/video: se puede pegar una URL o subir un archivo (se sube a
+// Supabase Storage y se guarda la URL publica). Preview con <video> si es video.
+function ImageField({ value, onChange }) {
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(null)
+  const inputRef = useRef(null)
+
+  async function onFile(e) {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    setBusy(true); setErr(null)
+    try {
+      const url = await uploadMedia(file)
+      onChange(url)
+    } catch (e2) {
+      setErr(e2.message || 'No se pudo subir el archivo.')
+    } finally {
+      setBusy(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  const vid = isVideoUrl(value)
+  return (
+    <div className="cf-img">
+      <div className="cf-img-row">
+        <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="URL o subí un archivo…" />
+        <button type="button" className="btn btn-sm cf-upload" disabled={busy} onClick={() => inputRef.current && inputRef.current.click()}>
+          <Upload size={13} /> {busy ? 'Subiendo…' : 'Subir'}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={onFile} />
+      </div>
+      {err && <div className="cf-img-err">{err}</div>}
+      {value
+        ? (vid
+          ? <video className="cf-img-thumb" src={value} muted loop playsInline />
+          : <img className="cf-img-thumb" src={value} alt="" />)
+        : <div className="cf-img-thumb ph"><ImageIcon size={14} /></div>}
+    </div>
+  )
+}
 
 // Formulario de contenido de un componente: renderiza un input por campo del
 // catalogo (incluye campos 'list' repetibles). Es controlado: draft + onChange(key,val).
@@ -16,12 +60,7 @@ function Field({ f, value, onChange }) {
     )
   }
   if (f.type === 'image') {
-    return (
-      <div className="cf-img">
-        <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="URL de la imagen (https://...)" />
-        {value ? <img className="cf-img-thumb" src={value} alt="" /> : <div className="cf-img-thumb ph"><ImageIcon size={14} /></div>}
-      </div>
-    )
+    return <ImageField value={value} onChange={onChange} />
   }
   // text / url
   return <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.type === 'url' ? 'https://...' : f.placeholder} />
