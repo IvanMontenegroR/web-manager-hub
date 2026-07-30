@@ -13,9 +13,9 @@ const isVideo = (u) => /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(String(u || ''))
 // Imagen o video segun la URL (mismo className/estilo). Video en loop mudo.
 function MediaEl({ src, className = '', style }) {
   if (isVideo(src)) {
-    return <video className={className} src={src} style={style} muted autoPlay loop playsInline crossOrigin="anonymous" />
+    return <video className={className} src={src} style={style} muted autoPlay loop playsInline />
   }
-  return <img className={className} src={src} alt="" crossOrigin="anonymous" style={style} />
+  return <img className={className} src={src} alt="" style={style} />
 }
 
 function Img({ src, h = 160, aspect, dim, className = '' }) {
@@ -263,7 +263,7 @@ const RENDERERS = {
             return (
               <div key={i} className={`cp-svc-card${hl ? ' hl' : ''}`}>
                 {!hl && (card.icon
-                  ? <img className="cp-svc-ico-img" src={card.icon} alt="" crossOrigin="anonymous" />
+                  ? <img className="cp-svc-ico-img" src={card.icon} alt="" />
                   : <span className="cp-svc-ico"><PawPrint size={22} /></span>)}
                 <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
                 {card.text && <div className="cp-svc-card-s">{card.text}</div>}
@@ -416,7 +416,7 @@ const RENDERERS = {
           {arr.map((o, i) => (
             <div key={i} className="cp-species-opt">
               {o.image
-                ? <img className="cp-species-av" src={o.image} alt="" crossOrigin="anonymous" />
+                ? <img className="cp-species-av" src={o.image} alt="" />
                 : <div className="cp-species-av cp-species-av-ph"><ImageIcon size={16} /></div>}
               <span className="cp-species-label">{T(o.label, 'Mascota')}</span>
             </div>
@@ -476,7 +476,7 @@ const RENDERERS = {
           <div className="cp-section-cards">
             {arr.map((card, i) => (
               <div key={i} className="cp-section-card">
-                {card.icon ? <img className="cp-section-ico" src={card.icon} alt="" crossOrigin="anonymous" /> : <div className="cp-section-ico cp-section-ico-ph" />}
+                {card.icon ? <img className="cp-section-ico" src={card.icon} alt="" /> : <div className="cp-section-ico cp-section-ico-ph" />}
                 <div className="cp-section-card-t">{T(card.title, 'Título')}</div>
                 {card.text && <div className="cp-section-card-s">{card.text}</div>}
               </div>
@@ -497,7 +497,7 @@ const RENDERERS = {
         <div className="cp-cats">
           {arr.map((it, i) => (
             <div key={i} className="cp-cat">
-              {it.image ? <img className="cp-cat-img" src={it.image} alt="" crossOrigin="anonymous" /> : <div className="cp-cat-img cp-cat-ph" />}
+              {it.image ? <img className="cp-cat-img" src={it.image} alt="" /> : <div className="cp-cat-img cp-cat-ph" />}
               <div className="cp-cat-scrim" />
               <span className="cp-cat-label">{T(it.label, 'Categoría')}</span>
               <span className="cp-cat-arrow">→</span>
