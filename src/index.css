@@ -1665,7 +1665,11 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-plist-arrows { display: flex; gap: 12px; flex: none; }
 .cp-plist-arrow { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #2b2b2b; display: grid; place-items: center; font-size: 22px; line-height: 1; color: #2b2b2b; }
 .cp-plist-arrow.disabled { border-color: #d8d8d8; color: #c2c2c2; }
-.cp-plist-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
+/* Carrusel: fila horizontal (nowrap) de cards anchas que sangra a la derecha.
+   overflow hidden + margen que llega al borde del bloque = las cards se cortan
+   en el borde (edge bleed). El bloque se extiende al borde derecho en preview. */
+.cp-plist-row { display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch; overflow: hidden; margin-right: -30px; }
+.cp-plist-card, .cp-plist-promo { flex: 0 0 320px; }
 .cp-plist-promo { position: relative; background: var(--purina); color: #fff; border-radius: 20px; padding: 26px 24px; display: flex; flex-direction: column; }
 .cp-plist-promo-t { font-size: 22px; font-weight: 400; }
 .cp-plist-promo-d { font-size: 15px; line-height: 1.5; margin-top: 18px; }
@@ -1742,6 +1746,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
 /* Carrusel de servicios: FULL BLEED (0 del borde del container). */
 .pb-canvas.preview .pb-block--services_carousel { margin-inline: -60px; }
+/* Listado de productos: la fila de cards sangra al borde derecho (carrusel). */
+.pb-canvas.preview .pb-block--product_list { margin-right: -60px; }
 /* Carrusel de testimonios: full bleed con fondo rosado; el contenido vuelve al gutter. */
 .pb-canvas.preview .pb-block--testimonials { margin-inline: -60px; }
 .pb-canvas.preview .pb-block--testimonials .cp-testi { padding-inline: 60px; }
