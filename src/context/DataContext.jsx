@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAll } from '../lib/db'
-import { detectOverlaps, detectDelays, withDerived, buildDailyControl } from '../lib/analysis'
+import { detectOverlaps, detectDelays, withDerived, buildDailyControl, applyEffectiveDelay } from '../lib/analysis'
 import { computeProjection } from '../lib/projection'
 import { taskCountry } from '../lib/countries'
 import { toISO } from '../lib/dates'
@@ -87,6 +87,9 @@ export function DataProvider({ children }) {
       t.renderEnd = started ? p.effEnd : p.projEnd
       // Guard: nunca dibujar una barra invertida (fin antes que inicio) por datos malos.
       if (t.renderEnd && t.renderStart && t.renderEnd < t.renderStart) t.renderEnd = t.renderStart
+      // Atraso PROPIO medido contra el plan EFECTIVO (baseline corrido al projStart),
+      // no contra el planned_end original. El corrimiento heredado no pinta en rojo.
+      applyEffectiveDelay(t, p.effPlanEnd, today)
     }
 
     const active = enriched.filter((t) => !archivedIds.has(t.project_id))
