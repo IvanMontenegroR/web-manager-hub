@@ -572,7 +572,7 @@ const RENDERERS = {
       .split(',').map((s) => s.trim()).filter(Boolean)
     const products = list(c.products)
     const hasPromo = c.promo_title && c.promo_title.trim()
-    const arr = products.length ? products : [{}, {}, {}, {}, {}, {}]
+    const arr = products.length ? products : [{}, {}, {}, {}, {}]
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
       <div className="cp-plist">
