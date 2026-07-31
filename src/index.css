@@ -1677,7 +1677,7 @@ textarea.control { resize: vertical; min-height: 64px; }
    overflow hidden + margen que llega al borde del bloque = las cards se cortan
    en el borde (edge bleed). El bloque se extiende al borde derecho en preview. */
 .cp-plist-row { display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch; overflow: hidden; margin-right: -30px; }
-.cp-plist-card, .cp-plist-promo { flex: 0 0 320px; }
+.cp-plist-card, .cp-plist-promo { flex: 0 0 300px; }
 .cp-plist-promo { position: relative; background: var(--purina); color: #fff; border-radius: 20px; padding: 26px 24px; display: flex; flex-direction: column; }
 .cp-plist-promo-t { font-size: 22px; font-weight: 400; }
 .cp-plist-promo-d { font-size: 15px; line-height: 1.5; margin-top: 18px; }
