@@ -1521,8 +1521,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-brands-sub { font-size: 15px; color: #545c67; margin-top: 6px; }
 
 /* ===== Carrusel de marcas (Marcas Purina®) ===== */
-.cp-brands-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.cp-brandc { border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
+/* Carrusel de marcas: fila nowrap de cards anchas que sangra al borde derecho. */
+.cp-brands-row { display: flex; flex-wrap: nowrap; gap: 22px; overflow: hidden; margin-right: -30px; }
+.cp-brandc { flex: 0 0 360px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(23,31,43,0.06); }
 .cp-brandc-media { position: relative; }
 .cp-brandc-img.cp-img { border-radius: 0; object-fit: cover; }
 .cp-brandc-pets { position: absolute; top: 14px; right: 14px; display: flex; gap: 8px; }
@@ -1532,9 +1533,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-brandc-desc { font-size: 13.5px; color: #454545; line-height: 1.5; margin-top: 8px; }
 
 /* ===== Carrusel de articulos (Nuestro Blog) ===== */
-.cp-artc-row { display: flex; gap: 20px; align-items: flex-start; }
-.cp-artc-card { position: relative; flex: 1; height: 260px; border-radius: 16px; overflow: hidden; }
-.cp-artc-card.feat { flex: 1.7; height: 400px; }
+/* Carrusel de blog: fila nowrap (destacada más ancha) que sangra al borde derecho. */
+.cp-artc-row { display: flex; flex-wrap: nowrap; gap: 20px; align-items: flex-start; overflow: hidden; margin-right: -30px; }
+.cp-artc-card { position: relative; flex: 0 0 440px; height: 260px; border-radius: 16px; overflow: hidden; }
+.cp-artc-card.feat { flex: 0 0 500px; height: 400px; }
 .cp-artc-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cp-artc-ph { background: linear-gradient(160deg, #c8cfd8, #9aa4af); }
 .cp-artc-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 40%, rgba(0,0,0,.72) 100%); }
@@ -1754,6 +1756,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-block--services_carousel { margin-inline: -60px; }
 /* Listado de productos: la fila de cards sangra al borde derecho (carrusel). */
 .pb-canvas.preview .pb-block--product_list { margin-right: -60px; }
+/* Carruseles de marcas y blog: la fila de cards sangra al borde derecho. */
+.pb-canvas.preview .pb-block--brand_cards { margin-right: -60px; }
+.pb-canvas.preview .pb-block--articles_carousel { margin-right: -60px; }
 /* Carrusel de testimonios: full bleed con fondo rosado; el contenido vuelve al gutter. */
 .pb-canvas.preview .pb-block--testimonials { margin-inline: -60px; }
 .pb-canvas.preview .pb-block--testimonials .cp-testi { padding-inline: 60px; }
