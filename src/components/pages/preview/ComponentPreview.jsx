@@ -289,6 +289,7 @@ const RENDERERS = {
       { name: 'Purina® Pro Plan®', description: 'Dale una nutrición avanzada para cuidar y satisfacer cada una de sus necesidades.', pets: 'Perro + Gato' },
       { name: 'Purina® Dog Chow®', description: 'Conoce nuestra línea de alimentos que ayudan a maximizar la vida de tu perro.', pets: 'Perro' },
       { name: 'Purina® Felix®', description: 'Sorpréndelo todos los días con nuestra variedad de alimento húmedo.', pets: 'Gato' },
+      { name: 'Purina® Cat Chow®', description: 'Nutrición completa y balanceada para acompañar cada etapa de tu gato.', pets: 'Gato' },
     ]
     const moreText = c.see_more_text == null ? 'Ver todas' : c.see_more_text
     return (
