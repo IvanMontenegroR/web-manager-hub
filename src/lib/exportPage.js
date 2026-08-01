@@ -187,7 +187,7 @@ export async function exportPageMatrix(page, components, getNode) {
   // Titulo de la pagina + instrucciones para el mercado.
   ws.mergeCells(2, 2, 2, 5)
   const title = ws.getCell(2, 2)
-  title.value = `${page.name}${page.path ? '  ·  ' + page.path : ''}`
+  title.value = `${page.name}${page.path ? '  -  ' + page.path : ''}`
   title.font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } }
   title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
   title.alignment = { vertical: 'middle', indent: 1 }
@@ -228,7 +228,7 @@ export async function exportPageMatrix(page, components, getNode) {
       // Tamano de imagen recomendado (si aplica).
       for (const s of getSpecs(def, content)) {
         const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
-        const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  ·  ')
+        const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  -  ').replace(/·/g, '-')
         row = fieldRow(row, label, parts, { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
       }
 
