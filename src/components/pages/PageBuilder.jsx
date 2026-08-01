@@ -92,9 +92,7 @@ export default function PageBuilder({ page, onBack }) {
       await exportPageMatrix(page, current, (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
-      },
-        headerRef.current?.querySelector('.cp-header'),
-        footerRef.current?.querySelector('.cp-footer'))
+      })
     } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
   }
 

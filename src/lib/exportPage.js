@@ -73,9 +73,14 @@ function fit(w, h, maxW, maxH) {
   return { w: Math.round(w * s), h: Math.round(h * s) }
 }
 
+// Ancho de captura de los componentes: se fuerza a desktop para que rendericen
+// como en la pagina real (imagenes anchas y bajas), sin depender del ancho del
+// canvas de edicion (que produce capturas altas y angostas que se pisan).
+const CAP_W = 1180
+
 // components = [{ id, component_key, content }] en orden.
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
-export async function exportPageMatrix(page, components, getNode, headerNode, footerNode) {
+export async function exportPageMatrix(page, components, getNode) {
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
@@ -98,7 +103,7 @@ export async function exportPageMatrix(page, components, getNode, headerNode, fo
     if (!dataUrl) return 0
     const probe = await loadSize(dataUrl)
     const nat = probe || { w: 1180, h: 620 }
-    const { w, h } = fit(nat.w, nat.h, 430, 360)
+    const { w, h } = fit(nat.w, nat.h, 440, 320)
     const imgId = wb.addImage({ base64: dataUrl, extension: 'png' })
     ws.addImage(imgId, { tl: { col: IMG_COL + 0.12, row: topRow - 1 + 0.12 }, ext: { width: w, height: h }, editAs: 'oneCell' })
     return h * 0.75 + 10 // px -> pt + padding
@@ -164,34 +169,6 @@ export async function exportPageMatrix(page, components, getNode, headerNode, fo
   setH(2, 30)
   let row = 4
 
-  // Seccion de imagen a lo ancho (header/footer globales, sin campos).
-  async function fullSection(label, dataUrl, noteText) {
-    row = bandTitle(row, label, HEAD_BG, true)
-    if (dataUrl) {
-      const probe = await loadSize(dataUrl)
-      const nat = probe || { w: 1180, h: 200 }
-      const { w, h } = fit(nat.w, nat.h, 760, 240)
-      const imgId = wb.addImage({ base64: dataUrl, extension: 'png' })
-      ws.addImage(imgId, { tl: { col: 1.2, row: row - 1 + 0.1 }, ext: { width: w, height: h }, editAs: 'oneCell' })
-      const rowsNeeded = Math.ceil((h * 0.75 + 12) / 16)
-      for (let i = 0; i < rowsNeeded; i++) setH(row + i, 16)
-      row += rowsNeeded
-    }
-    if (noteText) {
-      ws.mergeCells(row, 2, row, 5)
-      ws.getCell(row, 2).value = noteText
-      ws.getCell(row, 2).font = { italic: true, size: 9, color: { argb: MUTED } }
-      row += 1
-    }
-    row += 1
-  }
-
-  // Header global.
-  if (headerNode) {
-    const durl = await snapshot(headerNode, 1180)
-    if (durl) await fullSection('Header — global (igual en todas las páginas)', durl, 'El header es global: se configura una sola vez para todo el sitio, no por página.')
-  }
-
   // Componentes: banda -> [campos izquierda | imagen derecha].
   let idx = 0
   for (const comp of components) {
@@ -241,21 +218,20 @@ export async function exportPageMatrix(page, components, getNode, headerNode, fo
     }
 
     // Imagen del componente a la derecha, anclada al inicio de la banda.
-    const dataUrl = await snapshot(getNode(comp.id))
+    // Se captura a ancho DESKTOP (CAP_W) para que renderice como en la pagina
+    // real: asi las imagenes salen anchas y bajas en vez de altas y angostas.
+    const dataUrl = await snapshot(getNode(comp.id), CAP_W)
     const imgPt = await placeImageRight(dataUrl, topRow)
 
-    // Reservar filas si la imagen es mas alta que el bloque de campos.
+    // Reservar filas para que la SIGUIENTE seccion arranque SIEMPRE por debajo de
+    // la imagen (nunca se pisan). Se suma la altura real del bloque de campos y se
+    // rellena hasta superar el alto de la imagen + un margen de seguridad.
+    const GAP = 24 // pt de aire garantizado bajo la imagen
     let acc = 0
     for (let r = topRow; r < row; r++) acc += ws.getRow(r).height || 15
-    while (acc < imgPt) { setH(row, 16); acc += 16; row++ }
+    while (acc < imgPt + GAP) { setH(row, 16); acc += 16; row++ }
 
     row += 1 // separacion entre componentes
-  }
-
-  // Footer global.
-  if (footerNode) {
-    const durl = await snapshot(footerNode, 1180)
-    if (durl) await fullSection('Footer — global (igual en todas las páginas)', durl, 'El footer es global: se configura una sola vez para todo el sitio, no por página.')
   }
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
