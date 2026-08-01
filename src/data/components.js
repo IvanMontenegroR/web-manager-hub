@@ -35,7 +35,7 @@ export const COMPONENTS = [
       { key: 'title', label: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Title — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'description', label: 'Descripción', type: 'textarea' },
-      { key: 'image', label: 'Imagen / Video (URL)', type: 'image' },
+      { key: 'image', label: 'Imagen / Video (link)', type: 'image' },
       { key: 'link_text', label: 'Botón — texto', type: 'text' },
       { key: 'link_url', label: 'Botón — link', type: 'url' },
       // Avanzado (CMS, no van al Excel de mercados)
@@ -119,7 +119,7 @@ export const COMPONENTS = [
     help: 'Video embebido (YouTube/Vimeo) con miniatura.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'video_url', label: 'URL del video', type: 'url' },
+      { key: 'video_url', label: 'Link del video', type: 'url' },
       { key: 'thumbnail', label: 'Miniatura', type: 'image' },
     ],
   },

@@ -29,7 +29,7 @@ function ImageField({ value, onChange }) {
   return (
     <div className="cf-img">
       <div className="cf-img-row">
-        <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="URL o subí un archivo…" />
+        <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="Link o subí un archivo…" />
         <button type="button" className="btn btn-sm cf-upload" disabled={busy} onClick={() => inputRef.current && inputRef.current.click()}>
           <Upload size={13} /> {busy ? 'Subiendo…' : 'Subir'}
         </button>

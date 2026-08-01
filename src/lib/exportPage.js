@@ -7,6 +7,7 @@
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import { getComponent, fieldToText, getSpecs } from '../data/components'
+import { PURINA_LOGO_B64 } from './purinaLogo'
 
 const PURINA_RED = 'FFED1C24'
 const HEAD_BG = 'FF1F2530'
@@ -175,20 +176,28 @@ export async function exportPageMatrix(page, components, getNode) {
     }
   }
 
-  // Titulo de la pagina + instrucciones para el mercado.
+  // Banda superior con el logo Purina.
   ws.mergeCells(1, 2, 1, 5)
-  const title = ws.getCell(1, 2)
+  ws.getCell(1, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
+  setH(1, 34)
+  const logoId = wb.addImage({ base64: PURINA_LOGO_B64, extension: 'png' })
+  // Aspect real del logo oficial (1526x330 ~= 4.62); se respeta para no deformarlo.
+  ws.addImage(logoId, { tl: { col: 1.12, row: 0.2 }, ext: { width: 148, height: 32 } })
+
+  // Titulo de la pagina + instrucciones para el mercado.
+  ws.mergeCells(2, 2, 2, 5)
+  const title = ws.getCell(2, 2)
   title.value = `${page.name}${page.path ? '  ·  ' + page.path : ''}`
   title.font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } }
   title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
   title.alignment = { vertical: 'middle', indent: 1 }
-  setH(1, 26)
-  ws.mergeCells(2, 2, 2, 5)
-  ws.getCell(2, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.'
-  ws.getCell(2, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
-  ws.getCell(2, 2).alignment = { wrapText: true, vertical: 'top' }
-  setH(2, 30)
-  let row = 4
+  setH(2, 26)
+  ws.mergeCells(3, 2, 3, 5)
+  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.'
+  ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
+  ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
+  setH(3, 30)
+  let row = 5
 
   // Componentes: banda -> [campos izquierda | imagen derecha].
   // El breadcrumb (matrixExclude) no se exporta: se arma solo, no lleva contenido.
