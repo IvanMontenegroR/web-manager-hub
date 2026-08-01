@@ -30,21 +30,21 @@ export const COMPONENTS = [
     category: 'Hero',
     help: 'Campos reales del paragraph Banner en el CMS. Segun el Banner Type cambia el layout.',
     fields: [
-      { key: 'type', label: 'Banner Type', type: 'select', options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Banner Card', 'Full Image + Box Content', 'Brand Hero'] },
-      { key: 'title', label: 'Title', type: 'text' },
-      { key: 'title_tag', label: 'Title — HTML tag', type: 'select', options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'description', label: 'Description', type: 'textarea' },
-      { key: 'image', label: 'Media (imagen)', type: 'image' },
-      { key: 'link_url', label: 'Link — URL', type: 'url' },
-      { key: 'link_text', label: 'Link — Texto del enlace (CTA)', type: 'text' },
-      // Avanzado
-      { key: 'banner_align', label: 'Banner Align Content', type: 'select', options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
-      { key: 'background_color', label: 'Background Color', type: 'select', options: ['Por defecto', 'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04', 'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400', 'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800', 'Primary Black', 'Primary Red', 'Primary White', 'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600', 'Secondary Red'] },
-      { key: 'visibility', label: 'Visibilidad (pet type)', type: 'select', options: ['Genérica (todas)', 'Gato', 'Perro', 'Gato + Perro'] },
-      { key: 'see_more_text', label: 'See more — texto', type: 'text' },
-      { key: 'see_more_url', label: 'See more — URL', type: 'url' },
-      { key: 'section_id', label: 'Section ID', type: 'text' },
-      { key: 'css_class', label: 'Custom CSS classes', type: 'text' },
+      { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Banner Card', 'Full Image + Box Content', 'Brand Hero'] },
+      { key: 'title', label: 'Título', type: 'text' },
+      { key: 'title_tag', label: 'Title — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'description', label: 'Descripción', type: 'textarea' },
+      { key: 'image', label: 'Imagen / Video (URL)', type: 'image' },
+      { key: 'link_url', label: 'Botón — URL', type: 'url' },
+      { key: 'link_text', label: 'Botón — texto (CTA)', type: 'text' },
+      // Avanzado (CMS, no van al Excel de mercados)
+      { key: 'banner_align', label: 'Banner Align Content', type: 'select', cms: true, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
+      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: ['Por defecto', 'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04', 'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400', 'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800', 'Primary Black', 'Primary Red', 'Primary White', 'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600', 'Secondary Red'] },
+      { key: 'visibility', label: 'Visibilidad (pet type)', type: 'select', cms: true, options: ['Genérica (todas)', 'Gato', 'Perro', 'Gato + Perro'] },
+      { key: 'see_more_text', label: 'See more — texto', type: 'text', cms: true },
+      { key: 'see_more_url', label: 'See more — URL', type: 'url', cms: true },
+      { key: 'section_id', label: 'Section ID', type: 'text', cms: true },
+      { key: 'css_class', label: 'Custom CSS classes', type: 'text', cms: true },
     ],
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
@@ -62,7 +62,7 @@ export const COMPONENTS = [
     category: 'Contenido',
     help: 'Grilla de tarjetas (iconos, numeros, imagen + titulo...).',
     fields: [
-      { key: 'type', label: 'Tipo de grilla', type: 'select', options: ['Cards Icons', 'Cards Numbers', 'Cards simple (imagen + titulo)', 'Box image + card icons', 'Full background card icons'] },
+      { key: 'type', label: 'Tipo de grilla', type: 'select', cms: true, options: ['Cards Icons', 'Cards Numbers', 'Cards simple (imagen + titulo)', 'Box image + card icons', 'Full background card icons'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'cards', label: 'Tarjetas', type: 'list', item: [
@@ -79,7 +79,7 @@ export const COMPONENTS = [
     category: 'Contenido',
     help: 'Bloque de texto (una o dos columnas).',
     fields: [
-      { key: 'style', label: 'Estilo', type: 'select', options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
+      { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
     ],
@@ -128,7 +128,7 @@ export const COMPONENTS = [
     category: 'Articulos',
     help: 'Bloque que lista articulos (el CMS los popula por tipo).',
     fields: [
-      { key: 'block_type', label: 'Tipo de bloque', type: 'select', options: ['Featured', 'Highlighted', 'Recommendation List', 'Latest'] },
+      { key: 'block_type', label: 'Tipo de bloque', type: 'select', cms: true, options: ['Featured', 'Highlighted', 'Recommendation List', 'Latest'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'note', label: 'Nota para el editor', type: 'textarea' },
     ],
@@ -256,7 +256,7 @@ export const COMPONENTS = [
     category: 'Marcas',
     help: 'Grilla de cards de producto. El tipo define el tamano de imagen: A ingrediente, B producto, C marca.',
     fields: [
-      { key: 'variant', label: 'Tipo de card', type: 'select', options: ['A · Ingrediente', 'B · Producto', 'C · Marca'] },
+      { key: 'variant', label: 'Tipo de card', type: 'select', cms: true, options: ['A · Ingrediente', 'B · Producto', 'C · Marca'] },
       { key: 'title', label: 'Titulo de la seccion', type: 'text' },
       { key: 'cards', label: 'Cards', type: 'list', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
