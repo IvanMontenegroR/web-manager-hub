@@ -86,27 +86,33 @@ export async function exportPageMatrix(page, components, getNode) {
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
     views: [{ showGridLines: false }],
   })
+  const E_W = 70 // ancho (chars) de la columna de imagen
   ws.columns = [
-    { width: 2 },   // A: margen
-    { width: 30 },  // B: campo
-    { width: 52 },  // C: contenido
-    { width: 2 },   // D: separacion
-    { width: 62 },  // E: imagen
+    { width: 2 },     // A: margen
+    { width: 30 },    // B: campo
+    { width: 52 },    // C: contenido
+    { width: 2 },     // D: separacion
+    { width: E_W },   // E: imagen
   ]
   const IMG_COL = 4 // 0-based -> columna E
+  // Ancho interior de la col E en px (aprox Excel: chars*7 + 5). La imagen se topea
+  // a ese ancho MENOS un margen, para que SIEMPRE quede dentro del marco (no se sale).
+  const E_PX = Math.round(E_W * 7 + 5)
+  const IMG_MAX_W = E_PX - 34
+  const IMG_MAX_H = 320
 
   const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
 
-  // Coloca la imagen del componente a la derecha (columna E), anclada a `topRow`.
-  // Devuelve el alto de la imagen en pt (para reservar filas y no pisar lo de abajo).
-  async function placeImageRight(dataUrl, topRow) {
-    if (!dataUrl) return 0
+  // Prepara la imagen: la registra en el workbook y calcula su tamaño encajado en la
+  // celda de imagen. Devuelve { id, w, h, hpt } o null. El alto en pt (hpt) sirve para
+  // reservar filas. NO la ancla todavia (se ubica centrada despues de armar el marco).
+  async function prepImage(dataUrl) {
+    if (!dataUrl) return null
     const probe = await loadSize(dataUrl)
     const nat = probe || { w: 1180, h: 620 }
-    const { w, h } = fit(nat.w, nat.h, 440, 320)
-    const imgId = wb.addImage({ base64: dataUrl, extension: 'png' })
-    ws.addImage(imgId, { tl: { col: IMG_COL + 0.12, row: topRow - 1 + 0.12 }, ext: { width: w, height: h }, editAs: 'oneCell' })
-    return h * 0.75 + 10 // px -> pt + padding
+    const { w, h } = fit(nat.w, nat.h, IMG_MAX_W, IMG_MAX_H)
+    const id = wb.addImage({ base64: dataUrl, extension: 'png' })
+    return { id, w, h, hpt: h * 0.75 }
   }
 
   // Banda de titulo (merge B..C). Devuelve la fila siguiente.
@@ -252,23 +258,31 @@ export async function exportPageMatrix(page, components, getNode) {
       }
     }
 
-    // Imagen del componente a la derecha, anclada al inicio de la banda.
-    // Se captura a ancho DESKTOP (CAP_W) para que renderice como en la pagina
-    // real: asi las imagenes salen anchas y bajas en vez de altas y angostas.
+    // Imagen del componente en la columna E. Se captura a ancho DESKTOP (CAP_W)
+    // para que renderice como en la pagina real (ancha y baja). Se ubica centrada
+    // verticalmente dentro del marco, encajada en la celda (no se sale del borde).
     const dataUrl = await snapshot(getNode(comp.id), CAP_W)
-    const imgPt = await placeImageRight(dataUrl, topRow)
+    const img = await prepImage(dataUrl)
+    const PAD = 12 // pt de aire arriba/abajo de la imagen dentro del marco
 
-    // Reservar filas para que la SIGUIENTE seccion arranque SIEMPRE por debajo de
-    // la imagen (nunca se pisan). Se suma la altura real del bloque de campos y se
-    // rellena hasta superar el alto de la imagen + un margen de seguridad.
-    const GAP = 24 // pt de aire garantizado bajo la imagen
-    let acc = 0
-    for (let r = topRow; r < row; r++) acc += ws.getRow(r).height || 15
-    while (acc < imgPt + GAP) { setH(row, 16); acc += 16; row++ }
+    // Reservar filas (debajo de la banda) hasta que quepa la imagen + su padding.
+    const areaPt = () => { let a = 0; for (let r = topRow + 1; r < row; r++) a += ws.getRow(r).height || 15; return a }
+    const need = img ? img.hpt + 2 * PAD : 0
+    while (areaPt() < need) { setH(row, 16); row++ }
+    const lastRow = row - 1
+
+    // Anclar la imagen centrada verticalmente en el area [topRow+1 .. lastRow].
+    if (img) {
+      let total = 0; for (let r = topRow + 1; r <= lastRow; r++) total += ws.getRow(r).height || 15
+      const targetTop = Math.max(0, (total - img.hpt) / 2)
+      let a = 0, rr = topRow + 1
+      while (rr < lastRow) { const hh = ws.getRow(rr).height || 15; if (a + hh > targetTop) break; a += hh; rr++ }
+      ws.addImage(img.id, { tl: { col: IMG_COL, row: rr - 1 }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
+    }
 
     // Marco alrededor de todo el componente (campos + imagen) para que se entienda
     // que contenido va con que componente.
-    boxBorder(topRow, row - 1, 2, 5, PURINA_RED)
+    boxBorder(topRow, lastRow, 2, 5, PURINA_RED)
 
     row += 1 // separacion entre componentes
   }
