@@ -17,8 +17,9 @@ export const COMPONENTS = [
     name: 'Breadcrumb',
     category: 'Navegacion',
     help: 'Ruta de navegacion (Inicio / ...). El ultimo item es la pagina actual.',
+    matrixExclude: true, // no va en el Excel de matriz (se arma solo)
     fields: [
-      { key: 'items', label: 'Items (en orden)', type: 'list', item: [
+      { key: 'items', label: 'Items (en orden)', type: 'list', itemLabel: 'Item', item: [
         { key: 'label', label: 'Texto', type: 'text' },
         { key: 'url', label: 'Link (opcional)', type: 'url' },
       ] },
@@ -65,7 +66,7 @@ export const COMPONENTS = [
       { key: 'type', label: 'Tipo de grilla', type: 'select', cms: true, options: ['Cards Icons', 'Cards Numbers', 'Cards simple (imagen + titulo)', 'Box image + card icons', 'Full background card icons'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'image', label: 'Imagen / icono', type: 'image' },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'subtitle', label: 'Texto', type: 'textarea' },
@@ -105,7 +106,7 @@ export const COMPONENTS = [
     help: 'Numeros grandes con su etiqueta (estadisticas).',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'numbers', label: 'Numeros', type: 'list', item: [
+      { key: 'numbers', label: 'Numeros', type: 'list', itemLabel: 'Numero', item: [
         { key: 'number', label: 'Numero', type: 'text' },
         { key: 'label', label: 'Etiqueta', type: 'text' },
       ] },
@@ -160,7 +161,7 @@ export const COMPONENTS = [
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'icon', label: 'Icono (imagen)', type: 'image' },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
@@ -178,12 +179,15 @@ export const COMPONENTS = [
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Nuestro Blog' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Artículos pensados para ti y tu mascota' },
-      { key: 'cards', label: 'Articulos', type: 'list', item: [
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'category', label: 'Categoria (chip)', type: 'text' },
-        { key: 'category_color', label: 'Color del chip (hex)', type: 'text', placeholder: '#582d84' },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'url', label: 'Link', type: 'url' },
+      // En el CMS el articulo se SELECCIONA (no se cargan imagen/categoria/link):
+      // por eso en el Excel de matriz solo va el titulo del articulo. El resto se
+      // marca cms:true (sigue editable en el builder para el mockup, pero no exporta).
+      { key: 'cards', label: 'Articulos', type: 'list', itemLabel: 'Articulo', item: [
+        { key: 'image', label: 'Imagen', type: 'image', cms: true },
+        { key: 'category', label: 'Categoria (chip)', type: 'text', cms: true },
+        { key: 'category_color', label: 'Color del chip (hex)', type: 'text', placeholder: '#582d84', cms: true },
+        { key: 'title', label: 'Titulo del articulo', type: 'text' },
+        { key: 'url', label: 'Link', type: 'url', cms: true },
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Explora más artículos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
@@ -195,6 +199,7 @@ export const COMPONENTS = [
     name: 'Footer banner',
     category: 'Hero',
     help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
+    reusable: true, // componente reutilizable: no se carga contenido por pagina en el Excel
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
       { key: 'subtitle', label: 'Texto', type: 'textarea' },
@@ -209,7 +214,7 @@ export const COMPONENTS = [
     help: 'Sección "Historias que inspiran": imagen ovalada a la izquierda + cita, autor y botón a la derecha, con flechas de carrusel.',
     fields: [
       { key: 'eyebrow', label: 'Antetítulo', type: 'text', placeholder: 'Historias que inspiran' },
-      { key: 'items', label: 'Testimonios', type: 'list', item: [
+      { key: 'items', label: 'Testimonios', type: 'list', itemLabel: 'Testimonio', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'image_title', label: 'Texto sobre la imagen (opcional)', type: 'text' },
         { key: 'quote', label: 'Cita', type: 'textarea' },
@@ -238,7 +243,7 @@ export const COMPONENTS = [
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Marcas Purina®' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La variedad que buscas, con la confianza de Purina®' },
-      { key: 'cards', label: 'Marcas', type: 'list', item: [
+      { key: 'cards', label: 'Marcas', type: 'list', itemLabel: 'Marca', item: [
         { key: 'image', label: 'Imagen de marca', type: 'image' },
         { key: 'name', label: 'Nombre', type: 'text' },
         { key: 'description', label: 'Bajada', type: 'textarea' },
@@ -258,7 +263,7 @@ export const COMPONENTS = [
     fields: [
       { key: 'variant', label: 'Tipo de card', type: 'select', cms: true, options: ['A · Ingrediente', 'B · Producto', 'C · Marca'] },
       { key: 'title', label: 'Titulo de la seccion', type: 'text' },
-      { key: 'cards', label: 'Cards', type: 'list', item: [
+      { key: 'cards', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'subtitle', label: 'Texto / subtitulo', type: 'textarea' },
@@ -283,7 +288,7 @@ export const COMPONENTS = [
       { key: 'promo_title', label: 'Card promo — título (opcional)', type: 'text', placeholder: 'Pet ID' },
       { key: 'promo_text', label: 'Card promo — texto', type: 'textarea' },
       { key: 'promo_url', label: 'Card promo — link', type: 'url' },
-      { key: 'products', label: 'Productos', type: 'list', item: [
+      { key: 'products', label: 'Productos', type: 'list', itemLabel: 'Producto', item: [
         { key: 'image', label: 'Imagen del producto', type: 'image' },
         { key: 'title', label: 'Nombre', type: 'text' },
         { key: 'tag', label: 'Tag (opcional)', type: 'text' },
@@ -316,7 +321,7 @@ export const COMPONENTS = [
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', item: [
+      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'icon', label: 'Icono (imagen)', type: 'image' },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
@@ -331,7 +336,7 @@ export const COMPONENTS = [
     help: 'Bloque "Categorias populares": tarjetas horizontales con imagen de fondo y titulo por categoria.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Categorías populares' },
-      { key: 'items', label: 'Categorias', type: 'list', item: [
+      { key: 'items', label: 'Categorias', type: 'list', itemLabel: 'Categoria', item: [
         { key: 'label', label: 'Nombre', type: 'text' },
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'url', label: 'Link', type: 'url' },
@@ -345,7 +350,7 @@ export const COMPONENTS = [
     category: 'Navegacion',
     help: 'Tarjetas promocionales del menu desplegable del header: imagen + titulo + bajada + flecha.',
     fields: [
-      { key: 'items', label: 'Tarjetas', type: 'list', item: [
+      { key: 'items', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'description', label: 'Bajada', type: 'textarea' },
         { key: 'image', label: 'Imagen', type: 'image' },
@@ -363,7 +368,7 @@ export const COMPONENTS = [
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'assistant_name', label: 'Nombre del asistente', type: 'text', placeholder: 'Pandora' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
-      { key: 'steps', label: 'Pasos', type: 'list', item: [
+      { key: 'steps', label: 'Pasos', type: 'list', itemLabel: 'Paso', item: [
         { key: 'day', label: 'Etiqueta (ej. Día 1 - 3)', type: 'text' },
         { key: 'description', label: 'Descripcion', type: 'textarea' },
         { key: 'image', label: 'Imagen del paso', type: 'image' },

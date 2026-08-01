@@ -131,11 +131,9 @@ export async function exportPageMatrix(page, components, getNode) {
     c2.value = value == null || value === '' ? EMPTY : value
     c2.font = { size: 10, italic: !!opts.italic, color: { argb: (value == null || value === '') ? MUTED : 'FF1F2530' } }
     c2.alignment = { vertical: 'top', wrapText: true }
+    const thin = { style: 'thin', color: { argb: BORDER } }
     for (const col of [2, 3]) {
-      ws.getCell(atRow, col).border = {
-        top: { style: 'thin', color: { argb: BORDER } },
-        bottom: { style: 'thin', color: { argb: BORDER } },
-      }
+      ws.getCell(atRow, col).border = { top: thin, bottom: thin, left: thin, right: thin }
       if (opts.fill) ws.getCell(atRow, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fill } }
     }
     setH(atRow, estHeight(value))
@@ -150,8 +148,25 @@ export async function exportPageMatrix(page, components, getNode) {
     c.font = { bold: true, size: 10, color: { argb: 'FF7A1216' } }
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CARD_BG } }
     c.alignment = { vertical: 'middle', indent: 1 }
+    const thin = { style: 'thin', color: { argb: BORDER } }
+    ws.getCell(atRow, 2).border = { top: thin, bottom: thin, left: thin }
+    ws.getCell(atRow, 3).border = { top: thin, bottom: thin, right: thin }
     setH(atRow, 18)
     return atRow + 1
+  }
+
+  // Dibuja un marco (perimetro) alrededor de un rango de celdas, para agrupar
+  // visualmente los campos (izquierda) con la imagen del componente (derecha).
+  function boxBorder(r1, r2, c1, c2, argb, style = 'medium') {
+    const side = { style, color: { argb } }
+    for (let c = c1; c <= c2; c++) {
+      const top = ws.getCell(r1, c); top.border = { ...top.border, top: side }
+      const bot = ws.getCell(r2, c); bot.border = { ...bot.border, bottom: side }
+    }
+    for (let r = r1; r <= r2; r++) {
+      const lc = ws.getCell(r, c1); lc.border = { ...lc.border, left: side }
+      const rc = ws.getCell(r, c2); rc.border = { ...rc.border, right: side }
+    }
   }
 
   // Titulo de la pagina + instrucciones para el mercado.
@@ -170,50 +185,70 @@ export async function exportPageMatrix(page, components, getNode) {
   let row = 4
 
   // Componentes: banda -> [campos izquierda | imagen derecha].
+  // El breadcrumb (matrixExclude) no se exporta: se arma solo, no lleva contenido.
   let idx = 0
   for (const comp of components) {
-    idx++
     const def = getComponent(comp.component_key)
+    if (def?.matrixExclude) continue
+    idx++
     const content = comp.content || {}
     const topRow = row
 
-    // Banda de titulo (bloque izquierdo).
-    row = bandTitle(row, `${idx}. ${def?.name || comp.component_key}`, PURINA_RED)
+    // Banda de titulo (bloque izquierdo). En los banners, el subtipo (Banner Type)
+    // va entre parentesis para saber de que banner se trata.
+    const subtype = def?.key === 'banner' && content.type ? ` (${content.type})` : ''
+    row = bandTitle(row, `${idx}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
 
-    // Tamano de imagen recomendado (si aplica).
-    for (const s of getSpecs(def, content)) {
-      const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
-      const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  ·  ')
-      row = fieldRow(row, label, parts, { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
-    }
+    if (def?.reusable) {
+      // Componente REUTILIZABLE (ej. Footer banner): no se carga contenido por
+      // pagina. Se muestra solo la imagen de referencia + una nota.
+      ws.mergeCells(row, 2, row, 3)
+      const nc = ws.getCell(row, 2)
+      nc.value = 'Componente reutilizable: se configura una sola vez para todo el sitio. No se carga contenido por página.'
+      nc.font = { italic: true, size: 10, color: { argb: MUTED } }
+      nc.alignment = { vertical: 'top', wrapText: true, indent: 1 }
+      setH(row, 30)
+      row++
+    } else {
+      // Tamano de imagen recomendado (si aplica).
+      for (const s of getSpecs(def, content)) {
+        const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
+        const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  ·  ')
+        row = fieldRow(row, label, parts, { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
+      }
 
-    // Cabecera Campo | Contenido.
-    ws.getCell(row, 2).value = 'Campo'
-    ws.getCell(row, 3).value = 'Contenido a cargar'
-    for (const col of [2, 3]) {
-      const c = ws.getCell(row, col)
-      c.font = { bold: true, size: 10 }
-      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
-      c.alignment = { vertical: 'middle' }
-    }
-    setH(row, 18)
-    row++
+      // Cabecera Campo | Contenido.
+      const thin = { style: 'thin', color: { argb: BORDER } }
+      ws.getCell(row, 2).value = 'Campo'
+      ws.getCell(row, 3).value = 'Contenido a cargar'
+      for (const col of [2, 3]) {
+        const c = ws.getCell(row, col)
+        c.font = { bold: true, size: 10 }
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+        c.alignment = { vertical: 'middle' }
+        c.border = { top: thin, bottom: thin, left: thin, right: thin }
+      }
+      setH(row, 18)
+      row++
 
-    // Campos VISUALES (los cms:true se omiten). Las listas se abren por item.
-    const visible = (def?.fields || []).filter((f) => !f.cms)
-    for (const f of visible) {
-      if (f.type === 'list') {
-        const items = Array.isArray(content[f.key]) ? content[f.key] : []
-        const arr = items.length ? items : [{}] // al menos 1 plantilla vacia
-        const subFields = (f.item || []).filter((sf) => !sf.cms)
-        arr.forEach((item, i) => {
-          row = cardBand(row, `${f.label} ${i + 1}`)
-          for (const sf of subFields) {
-            row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true })
-          }
-        })
-      } else {
-        row = fieldRow(row, f.label, fieldToText(f, content[f.key]))
+      // Campos VISUALES (los cms:true se omiten). Las listas se abren por item,
+      // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
+      const visible = (def?.fields || []).filter((f) => !f.cms)
+      for (const f of visible) {
+        if (f.type === 'list') {
+          const items = Array.isArray(content[f.key]) ? content[f.key] : []
+          const arr = items.length ? items : [{}] // al menos 1 plantilla vacia
+          const subFields = (f.item || []).filter((sf) => !sf.cms)
+          const one = f.itemLabel || f.label
+          arr.forEach((item, i) => {
+            row = cardBand(row, `${one} ${i + 1}`)
+            for (const sf of subFields) {
+              row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true })
+            }
+          })
+        } else {
+          row = fieldRow(row, f.label, fieldToText(f, content[f.key]))
+        }
       }
     }
 
@@ -230,6 +265,10 @@ export async function exportPageMatrix(page, components, getNode) {
     let acc = 0
     for (let r = topRow; r < row; r++) acc += ws.getRow(r).height || 15
     while (acc < imgPt + GAP) { setH(row, 16); acc += 16; row++ }
+
+    // Marco alrededor de todo el componente (campos + imagen) para que se entienda
+    // que contenido va con que componente.
+    boxBorder(topRow, row - 1, 2, 5, PURINA_RED)
 
     row += 1 // separacion entre componentes
   }
