@@ -135,8 +135,10 @@ export async function exportPageMatrix(page, components, getNode) {
     c1.font = { bold: !opts.sub, size: 10, color: { argb: opts.color || 'FF1F2530' } }
     c1.alignment = { vertical: 'top', wrapText: true, indent: opts.sub ? 1 : 0 }
     const c2 = ws.getCell(atRow, 3)
-    c2.value = value == null || value === '' ? EMPTY : value
-    c2.font = { size: 10, italic: !!opts.italic, color: { argb: (value == null || value === '') ? MUTED : 'FF1F2530' } }
+    const empty = value == null || value === ''
+    // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
+    c2.value = empty ? (opts.placeholder || EMPTY) : value
+    c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder), color: { argb: empty ? MUTED : 'FF1F2530' } }
     c2.alignment = { vertical: 'top', wrapText: true }
     const thin = { style: 'thin', color: { argb: BORDER } }
     for (const col of [2, 3]) {
@@ -272,21 +274,37 @@ export async function exportPageMatrix(page, components, getNode) {
     // verticalmente dentro del marco, encajada en la celda (no se sale del borde).
     const dataUrl = await snapshot(getNode(comp.id), CAP_W)
     const img = await prepImage(dataUrl)
-    const PAD = 12 // pt de aire arriba/abajo de la imagen dentro del marco
+    const PAD = 12     // pt de aire arriba/abajo dentro del marco
+    const CAP_GAP = 4  // aire entre la imagen y su Alt Text
+    const CAP_H = 16   // fila del Alt Text (debajo de la imagen)
+    // El grupo imagen + Alt Text se centra vertical dentro del area del componente.
+    const groupHpt = img ? img.hpt + CAP_GAP + CAP_H : 0
 
-    // Reservar filas (debajo de la banda) hasta que quepa la imagen + su padding.
+    // Reservar filas (debajo de la banda) hasta que quepa el grupo + padding.
+    // El +40 da aire para el centrado y el redondeo de filas del Alt Text.
     const areaPt = () => { let a = 0; for (let r = topRow + 1; r < row; r++) a += ws.getRow(r).height || 15; return a }
-    const need = img ? img.hpt + 2 * PAD : 0
-    while (areaPt() < need) { setH(row, 16); row++ }
+    while (areaPt() < groupHpt + 40) { setH(row, 16); row++ }
     const lastRow = row - 1
 
-    // Anclar la imagen centrada verticalmente en el area [topRow+1 .. lastRow].
     if (img) {
       let total = 0; for (let r = topRow + 1; r <= lastRow; r++) total += ws.getRow(r).height || 15
-      const targetTop = Math.max(0, (total - img.hpt) / 2)
+      const targetTop = Math.max(0, (total - groupHpt) / 2)
+      // Fila donde ancla la imagen (la mas cercana por arriba a targetTop).
       let a = 0, rr = topRow + 1
       while (rr < lastRow) { const hh = ws.getRow(rr).height || 15; if (a + hh > targetTop) break; a += hh; rr++ }
       ws.addImage(img.id, { tl: { col: IMG_COL, row: rr - 1 }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
+      // Alt Text: la primera fila cuyo TOPE queda por debajo del pie de la imagen
+      // (placeholder "SEO Agency" para la agencia SEO), asi nunca pisa la imagen.
+      const capTop = a + img.hpt + CAP_GAP
+      let b = a, cr = rr
+      while (cr < lastRow && b < capTop) { b += ws.getRow(cr).height || 15; cr++ }
+      const cap = ws.getCell(cr, IMG_COL + 1)
+      cap.value = { richText: [
+        { text: 'Alt Text: ', font: { bold: true, size: 9, color: { argb: 'FF1F2530' } } },
+        { text: 'SEO Agency', font: { italic: true, size: 9, color: { argb: MUTED } } },
+      ] }
+      cap.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      setH(cr, CAP_H)
     }
 
     // Marco alrededor de todo el componente (campos + imagen) para que se entienda
@@ -295,6 +313,26 @@ export async function exportPageMatrix(page, components, getNode) {
 
     row += 1 // separacion entre componentes
   }
+
+  // Metas de la pagina (SEO) al final de la matriz. Las carga la agencia SEO,
+  // por eso el contenido va con el placeholder "SEO Agency".
+  const metaTop = row
+  row = bandTitle(row, 'Metas de la página (SEO)', PURINA_RED, true)
+  for (const label of ['Meta title', 'Meta description']) {
+    ws.getCell(row, 2).value = label
+    ws.getCell(row, 2).font = { bold: true, size: 10, color: { argb: 'FF1F2530' } }
+    ws.getCell(row, 2).alignment = { vertical: 'top', wrapText: true }
+    ws.mergeCells(row, 3, row, 5)
+    const c = ws.getCell(row, 3)
+    c.value = 'SEO Agency'
+    c.font = { italic: true, size: 10, color: { argb: MUTED } }
+    c.alignment = { vertical: 'top', wrapText: true }
+    const thin = { style: 'thin', color: { argb: BORDER } }
+    for (const col of [2, 3, 4, 5]) ws.getCell(row, col).border = { top: thin, bottom: thin, left: thin, right: thin }
+    setH(row, label === 'Meta description' ? 34 : 22)
+    row++
+  }
+  boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
 }
