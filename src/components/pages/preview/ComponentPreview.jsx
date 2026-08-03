@@ -85,8 +85,28 @@ const RENDERERS = {
       : fullbox ? '1680×820px'
       : '2100×1050px'
 
-    // Solo imagen.
-    if (promo) return <div className="cp-banner"><Img src={c.image} aspect="3/1" dim={dim} /></div>
+    // Promotional (solo imagen). Con varias imagenes (slides) se vuelve un slider.
+    if (promo) {
+      const slides = list(c.slides).filter((s) => s.image)
+      const imgs = slides.length ? slides : (c.image ? [{ image: c.image }] : [])
+      if (imgs.length > 1) {
+        return (
+          <div className="cp-promoslider">
+            <div className="cp-promo-track" onScroll={syncDots}>
+              {imgs.map((s, i) => (
+                <div key={i} className="cp-promo-slide"><MediaEl className="cp-promo-img" src={s.image} /></div>
+              ))}
+            </div>
+            <span className="cp-promo-arrow cp-promo-prev" onClick={scrollSnap(-1)}>‹</span>
+            <span className="cp-promo-arrow cp-promo-next" onClick={scrollSnap(1)}>›</span>
+            <div className="cp-promo-dots">
+              {imgs.map((_, i) => <span key={i} className={`cp-promo-dot${i === 0 ? ' on' : ''}`} onClick={goToSlide(i)} />)}
+            </div>
+          </div>
+        )
+      }
+      return <div className="cp-banner"><Img src={imgs[0]?.image} aspect="3/1" dim={dim} /></div>
+    }
 
     // Hero (Main / Brand / Secondary). Modela el markup real (.main-hero / .banner,
     // --banner-bg, .btn-primary; CTA mt-6). Secondary = ratio mas ancho/bajo (3:1) y
@@ -537,6 +557,28 @@ function scrollRow(rootSel, rowSel, step) {
   }
 }
 const scrollCmt = scrollRow('.cp-cmt', '.cp-cmt-row', 431)
+
+// Slider del Promotional banner: desplaza el track una "pantalla" (100% del ancho).
+function scrollSnap(dir) {
+  return (e) => {
+    const t = e.currentTarget.closest('.cp-promoslider')?.querySelector('.cp-promo-track')
+    if (t) t.scrollBy({ left: dir * t.clientWidth, behavior: 'smooth' })
+  }
+}
+// Dot: salta al slide i.
+function goToSlide(i) {
+  return (e) => {
+    const t = e.currentTarget.closest('.cp-promoslider')?.querySelector('.cp-promo-track')
+    if (t) t.scrollTo({ left: i * t.clientWidth, behavior: 'smooth' })
+  }
+}
+// Marca el dot activo segun la posicion del scroll (sin estado de React).
+function syncDots(e) {
+  const t = e.currentTarget
+  const i = Math.round(t.scrollLeft / t.clientWidth)
+  const dots = t.parentElement?.querySelectorAll('.cp-promo-dot')
+  if (dots) dots.forEach((d, j) => d.classList.toggle('on', j === i))
+}
 
 // Scroll generico de los carruseles clasicos (marcas, blog, servicios, productos):
 // desde la flecha sube al contenedor del carrusel, encuentra su fila scrolleable y

@@ -33,11 +33,17 @@ export const COMPONENTS = [
     fields: [
       { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Banner Card', 'Full Image + Box Content', 'Brand Hero'] },
       { key: 'title', label: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Title — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'description', label: 'Descripción', type: 'textarea' },
       { key: 'image', label: 'Imagen / Video (link)', type: 'image' },
       { key: 'link_text', label: 'Botón — texto', type: 'text' },
       { key: 'link_url', label: 'Botón — link', type: 'url' },
+      // Promotional banner: se pueden cargar VARIAS imagenes; con mas de 1 el banner
+      // se vuelve un slider (carrusel con flechas + dots). Con 1 sola, banner simple.
+      { key: 'slides', label: 'Promotional — imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', item: [
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'link', label: 'Link', type: 'url' },
+      ] },
       // Avanzado (CMS, no van al Excel de mercados)
       { key: 'banner_align', label: 'Banner Align Content', type: 'select', cms: true, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
       { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: ['Por defecto', 'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04', 'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400', 'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800', 'Primary Black', 'Primary Red', 'Primary White', 'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600', 'Secondary Red'] },
@@ -65,6 +71,7 @@ export const COMPONENTS = [
     fields: [
       { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
       { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
     ],
   },
@@ -75,6 +82,7 @@ export const COMPONENTS = [
     help: 'Texto con imagen a un costado.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
       { key: 'image', label: 'Imagen', type: 'image' },
       { key: 'image_position', label: 'Posicion de la imagen', type: 'select', options: ['Izquierda', 'Derecha'] },
@@ -89,6 +97,7 @@ export const COMPONENTS = [
     help: 'Bloque "Aliados y Servicios": titulo sobre una imagen de fondo + tarjetas de servicio (una destacada).',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
       { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
@@ -108,6 +117,7 @@ export const COMPONENTS = [
     help: 'Sección "Nuestro Blog": cabecera + carrusel de artículos (imagen con chip de categoría y título superpuestos, botón +). Card destacada más grande a la izquierda.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Nuestro Blog' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Artículos pensados para ti y tu mascota' },
       // En el CMS el articulo se SELECCIONA (no se cargan imagen/categoria/link):
       // por eso en el Excel de matriz solo va el titulo del articulo. El resto se
@@ -132,6 +142,7 @@ export const COMPONENTS = [
     reusable: true, // componente reutilizable: no se carga contenido por pagina en el Excel
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Texto', type: 'textarea' },
       { key: 'button_text', label: 'Botón — texto', type: 'text', placeholder: 'Unirme al club' },
       { key: 'button_url', label: 'Botón — link', type: 'url' },
@@ -144,6 +155,7 @@ export const COMPONENTS = [
     help: 'Sección "Historias que inspiran": imagen ovalada a la izquierda + cita, autor y botón a la derecha, con flechas de carrusel.',
     fields: [
       { key: 'eyebrow', label: 'Antetítulo', type: 'text', placeholder: 'Historias que inspiran' },
+      { key: 'title_tag', label: 'Antetítulo — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'items', label: 'Testimonios', type: 'list', itemLabel: 'Testimonio', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'image_title', label: 'Texto sobre la imagen (opcional)', type: 'text' },
@@ -162,6 +174,7 @@ export const COMPONENTS = [
     help: 'Selector de mascota Gato / Perro (estático, con los íconos de gato y perro). Solo se editan el título y el subtítulo.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Elige tu mascota para personalizar tu experiencia:' },
     ],
   },
@@ -172,6 +185,7 @@ export const COMPONENTS = [
     help: 'Sección "Marcas Purina®": cabecera + carrusel de marcas. Cada card = imagen de marca (con toggles perro/gato) + pie gris con nombre y bajada. Botón "Ver todas".',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Marcas Purina®' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La variedad que buscas, con la confianza de Purina®' },
       { key: 'cards', label: 'Marcas', type: 'list', itemLabel: 'Marca', item: [
         { key: 'image', label: 'Imagen de marca', type: 'image' },
@@ -214,6 +228,7 @@ export const COMPONENTS = [
     help: 'Sección "Historia": título + subtítulo centrados y una línea de tiempo horizontal (carrusel). Cada hito: año en pill roja sobre la línea, imagen, título y descripción; un punto rojo cierra el conector.',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Historia Purina®' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.' },
       { key: 'items', label: 'Hitos', type: 'list', itemLabel: 'Hito', item: [
         { key: 'year', label: 'Año', type: 'text' },
@@ -231,6 +246,7 @@ export const COMPONENTS = [
     help: 'Sección "Compromiso Purina®": header (título + subtítulo) con flechas y un carrusel de cards verticales con imagen de fondo a sangre, título arriba y descripción abajo (overlaid en blanco).',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Compromiso Purina®' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
       { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
@@ -248,6 +264,7 @@ export const COMPONENTS = [
     help: 'Bloque a dos columnas (50/50): título + texto a la izquierda; a la derecha, un texto o un desplegable (acordeón) de items (título + texto). El item abierto marca su título en rojo.',
     fields: [
       { key: 'title', label: 'Titulo (izquierda)', type: 'text', placeholder: 'Nutriendo mascotas. Enriqueciendo vidas.' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'text', label: 'Texto (izquierda)', type: 'textarea' },
       { key: 'right_type', label: 'Columna derecha', type: 'select', cms: true, options: ['Desplegable', 'Texto'] },
       { key: 'right_text', label: 'Texto (derecha)', type: 'textarea' },
