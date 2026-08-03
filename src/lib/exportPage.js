@@ -32,6 +32,58 @@ async function download(wb, filename) {
   URL.revokeObjectURL(url)
 }
 
+// html2canvas NO puede leer los pixeles de una imagen cross-origin cuyo host no manda
+// header CORS -> la dibuja en blanco. Por eso, antes de capturar, cada imagen se
+// pre-convierte a dataURL: 1) intento directo con crossOrigin (hosts con CORS, ej.
+// Supabase Storage); 2) via proxy CORS (images.weserv.nl) para links sin CORS; 3) si
+// aun asi no se puede, se reemplaza por un recuadro con el link (nunca queda en blanco).
+const IMG_CACHE = new Map()
+
+function loadToDataUrl(src) {
+  return new Promise((res) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      try {
+        const cv = document.createElement('canvas')
+        cv.width = img.naturalWidth || 1
+        cv.height = img.naturalHeight || 1
+        cv.getContext('2d').drawImage(img, 0, 0)
+        res(cv.toDataURL('image/png'))
+      } catch { res(null) }
+    }
+    img.onerror = () => res(null)
+    img.src = src
+  })
+}
+
+// URL a traves del proxy de imagenes (agrega CORS) para hosts que no lo mandan.
+function weservUrl(url) {
+  try {
+    const u = new URL(url, window.location.href)
+    const prefix = u.protocol === 'https:' ? 'ssl:' : ''
+    return 'https://images.weserv.nl/?url=' + encodeURIComponent(prefix + u.host + u.pathname + u.search)
+  } catch { return null }
+}
+
+// Resuelve una URL de imagen a dataURL (o null si no se pudo capturar de ningun modo).
+async function resolveImg(src) {
+  if (!src || src.startsWith('data:')) return src || null
+  if (IMG_CACHE.has(src)) return IMG_CACHE.get(src)
+  let out = await loadToDataUrl(src)
+  if (!out) { const w = weservUrl(src); if (w) out = await loadToDataUrl(w) }
+  IMG_CACHE.set(src, out)
+  return out
+}
+
+// Placeholder (para el clon de html2canvas) cuando una imagen no se pudo capturar.
+function imgPlaceholder(doc, url) {
+  const box = doc.createElement('div')
+  box.textContent = url ? `Imagen: ${url}` : 'Imagen'
+  box.setAttribute('style', 'box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:140px;background:#eceff2;color:#6b727b;font:12px sans-serif;padding:14px;text-align:center;word-break:break-all;border-radius:8px;')
+  return box
+}
+
 // Captura un nodo del DOM a PNG (dataURL). Devuelve null si falla.
 async function snapshot(node, forceWidth) {
   if (!node) return null
@@ -40,9 +92,29 @@ async function snapshot(node, forceWidth) {
   node.style.width = w + 'px'
   try {
     const h = node.offsetHeight || 300
+    // Pre-resolver todas las imagenes del nodo a dataURL (una vez, deduplicado).
+    const srcs = Array.from(new Set(
+      Array.from(node.querySelectorAll('img')).map((im) => im.getAttribute('src')).filter(Boolean),
+    ))
+    const srcMap = new Map()
+    await Promise.all(srcs.map(async (s) => { srcMap.set(s, await resolveImg(s)) }))
+
     const canvas = await html2canvas(node, {
       backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false,
       width: w, height: h, windowWidth: w, windowHeight: h,
+      onclone: (doc, clone) => {
+        const scope = clone && clone.querySelectorAll ? clone : doc
+        scope.querySelectorAll('img').forEach((im) => {
+          const s = im.getAttribute('src')
+          const d = srcMap.get(s)
+          if (d) { im.setAttribute('src', d); im.removeAttribute('crossorigin') }
+          else if (s && !s.startsWith('data:')) { im.replaceWith(imgPlaceholder(doc, s)) }
+        })
+        // Los <video> no los captura html2canvas: se muestran como placeholder.
+        scope.querySelectorAll('video').forEach((v) => {
+          v.replaceWith(imgPlaceholder(doc, v.getAttribute('src') || ''))
+        })
+      },
     })
     return canvas.toDataURL('image/png')
   } catch {
