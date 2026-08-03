@@ -636,10 +636,23 @@ const RENDERERS = {
             </div>
           ))}
         </div>
-        <div className="cp-plist-arrows cp-tl-arrows"><span className="cp-plist-arrow">‹</span><span className="cp-plist-arrow">›</span></div>
+        <div className="cp-plist-arrows cp-tl-arrows">
+          <span className="cp-plist-arrow" onClick={scrollTL(-1)}>‹</span>
+          <span className="cp-plist-arrow" onClick={scrollTL(1)}>›</span>
+        </div>
       </div>
     )
   },
+}
+
+// Scroll del carrusel de la timeline: desde la flecha, encuentra el track hermano
+// y lo desplaza horizontalmente (una card + gap por click).
+function scrollTL(dir) {
+  return (e) => {
+    const root = e.currentTarget.closest('.cp-tl')
+    const track = root && root.querySelector('.cp-tl-track')
+    if (track) track.scrollBy({ left: dir * 342, behavior: 'smooth' })
+  }
 }
 
 export default function ComponentPreview({ componentKey, content }) {

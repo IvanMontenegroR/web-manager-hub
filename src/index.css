@@ -1767,25 +1767,31 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-tl-head { text-align: center; margin-bottom: 40px; }
 .cp-tl-h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; color: #1b252e; }
 .cp-tl-sub { font-size: 13.5px; color: #6b727b; line-height: 1.5; max-width: 480px; margin: 12px auto 0; }
-/* Carrusel de hitos: sangra al borde derecho (se cortan las cards que siguen).
+/* Carrusel de hitos: scroll horizontal real (rueda/trackpad/drag/flechas).
+   Sangra al borde derecho para que se vean cortadas las cards que siguen.
    AXIS = y de la linea horizontal (y del centro de las pills) = 22px. */
-.cp-tl-track { position: relative; display: flex; flex-wrap: nowrap; gap: 12px; overflow: hidden; margin-right: -60px; }
-/* Linea horizontal punteada: pasa por el CENTRO de las pills de anho (y = 22px). */
-.cp-tl-track::before { content: ''; position: absolute; top: 22px; left: 24px; right: 0; border-top: 1px dashed #eab6b9; }
+.cp-tl-track { position: relative; display: flex; flex-wrap: nowrap; gap: 12px; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; margin-right: -60px; padding-bottom: 4px; }
+.cp-tl-track::-webkit-scrollbar { height: 8px; }
+.cp-tl-track::-webkit-scrollbar-thumb { background: #d8d8d8; border-radius: 4px; }
+.cp-tl-track::-webkit-scrollbar-track { background: transparent; }
 /* padding-top deja lugar a la pill por encima de la imagen. */
 .cp-tl-item { position: relative; flex: 0 0 330px; padding: 44px 0 30px 56px; }
+/* Linea horizontal punteada (segmento por hito, con puente sobre el gap): es el eje
+   de la timeline y scrollea junto con las cards. Pasa por el centro de las pills. */
+.cp-tl-item::after { content: ''; position: absolute; top: 22px; left: 24px; width: 342px; border-top: 1px dashed #eab6b9; z-index: 0; }
 /* Conector vertical punteado (del centro de la pill hasta el punto rojo de abajo). */
-.cp-tl-item::before { content: ''; position: absolute; left: 24px; top: 22px; bottom: 5px; border-left: 1px dashed #eab6b9; }
+.cp-tl-item::before { content: ''; position: absolute; left: 24px; top: 22px; bottom: 5px; border-left: 1px dashed #eab6b9; z-index: 0; }
 /* Pill centrada exactamente en el cruce (x=24, y=22) para caer sobre las lineas. */
-.cp-tl-year { position: absolute; top: 22px; left: 24px; transform: translate(-50%, -50%); background: #ED1C24; color: #fff; font-weight: 700; font-size: 15px; padding: 5px 15px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(0, 0, 0, .12); white-space: nowrap; }
-.cp-tl-dot { position: absolute; left: 24px; transform: translateX(-50%); bottom: 0; width: 11px; height: 11px; border-radius: 50%; background: #ED1C24; }
-.cp-tl-img { width: 274px; height: 190px; object-fit: cover; border-radius: 6px; display: block; }
+.cp-tl-year { position: absolute; top: 22px; left: 24px; transform: translate(-50%, -50%); z-index: 2; background: #ED1C24; color: #fff; font-weight: 700; font-size: 15px; padding: 5px 15px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(0, 0, 0, .12); white-space: nowrap; }
+.cp-tl-dot { position: absolute; left: 24px; transform: translateX(-50%); bottom: 0; z-index: 2; width: 11px; height: 11px; border-radius: 50%; background: #ED1C24; }
+.cp-tl-img { width: 274px; height: 190px; object-fit: cover; border-radius: 6px; display: block; position: relative; z-index: 1; }
 .cp-tl-ph { display: grid; place-items: center; gap: 6px; background: #eceff2; color: #aeb6bf; }
 .cp-tl-name { font-size: 17px; font-weight: 700; color: #1b252e; line-height: 1.28; margin-top: 16px; }
 .cp-tl-desc { font-size: 12.5px; color: #6b727b; line-height: 1.55; margin-top: 10px; }
-/* Flechas del carrusel: abajo a la derecha. */
+/* Flechas del carrusel: abajo a la derecha, clickeables. */
 .cp-tl-arrows { justify-content: flex-end; margin-top: 16px; }
-.cp-tl-arrows .cp-plist-arrow { width: 38px; height: 38px; border-color: #d8d8d8; color: #9aa0a6; font-size: 20px; }
+.cp-tl-arrows .cp-plist-arrow { width: 38px; height: 38px; border-color: #d8d8d8; color: #9aa0a6; font-size: 20px; cursor: pointer; transition: border-color .15s, color .15s; }
+.cp-tl-arrows .cp-plist-arrow:hover { border-color: #9aa0a6; color: #2b2b2b; }
 
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }
