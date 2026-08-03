@@ -390,6 +390,23 @@ export const COMPONENTS = [
     ],
     specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1570×1177px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
   },
+  {
+    key: 'timeline',
+    name: 'Línea de tiempo',
+    category: 'Contenido',
+    help: 'Sección "Historia": título + subtítulo centrados y una línea de tiempo horizontal (carrusel). Cada hito: año en pill roja sobre la línea, imagen, título y descripción; un punto rojo cierra el conector.',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Historia Purina®' },
+      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.' },
+      { key: 'items', label: 'Hitos', type: 'list', itemLabel: 'Hito', item: [
+        { key: 'year', label: 'Año', type: 'text' },
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'description', label: 'Descripcion', type: 'textarea' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 274×190', desktop: '274×190px', mobile: '274×190px', max: '500kb', format: 'JPG' }],
+  },
 ]
 
 export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key, c]))

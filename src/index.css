@@ -1763,6 +1763,26 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-block--testimonials { margin-inline: -60px; }
 .pb-canvas.preview .pb-block--testimonials .cp-testi { padding-inline: 60px; }
 
+/* ===== Linea de tiempo (Historia) ===== */
+.cp-tl-head { text-align: center; margin-bottom: 40px; }
+.cp-tl-h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; color: #1b252e; }
+.cp-tl-sub { font-size: 13.5px; color: #6b727b; line-height: 1.5; max-width: 480px; margin: 12px auto 0; }
+/* Carrusel de hitos: sangra al borde derecho (se cortan las cards que siguen). */
+.cp-tl-track { position: relative; display: flex; flex-wrap: nowrap; gap: 12px; overflow: hidden; padding-top: 48px; margin-right: -60px; }
+/* Linea horizontal punteada por donde se apoyan las pills de anho. */
+.cp-tl-track::before { content: ''; position: absolute; top: 18px; left: 24px; right: 0; border-top: 1px dashed #eab6b9; }
+.cp-tl-item { position: relative; flex: 0 0 330px; padding-left: 56px; padding-bottom: 30px; }
+/* Conector vertical punteado (de la linea de arriba hasta el punto rojo de abajo). */
+.cp-tl-item::before { content: ''; position: absolute; left: 24px; top: 18px; bottom: 5px; border-left: 1px dashed #eab6b9; }
+.cp-tl-year { position: absolute; top: 4px; left: 24px; transform: translateX(-50%); background: #ED1C24; color: #fff; font-weight: 700; font-size: 15px; padding: 5px 15px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(0, 0, 0, .12); white-space: nowrap; }
+.cp-tl-dot { position: absolute; left: 24px; transform: translateX(-50%); bottom: 0; width: 11px; height: 11px; border-radius: 50%; background: #ED1C24; }
+.cp-tl-img { width: 274px; height: 190px; object-fit: cover; border-radius: 6px; display: block; }
+.cp-tl-ph { display: grid; place-items: center; gap: 6px; background: #eceff2; color: #aeb6bf; }
+.cp-tl-name { font-size: 17px; font-weight: 700; color: #1b252e; line-height: 1.28; margin-top: 16px; }
+.cp-tl-desc { font-size: 12.5px; color: #6b727b; line-height: 1.55; margin-top: 10px; }
+.cp-tl-arrows { justify-content: center; margin-top: 8px; }
+.cp-tl-arrows .cp-plist-arrow { width: 38px; height: 38px; border-color: #d8d8d8; color: #9aa0a6; font-size: 20px; }
+
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }
 .cp-breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; list-style: none; margin: 0; padding: 0; font-size: 12px; }

@@ -605,6 +605,41 @@ const RENDERERS = {
       </div>
     )
   },
+
+  // Linea de tiempo "Historia": header centrado + carrusel de hitos. Cada hito lleva
+  // una pill de anho (roja) sobre una linea horizontal punteada, un conector vertical
+  // punteado que baja hasta un punto rojo, y la imagen 274x190 + titulo + descripcion.
+  timeline: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { year: '1894', title: 'Purina is founded in St. Louis, Missouri, USA.', description: 'Purina was founded by William H. Danforth, who began with farm animal feed but had a greater ambition — to create high-quality, convenient nutrition for companion animals.' },
+      { year: '1926', title: 'First centre dedicated to dog nutrition', description: 'Purina opens the industry\'s first dedicated pet nutrition centre in Gray Summit, Missouri. Backed by feeding studies and data-driven testing, this sets a new standard in understanding the nutritional needs of dogs.' },
+      { year: '1957', title: 'First kibble biscuit produced', description: 'Purina pioneers the use of extrusion technology in pet food and produces the first kibble biscuit. This innovation improves cooking, boosts digestibility, and enhances taste in a convenient, ready-to-serve format.' },
+      { year: '1961', title: 'First complete cat nutrition', description: 'Purina develops one of the first complete and balanced diets formulated specifically for cats.' },
+    ]
+    return (
+      <div className="cp-tl">
+        <div className="cp-tl-head">
+          <div className="cp-tl-h1">{T(c.title, 'Historia Purina®')}</div>
+          <div className="cp-tl-sub">{T(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.')}</div>
+        </div>
+        <div className="cp-tl-track">
+          {arr.map((it, i) => (
+            <div key={i} className="cp-tl-item">
+              <span className="cp-tl-year">{T(it.year, '—')}</span>
+              {it.image
+                ? <MediaEl className="cp-tl-img" src={it.image} />
+                : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">274×190px</span></div>}
+              <div className="cp-tl-name">{T(it.title, 'Título del hito')}</div>
+              <p className="cp-tl-desc">{T(it.description, 'Descripción del hito.')}</p>
+              <span className="cp-tl-dot" />
+            </div>
+          ))}
+        </div>
+        <div className="cp-plist-arrows cp-tl-arrows"><span className="cp-plist-arrow">‹</span><span className="cp-plist-arrow">›</span></div>
+      </div>
+    )
+  },
 }
 
 export default function ComponentPreview({ componentKey, content }) {
