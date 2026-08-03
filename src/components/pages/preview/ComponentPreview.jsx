@@ -187,7 +187,7 @@ const RENDERERS = {
               <div className="cp-svc-sub">{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</div>
             </div>
             <div className="cp-svc-arrows">
-              <span className="cp-svc-nav">‹</span><span className="cp-svc-nav">›</span>
+              <span className="cp-svc-nav" onClick={scrollCarousel(-1)}>‹</span><span className="cp-svc-nav" onClick={scrollCarousel(1)}>›</span>
             </div>
           </div>
           <div className="cp-svc-cards">
@@ -228,7 +228,7 @@ const RENDERERS = {
             <div className="cp-brands-title">{T(c.title, 'Marcas Purina®')}</div>
             <div className="cp-brands-sub">{T(c.subtitle, 'La variedad que buscas, con la confianza de Purina®')}</div>
           </div>
-          <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
+          <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
         <div className="cp-brands-row">
           {arr.map((card, i) => {
@@ -272,7 +272,7 @@ const RENDERERS = {
             <div className="cp-brands-title"><span className="cp-spark">✦</span> {T(c.title, 'Nuestro Blog')}</div>
             <div className="cp-brands-sub">{T(c.subtitle, 'Artículos pensados para ti y tu mascota')}</div>
           </div>
-          <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
+          <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
         <div className="cp-artc-row">
           {arr.map((a, i) => (
@@ -376,8 +376,8 @@ const RENDERERS = {
             {filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
           </div>
           <div className="cp-plist-arrows">
-            <span className="cp-plist-arrow disabled">‹</span>
-            <span className="cp-plist-arrow">›</span>
+            <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>
+            <span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span>
           </div>
         </div>
         <div className="cp-plist-row">
@@ -498,6 +498,19 @@ function scrollRow(rootSel, rowSel, step) {
   }
 }
 const scrollCmt = scrollRow('.cp-cmt', '.cp-cmt-row', 431)
+
+// Scroll generico de los carruseles clasicos (marcas, blog, servicios, productos):
+// desde la flecha sube al contenedor del carrusel, encuentra su fila scrolleable y
+// la desplaza ~85% del ancho visible (sirve para cualquier tamano de card).
+const CAROUSEL_ROOT = '.cp-brands, .cp-svc, .cp-plist'
+const CAROUSEL_ROW = '.cp-brands-row, .cp-artc-row, .cp-svc-cards, .cp-plist-row'
+function scrollCarousel(dir) {
+  return (e) => {
+    const root = e.currentTarget.closest(CAROUSEL_ROOT)
+    const row = root && root.querySelector(CAROUSEL_ROW)
+    if (row) row.scrollBy({ left: dir * Math.max(240, row.clientWidth * 0.85), behavior: 'smooth' })
+  }
+}
 
 export default function ComponentPreview({ componentKey, content }) {
   const render = RENDERERS[componentKey]
