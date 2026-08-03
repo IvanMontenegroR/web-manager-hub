@@ -241,6 +241,22 @@ export const COMPONENTS = [
     ],
     specs: [{ ratio: 'Desktop 411×520', desktop: '411×520px', mobile: '411×520px', max: '500kb', format: 'JPG' }],
   },
+  {
+    key: 'fifty_fifty',
+    name: '50/50',
+    category: 'Contenido',
+    help: 'Bloque a dos columnas (50/50): título + texto a la izquierda; a la derecha, un texto o un desplegable (acordeón) de items (título + texto). El item abierto marca su título en rojo.',
+    fields: [
+      { key: 'title', label: 'Titulo (izquierda)', type: 'text', placeholder: 'Nutriendo mascotas. Enriqueciendo vidas.' },
+      { key: 'text', label: 'Texto (izquierda)', type: 'textarea' },
+      { key: 'right_type', label: 'Columna derecha', type: 'select', cms: true, options: ['Desplegable', 'Texto'] },
+      { key: 'right_text', label: 'Texto (derecha)', type: 'textarea' },
+      { key: 'items', label: 'Desplegables', type: 'list', itemLabel: 'Item', item: [
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+      ] },
+    ],
+  },
 ]
 
 export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key, c]))

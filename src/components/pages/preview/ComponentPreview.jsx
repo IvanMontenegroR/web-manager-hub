@@ -1,4 +1,4 @@
-import { ImageIcon, Dog, Cat, PawPrint } from 'lucide-react'
+import { ImageIcon, Dog, Cat, PawPrint, ChevronDown } from 'lucide-react'
 
 // Mockups aproximados de cada componente. Se llenan con el contenido cargado, asi
 // se ve la pagina armandose. La MISMA imagen renderizada se captura para el export.
@@ -472,6 +472,45 @@ const RENDERERS = {
               <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
             </div>
           ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Bloque 50/50: titulo + texto a la izquierda; a la derecha texto o un desplegable
+  // (acordeon) de items. Usa <details>/<summary> nativos (click para abrir/cerrar);
+  // el item abierto marca su titulo en rojo.
+  fifty_fifty: (c) => {
+    const drop = !/texto/i.test(c.right_type || '') // por defecto: desplegable
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { title: 'Misión' },
+      { title: 'Visión', text: 'Dorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus.' },
+      { title: 'Valores' },
+    ]
+    const openIdx = arr.findIndex((it) => it.text)
+    return (
+      <div className="cp-half">
+        <div className="cp-half-left">
+          <div className="cp-half-title">{T(c.title, 'Nutriendo mascotas. Enriqueciendo vidas.')}</div>
+          <p className="cp-half-text">{T(c.text, 'Desde hace más de 130 años creemos que las mascotas y las personas están mejor juntas. Por eso ponemos tanto cuidado en la calidad de nuestros alimentos: porque también amamos a las mascotas.')}</p>
+        </div>
+        <div className="cp-half-right">
+          {drop ? (
+            <div className="cp-half-acc">
+              {arr.map((it, i) => (
+                <details key={i} className="cp-acc-item" open={i === (openIdx < 0 ? 0 : openIdx)}>
+                  <summary className="cp-acc-sum">
+                    <span className="cp-acc-label">{T(it.title, 'Título')}</span>
+                    <ChevronDown size={18} className="cp-acc-chev" />
+                  </summary>
+                  {it.text && <div className="cp-acc-body">{it.text}</div>}
+                </details>
+              ))}
+            </div>
+          ) : (
+            <p className="cp-half-rtext">{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</p>
+          )}
         </div>
       </div>
     )
