@@ -407,6 +407,23 @@ export const COMPONENTS = [
     ],
     specs: [{ ratio: 'Desktop 274×190', desktop: '274×190px', mobile: '274×190px', max: '500kb', format: 'JPG' }],
   },
+  {
+    key: 'commitment_carousel',
+    name: 'Carrusel de compromiso',
+    category: 'Carruseles',
+    help: 'Sección "Compromiso Purina®": header (título + subtítulo) con flechas y un carrusel de cards verticales con imagen de fondo a sangre, título arriba y descripción abajo (overlaid en blanco).',
+    fields: [
+      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Compromiso Purina®' },
+      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
+      { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
+        { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'description', label: 'Descripcion', type: 'textarea' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 411×520', desktop: '411×520px', mobile: '411×520px', max: '500kb', format: 'JPG' }],
+  },
 ]
 
 export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key, c]))

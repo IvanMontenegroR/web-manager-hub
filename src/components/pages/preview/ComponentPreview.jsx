@@ -643,6 +643,44 @@ const RENDERERS = {
       </div>
     )
   },
+
+  // Carrusel "Compromiso Purina": header (titulo + subtitulo) con flechas + cards
+  // verticales con imagen de fondo a sangre, titulo arriba y descripcion abajo.
+  commitment_carousel: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { title: 'Para mascotas y personas', description: 'Enriquecer la vida de las mascotas y de las personas que las aman.' },
+      { title: 'Nutrición y calidad', description: 'Defender la seguridad y la nutrición de alta calidad.' },
+      { title: 'Innovación', description: 'Impulsar innovaciones que ayuden a las mascotas a prosperar.' },
+      { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
+    ]
+    return (
+      <div className="cp-brands cp-cmt">
+        <div className="cp-brands-head">
+          <div>
+            <div className="cp-brands-title">{T(c.title, 'Compromiso Purina®')}</div>
+            <div className="cp-brands-sub">{T(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.')}</div>
+          </div>
+          <div className="cp-plist-arrows">
+            <span className="cp-plist-arrow" onClick={scrollCmt(-1)}>‹</span>
+            <span className="cp-plist-arrow" onClick={scrollCmt(1)}>›</span>
+          </div>
+        </div>
+        <div className="cp-cmt-row">
+          {arr.map((it, i) => (
+            <div key={i} className="cp-cmt-card">
+              {it.image
+                ? <MediaEl className="cp-cmt-img" src={it.image} />
+                : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">411×520px</span></div>}
+              <div className="cp-cmt-scrim" />
+              <div className="cp-cmt-ttl">{T(it.title, 'Título')}</div>
+              <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
 }
 
 // Scroll del carrusel de la timeline: desde la flecha, encuentra el track hermano
@@ -654,6 +692,17 @@ function scrollTL(dir) {
     if (track) track.scrollBy({ left: dir * 342, behavior: 'smooth' })
   }
 }
+
+// Scroll generico de un carrusel: sube desde la flecha hasta `rootSel`, busca la
+// fila `rowSel` adentro y la desplaza `step` px (una card + gap).
+function scrollRow(rootSel, rowSel, step) {
+  return (dir) => (e) => {
+    const root = e.currentTarget.closest(rootSel)
+    const row = root && root.querySelector(rowSel)
+    if (row) row.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
+}
+const scrollCmt = scrollRow('.cp-cmt', '.cp-cmt-row', 431)
 
 export default function ComponentPreview({ componentKey, content }) {
   const render = RENDERERS[componentKey]
