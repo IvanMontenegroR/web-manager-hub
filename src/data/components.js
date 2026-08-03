@@ -58,23 +58,6 @@ export const COMPONENTS = [
     },
   },
   {
-    key: 'card_grid',
-    name: 'Card grid',
-    category: 'Contenido',
-    help: 'Grilla de tarjetas (iconos, numeros, imagen + titulo...).',
-    fields: [
-      { key: 'type', label: 'Tipo de grilla', type: 'select', cms: true, options: ['Cards Icons', 'Cards Numbers', 'Cards simple (imagen + titulo)', 'Box image + card icons', 'Full background card icons'] },
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
-        { key: 'image', label: 'Imagen / icono', type: 'image' },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'subtitle', label: 'Texto', type: 'textarea' },
-        { key: 'url', label: 'Link', type: 'url' },
-      ] },
-    ],
-  },
-  {
     key: 'text',
     name: 'Texto',
     category: 'Contenido',
@@ -98,59 +81,6 @@ export const COMPONENTS = [
       { key: 'cta_label', label: 'Botón — texto', type: 'text' },
       { key: 'cta_url', label: 'Botón — link', type: 'url' },
     ],
-  },
-  {
-    key: 'big_number_grid',
-    name: 'Grilla de numeros',
-    category: 'Contenido',
-    help: 'Numeros grandes con su etiqueta (estadisticas).',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'numbers', label: 'Numeros', type: 'list', itemLabel: 'Numero', item: [
-        { key: 'number', label: 'Numero', type: 'text' },
-        { key: 'label', label: 'Etiqueta', type: 'text' },
-      ] },
-    ],
-  },
-  {
-    key: 'external_video',
-    name: 'Video externo',
-    category: 'Contenido',
-    help: 'Video embebido (YouTube/Vimeo) con miniatura.',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'video_url', label: 'Link del video', type: 'url' },
-      { key: 'thumbnail', label: 'Miniatura', type: 'image' },
-    ],
-  },
-  {
-    key: 'article_list',
-    name: 'Listado de articulos',
-    category: 'Articulos',
-    help: 'Bloque que lista articulos (el CMS los popula por tipo).',
-    fields: [
-      { key: 'block_type', label: 'Tipo de bloque', type: 'select', cms: true, options: ['Featured', 'Highlighted', 'Recommendation List', 'Latest'] },
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'note', label: 'Nota para el editor', type: 'textarea' },
-    ],
-  },
-
-  // ===== Nuevos componentes del Design Guidelines 2026 (homepage + reusables) =====
-  {
-    key: 'featured_articles',
-    name: 'Featured articles',
-    category: 'Articulos',
-    help: 'Articulo destacado: imagen grande + tarjeta con categoria, titulo, bajada y autor.',
-    fields: [
-      { key: 'category', label: 'Categoria (chip)', type: 'text' },
-      { key: 'title', label: 'Titulo del articulo', type: 'text' },
-      { key: 'description', label: 'Bajada', type: 'textarea' },
-      { key: 'image', label: 'Imagen', type: 'image' },
-      { key: 'author', label: 'Autor', type: 'text' },
-      { key: 'date', label: 'Fecha', type: 'text' },
-      { key: 'link_url', label: 'Link del articulo', type: 'url' },
-    ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1216×912px', mobile: '303×454px', max: '500kb', format: 'JPG / MP4' }],
   },
   {
     key: 'services_carousel',
@@ -256,31 +186,8 @@ export const COMPONENTS = [
     specs: [{ label: 'Imagen de marca', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG' }],
   },
   {
-    key: 'product_cards',
-    name: 'Cards de producto',
-    category: 'Marcas',
-    help: 'Grilla de cards de producto. El tipo define el tamano de imagen: A ingrediente, B producto, C marca.',
-    fields: [
-      { key: 'variant', label: 'Tipo de card', type: 'select', cms: true, options: ['A · Ingrediente', 'B · Producto', 'C · Marca'] },
-      { key: 'title', label: 'Titulo de la seccion', type: 'text' },
-      { key: 'cards', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'subtitle', label: 'Texto / subtitulo', type: 'textarea' },
-        { key: 'tags', label: 'Tags (separados por coma)', type: 'text' },
-        { key: 'url', label: 'Link', type: 'url' },
-      ] },
-    ],
-    specKey: 'variant',
-    specsByType: {
-      'A · Ingrediente': [{ ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG' }],
-      'B · Producto': [{ ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '540×540px', mobile: '540×540px', max: '500kb', format: 'JPG' }],
-      'C · Marca': [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG' }],
-    },
-  },
-  {
     key: 'product_list',
-    name: 'Listado de productos',
+    name: 'Carrusel de productos',
     category: 'Marcas',
     help: 'Sección "Más populares": tabs de filtro + carrusel de card-products. Card promo (ej. Pet ID) opcional y botón "Ver todos". Sin imagen usa placeholder. En el CMS los productos los popula la vista; acá cargás ejemplos.',
     fields: [
@@ -301,96 +208,6 @@ export const COMPONENTS = [
     specs: [{ label: 'Imagen de producto', ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
-    key: 'banner_ia',
-    name: 'Banner IA',
-    category: 'Hero',
-    help: 'Banner con forma de pastilla (stadium): imagen de fondo + titulo + barra de busqueda del asistente.',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'placeholder', label: 'Texto del buscador', type: 'text', placeholder: 'Escribe tus consultas aquí…' },
-      { key: 'image', label: 'Imagen de fondo', type: 'image' },
-    ],
-    specs: [{ ratio: 'Desktop 1.5:1 · Mobile 1.5:1', desktop: '1552×1014px', mobile: '670×446px', max: '500kb', format: 'JPG' }],
-  },
-  {
-    key: 'section',
-    name: 'Seccion con fondo',
-    category: 'Contenido',
-    help: 'Seccion con imagen/degradado de fondo a sangre: titulo + subtitulo arriba y tarjetas con icono abajo.',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text' },
-      { key: 'background', label: 'Imagen de fondo', type: 'image' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
-        { key: 'icon', label: 'Icono (imagen)', type: 'image' },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'text', label: 'Texto', type: 'textarea' },
-      ] },
-    ],
-    specs: [{ label: 'Fondo', ratio: 'Desktop 1:1 · Mobile 9:16', desktop: '2784×1994px', mobile: '702×1248px', max: '500kb', format: 'JPG' }],
-  },
-  {
-    key: 'category_grid',
-    name: 'Categorias',
-    category: 'Navegacion',
-    help: 'Bloque "Categorias populares": tarjetas horizontales con imagen de fondo y titulo por categoria.',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Categorías populares' },
-      { key: 'items', label: 'Categorias', type: 'list', itemLabel: 'Categoria', item: [
-        { key: 'label', label: 'Nombre', type: 'text' },
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'url', label: 'Link', type: 'url' },
-      ] },
-    ],
-    specs: [{ ratio: 'Desktop 3:1 · Mobile 2.25:1', desktop: '758×252px', mobile: '320×142px', max: '500kb', format: 'JPG' }],
-  },
-  {
-    key: 'header_menu',
-    name: 'Header menu (cards)',
-    category: 'Navegacion',
-    help: 'Tarjetas promocionales del menu desplegable del header: imagen + titulo + bajada + flecha.',
-    fields: [
-      { key: 'items', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'description', label: 'Bajada', type: 'textarea' },
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'url', label: 'Link', type: 'url' },
-      ] },
-    ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
-  },
-  {
-    key: 'banner_tutorial',
-    name: 'Banner tutorial',
-    category: 'Hero',
-    help: 'Banner "Cómo introducir…": fondo con asistente a la izquierda + carrusel de pasos (dia + imagen + texto) a la derecha.',
-    fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'assistant_name', label: 'Nombre del asistente', type: 'text', placeholder: 'Pandora' },
-      { key: 'background', label: 'Imagen de fondo', type: 'image' },
-      { key: 'steps', label: 'Pasos', type: 'list', itemLabel: 'Paso', item: [
-        { key: 'day', label: 'Etiqueta (ej. Día 1 - 3)', type: 'text' },
-        { key: 'description', label: 'Descripcion', type: 'textarea' },
-        { key: 'image', label: 'Imagen del paso', type: 'image' },
-      ] },
-    ],
-    specs: [
-      { label: 'Fondo', ratio: 'Desktop 2.5:1', desktop: '2784×1772px', mobile: '540×940px', max: '500kb', format: 'JPG' },
-      { label: 'Pasos', ratio: 'Desktop 1:1', desktop: '624×624px', mobile: '400×400px', max: '500kb', format: 'JPG' },
-    ],
-  },
-  {
-    key: 'post_image',
-    name: 'Imagen de post',
-    category: 'Articulos',
-    help: 'Imagen dentro del cuerpo de un articulo.',
-    fields: [
-      { key: 'image', label: 'Imagen', type: 'image' },
-      { key: 'alt', label: 'Texto alternativo', type: 'text' },
-    ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1570×1177px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
-  },
-  {
     key: 'timeline',
     name: 'Línea de tiempo',
     category: 'Contenido',
@@ -409,7 +226,7 @@ export const COMPONENTS = [
   },
   {
     key: 'commitment_carousel',
-    name: 'Carrusel de compromiso',
+    name: 'Carrusel de cards',
     category: 'Carruseles',
     help: 'Sección "Compromiso Purina®": header (título + subtítulo) con flechas y un carrusel de cards verticales con imagen de fondo a sangre, título arriba y descripción abajo (overlaid en blanco).',
     fields: [
