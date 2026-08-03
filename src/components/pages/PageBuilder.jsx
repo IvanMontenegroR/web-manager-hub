@@ -19,6 +19,7 @@ export default function PageBuilder({ page, onBack }) {
   const [selId, setSelId] = useState(null)
   const [draft, setDraft] = useState({})
   const [dirty, setDirty] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [editMode, setEditMode] = useState(true) // false = vista previa (pagina real, sin toolbars)
@@ -39,28 +40,63 @@ export default function PageBuilder({ page, onBack }) {
   const selected = comps.find((c) => c.id === selId) || null
   const selectedDef = selected ? getComponent(selected.component_key) : null
 
-  function select(comp) {
+  // Refs con el ultimo valor, para que los timers / beforeunload / flush no dependan
+  // de closures viejas.
+  const draftRef = useRef(draft); draftRef.current = draft
+  const selRef = useRef(selId); selRef.current = selId
+  const dirtyRef = useRef(dirty); dirtyRef.current = dirty
+
+  // Persiste el borrador vigente en la DB SIN bloquear la UI. Idempotente y seguro
+  // de llamar en cualquier momento (al cambiar de componente, salir, autosave...).
+  async function flushSave() {
+    const id = selRef.current
+    if (!id || !dirtyRef.current) return
+    const data = draftRef.current
+    setSaving(true)
+    try {
+      await updatePageComponentContent(id, data)
+      setComps((cs) => cs.map((c) => (c.id === id ? { ...c, content: data } : c)))
+      // Solo marcar "guardado" si no hubo cambios nuevos mientras se guardaba.
+      if (draftRef.current === data) setDirty(false)
+    } catch (e) { setErrMsg(e.message) } finally { setSaving(false) }
+  }
+
+  // AUTOGUARDADO: cada cambio del borrador se persiste solo ~700ms despues de que
+  // dejas de tocar. Asi, aunque no le des a "Guardar", no se pierde el progreso.
+  useEffect(() => {
+    if (!dirty || !selId) return
+    const t = setTimeout(() => { flushSave() }, 700)
+    return () => clearTimeout(t)
+  }, [draft, dirty, selId])
+
+  // Backstop: si intentas cerrar/recargar la pestana con cambios sin guardar, avisa.
+  useEffect(() => {
+    const h = (e) => { if (dirtyRef.current) { e.preventDefault(); e.returnValue = '' } }
+    window.addEventListener('beforeunload', h)
+    return () => window.removeEventListener('beforeunload', h)
+  }, [])
+
+  async function select(comp) {
+    if (comp.id === selRef.current) return
+    await flushSave() // guarda lo del componente anterior antes de cambiar
     setSelId(comp.id)
     setDraft(comp.content || {})
+    setDirty(false)
+  }
+
+  async function closeEditor() {
+    await flushSave()
+    setSelId(null)
     setDirty(false)
   }
 
   async function add(key) {
     setBusy(true)
     try {
+      await flushSave() // no perder lo del componente actual al agregar otro
       const created = await addPageComponent(page.id, key, nextSort)
       await load()
-      select(created)
-    } catch (e) { setErrMsg(e.message) } finally { setBusy(false) }
-  }
-
-  async function save() {
-    if (!selected) return
-    setBusy(true)
-    try {
-      await updatePageComponentContent(selected.id, draft)
-      setComps((cs) => cs.map((c) => (c.id === selected.id ? { ...c, content: draft } : c)))
-      setDirty(false)
+      await select(created)
     } catch (e) { setErrMsg(e.message) } finally { setBusy(false) }
   }
 
@@ -68,6 +104,7 @@ export default function PageBuilder({ page, onBack }) {
     if (!confirm(`Quitar "${getComponent(comp.component_key)?.name || comp.component_key}" de la pagina?`)) return
     setBusy(true)
     try {
+      if (comp.id !== selId) await flushSave() // preservar edits de otro componente
       await deletePageComponent(comp.id)
       if (selId === comp.id) { setSelId(null); setDirty(false) }
       await load()
@@ -86,7 +123,7 @@ export default function PageBuilder({ page, onBack }) {
   async function exportExcel() {
     setExporting(true)
     try {
-      if (dirty && selected) await save()
+      await flushSave()
       // usar el contenido vigente (incluye lo recien guardado)
       const current = comps.map((c) => (c.id === selId ? { ...c, content: draft } : c))
       await exportPageMatrix(page, current, (id) => {
@@ -102,13 +139,13 @@ export default function PageBuilder({ page, onBack }) {
   return (
     <div className="content pb-content">
       <div className="pb-bar">
-        <button className="btn btn-sm" onClick={onBack}><ArrowLeft size={14} /> Paginas</button>
+        <button className="btn btn-sm" onClick={async () => { await flushSave(); onBack() }}><ArrowLeft size={14} /> Paginas</button>
         <div className="pb-title">{page.name}</div>
         <button
           className={`btn btn-sm${editMode ? ' active' : ''}`}
           style={{ marginLeft: 'auto' }}
           title={editMode ? 'Modo edicion (click para ver la pagina)' : 'Vista previa (click para editar)'}
-          onClick={() => { setEditMode((v) => !v); if (editMode) setSelId(null) }}
+          onClick={async () => { if (editMode) await flushSave(); setEditMode((v) => !v); if (editMode) setSelId(null) }}
         >
           <Pencil size={14} /> {editMode ? 'Editando' : 'Vista previa'}
         </button>
@@ -179,14 +216,15 @@ export default function PageBuilder({ page, onBack }) {
             <>
               <div className="pb-editor-h">
                 <span>{selectedDef.name}</span>
-                <button className="ic-btn" onClick={() => setSelId(null)} title="Cerrar"><X size={15} /></button>
+                <button className="ic-btn" onClick={closeEditor} title="Cerrar"><X size={15} /></button>
               </div>
               {selectedDef.help && <div className="pb-editor-help">{selectedDef.help}</div>}
               <ContentForm component={selectedDef} draft={draft} onChange={setDraftField} />
               <div className="pb-editor-foot">
-                <button className="btn btn-primary btn-sm" onClick={save} disabled={busy || !dirty}>
-                  {dirty ? <><Save size={14} /> Guardar</> : <><Check size={14} /> Guardado</>}
+                <button className="btn btn-primary btn-sm" onClick={flushSave} disabled={busy || saving || !dirty}>
+                  {saving ? <><Save size={14} /> Guardando…</> : dirty ? <><Save size={14} /> Guardar</> : <><Check size={14} /> Guardado</>}
                 </button>
+                <span className="pb-autosave">Se guarda solo</span>
               </div>
             </>
           ) : (
