@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Boxes, BookOpen, FileText, ChevronRight, LayoutTemplate, Sparkles } from 'lucide-react'
+import { Boxes, BookOpen, FileText, ChevronRight, LayoutTemplate, Sparkles, LayoutGrid } from 'lucide-react'
 import { PLAYBOOKS } from '../data/playbooks'
 import DocViewer from '../components/docs/DocViewer.jsx'
 import PagesTracker from '../components/pages/PagesTracker.jsx'
 import PageBuilder from '../components/pages/PageBuilder.jsx'
+import ComponentsGallery from '../components/pages/ComponentsGallery.jsx'
 
 // Ecosystem 2.0 = hub de la migracion. Hoy: documentacion (playbooks del backend
 // v2.0) y el modulo "Creacion de paginas" (tracker de paginas + builder/export).
@@ -48,6 +49,20 @@ export default function Ecosystem() {
           </div>
         </div>
         <PagesTracker onBack={() => setView(null)} onOpenBuilder={setBuilderPage} />
+      </>
+    )
+  }
+
+  if (view === 'gallery') {
+    return (
+      <>
+        <div className="topbar">
+          <div>
+            <h1>Todos los componentes</h1>
+            <div className="sub">Galería de todos los componentes disponibles del builder</div>
+          </div>
+        </div>
+        <ComponentsGallery onBack={() => setView(null)} />
       </>
     )
   }
@@ -106,6 +121,15 @@ export default function Ecosystem() {
                 <div className="eco-doc-tag">Builder</div>
                 <h3>Creacion de paginas</h3>
                 <p>Lista de paginas a armar (estado + prioridad). Proximamente: builder visual con componentes y export de matriz de contenido para editores.</p>
+              </div>
+              <ChevronRight size={18} className="eco-doc-arrow" />
+            </button>
+            <button className="eco-doc-card" onClick={() => setView('gallery')}>
+              <div className="eco-doc-icon"><LayoutGrid size={20} /></div>
+              <div className="eco-doc-body">
+                <div className="eco-doc-tag">Referencia</div>
+                <h3>Todos los componentes</h3>
+                <p>Galería con todos los componentes disponibles del builder, renderizados con su contenido por defecto. Se actualiza sola al sumar componentes nuevos.</p>
               </div>
               <ChevronRight size={18} className="eco-doc-arrow" />
             </button>
