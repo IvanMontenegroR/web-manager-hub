@@ -164,114 +164,36 @@ function drawBox(ws, r1, r2, c1, c2, argb, style = 'medium') {
   }
 }
 
-// Hoja "Banners": cada tipo de banner en su propia columna, uno al lado del otro
-// (nombre + tamaño + imagen + campos). Sirve para comparar todos los tipos de una.
-async function addBannersSheet(wb, banners, getNode) {
-  const ws = wb.addWorksheet('Banners', { views: [{ showGridLines: false }] })
-  const BLOCK = 3 // por tipo: campo(22) + contenido(44) + separacion(2)
-  const cols = [{ width: 2 }]
-  for (let i = 0; i < banners.length; i++) cols.push({ width: 22 }, { width: 44 }, { width: 2 })
-  ws.columns = cols
-  const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
-  const thin = { style: 'thin', color: { argb: BORDER } }
-  const def = getComponent('banner')
-
-  // Titulo de la hoja.
-  ws.mergeCells(1, 2, 1, 1 + banners.length * BLOCK)
-  const t = ws.getCell(1, 2)
-  t.value = 'Banner — todos los tipos (uno al lado del otro)'
-  t.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } }
-  t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
-  t.alignment = { vertical: 'middle', indent: 1 }
-  setH(1, 26)
-
-  const NAME_ROW = 3, SIZE_ROW = 4, IMG_ROW = 5, IMG_BAND = 14, FIELDS_ROW = IMG_ROW + IMG_BAND
-
-  for (let i = 0; i < banners.length; i++) {
-    const comp = banners[i]
-    const content = comp.content || {}
-    const c = 2 + i * BLOCK, c2 = c + 1
-
-    // Nombre del tipo.
-    ws.mergeCells(NAME_ROW, c, NAME_ROW, c2)
-    const nm = ws.getCell(NAME_ROW, c)
-    nm.value = content.type || 'Banner'
-    nm.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } }
-    nm.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PURINA_RED } }
-    nm.alignment = { vertical: 'middle', indent: 1 }
-    setH(NAME_ROW, 22)
-
-    // Tamaño recomendado.
-    ws.mergeCells(SIZE_ROW, c, SIZE_ROW, c2)
-    const sz = ws.getCell(SIZE_ROW, c)
-    sz.value = (getSpecs(def, content).map((s) => [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  -  ')).join('\n') || '—').replace(/·/g, '-')
-    sz.font = { italic: true, size: 9, color: { argb: PURINA_RED } }
-    sz.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
-    sz.alignment = { vertical: 'top', wrapText: true }
-    setH(SIZE_ROW, 40)
-
-    // Imagen del banner (arriba en su columna).
-    const dataUrl = await snapshot(getNode(comp.id), CAP_W)
-    if (dataUrl) {
-      const probe = await loadSize(dataUrl)
-      const nat = probe || { w: 1180, h: 400 }
-      const { w, h } = fit(nat.w, nat.h, 450, 230)
-      const imgId = wb.addImage({ base64: dataUrl, extension: 'png' })
-      ws.addImage(imgId, { tl: { col: (c - 1) + 0.04, row: (IMG_ROW - 1) + 0.1 }, ext: { width: w, height: h }, editAs: 'oneCell' })
-    }
-    for (let r = IMG_ROW; r < IMG_ROW + IMG_BAND; r++) setH(r, 13)
-
-    // Campos del tipo (label | contenido), listas expandidas por item.
-    let row = FIELDS_ROW
-    ws.getCell(row, c).value = 'Campo'; ws.getCell(row, c2).value = 'Contenido'
-    for (const cc of [c, c2]) { const cell = ws.getCell(row, cc); cell.font = { bold: true, size: 9 }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }; cell.border = { top: thin, bottom: thin, left: thin, right: thin } }
-    setH(row, 16); row++
-    const bfield = (label, value, sub) => {
-      const a = ws.getCell(row, c); a.value = label; a.font = { bold: !sub, size: 9, color: { argb: 'FF1F2530' } }; a.alignment = { vertical: 'top', wrapText: true, indent: sub ? 1 : 0 }
-      const empty = value == null || value === ''
-      const b = ws.getCell(row, c2); b.value = empty ? EMPTY : value; b.font = { size: 9, color: { argb: empty ? MUTED : 'FF1F2530' } }; b.alignment = { vertical: 'top', wrapText: true }
-      for (const cc of [c, c2]) ws.getCell(row, cc).border = { top: thin, bottom: thin, left: thin, right: thin }
-      setH(row, 16); row++
-    }
-    const bcard = (text) => {
-      ws.mergeCells(row, c, row, c2); const cell = ws.getCell(row, c); cell.value = text; cell.font = { bold: true, size: 9, color: { argb: 'FF7A1216' } }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CARD_BG } }; cell.alignment = { vertical: 'middle', indent: 1 }; setH(row, 16); row++
-    }
-    for (const f of visibleFields(def, content, { excel: true })) {
-      if (f.type === 'list') {
-        const items = Array.isArray(content[f.key]) && content[f.key].length ? content[f.key] : [{}]
-        const subs = (f.item || []).filter((sf) => !sf.cms)
-        items.forEach((it, k) => { bcard(`${f.itemLabel || f.label} ${k + 1}`); for (const sf of subs) bfield(sf.label, fieldToText(sf, it[sf.key]), true) })
-      } else {
-        bfield(f.label, fieldToText(f, content[f.key]))
-      }
-    }
-    drawBox(ws, NAME_ROW, row - 1, c, c2, PURINA_RED)
-  }
-}
-
 // components = [{ id, component_key, content }] en orden.
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
 export async function exportPageMatrix(page, components, getNode, opts = {}) {
   const withMetas = opts.metas !== false // por defecto se incluyen las metas (SEO)
-  // Con 2+ banners (galeria de todos los tipos), van a una hoja "Banners" aparte,
-  // uno al lado del otro. Con 1 solo (pagina del builder) queda inline en la matriz.
+  // Con 2+ banners (galeria de todos los tipos): el PRIMERO (Main Hero) queda en la
+  // matriz como un componente normal, y los OTROS tipos se muestran a su DERECHA, en la
+  // misma hoja (bloques en columnas F+). Con 1 solo (pagina del builder) queda inline.
   const isBanner = (c) => getComponent(c.component_key)?.key === 'banner'
   const bannerComps = components.filter(isBanner)
-  const useBannerSheet = bannerComps.length >= 2
-  const mainComps = useBannerSheet ? components.filter((c) => !isBanner(c)) : components
+  const useStrip = bannerComps.length >= 2
+  const firstBanner = bannerComps[0]
+  const otherBanners = useStrip ? bannerComps.slice(1) : []
+  const mainComps = useStrip ? components.filter((c) => !isBanner(c) || c === firstBanner) : components
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
     views: [{ showGridLines: false }],
   })
   const E_W = 70 // ancho (chars) de la columna de imagen
-  ws.columns = [
+  const columns = [
     { width: 2 },     // A: margen
     { width: 30 },    // B: campo
     { width: 52 },    // C: contenido
     { width: 2 },     // D: separacion
     { width: E_W },   // E: imagen
   ]
+  // Columnas para los OTROS tipos de banner a la derecha (bloque: campo 20, contenido 42).
+  const STRIP_C0 = columns.length + 2 // 1-based col del primer bloque (F=gap, G=label...)
+  if (useStrip) { columns.push({ width: 3 }); for (const _ of otherBanners) columns.push({ width: 20 }, { width: 42 }, { width: 3 }) }
+  ws.columns = columns
   const IMG_COL = 4 // 0-based -> columna E
   // Ancho interior de la col E en px (aprox Excel: chars*7 + 5). La imagen se topea
   // a ese ancho MENOS un margen, para que SIEMPRE quede dentro del marco (no se sale).
@@ -291,6 +213,61 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const { w, h } = fit(nat.w, nat.h, IMG_MAX_W, IMG_MAX_H)
     const id = wb.addImage({ base64: dataUrl, extension: 'png' })
     return { id, w, h, hpt: h * 0.75 }
+  }
+
+  // Renderiza un tipo de banner como bloque (nombre + tamaño + imagen + campos) en las
+  // columnas [c, c+1] desde topRow. Sirve para los OTROS tipos, a la derecha del primero.
+  async function bannerBlock(comp, topRow, c) {
+    const c2 = c + 1
+    const content = comp.content || {}
+    const bdef = getComponent('banner')
+    const thin = { style: 'thin', color: { argb: BORDER } }
+    let r = topRow
+    ws.mergeCells(r, c, r, c2)
+    const nm = ws.getCell(r, c)
+    nm.value = content.type || 'Banner'
+    nm.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } }
+    nm.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PURINA_RED } }
+    nm.alignment = { vertical: 'middle', indent: 1 }
+    setH(r, 22); r++
+    ws.mergeCells(r, c, r, c2)
+    const sz = ws.getCell(r, c)
+    sz.value = (getSpecs(bdef, content).map((s) => [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  -  ')).join('\n') || '—').replace(/·/g, '-')
+    sz.font = { italic: true, size: 9, color: { argb: PURINA_RED } }
+    sz.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+    sz.alignment = { vertical: 'top', wrapText: true }
+    setH(r, 40); r++
+    const dataUrl = await snapshot(getNode(comp.id), CAP_W)
+    if (dataUrl) {
+      const probe = await loadSize(dataUrl)
+      const nat = probe || { w: 1180, h: 400 }
+      const { w, h } = fit(nat.w, nat.h, 430, 240)
+      const imgId = wb.addImage({ base64: dataUrl, extension: 'png' })
+      ws.addImage(imgId, { tl: { col: (c - 1) + 0.04, row: (r - 1) + 0.1 }, ext: { width: w, height: h }, editAs: 'oneCell' })
+      const rows = Math.ceil((h * 0.75 + 8) / 13)
+      for (let k = 0; k < rows; k++) setH(r + k, 13)
+      r += rows
+    }
+    ws.getCell(r, c).value = 'Campo'; ws.getCell(r, c2).value = 'Contenido'
+    for (const cc of [c, c2]) { const cell = ws.getCell(r, cc); cell.font = { bold: true, size: 9 }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }; cell.border = { top: thin, bottom: thin, left: thin, right: thin } }
+    setH(r, 16); r++
+    const bf = (label, value, sub) => {
+      const a = ws.getCell(r, c); a.value = label; a.font = { bold: !sub, size: 9, color: { argb: 'FF1F2530' } }; a.alignment = { vertical: 'top', wrapText: true, indent: sub ? 1 : 0 }
+      const empty = value == null || value === ''
+      const b = ws.getCell(r, c2); b.value = empty ? EMPTY : value; b.font = { size: 9, color: { argb: empty ? MUTED : 'FF1F2530' } }; b.alignment = { vertical: 'top', wrapText: true }
+      for (const cc of [c, c2]) ws.getCell(r, cc).border = { top: thin, bottom: thin, left: thin, right: thin }
+      setH(r, 16); r++
+    }
+    const bc = (text) => { ws.mergeCells(r, c, r, c2); const cell = ws.getCell(r, c); cell.value = text; cell.font = { bold: true, size: 9, color: { argb: 'FF7A1216' } }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CARD_BG } }; cell.alignment = { vertical: 'middle', indent: 1 }; setH(r, 16); r++ }
+    for (const f of visibleFields(bdef, content, { excel: true })) {
+      if (f.type === 'list') {
+        const items = Array.isArray(content[f.key]) && content[f.key].length ? content[f.key] : [{}]
+        const subs = (f.item || []).filter((sf) => !sf.cms)
+        items.forEach((it, k) => { bc(`${f.itemLabel || f.label} ${k + 1}`); for (const sf of subs) bf(sf.label, fieldToText(sf, it[sf.key]), true) })
+      } else { bf(f.label, fieldToText(f, content[f.key])) }
+    }
+    drawBox(ws, topRow, r - 1, c, c2, PURINA_RED)
+    return r - 1
   }
 
   // Banda de titulo (merge B..C). Devuelve la fila siguiente.
@@ -488,6 +465,17 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // que contenido va con que componente.
     boxBorder(topRow, lastRow, 2, 5, PURINA_RED)
 
+    // Si es el primer banner y hay mas tipos, se muestran a la DERECHA (columnas F+),
+    // en la misma hoja, cada uno como su propio bloque.
+    if (useStrip && comp === firstBanner) {
+      let bottom = lastRow
+      for (let k = 0; k < otherBanners.length; k++) {
+        const end = await bannerBlock(otherBanners[k], topRow, STRIP_C0 + k * 3)
+        if (end > bottom) bottom = end
+      }
+      if (bottom > lastRow) row = bottom + 1 // dejar sitio si algun tipo quedo mas alto
+    }
+
     row += 1 // separacion entre componentes
   }
 
@@ -513,9 +501,6 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     }
     boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
   }
-
-  // Hoja aparte con todos los tipos de banner, uno al lado del otro.
-  if (useBannerSheet) await addBannersSheet(wb, bannerComps, getNode)
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
 }
