@@ -85,16 +85,20 @@ const RENDERERS = {
       : fullbox ? '1680×820px'
       : '2100×1050px'
 
-    // Promotional (solo imagen). Con varias imagenes (slides) se vuelve un slider.
+    // Promotional (solo imagen). Con mas de 1 slide se vuelve un slider.
     if (promo) {
-      const slides = list(c.slides).filter((s) => s.image)
-      const imgs = slides.length ? slides : (c.image ? [{ image: c.image }] : [])
+      const slides = list(c.slides)
+      const imgs = slides.length ? slides : (c.image ? [{ image: c.image }] : [{}])
       if (imgs.length > 1) {
         return (
           <div className="cp-promoslider">
             <div className="cp-promo-track" onScroll={syncDots}>
               {imgs.map((s, i) => (
-                <div key={i} className="cp-promo-slide"><MediaEl className="cp-promo-img" src={s.image} /></div>
+                <div key={i} className="cp-promo-slide">
+                  {s.image
+                    ? <MediaEl className="cp-promo-img" src={s.image} />
+                    : <div className="cp-promo-img cp-promo-ph"><span className="cp-dim-badge">{dim}</span></div>}
+                </div>
               ))}
             </div>
             <span className="cp-promo-arrow cp-promo-prev" onClick={scrollSnap(-1)}>‹</span>

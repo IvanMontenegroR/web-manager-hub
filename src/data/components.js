@@ -295,6 +295,39 @@ export function getSpecs(component, content) {
   return component.specs || []
 }
 
+// Contenido de EJEMPLO para un componente (galeria "Todos los componentes" + su
+// export). Objetivo: validar campos y referencias de tamaño/peso con la agencia, asi
+// que todo campo de LISTA trae al menos 2 items (productos, marcas, slides...). Las
+// imagenes van vacias a proposito -> el mockup muestra el placeholder CON el tamaño.
+function sampleFieldValue(f, i = 0) {
+  const n = i + 1
+  switch (f.type) {
+    case 'image': return '' // vacio: el placeholder muestra el tamaño recomendado
+    case 'select': return (f.options && f.options[0]) || ''
+    case 'url': return `https://ejemplo.com/${f.key}-${n}`
+    case 'textarea': return f.placeholder || `Texto de ejemplo ${n} para validar el campo “${f.label}”.`
+    default: return f.placeholder || `${f.label} ${n}`
+  }
+}
+
+export function sampleContent(def) {
+  const c = {}
+  for (const f of def.fields || []) {
+    if (f.type === 'list') {
+      c[f.key] = [0, 1].map((i) => {
+        const item = {}
+        for (const sf of f.item || []) item[sf.key] = sampleFieldValue(sf, i)
+        return item
+      })
+    } else {
+      c[f.key] = sampleFieldValue(f)
+    }
+  }
+  // Banner: mostrar el Promotional como slider (es lo nuevo a validar) con sus 2 slides.
+  if (def.key === 'banner') c.type = 'Promotional banner (Only image)'
+  return c
+}
+
 // Valor legible de un campo para el export/preview (list -> texto multilinea).
 export function fieldToText(field, value) {
   if (value == null || value === '') return ''

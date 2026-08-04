@@ -1441,6 +1441,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-promo-track::-webkit-scrollbar { display: none; }
 .cp-promo-slide { flex: 0 0 100%; scroll-snap-align: start; }
 .cp-promo-img { width: 100%; display: block; aspect-ratio: 3 / 1; object-fit: cover; }
+.cp-promo-ph { display: grid; place-items: center; background: #eceff2; color: #aeb6bf; }
 .cp-promo-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.9); color: #2b2b2b; display: grid; place-items: center; font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
 .cp-promo-prev { left: 14px; }
 .cp-promo-next { right: 14px; }
