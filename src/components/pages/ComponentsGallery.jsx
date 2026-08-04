@@ -7,6 +7,18 @@ import ComponentPreview from './preview/ComponentPreview.jsx'
 const BANNER_DEF = getComponent('banner')
 const BANNER_TYPES = (BANNER_DEF?.fields.find((f) => f.key === 'type')?.options) || []
 
+// Componentes agrupados por categoria (en el orden de aparicion del catalogo), para
+// mostrar la libreria en secciones (ej. "Componentes reusables").
+const CATEGORIES = (() => {
+  const order = []
+  const map = new Map()
+  for (const def of COMPONENTS) {
+    if (!map.has(def.category)) { map.set(def.category, []); order.push(def.category) }
+    map.get(def.category).push(def)
+  }
+  return order.map((category) => ({ category, defs: map.get(category) }))
+})()
+
 // "Todos los componentes": galeria que renderiza CADA componente del catalogo con
 // CONTENIDO DE EJEMPLO (al menos 2 items en las listas). Se puede EXPORTAR a Excel
 // para validar campos y referencias de tamaño/peso con la agencia. El Banner se muestra
@@ -58,35 +70,40 @@ export default function ComponentsGallery({ onBack }) {
 
       <div className="pb-canvas preview cg-canvas">
         <div className="pb-page">
-          {COMPONENTS.map((def) => def.key === 'banner' ? (
-            <Fragment key="banner">
-              <div className="cg-head">
-                <span className="cg-name">{def.name}</span>
-                <span className="cg-cat">{def.category}</span>
-                <code className="cg-key">{def.key}</code>
-              </div>
-              {/* Todos los tipos de banner en fila: Main Hero primero y el resto a la derecha. */}
-              <div className="cg-bannerrow">
-                {bannerVariants.map((v) => (
-                  <div key={v.id} className="cg-banneritem">
-                    <div className="cg-banner-type">{v.type}</div>
-                    <div className="pb-block pb-block--banner" ref={setNode(v.id)}>
-                      <ComponentPreview componentKey="banner" content={v.content} />
-                    </div>
+          {CATEGORIES.map(({ category, defs }) => (
+            <Fragment key={category}>
+              <div className="cg-section">{category}</div>
+              {defs.map((def) => def.key === 'banner' ? (
+                <Fragment key="banner">
+                  <div className="cg-head">
+                    <span className="cg-name">{def.name}</span>
+                    <span className="cg-cat">{def.category}</span>
+                    <code className="cg-key">{def.key}</code>
                   </div>
-                ))}
-              </div>
-            </Fragment>
-          ) : (
-            <Fragment key={def.key}>
-              <div className="cg-head">
-                <span className="cg-name">{def.name}</span>
-                <span className="cg-cat">{def.category}</span>
-                <code className="cg-key">{def.key}</code>
-              </div>
-              <div className={`pb-block pb-block--${def.key}`} ref={setNode(def.key)}>
-                <ComponentPreview componentKey={def.key} content={sampleContent(def)} />
-              </div>
+                  {/* Todos los tipos de banner en fila: Main Hero primero y el resto a la derecha. */}
+                  <div className="cg-bannerrow">
+                    {bannerVariants.map((v) => (
+                      <div key={v.id} className="cg-banneritem">
+                        <div className="cg-banner-type">{v.type}</div>
+                        <div className="pb-block pb-block--banner" ref={setNode(v.id)}>
+                          <ComponentPreview componentKey="banner" content={v.content} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Fragment>
+              ) : (
+                <Fragment key={def.key}>
+                  <div className="cg-head">
+                    <span className="cg-name">{def.name}</span>
+                    <span className="cg-cat">{def.category}</span>
+                    <code className="cg-key">{def.key}</code>
+                  </div>
+                  <div className={`pb-block pb-block--${def.key}`} ref={setNode(def.key)}>
+                    <ComponentPreview componentKey={def.key} content={sampleContent(def)} />
+                  </div>
+                </Fragment>
+              ))}
             </Fragment>
           ))}
         </div>

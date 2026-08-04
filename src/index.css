@@ -1845,6 +1845,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Galeria "Todos los componentes" ===== */
 .cg-count { margin-left: auto; font-size: 13px; color: var(--muted, #868e99); }
+/* Encabezado de seccion de la libreria (agrupa por categoria, ej. "Componentes reusables"). */
+.cg-section { font-size: 18px; font-weight: 800; color: #1b252e; letter-spacing: .2px; margin: 30px 0 6px; padding-bottom: 10px; border-bottom: 2px solid var(--purina, #ED1C24); }
+.cg-section:first-child { margin-top: 0; }
 .cg-head { display: flex; align-items: center; gap: 10px; margin-bottom: -24px; padding-bottom: 8px; border-bottom: 1px dashed var(--border, #e4e7eb); }
 .cg-name { font-weight: 700; font-size: 15px; color: #1b252e; }
 .cg-cat { font-size: 10.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: #fff; background: var(--purina, #ED1C24); padding: 2px 9px; border-radius: 9999px; }

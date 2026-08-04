@@ -282,34 +282,38 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     return atRow + 1
   }
 
-  // Fila campo/contenido en el bloque izquierdo (B=campo, C=contenido).
+  // Fila campo/contenido en el bloque izquierdo (B=campo, C=contenido). Con
+  // opts.disabled los campos se pintan grises (componente reutilizable: no se edita aca).
   function fieldRow(atRow, label, value, opts = {}) {
+    const disabled = !!opts.disabled
     const c1 = ws.getCell(atRow, 2)
     c1.value = label
-    c1.font = { bold: !opts.sub, size: 10, color: { argb: opts.color || 'FF1F2530' } }
+    c1.font = { bold: !opts.sub, size: 10, color: { argb: disabled ? MUTED : (opts.color || 'FF1F2530') } }
     c1.alignment = { vertical: 'top', wrapText: true, indent: opts.sub ? 1 : 0 }
     const c2 = ws.getCell(atRow, 3)
     const empty = value == null || value === ''
     // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
     c2.value = empty ? (opts.placeholder || EMPTY) : value
-    c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder), color: { argb: empty ? MUTED : 'FF1F2530' } }
+    c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
     c2.alignment = { vertical: 'top', wrapText: true }
     const thin = { style: 'thin', color: { argb: BORDER } }
+    const fill = opts.fill || (disabled ? SUBHEAD_BG : null)
     for (const col of [2, 3]) {
       ws.getCell(atRow, col).border = { top: thin, bottom: thin, left: thin, right: thin }
-      if (opts.fill) ws.getCell(atRow, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fill } }
+      if (fill) ws.getCell(atRow, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } }
     }
     setH(atRow, estHeight(value))
     return atRow + 1
   }
 
-  // Franja de card dentro de una lista (ej. "Marca 1"), merge B..C.
-  function cardBand(atRow, text) {
+  // Franja de card dentro de una lista (ej. "Marca 1"), merge B..C. Gris si disabled.
+  function cardBand(atRow, text, opts = {}) {
+    const disabled = !!opts.disabled
     ws.mergeCells(atRow, 2, atRow, 3)
     const c = ws.getCell(atRow, 2)
     c.value = text
-    c.font = { bold: true, size: 10, color: { argb: 'FF7A1216' } }
-    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CARD_BG } }
+    c.font = { bold: true, size: 10, color: { argb: disabled ? MUTED : 'FF7A1216' } }
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: disabled ? SUBHEAD_BG : CARD_BG } }
     c.alignment = { vertical: 'middle', indent: 1 }
     const thin = { style: 'thin', color: { argb: BORDER } }
     ws.getCell(atRow, 2).border = { top: thin, bottom: thin, left: thin }
@@ -370,56 +374,64 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const subtype = def?.key === 'banner' && content.type ? ` (${content.type})` : ''
     row = bandTitle(row, `${idx}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
 
-    if (def?.reusable) {
-      // Componente REUTILIZABLE (ej. Footer banner): no se carga contenido por
-      // pagina. Se muestra solo la imagen de referencia + una nota.
+    // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
+    // vez para todo el sitio. Los campos SE MUESTRAN pero DESHABILITADOS (grises) para
+    // dejar claro que en esta pagina no se modifican.
+    const disabled = !!def?.reusable
+    if (disabled) {
       ws.mergeCells(row, 2, row, 3)
       const nc = ws.getCell(row, 2)
-      nc.value = 'Componente reutilizable: se configura una sola vez para todo el sitio. No se carga contenido por página.'
+      nc.value = 'Componente reutilizable: se configura una sola vez para todo el sitio. En esta página no se modifica (campos deshabilitados).'
       nc.font = { italic: true, size: 10, color: { argb: MUTED } }
+      nc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
       nc.alignment = { vertical: 'top', wrapText: true, indent: 1 }
+      const thin0 = { style: 'thin', color: { argb: BORDER } }
+      for (const col of [2, 3]) ws.getCell(row, col).border = { top: thin0, bottom: thin0, left: thin0, right: thin0 }
       setH(row, 30)
       row++
-    } else {
-      // Tamano de imagen recomendado (si aplica).
+    }
+
+    // Tamano de imagen recomendado (si aplica). Los reutilizables no cargan imagenes
+    // por pagina, asi que se omite.
+    if (!disabled) {
       for (const s of getSpecs(def, content)) {
         const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
         const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  -  ').replace(/·/g, '-')
         row = fieldRow(row, label, parts, { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
       }
+    }
 
-      // Cabecera Campo | Contenido.
-      const thin = { style: 'thin', color: { argb: BORDER } }
-      ws.getCell(row, 2).value = 'Campo'
-      ws.getCell(row, 3).value = 'Contenido a cargar'
-      for (const col of [2, 3]) {
-        const c = ws.getCell(row, col)
-        c.font = { bold: true, size: 10 }
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
-        c.alignment = { vertical: 'middle' }
-        c.border = { top: thin, bottom: thin, left: thin, right: thin }
-      }
-      setH(row, 18)
-      row++
+    // Cabecera Campo | Contenido.
+    const thin = { style: 'thin', color: { argb: BORDER } }
+    ws.getCell(row, 2).value = 'Campo'
+    ws.getCell(row, 3).value = disabled ? 'Contenido (no editable)' : 'Contenido a cargar'
+    for (const col of [2, 3]) {
+      const c = ws.getCell(row, col)
+      c.font = { bold: true, size: 10, color: { argb: disabled ? MUTED : 'FF1F2530' } }
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+      c.alignment = { vertical: 'middle' }
+      c.border = { top: thin, bottom: thin, left: thin, right: thin }
+    }
+    setH(row, 18)
+    row++
 
-      // Campos VISUALES (los cms:true se omiten). Las listas se abren por item,
-      // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
-      const visible = visibleFields(def, content, { excel: true })
-      for (const f of visible) {
-        if (f.type === 'list') {
-          const items = Array.isArray(content[f.key]) ? content[f.key] : []
-          const arr = items.length ? items : [{}] // al menos 1 plantilla vacia
-          const subFields = (f.item || []).filter((sf) => !sf.cms)
-          const one = f.itemLabel || f.label
-          arr.forEach((item, i) => {
-            row = cardBand(row, `${one} ${i + 1}`)
-            for (const sf of subFields) {
-              row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true })
-            }
-          })
-        } else {
-          row = fieldRow(row, f.label, fieldToText(f, content[f.key]))
-        }
+    // Campos VISUALES (los cms:true se omiten). Las listas se abren por item,
+    // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
+    const visible = visibleFields(def, content, { excel: true })
+    for (const f of visible) {
+      if (f.type === 'list') {
+        const items = Array.isArray(content[f.key]) ? content[f.key] : []
+        const arr = items.length ? items : [{}] // al menos 1 plantilla vacia
+        const subFields = (f.item || []).filter((sf) => !sf.cms)
+        const one = f.itemLabel || f.label
+        arr.forEach((item, i) => {
+          row = cardBand(row, `${one} ${i + 1}`, { disabled })
+          for (const sf of subFields) {
+            row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
+          }
+        })
+      } else {
+        row = fieldRow(row, f.label, fieldToText(f, content[f.key]), { disabled })
       }
     }
 

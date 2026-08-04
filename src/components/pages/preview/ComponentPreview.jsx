@@ -393,12 +393,14 @@ const RENDERERS = {
     const arr = products.length ? products : [{}, {}, {}, {}, {}]
     // Pet ID: card fija (no editable), se muestra/oculta con el checkbox del builder.
     const showPetId = c.show_petid !== false
+    // Tabs de filtro por categoria: solo si el toggle esta activo (default: mostrar).
+    const showFilters = c.show_filters !== false
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
       <div className="cp-plist">
         <div className="cp-plist-head">
           <div className="cp-plist-tabs">
-            {filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
+            {showFilters && filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
           </div>
           <div className="cp-plist-arrows">
             <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>

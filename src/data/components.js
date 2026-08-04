@@ -138,11 +138,10 @@ export const COMPONENTS = [
   },
   {
     key: 'footer_banner',
-    name: 'Footer banner',
-    category: 'Hero',
+    name: 'Banner CTA',
+    category: 'Componentes reusables',
     help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
-    reusable: true, // componente reutilizable: no se carga contenido por pagina en el Excel
-    matrixExclude: true, // no va en el Excel
+    reusable: true, // reutilizable: en el Excel de una pagina va con los campos deshabilitados
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -173,9 +172,9 @@ export const COMPONENTS = [
   {
     key: 'species_selector',
     name: 'Selector de especie',
-    category: 'Contenido',
+    category: 'Componentes reusables',
     help: 'Selector de mascota Gato / Perro (estático, con los íconos de gato y perro). Solo se editan el título y el subtítulo.',
-    matrixExclude: true, // no va en el Excel
+    reusable: true, // reutilizable: en el Excel de una pagina va con los campos deshabilitados
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -209,7 +208,10 @@ export const COMPONENTS = [
     category: 'Marcas',
     help: 'Sección "Más populares": tabs de filtro + carrusel de productos. Los productos los POPULA la vista del CMS (son pulleados): acá cada producto es solo un placeholder con el nombre, sin imagen. La card Pet ID es un componente fijo no editable (checkbox mostrar/ocultar).',
     fields: [
-      { key: 'filters', label: 'Tabs de filtro (separados por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks' },
+      // Filtro por categoria: toggle SOLO del builder (cms, no se exporta). Si esta
+      // activo, el campo de tabs SI se exporta (requires: 'show_filters'); si no, se oculta.
+      { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true },
+      { key: 'filters', label: 'Tabs de filtro (separados por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks', requires: 'show_filters' },
       // Pet ID: componente fijo (no editable). Checkbox solo del builder (cms) para
       // mostrar/ocultar la card; NO sale como campo en el Excel.
       { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true },
@@ -340,6 +342,9 @@ export function visibleFields(def, content = {}, opts = {}) {
   const type = content && content.type
   return (def?.fields || []).filter((f) => {
     if (opts.excel && f.cms) return false
+    // Campo condicional: depende de otro (ej. filtros de producto). Si el otro esta
+    // apagado, este campo no se muestra ni se exporta.
+    if (f.requires && content[f.requires] === false) return false
     if (f.hideTypes && type && f.hideTypes.includes(type)) return false
     if (f.onlyTypes && !f.onlyTypes.includes(type)) return false
     return true
