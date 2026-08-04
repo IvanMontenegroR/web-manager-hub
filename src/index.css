@@ -1706,6 +1706,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-plist-imgwrap { flex: 1; display: grid; place-items: center; }
 .cp-plist-img.cp-img { border-radius: 0; object-fit: contain; background: transparent; }
 .cp-plist-title { font-size: 16px; margin-top: 16px; line-height: 1.35; color: #2b2b2b; }
+/* Productos pulleados por el CMS: placeholder con el nombre, sin imagen. */
+.cp-plist-ph { flex: 1; display: grid; place-items: center; background: #eceff2; border-radius: 12px; padding: 18px; text-align: center; color: #6b727b; font-weight: 600; font-size: 14px; }
 .cp-plist-more { display: flex; justify-content: flex-end; margin-top: 24px; }
 .cp-plist-more-btn { background: #111; color: #fff; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 9999px; }
 
@@ -1847,6 +1849,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cg-name { font-weight: 700; font-size: 15px; color: #1b252e; }
 .cg-cat { font-size: 10.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: #fff; background: var(--purina, #ED1C24); padding: 2px 9px; border-radius: 9999px; }
 .cg-key { font-size: 12px; color: var(--muted, #868e99); font-family: ui-monospace, monospace; margin-left: auto; }
+.cg-bannertype { font-size: 12px; padding: 3px 8px; border: 1px solid var(--border, #e4e7eb); border-radius: 6px; background: #fff; color: #1b252e; }
+.cf-check { width: 18px; height: 18px; accent-color: var(--purina, #ED1C24); cursor: pointer; }
 
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }

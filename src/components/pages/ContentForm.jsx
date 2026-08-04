@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Plus, X, Image as ImageIcon, Ruler, Upload } from 'lucide-react'
-import { getSpecs } from '../../data/components'
+import { getSpecs, visibleFields } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
 
 // Campo de imagen/video: se puede pegar una URL o subir un archivo (se sube a
@@ -62,6 +62,10 @@ function Field({ f, value, onChange }) {
   if (f.type === 'image') {
     return <ImageField value={value} onChange={onChange} />
   }
+  if (f.type === 'checkbox') {
+    // Sin valor cargado = mostrado por defecto (value !== false).
+    return <input type="checkbox" className="cf-check" checked={value !== false} onChange={(e) => onChange(e.target.checked)} />
+  }
   // text / url
   return <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.type === 'url' ? 'https://...' : f.placeholder} />
 }
@@ -121,7 +125,8 @@ export default function ContentForm({ component, draft, onChange }) {
   return (
     <div className="cf">
       <SpecsPanel specs={getSpecs(component, draft)} />
-      {component.fields.map((f) => (
+      {/* Campos filtrados por tipo (ej. Banner Type oculta/muestra campos). */}
+      {visibleFields(component, draft).map((f) => (
         <div key={f.key} className="field">
           <label>{f.label}</label>
           {f.type === 'list'

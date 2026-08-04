@@ -32,15 +32,17 @@ export const COMPONENTS = [
     help: 'Campos reales del paragraph Banner en el CMS. Segun el Banner Type cambia el layout.',
     fields: [
       { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Banner Card', 'Full Image + Box Content', 'Brand Hero'] },
-      { key: 'title', label: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'description', label: 'Descripción', type: 'textarea' },
-      { key: 'image', label: 'Imagen / Video (link)', type: 'image' },
-      { key: 'link_text', label: 'Botón — texto', type: 'text' },
-      { key: 'link_url', label: 'Botón — link', type: 'url' },
-      // Promotional banner: se pueden cargar VARIAS imagenes; con mas de 1 el banner
-      // se vuelve un slider (carrusel con flechas + dots). Con 1 sola, banner simple.
-      { key: 'slides', label: 'Promotional — imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', item: [
+      // Los campos aplican segun el Banner Type: el Promotional (Only image) NO tiene
+      // titulo/descripcion/imagen/boton -> solo las imagenes del slider; el resto de los
+      // tipos usan titulo/descripcion/imagen/boton y NO el slider. (hideTypes/onlyTypes)
+      { key: 'title', label: 'Título', type: 'text', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, hideTypes: ['Promotional banner (Only image)'], options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'description', label: 'Descripción', type: 'textarea', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'image', label: 'Imagen / Video (link)', type: 'image', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'link_text', label: 'Botón — texto', type: 'text', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'link_url', label: 'Botón — link', type: 'url', hideTypes: ['Promotional banner (Only image)'] },
+      // Solo Promotional: varias imagenes; con mas de 1 el banner se vuelve un slider.
+      { key: 'slides', label: 'Imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', onlyTypes: ['Promotional banner (Only image)'], item: [
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'link', label: 'Link', type: 'url' },
       ] },
@@ -101,7 +103,7 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
       { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
-        { key: 'icon', label: 'Icono (imagen)', type: 'image' },
+        { key: 'icon', label: 'Icono', type: 'select', options: ['pata'] },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
         { key: 'url', label: 'Link', type: 'url' },
@@ -140,6 +142,7 @@ export const COMPONENTS = [
     category: 'Hero',
     help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
     reusable: true, // componente reutilizable: no se carga contenido por pagina en el Excel
+    matrixExclude: true, // no va en el Excel
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -172,6 +175,7 @@ export const COMPONENTS = [
     name: 'Selector de especie',
     category: 'Contenido',
     help: 'Selector de mascota Gato / Perro (estático, con los íconos de gato y perro). Solo se editan el título y el subtítulo.',
+    matrixExclude: true, // no va en el Excel
     fields: [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -203,23 +207,19 @@ export const COMPONENTS = [
     key: 'product_list',
     name: 'Carrusel de productos',
     category: 'Marcas',
-    help: 'Sección "Más populares": tabs de filtro + carrusel de card-products. Card promo (ej. Pet ID) opcional y botón "Ver todos". Sin imagen usa placeholder. En el CMS los productos los popula la vista; acá cargás ejemplos.',
+    help: 'Sección "Más populares": tabs de filtro + carrusel de productos. Los productos los POPULA la vista del CMS (son pulleados): acá cada producto es solo un placeholder con el nombre, sin imagen. La card Pet ID es un componente fijo no editable (checkbox mostrar/ocultar).',
     fields: [
       { key: 'filters', label: 'Tabs de filtro (separados por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks' },
-      { key: 'promo_title', label: 'Card promo — título (opcional)', type: 'text', placeholder: 'Pet ID' },
-      { key: 'promo_text', label: 'Card promo — texto', type: 'textarea' },
-      { key: 'promo_url', label: 'Card promo — link', type: 'url' },
+      // Pet ID: componente fijo (no editable). Checkbox solo del builder (cms) para
+      // mostrar/ocultar la card; NO sale como campo en el Excel.
+      { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true },
+      // Productos pulleados por el CMS: en la matriz solo el nombre (sin imagen).
       { key: 'products', label: 'Productos', type: 'list', itemLabel: 'Producto', item: [
-        { key: 'image', label: 'Imagen del producto', type: 'image' },
         { key: 'title', label: 'Nombre', type: 'text' },
-        { key: 'tag', label: 'Tag (opcional)', type: 'text' },
-        { key: 'tag_color', label: 'Color del tag (hex)', type: 'text', placeholder: '#895731' },
-        { key: 'url', label: 'Link', type: 'url' },
       ] },
       { key: 'see_more_text', label: 'Botón "ver todos" — texto', type: 'text', placeholder: 'Ver todos' },
       { key: 'see_more_url', label: 'Botón "ver todos" — link', type: 'url' },
     ],
-    specs: [{ label: 'Imagen de producto', ratio: 'Desktop 1:1 · Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'timeline',
@@ -303,6 +303,7 @@ function sampleFieldValue(f, i = 0) {
   const n = i + 1
   switch (f.type) {
     case 'image': return '' // vacio: el placeholder muestra el tamaño recomendado
+    case 'checkbox': return true
     case 'select': return (f.options && f.options[0]) || ''
     case 'url': return `https://ejemplo.com/${f.key}-${n}`
     case 'textarea': return f.placeholder || `Texto de ejemplo ${n} para validar el campo “${f.label}”.`
@@ -323,9 +324,19 @@ export function sampleContent(def) {
       c[f.key] = sampleFieldValue(f)
     }
   }
-  // Banner: mostrar el Promotional como slider (es lo nuevo a validar) con sus 2 slides.
-  if (def.key === 'banner') c.type = 'Promotional banner (Only image)'
   return c
+}
+
+// Campos VISIBLES de un componente segun su contenido: filtra por Banner Type
+// (hideTypes/onlyTypes). Con { excel:true } ademas oculta los tecnicos (cms).
+export function visibleFields(def, content = {}, opts = {}) {
+  const type = content && content.type
+  return (def?.fields || []).filter((f) => {
+    if (opts.excel && f.cms) return false
+    if (f.hideTypes && type && f.hideTypes.includes(type)) return false
+    if (f.onlyTypes && !f.onlyTypes.includes(type)) return false
+    return true
+  })
 }
 
 // Valor legible de un campo para el export/preview (list -> texto multilinea).

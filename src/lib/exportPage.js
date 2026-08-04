@@ -6,7 +6,7 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs } from '../data/components'
+import { getComponent, fieldToText, getSpecs, visibleFields } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 
 const PURINA_RED = 'FFED1C24'
@@ -153,7 +153,8 @@ const CAP_W = 1180
 
 // components = [{ id, component_key, content }] en orden.
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
-export async function exportPageMatrix(page, components, getNode) {
+export async function exportPageMatrix(page, components, getNode, opts = {}) {
+  const withMetas = opts.metas !== false // por defecto se incluyen las metas (SEO)
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
   const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
@@ -322,7 +323,7 @@ export async function exportPageMatrix(page, components, getNode) {
 
       // Campos VISUALES (los cms:true se omiten). Las listas se abren por item,
       // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
-      const visible = (def?.fields || []).filter((f) => !f.cms)
+      const visible = visibleFields(def, content, { excel: true })
       for (const f of visible) {
         if (f.type === 'list') {
           const items = Array.isArray(content[f.key]) ? content[f.key] : []
@@ -386,25 +387,28 @@ export async function exportPageMatrix(page, components, getNode) {
     row += 1 // separacion entre componentes
   }
 
-  // Metas de la pagina (SEO) al final de la matriz. Las carga la agencia SEO,
-  // por eso el contenido va con el placeholder "SEO Agency".
-  const metaTop = row
-  row = bandTitle(row, 'Metas de la página (SEO)', PURINA_RED, true)
-  for (const label of ['Meta title', 'Meta description']) {
-    ws.getCell(row, 2).value = label
-    ws.getCell(row, 2).font = { bold: true, size: 10, color: { argb: 'FF1F2530' } }
-    ws.getCell(row, 2).alignment = { vertical: 'top', wrapText: true }
-    ws.mergeCells(row, 3, row, 5)
-    const c = ws.getCell(row, 3)
-    c.value = 'SEO Agency'
-    c.font = { italic: true, size: 10, color: { argb: MUTED } }
-    c.alignment = { vertical: 'top', wrapText: true }
-    const thin = { style: 'thin', color: { argb: BORDER } }
-    for (const col of [2, 3, 4, 5]) ws.getCell(row, col).border = { top: thin, bottom: thin, left: thin, right: thin }
-    setH(row, label === 'Meta description' ? 34 : 22)
-    row++
+  // Metas de la pagina (SEO) al final de la matriz. Las carga la agencia SEO, por eso
+  // el placeholder "SEO Agency". Se omiten cuando el export no es de una pagina real
+  // (ej. la galeria "Todos los componentes" pasa metas:false).
+  if (withMetas) {
+    const metaTop = row
+    row = bandTitle(row, 'Metas de la página (SEO)', PURINA_RED, true)
+    for (const label of ['Meta title', 'Meta description']) {
+      ws.getCell(row, 2).value = label
+      ws.getCell(row, 2).font = { bold: true, size: 10, color: { argb: 'FF1F2530' } }
+      ws.getCell(row, 2).alignment = { vertical: 'top', wrapText: true }
+      ws.mergeCells(row, 3, row, 5)
+      const c = ws.getCell(row, 3)
+      c.value = 'SEO Agency'
+      c.font = { italic: true, size: 10, color: { argb: MUTED } }
+      c.alignment = { vertical: 'top', wrapText: true }
+      const thin = { style: 'thin', color: { argb: BORDER } }
+      for (const col of [2, 3, 4, 5]) ws.getCell(row, col).border = { top: thin, bottom: thin, left: thin, right: thin }
+      setH(row, label === 'Meta description' ? 34 : 22)
+      row++
+    }
+    boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
   }
-  boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
 }

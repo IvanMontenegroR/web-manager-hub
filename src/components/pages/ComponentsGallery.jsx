@@ -1,22 +1,30 @@
 import { Fragment, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react'
-import { COMPONENTS, sampleContent } from '../../data/components'
+import { COMPONENTS, getComponent, sampleContent } from '../../data/components'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
 
-// "Todos los componentes": galeria que renderiza CADA componente del catalogo
-// (src/data/components.js) con CONTENIDO DE EJEMPLO (al menos 2 items en las listas:
-// productos, marcas, slides...). Sirve de referencia y se puede EXPORTAR a Excel para
-// validar con la agencia si los campos y las referencias de tamaño/peso estan bien.
-// Se arma sola a partir de COMPONENTS, asi que un componente nuevo aparece solo.
+// Tipos de banner (para el dropdown de la galeria). Main Hero primero.
+const BANNER_TYPES = (getComponent('banner')?.fields.find((f) => f.key === 'type')?.options) || []
+
+// "Todos los componentes": galeria que renderiza CADA componente del catalogo con
+// CONTENIDO DE EJEMPLO (al menos 2 items en las listas). Se puede EXPORTAR a Excel
+// para validar campos y referencias de tamaño/peso con la agencia. El Banner es 1 solo
+// con un dropdown para elegir el tipo (Main Hero por defecto): asi no se muestran todos
+// los tipos a la vez, y el mockup + los campos + el export se actualizan al tipo elegido.
 export default function ComponentsGallery({ onBack }) {
   const nodes = useRef(new Map())
   const [exporting, setExporting] = useState(false)
   const [err, setErr] = useState(null)
-  // Contenido de ejemplo memoizado (mismo para el mockup y para el export).
+  const [bannerType, setBannerType] = useState(BANNER_TYPES[0] || 'Main Hero')
+
   const items = useMemo(
-    () => COMPONENTS.map((def) => ({ id: def.key, def, content: sampleContent(def) })),
-    [],
+    () => COMPONENTS.map((def) => ({
+      id: def.key,
+      def,
+      content: def.key === 'banner' ? { ...sampleContent(def), type: bannerType } : sampleContent(def),
+    })),
+    [bannerType],
   )
 
   async function exportExcel() {
@@ -26,7 +34,7 @@ export default function ComponentsGallery({ onBack }) {
       await exportPageMatrix({ name: 'Todos los componentes', path: '' }, comps, (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
-      })
+      }, { metas: false }) // la galeria no lleva metas (SEO)
     } catch (e) { setErr(e.message) } finally { setExporting(false) }
   }
 
@@ -50,6 +58,11 @@ export default function ComponentsGallery({ onBack }) {
               <div className="cg-head">
                 <span className="cg-name">{def.name}</span>
                 <span className="cg-cat">{def.category}</span>
+                {def.key === 'banner' && (
+                  <select className="cg-bannertype" value={bannerType} onChange={(e) => setBannerType(e.target.value)}>
+                    {BANNER_TYPES.map((o) => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                )}
                 <code className="cg-key">{def.key}</code>
               </div>
               <div

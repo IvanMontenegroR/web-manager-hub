@@ -219,9 +219,8 @@ const RENDERERS = {
               const hl = /si|sí/i.test(card.highlighted)
               return (
                 <div key={i} className={`cp-svc-card${hl ? ' hl' : ''}`}>
-                  {!hl && (card.icon
-                    ? <img className="cp-svc-ico-img" src={card.icon} alt="" />
-                    : <span className="cp-svc-ico"><PawPrint size={22} /></span>)}
+                  {/* Icono elegido de una lista (por ahora solo "pata" -> huella). */}
+                  {!hl && <span className="cp-svc-ico"><PawPrint size={22} /></span>}
                   <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
                   {card.text && <div className="cp-svc-card-s">{card.text}</div>}
                   <span className="cp-svc-arrow">→</span>
@@ -390,8 +389,10 @@ const RENDERERS = {
     const filters = String(c.filters && c.filters.trim() ? c.filters : 'Más populares, Seco, Húmedo, Snacks')
       .split(',').map((s) => s.trim()).filter(Boolean)
     const products = list(c.products)
-    const hasPromo = c.promo_title && c.promo_title.trim()
+    // Los productos los pullea el CMS: cada uno es solo un placeholder con el nombre.
     const arr = products.length ? products : [{}, {}, {}, {}, {}]
+    // Pet ID: card fija (no editable), se muestra/oculta con el checkbox del builder.
+    const showPetId = c.show_petid !== false
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
       <div className="cp-plist">
@@ -405,18 +406,16 @@ const RENDERERS = {
           </div>
         </div>
         <div className="cp-plist-row">
-          {hasPromo && (
+          {showPetId && (
             <div className="cp-plist-promo">
-              <div className="cp-plist-promo-t">{c.promo_title}</div>
-              <p className="cp-plist-promo-d">{T(c.promo_text, 'Crea tu Pet ID y obtén sugerencias de alimentos y cuidados personalizados para tu mascota.')}</p>
+              <div className="cp-plist-promo-t">Pet ID</div>
+              <p className="cp-plist-promo-d">Crea tu Pet ID y obtén sugerencias de alimentos y cuidados personalizados para tu mascota.</p>
               <span className="cp-plist-promo-arrow">→</span>
             </div>
           )}
           {arr.map((p, i) => (
             <div key={i} className="cp-plist-card">
-              {p.tag && <span className="cp-plist-tag" style={{ '--tag-bg': p.tag_color || '#895731' }}>{p.tag}</span>}
-              <div className="cp-plist-imgwrap"><Img src={p.image} aspect="1/1" dim="600×600px" className="cp-plist-img" /></div>
-              <div className="cp-plist-title">{T(p.title, 'Nombre del producto')}</div>
+              <div className="cp-plist-ph"><span>{T(p.title, `Producto ${i + 1}`)}</span></div>
             </div>
           ))}
         </div>
