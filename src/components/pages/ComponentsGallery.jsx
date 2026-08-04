@@ -1,37 +1,42 @@
-import { Fragment, useMemo, useRef, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react'
 import { COMPONENTS, getComponent, sampleContent } from '../../data/components'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
 
-// Tipos de banner (para el dropdown de la galeria). Main Hero primero.
-const BANNER_TYPES = (getComponent('banner')?.fields.find((f) => f.key === 'type')?.options) || []
+const BANNER_DEF = getComponent('banner')
+const BANNER_TYPES = (BANNER_DEF?.fields.find((f) => f.key === 'type')?.options) || []
 
 // "Todos los componentes": galeria que renderiza CADA componente del catalogo con
 // CONTENIDO DE EJEMPLO (al menos 2 items en las listas). Se puede EXPORTAR a Excel
-// para validar campos y referencias de tamaño/peso con la agencia. El Banner es 1 solo
-// con un dropdown para elegir el tipo (Main Hero por defecto): asi no se muestran todos
-// los tipos a la vez, y el mockup + los campos + el export se actualizan al tipo elegido.
+// para validar campos y referencias de tamaño/peso con la agencia. El Banner se muestra
+// con TODOS sus tipos en una fila (Main Hero primero y los demas a la derecha); cada
+// tipo entra al export como su propia seccion (con sus campos y tamaños).
 export default function ComponentsGallery({ onBack }) {
   const nodes = useRef(new Map())
   const [exporting, setExporting] = useState(false)
   const [err, setErr] = useState(null)
-  const [bannerType, setBannerType] = useState(BANNER_TYPES[0] || 'Main Hero')
+  const setNode = (id) => (el) => { if (el) nodes.current.set(id, el); else nodes.current.delete(id) }
 
-  const items = useMemo(
-    () => COMPONENTS.map((def) => ({
-      id: def.key,
-      def,
-      content: def.key === 'banner' ? { ...sampleContent(def), type: bannerType } : sampleContent(def),
-    })),
-    [bannerType],
-  )
+  const bannerVariants = BANNER_TYPES.map((type) => ({
+    id: `banner__${type}`, type, content: { ...sampleContent(BANNER_DEF), type },
+  }))
+
+  // Lista de componentes para el export (orden del catalogo; el banner se expande a
+  // un item por tipo).
+  function exportComps() {
+    const out = []
+    for (const def of COMPONENTS) {
+      if (def.key === 'banner') bannerVariants.forEach((v) => out.push({ id: v.id, component_key: 'banner', content: v.content }))
+      else out.push({ id: def.key, component_key: def.key, content: sampleContent(def) })
+    }
+    return out
+  }
 
   async function exportExcel() {
     setExporting(true); setErr(null)
     try {
-      const comps = items.map((it) => ({ id: it.id, component_key: it.def.key, content: it.content }))
-      await exportPageMatrix({ name: 'Todos los componentes', path: '' }, comps, (id) => {
+      await exportPageMatrix({ name: 'Todos los componentes', path: '' }, exportComps(), (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
       }, { metas: false }) // la galeria no lleva metas (SEO)
@@ -53,23 +58,34 @@ export default function ComponentsGallery({ onBack }) {
 
       <div className="pb-canvas preview cg-canvas">
         <div className="pb-page">
-          {items.map(({ id, def, content }) => (
-            <Fragment key={id}>
+          {COMPONENTS.map((def) => def.key === 'banner' ? (
+            <Fragment key="banner">
               <div className="cg-head">
                 <span className="cg-name">{def.name}</span>
                 <span className="cg-cat">{def.category}</span>
-                {def.key === 'banner' && (
-                  <select className="cg-bannertype" value={bannerType} onChange={(e) => setBannerType(e.target.value)}>
-                    {BANNER_TYPES.map((o) => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                )}
                 <code className="cg-key">{def.key}</code>
               </div>
-              <div
-                className={`pb-block pb-block--${def.key}`}
-                ref={(el) => { if (el) nodes.current.set(id, el); else nodes.current.delete(id) }}
-              >
-                <ComponentPreview componentKey={def.key} content={content} />
+              {/* Todos los tipos de banner en fila: Main Hero primero y el resto a la derecha. */}
+              <div className="cg-bannerrow">
+                {bannerVariants.map((v) => (
+                  <div key={v.id} className="cg-banneritem">
+                    <div className="cg-banner-type">{v.type}</div>
+                    <div className="pb-block pb-block--banner" ref={setNode(v.id)}>
+                      <ComponentPreview componentKey="banner" content={v.content} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Fragment>
+          ) : (
+            <Fragment key={def.key}>
+              <div className="cg-head">
+                <span className="cg-name">{def.name}</span>
+                <span className="cg-cat">{def.category}</span>
+                <code className="cg-key">{def.key}</code>
+              </div>
+              <div className={`pb-block pb-block--${def.key}`} ref={setNode(def.key)}>
+                <ComponentPreview componentKey={def.key} content={sampleContent(def)} />
               </div>
             </Fragment>
           ))}

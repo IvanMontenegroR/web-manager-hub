@@ -1849,8 +1849,13 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cg-name { font-weight: 700; font-size: 15px; color: #1b252e; }
 .cg-cat { font-size: 10.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: #fff; background: var(--purina, #ED1C24); padding: 2px 9px; border-radius: 9999px; }
 .cg-key { font-size: 12px; color: var(--muted, #868e99); font-family: ui-monospace, monospace; margin-left: auto; }
-.cg-bannertype { font-size: 12px; padding: 3px 8px; border: 1px solid var(--border, #e4e7eb); border-radius: 6px; background: #fff; color: #1b252e; }
 .cf-check { width: 18px; height: 18px; accent-color: var(--purina, #ED1C24); cursor: pointer; }
+/* Banner en la galeria: todos los tipos en fila (Main Hero primero, resto a la derecha). */
+.cg-bannerrow { display: flex; flex-wrap: nowrap; gap: 26px; overflow-x: auto; padding-bottom: 10px; align-items: flex-start; }
+.cg-banneritem { flex: 0 0 620px; }
+.cg-banner-type { font-size: 12px; font-weight: 700; color: var(--purina, #ED1C24); margin-bottom: 8px; }
+/* dentro de la fila el banner queda contenido (sin el full-bleed de -36px). */
+.pb-canvas.preview .cg-bannerrow .pb-block--banner { margin-inline: 0; }
 
 /* ===== Breadcrumb (componente) ===== */
 .cp-breadcrumb { padding: 12px 0; }
