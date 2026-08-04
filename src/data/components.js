@@ -217,8 +217,8 @@ export const COMPONENTS = [
       { key: 'products', label: 'Productos', type: 'list', itemLabel: 'Producto', item: [
         { key: 'title', label: 'Nombre', type: 'text' },
       ] },
-      { key: 'see_more_text', label: 'Botón "ver todos" — texto', type: 'text', placeholder: 'Ver todos' },
-      { key: 'see_more_url', label: 'Botón "ver todos" — link', type: 'url' },
+      { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todos' },
+      { key: 'see_more_url', label: 'Botón — link', type: 'url' },
     ],
   },
   {
@@ -262,6 +262,7 @@ export const COMPONENTS = [
     name: '50/50',
     category: 'Contenido',
     help: 'Bloque a dos columnas (50/50): título + texto a la izquierda; a la derecha, un texto o un desplegable (acordeón) de items (título + texto). El item abierto marca su título en rojo.',
+    exportWidth: 820, // se captura mas angosto para que la imagen del Excel no salga tan baja
     fields: [
       { key: 'title', label: 'Titulo (izquierda)', type: 'text', placeholder: 'Nutriendo mascotas. Enriqueciendo vidas.' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -325,6 +326,12 @@ export function sampleContent(def) {
     }
   }
   return c
+}
+
+// ¿El componente tiene algun campo de imagen (propio o dentro de una lista)? Se usa
+// para poner el "Alt Text" en el Excel solo en los componentes que tienen imagenes.
+export function componentHasImage(def) {
+  return (def?.fields || []).some((f) => f.type === 'image' || (f.type === 'list' && (f.item || []).some((sf) => sf.type === 'image')))
 }
 
 // Campos VISIBLES de un componente segun su contenido: filtra por Banner Type

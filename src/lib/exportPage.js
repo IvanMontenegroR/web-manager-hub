@@ -6,7 +6,7 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs, visibleFields } from '../data/components'
+import { getComponent, fieldToText, getSpecs, visibleFields, componentHasImage } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 
 const PURINA_RED = 'FFED1C24'
@@ -423,10 +423,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       }
     }
 
-    // Imagen del componente en la columna E. Se captura a ancho DESKTOP (CAP_W)
-    // para que renderice como en la pagina real (ancha y baja). Se ubica centrada
-    // verticalmente dentro del marco, encajada en la celda (no se sale del borde).
-    const dataUrl = await snapshot(getNode(comp.id), CAP_W)
+    // Imagen del componente en la columna E. Se captura a ancho DESKTOP (CAP_W) para
+    // que renderice como en la pagina real; algunos (ej. 50/50) definen un exportWidth
+    // mas angosto para no salir tan bajos. Se ubica centrada dentro del marco.
+    const dataUrl = await snapshot(getNode(comp.id), def?.exportWidth || CAP_W)
     const img = await prepImage(dataUrl)
     const PAD = 12     // pt de aire arriba/abajo dentro del marco
     const CAP_GAP = 4  // aire entre la imagen y su Alt Text
@@ -447,18 +447,20 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       let a = 0, rr = topRow + 1
       while (rr < lastRow) { const hh = ws.getRow(rr).height || 15; if (a + hh > targetTop) break; a += hh; rr++ }
       ws.addImage(img.id, { tl: { col: IMG_COL, row: rr - 1 }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
-      // Alt Text: la primera fila cuyo TOPE queda por debajo del pie de la imagen
-      // (placeholder "SEO Agency" para la agencia SEO), asi nunca pisa la imagen.
-      const capTop = a + img.hpt + CAP_GAP
-      let b = a, cr = rr
-      while (cr < lastRow && b < capTop) { b += ws.getRow(cr).height || 15; cr++ }
-      const cap = ws.getCell(cr, IMG_COL + 1)
-      cap.value = { richText: [
-        { text: 'Alt Text: ', font: { bold: true, size: 9, color: { argb: 'FF1F2530' } } },
-        { text: 'SEO Agency', font: { italic: true, size: 9, color: { argb: MUTED } } },
-      ] }
-      cap.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-      setH(cr, CAP_H)
+      // Alt Text (placeholder "SEO Agency") SOLO en componentes que tienen imagen(es).
+      // La primera fila cuyo TOPE queda por debajo del pie de la imagen, asi no la pisa.
+      if (componentHasImage(def)) {
+        const capTop = a + img.hpt + CAP_GAP
+        let b = a, cr = rr
+        while (cr < lastRow && b < capTop) { b += ws.getRow(cr).height || 15; cr++ }
+        const cap = ws.getCell(cr, IMG_COL + 1)
+        cap.value = { richText: [
+          { text: 'Alt Text: ', font: { bold: true, size: 9, color: { argb: 'FF1F2530' } } },
+          { text: 'SEO Agency', font: { italic: true, size: 9, color: { argb: MUTED } } },
+        ] }
+        cap.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+        setH(cr, CAP_H)
+      }
     }
 
     // Marco alrededor de todo el componente (campos + imagen) para que se entienda
