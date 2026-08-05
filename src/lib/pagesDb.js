@@ -33,6 +33,12 @@ export function brandSecondaryColor(brand) {
   return /pro\s*plan/i.test(brand || '') ? '#d7bb77' : null
 }
 
+// El color primario/main de una marca. Hoy solo Pro Plan (negro). Se usa, por ej.,
+// para el texto de las cajas del mosaico (negro sobre el dorado secundario).
+export function brandPrimaryColor(brand) {
+  return /pro\s*plan/i.test(brand || '') ? '#111114' : null
+}
+
 // Estados de una pagina (orden fijo, de menos a mas avanzado).
 export const PAGE_STATUSES = ['Not started', 'In progress', 'On hold', 'Done']
 export const PAGE_STATUS_LABEL = {

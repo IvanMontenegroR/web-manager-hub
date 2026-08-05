@@ -488,7 +488,9 @@ const RENDERERS = {
 
   // Carrusel "Compromiso Purina": header (titulo + subtitulo) con flechas + cards
   // verticales con imagen de fondo a sangre, titulo arriba y descripcion abajo.
-  commitment_carousel: (c) => {
+  commitment_carousel: (c, ctx) => {
+    // Si hay marca seleccionada, los titulos de las cards toman su color secundario.
+    const titleStyle = ctx?.brandSecondary ? { color: ctx.brandSecondary } : undefined
     const items = list(c.items)
     const arr = items.length ? items : [
       { title: 'Para mascotas y personas', description: 'Enriquecer la vida de las mascotas y de las personas que las aman.' },
@@ -515,7 +517,7 @@ const RENDERERS = {
                 ? <MediaEl className="cp-cmt-img" src={it.image} />
                 : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">411×520px</span></div>}
               <div className="cp-cmt-scrim" />
-              <div className="cp-cmt-ttl">{T(it.title, 'Título')}</div>
+              <div className="cp-cmt-ttl" style={titleStyle}>{T(it.title, 'Título')}</div>
               <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
             </div>
           ))}
@@ -566,8 +568,10 @@ const RENDERERS = {
   // Hero con tarjetas: fondo en gradiente (color configurable, --acc) con una imagen
   // de fondo opcional; titulo + subtitulo centrados arriba y una fila de tarjetas
   // blancas (icono + titulo de color + texto) apoyadas sobre el gradiente.
-  gradient_cards: (c) => {
+  gradient_cards: (c, ctx) => {
     const acc = T(c.color, ACCENT)
+    // Si hay marca seleccionada, los titulos de las tarjetas toman su color secundario.
+    const titleStyle = ctx?.brandSecondary ? { color: ctx.brandSecondary } : undefined
     const cards = list(c.cards)
     const arr = cards.length ? cards : [
       { title: 'Dorem ipsum', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit', icon: 'gato' },
@@ -588,7 +592,7 @@ const RENDERERS = {
           {arr.map((card, i) => (
             <div key={i} className="cp-gcard">
               <span className="cp-gcard-ico"><FeatureIcon name={card.icon} /></span>
-              <div className="cp-gcard-t">{T(card.title, 'Título')}</div>
+              <div className="cp-gcard-t" style={titleStyle}>{T(card.title, 'Título')}</div>
               <p className="cp-gcard-d">{T(card.text, 'Texto de la tarjeta.')}</p>
             </div>
           ))}
@@ -653,6 +657,9 @@ const RENDERERS = {
     // El mosaico SIEMPRE tiene 6 bloques (ni mas, ni menos): se rellena/recorta a 6.
     const src = blocks.length ? blocks : defaults
     const arr = Array.from({ length: 6 }, (_, i) => src[i] || {})
+    // Texto de las cajas: por defecto blanco; si la marca define un color primario
+    // (ej. Pro Plan = negro), el texto usa ese color (mejor contraste sobre el dorado).
+    const boxTextStyle = ctx?.brandPrimary ? { color: ctx.brandPrimary } : undefined
     return (
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">
@@ -662,8 +669,8 @@ const RENDERERS = {
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
             <div key={i} className="cp-mosaic-box" style={{ background: acc }}>
-              <div className="cp-mosaic-box-t">{T(b.title, 'Título del bloque')}</div>
-              <p className="cp-mosaic-box-d">{T(b.text, 'Texto del bloque de contenido.')}</p>
+              <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(b.title, 'Título del bloque')}</div>
+              <p className="cp-mosaic-box-d" style={boxTextStyle}>{T(b.text, 'Texto del bloque de contenido.')}</p>
             </div>
           ) : (
             <div key={i} className="cp-mosaic-cell">
@@ -801,10 +808,10 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content, brandSecondary, dark }) {
+export default function ComponentPreview({ componentKey, content, brandSecondary, brandPrimary, dark }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
-  // ctx: contexto de la pagina (color secundario de la marca, tema oscuro).
+  // ctx: contexto de la pagina (colores primario/secundario de la marca, tema oscuro).
   // Con `dark` (paginas de marca oscura, ej. Pro Plan) el componente se pinta en oscuro.
-  return <div className={`cp-render${dark ? ' cp-dark' : ''}`}>{render(content || {}, { brandSecondary, dark })}</div>
+  return <div className={`cp-render${dark ? ' cp-dark' : ''}`}>{render(content || {}, { brandSecondary, brandPrimary, dark })}</div>
 }
