@@ -350,7 +350,7 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
-      { key: 'color2', label: 'Color secundario (cajas alternas; por defecto el de la marca)', type: 'color', cms: true },
+      { key: 'color2', label: 'Color de las cajas alternas', type: 'color', cms: true, brandDefault: true, default: '#d7bb77' },
       // El mosaico tiene SIEMPRE 6 bloques fijos que alternan imagen / contenido. Cada
       // bloque muestra solo los campos de su rol (roles + subcampos con roles).
       { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', fixed: 6,

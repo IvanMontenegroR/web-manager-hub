@@ -1924,6 +1924,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cf-color { display: flex; align-items: center; gap: 8px; }
 .cf-color-sw { width: 40px; height: 34px; padding: 0; border: 1px solid var(--border, #e4e7eb); border-radius: 6px; background: none; cursor: pointer; flex: none; }
 .cf-color-hex { max-width: 130px; text-transform: uppercase; }
+.cf-color-inherit { font-size: 11px; font-weight: 700; color: var(--muted, #868e99); background: #f1f3f5; padding: 3px 8px; border-radius: 9999px; white-space: nowrap; }
+.cf-color-reset { white-space: nowrap; }
 
 /* ===== Galeria "Todos los componentes" ===== */
 .cg-count { margin-left: auto; font-size: 13px; color: var(--muted, #868e99); }

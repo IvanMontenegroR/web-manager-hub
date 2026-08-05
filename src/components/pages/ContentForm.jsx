@@ -47,7 +47,7 @@ function ImageField({ value, onChange }) {
 
 // Formulario de contenido de un componente: renderiza un input por campo del
 // catalogo (incluye campos 'list' repetibles). Es controlado: draft + onChange(key,val).
-function Field({ f, value, onChange }) {
+function Field({ f, value, onChange, brandSecondary }) {
   if (f.type === 'textarea') {
     return <textarea className="control" rows={3} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
   }
@@ -67,12 +67,21 @@ function Field({ f, value, onChange }) {
     return <input type="checkbox" className="cf-check" checked={value !== false} onChange={(e) => onChange(e.target.checked)} />
   }
   if (f.type === 'color') {
-    // Color de acento: swatch (input color) + hex editable. Default rojo Purina.
-    const v = value || '#ED1C24'
+    // Color de acento: swatch (input color) + hex editable.
+    // Si el campo hereda de la marca (brandDefault) y no hay valor propio cargado, se
+    // muestra/aplica el color de la marca (ej. Pro Plan #d7bb77) como "heredado", con un
+    // boton para volver a heredarlo si se sobreescribio.
+    // Color heredado de la marca (solo si la pagina tiene marca); si no, cae al rojo,
+    // igual que el mosaico (acc2 = brandSecondary || primario).
+    const inheritColor = f.brandDefault ? (brandSecondary || null) : null
+    const explicit = value != null && value !== ''
+    const shown = explicit ? value : (inheritColor || '#ED1C24')
     return (
       <div className="cf-color">
-        <input type="color" className="cf-color-sw" value={v} onChange={(e) => onChange(e.target.value)} />
-        <input className="control cf-color-hex" value={v} onChange={(e) => onChange(e.target.value)} />
+        <input type="color" className="cf-color-sw" value={shown} onChange={(e) => onChange(e.target.value)} />
+        <input className="control cf-color-hex" value={shown} onChange={(e) => onChange(e.target.value)} />
+        {f.brandDefault && !explicit && inheritColor && <span className="cf-color-inherit">de la marca</span>}
+        {f.brandDefault && explicit && <button type="button" className="btn btn-sm cf-color-reset" title="Volver al color de la marca" onClick={() => onChange('')}>↺ marca</button>}
       </div>
     )
   }
@@ -139,7 +148,7 @@ function SpecsPanel({ specs }) {
   )
 }
 
-export default function ContentForm({ component, draft, onChange }) {
+export default function ContentForm({ component, draft, onChange, brandSecondary }) {
   const set = (key) => (val) => onChange({ ...draft, [key]: val })
   return (
     <div className="cf">
@@ -150,7 +159,7 @@ export default function ContentForm({ component, draft, onChange }) {
           <label>{f.label}</label>
           {f.type === 'list'
             ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} />
-            : <Field f={f} value={draft[f.key]} onChange={set(f.key)} />}
+            : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
         </div>
       ))}
     </div>
