@@ -90,7 +90,7 @@ const RENDERERS = {
     const dim = /brand hero/i.test(type) ? '2088×835px'
       : secondary ? '2100×700px'
       : promo ? '2088×696px'
-      : fullbox ? '1680×820px'
+      : fullbox ? '2088×1044px'
       : '2100×1050px'
 
     // Promotional (solo imagen). Con mas de 1 slide se vuelve un slider.
@@ -308,7 +308,7 @@ const RENDERERS = {
         <div className="cp-artc-row">
           {arr.map((a, i) => (
             <div key={i} className={`cp-artc-card${i === 0 ? ' feat' : ''}`}>
-              {a.image ? <MediaEl className="cp-artc-img" src={a.image} /> : <div className="cp-artc-img cp-artc-ph"><span className="cp-dim-badge">1216×912px</span></div>}
+              {a.image ? <MediaEl className="cp-artc-img" src={a.image} /> : <div className="cp-artc-img cp-artc-ph"><ImageIcon size={20} /></div>}
               <div className="cp-artc-scrim" />
               {a.category && <span className="cp-artc-cat" style={{ background: a.category_color || '#582d84' }}>{a.category}</span>}
               <div className="cp-artc-ttl">{T(a.title, 'Título del artículo')}</div>
@@ -457,7 +457,7 @@ const RENDERERS = {
               <span className="cp-tl-year">{T(it.year, '—')}</span>
               {it.image
                 ? <MediaEl className="cp-tl-img" src={it.image} />
-                : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">274×190px</span></div>}
+                : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">670×502px</span></div>}
               <div className="cp-tl-name">{T(it.title, 'Título del hito')}</div>
               <p className="cp-tl-desc">{T(it.description, 'Descripción del hito.')}</p>
               <span className="cp-tl-dot" />

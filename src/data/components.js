@@ -31,7 +31,7 @@ export const COMPONENTS = [
     category: 'Hero',
     help: 'Campos reales del paragraph Banner en el CMS. Segun el Banner Type cambia el layout.',
     fields: [
-      { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Banner Card', 'Full Image + Box Content', 'Brand Hero'] },
+      { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Full Image + Box Content', 'Brand Hero'] },
       // Los campos aplican segun el Banner Type: el Promotional (Only image) NO tiene
       // titulo/descripcion/imagen/boton -> solo las imagenes del slider; el resto de los
       // tipos usan titulo/descripcion/imagen/boton y NO el slider. (hideTypes/onlyTypes)
@@ -58,10 +58,10 @@ export const COMPONENTS = [
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
     specsByType: {
-      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 10MB', format: 'JPG / MP4' }],
-      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 10MB', format: 'JPG / MP4' }],
+      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB o YouTube', format: 'JPG / PNG / MP4' }],
+      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB o YouTube', format: 'JPG / PNG / MP4' }],
       'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
-      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~9:14', desktop: '1680×820px', mobile: '430×694px', max: '500kb', format: 'JPG / MP4' }],
+      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
       'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb', format: 'JPG / MP4' }],
     },
   },
@@ -134,7 +134,6 @@ export const COMPONENTS = [
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Explora más artículos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
     ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '1216×912px', mobile: '303×454px', max: '500kb', format: 'JPG' }],
   },
   {
     key: 'footer_banner',
@@ -167,7 +166,7 @@ export const COMPONENTS = [
       { key: 'button_text', label: 'Botón — texto', type: 'text', placeholder: 'Compartir mi historia' },
       { key: 'button_url', label: 'Botón — link', type: 'url' },
     ],
-    specs: [{ label: 'Imagen', ratio: 'Desktop ≈1:1', desktop: '900×840px', mobile: '640×600px', max: '500kb', format: 'JPG' }],
+    specs: [{ label: 'Imagen', ratio: 'Desktop 1.5:1', desktop: '1552×1014px', mobile: '670×446px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'species_selector',
@@ -200,7 +199,7 @@ export const COMPONENTS = [
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todas' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
     ],
-    specs: [{ label: 'Imagen de marca', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG' }],
+    specs: [{ label: 'Imagen de marca', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'product_list',
@@ -239,7 +238,7 @@ export const COMPONENTS = [
         { key: 'description', label: 'Descripcion', type: 'textarea' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 274×190', desktop: '274×190px', mobile: '274×190px', max: '500kb', format: 'JPG' }],
+    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
   },
   {
     key: 'commitment_carousel',
