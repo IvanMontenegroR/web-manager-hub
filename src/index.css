@@ -1683,11 +1683,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Titulo opcional del carrusel de productos. */
 .cp-plist-h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; color: #1b252e; margin-bottom: 22px; max-width: 620px; }
 /* Con imagen izquierda: fila [imagen | contenido]. La imagen es 650×692 (vertical).
+   align-items:flex-start => la imagen arranca a la misma altura que las cards.
    Sin imagen, el layout no cambia (bloque normal). */
-.cp-plist.has-left .cp-plist-main { display: flex; gap: 26px; align-items: stretch; }
+.cp-plist.has-left .cp-plist-main { display: flex; gap: 26px; align-items: flex-start; }
 .cp-plist.has-left .cp-plist-content { flex: 1; min-width: 0; }
 .cp-plist-left { flex: 0 0 34%; max-width: 360px; }
-.cp-plist-leftimg { border-radius: 16px; height: 100%; }
+.cp-plist-leftimg { border-radius: 16px; }
 .cp-plist-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .cp-plist-tabs { display: flex; flex-wrap: wrap; gap: 28px; }
 .cp-plist-tab { font-size: 18px; color: #2b2b2b; white-space: nowrap; }

@@ -409,6 +409,17 @@ const RENDERERS = {
     return (
       <div className={`cp-plist${showLeft ? ' has-left' : ''}`}>
         {c.title && <div className="cp-plist-h2">{c.title}</div>}
+        {/* La cabecera (tabs + flechas) va arriba, a lo ancho: asi la imagen izquierda
+            y las cards de producto arrancan a la misma altura (quedan alineadas). */}
+        <div className="cp-plist-head">
+          <div className="cp-plist-tabs">
+            {showFilters && filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
+          </div>
+          <div className="cp-plist-arrows">
+            <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>
+            <span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span>
+          </div>
+        </div>
         <div className="cp-plist-main">
           {showLeft && (
             <div className="cp-plist-left">
@@ -416,15 +427,6 @@ const RENDERERS = {
             </div>
           )}
           <div className="cp-plist-content">
-            <div className="cp-plist-head">
-              <div className="cp-plist-tabs">
-                {showFilters && filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
-              </div>
-              <div className="cp-plist-arrows">
-                <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>
-                <span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span>
-              </div>
-            </div>
             <div className="cp-plist-row">
               {showPetId && (
                 <div className="cp-plist-promo">
