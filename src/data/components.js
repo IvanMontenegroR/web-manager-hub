@@ -58,11 +58,11 @@ export const COMPONENTS = [
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
     specsByType: {
-      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB o YouTube', format: 'JPG / PNG / MP4' }],
-      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB o YouTube', format: 'JPG / PNG / MP4' }],
-      'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
-      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb', format: 'JPG / MP4' }],
-      'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb', format: 'JPG / MP4' }],
+      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
     },
   },
   {
@@ -110,7 +110,7 @@ export const COMPONENTS = [
         { key: 'highlighted', label: 'Destacada (roja)', type: 'select', options: ['No', 'Si'] },
       ] },
     ],
-    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9 · Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG' }],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9 · Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'articles_carousel',
@@ -238,7 +238,7 @@ export const COMPONENTS = [
         { key: 'description', label: 'Descripcion', type: 'textarea' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG' }],
+    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'commitment_carousel',
@@ -256,7 +256,7 @@ export const COMPONENTS = [
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 411×520', desktop: '411×520px', mobile: '411×520px', max: '500kb', format: 'JPG' }],
+    specs: [{ ratio: 'Desktop 411×520', desktop: '411×520px', mobile: '411×520px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'fifty_fifty',
@@ -311,7 +311,7 @@ export const COMPONENTS = [
       { key: 'image', label: 'Imagen', type: 'image' },
       { key: 'body', label: 'Texto', type: 'textarea' },
     ],
-    specs: [{ ratio: 'Desktop 16:6', desktop: '2100×760px', max: '500kb', format: 'JPG' }],
+    specs: [{ ratio: 'Desktop 16:6', desktop: '2100×760px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'image_features',
@@ -334,7 +334,7 @@ export const COMPONENTS = [
         { key: 'text', label: 'Texto', type: 'textarea' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG' }],
+    specs: [{ ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'mosaic',
@@ -356,7 +356,7 @@ export const COMPONENTS = [
         { key: 'text', label: 'Texto (bloques de contenido)', type: 'textarea' },
       ] },
     ],
-    specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG' }],
+    specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'stats_grid',
