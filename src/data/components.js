@@ -279,16 +279,20 @@ export const COMPONENTS = [
   },
   {
     key: 'gradient_cards',
-    name: 'Hero con tarjetas',
+    name: 'Banner con tarjetas',
     category: 'Hero',
-    help: 'Sección con fondo en gradiente (color configurable): título + subtítulo centrados arriba y una fila de tarjetas (ícono + título + texto) sobre el gradiente. La imagen de fondo es opcional.',
+    help: 'Banner con fondo en gradiente (color configurable): título + subtítulo centrados arriba y una fila de tarjetas (ícono + título + texto) sobre el gradiente. La imagen de fondo es opcional.',
     fields: [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Dorem ipsum dolor sit' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color del gradiente', type: 'color', cms: true },
       { key: 'background', label: 'Imagen de fondo (opcional)', type: 'image' },
-      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
+      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', sample: [
+        { icon: 'gato', title: 'Dorem ipsum', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { icon: 'gato', title: 'Adipiscing elit', text: 'Morem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { icon: 'gato', title: 'Forem ipsum dolor', text: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      ], item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'] },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
@@ -321,7 +325,11 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de los títulos', type: 'color', cms: true },
       { key: 'image', label: 'Imagen', type: 'image' },
-      { key: 'features', label: 'Destacados', type: 'list', itemLabel: 'Destacado', item: [
+      { key: 'features', label: 'Destacados', type: 'list', itemLabel: 'Destacado', sample: [
+        { icon: 'gato', title: 'Rorem ipsum dolor sit amet, consectetur', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { icon: 'gato', title: 'Jorem ipsum dolor sit amet, consectetur adipiscing elit', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { icon: 'gato', title: 'Lorem ipsum dolor sit amet, consectetur', text: 'Porem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      ], item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'] },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
@@ -339,7 +347,11 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
-      { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', item: [
+      { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', sample: [
+        {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        {}, { title: 'Porem ipsum dolor sit amet, consectetur.', text: 'Torem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      ], item: [
         { key: 'image', label: 'Imagen (bloques de imagen)', type: 'image' },
         { key: 'title', label: 'Título (bloques de contenido)', type: 'text' },
         { key: 'text', label: 'Texto (bloques de contenido)', type: 'textarea' },
@@ -356,7 +368,12 @@ export const COMPONENTS = [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Forem ipsum dolor sit amet.' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'color', label: 'Color de los números', type: 'color', cms: true },
-      { key: 'stats', label: 'Números', type: 'list', itemLabel: 'Número', item: [
+      { key: 'stats', label: 'Números', type: 'list', itemLabel: 'Número', sample: [
+        { value: '40+', label: 'Torem ipsum dolor sit amet' },
+        { value: '540+', label: 'Porem ipsum dolor sit amet' },
+        { value: '300+', label: 'Korem ipsum dolor sit amet' },
+        { value: '25+', label: 'Jorem ipsum dolor sit amet' },
+      ], item: [
         { key: 'value', label: 'Número', type: 'text', placeholder: '40+' },
         { key: 'label', label: 'Etiqueta', type: 'text' },
       ] },
@@ -404,11 +421,17 @@ export function sampleContent(def) {
   const c = {}
   for (const f of def.fields || []) {
     if (f.type === 'list') {
-      c[f.key] = [0, 1].map((i) => {
-        const item = {}
-        for (const sf of f.item || []) item[sf.key] = sampleFieldValue(sf, i)
-        return item
-      })
+      // Si el campo define `sample` (contenido fiel a la referencia), se usa tal cual
+      // para que la galeria muestre la cantidad/estructura real; si no, 2 items genericos.
+      if (Array.isArray(f.sample)) {
+        c[f.key] = f.sample.map((it) => ({ ...it }))
+      } else {
+        c[f.key] = [0, 1].map((i) => {
+          const item = {}
+          for (const sf of f.item || []) item[sf.key] = sampleFieldValue(sf, i)
+          return item
+        })
+      }
     } else {
       c[f.key] = sampleFieldValue(f)
     }
