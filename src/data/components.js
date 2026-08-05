@@ -358,8 +358,9 @@ export const COMPONENTS = [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Worem ipsum dolor sit amet, consectetur adipiscing elit' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-      { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
-      { key: 'color2', label: 'Color de las cajas alternas', type: 'color', cms: true, brandDefault: true, default: '#d7bb77' },
+      // Un solo color para TODAS las cajas de contenido (las que alternan con las
+      // imagenes). Por defecto usa el secundario de la marca (ej. Pro Plan #d7bb77).
+      { key: 'color', label: 'Color de las cajas', type: 'color', cms: true, brandDefault: true },
       // El mosaico tiene SIEMPRE 6 bloques fijos que alternan imagen / contenido. Cada
       // bloque muestra solo los campos de su rol (roles + subcampos con roles).
       { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', fixed: 6,

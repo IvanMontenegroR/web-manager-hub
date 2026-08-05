@@ -200,7 +200,7 @@ export default function PageBuilder({ page, onBack }) {
                       <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
                     </div>
                   </div>
-                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} brandSecondary={brandSecondaryColor(page.brand)} />
+                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} brandSecondary={brandSecondaryColor(page.brand)} dark={pageIsDark(page.brand)} />
                 </div>
               ))
             )}

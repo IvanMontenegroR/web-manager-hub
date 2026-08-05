@@ -1775,9 +1775,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Page container (gutter lateral, replica el .container real) ===== */
 .pb-page { width: 100%; max-width: 1680px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-/* Paginas de marca oscura (Pro Plan): fondo negro detras de los componentes. */
+/* Paginas de marca oscura (Pro Plan): fondo negro detras de los componentes. Los
+   bloques quedan transparentes para dejar ver el negro (el componente se pinta en
+   tema oscuro con .cp-dark). */
 .pb-page--dark { background: #0d0d0f; border-radius: 8px; padding: 14px; }
 .pb-canvas.preview .pb-page--dark { padding: 12px 60px 56px; }
+.pb-page--dark .pb-block { background: transparent; box-shadow: none; }
 /* En vista previa: gutter lateral + espacio vertical entre secciones y respecto al
    header/footer, como la pagina real (container--padding-lg: max-width 1680, padding 0 60). */
 .pb-canvas.preview .pb-page { padding: 12px 60px 56px; gap: 40px; }
@@ -1928,6 +1931,34 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-lcard-list li { position: relative; padding-left: 16px; margin: 7px 0; font-size: 13px; color: #d7d9dd; line-height: 1.4; }
 .cp-lcard-list li::before { content: '·'; position: absolute; left: 3px; top: -2px; font-size: 18px; color: #d7d9dd; }
 .cp-lcard-cta { display: inline-block; margin-top: 20px; background: #f5f5f5; color: #14151a; font-weight: 700; font-size: 12.5px; padding: 10px 20px; border-radius: 24px; }
+
+/* ===== Tema oscuro de componentes (paginas de marca oscura, ej. Pro Plan) =====
+   El componente se pinta transparente (deja ver el fondo negro de la pagina) con
+   textos claros y placeholders/cards oscuros. Los acentos de color se mantienen. */
+.cp-render.cp-dark { background: transparent; color: #e8e9ec; }
+.cp-dark .cp-h1, .cp-dark .cp-h2, .cp-dark .cp-plist-h2, .cp-dark .cp-mosaic-title,
+.cp-dark .cp-imgfeat-title, .cp-dark .cp-stats-title, .cp-dark .cp-twi-title,
+.cp-dark .cp-tl-h1, .cp-dark .cp-brands-title, .cp-dark .cp-half-title,
+.cp-dark .cp-gcards-title, .cp-dark .cp-stat-v, .cp-dark .cp-tl-name,
+.cp-dark .cp-svc-title { color: #fff; }
+.cp-dark .cp-p, .cp-dark .cp-sub, .cp-dark .cp-mosaic-sub, .cp-dark .cp-imgfeat-sub,
+.cp-dark .cp-twi-body, .cp-dark .cp-tl-sub, .cp-dark .cp-brands-sub, .cp-dark .cp-svc-sub,
+.cp-dark .cp-half-text, .cp-dark .cp-half-rtext, .cp-dark .cp-gcards-sub,
+.cp-dark .cp-stat-l, .cp-dark .cp-tl-desc { color: #b9bcc3; }
+/* Placeholders e imagenes vacias en oscuro. */
+.cp-dark .cp-img, .cp-dark .cp-img-ph, .cp-dark .cp-plist-ph { background: #1e1f24; color: #6c6f77; }
+.cp-dark .cp-plist-card { background: #17181c; }
+.cp-dark .cp-ph-dim { color: #7a7d85; }
+/* Carrusel de productos: tabs, flechas y boton en claro. */
+.cp-dark .cp-plist-tab { color: #cfd2d8; }
+.cp-dark .cp-plist-arrow { border-color: #6a6d75; color: #e8e9ec; }
+.cp-dark .cp-plist-more-btn { background: #f5f5f5; color: #14151a; }
+/* Grilla de numeros: la linea inferior clara. */
+.cp-dark .cp-stat-line { border-bottom-color: #e8e9ec; }
+/* 50/50: acordeon con bordes oscuros. */
+.cp-dark .cp-half-acc, .cp-dark .cp-acc-item { border-color: #33353b; }
+.cp-dark .cp-acc-sum { color: #e8e9ec; }
+.cp-dark .cp-acc-body { color: #9aa0a6; }
 
 /* Campo de color (swatch + hex) del builder. */
 .cf-color { display: flex; align-items: center; gap: 8px; }

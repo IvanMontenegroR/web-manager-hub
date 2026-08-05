@@ -92,6 +92,9 @@ async function snapshot(node, forceWidth) {
   node.style.width = w + 'px'
   try {
     const h = node.offsetHeight || 300
+    // Componentes de tema oscuro (paginas de marca oscura): se capturan sobre fondo
+    // negro para que el texto claro se vea (sobre blanco quedaria invisible).
+    const isDark = node.classList?.contains('cp-dark') || !!node.closest?.('.cp-dark, .pb-page--dark')
     // Pre-resolver todas las imagenes del nodo a dataURL (una vez, deduplicado).
     const srcs = Array.from(new Set(
       Array.from(node.querySelectorAll('img')).map((im) => im.getAttribute('src')).filter(Boolean),
@@ -100,7 +103,7 @@ async function snapshot(node, forceWidth) {
     await Promise.all(srcs.map(async (s) => { srcMap.set(s, await resolveImg(s)) }))
 
     const canvas = await html2canvas(node, {
-      backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false,
+      backgroundColor: isDark ? '#0d0d0f' : '#ffffff', scale: 2, useCORS: true, logging: false,
       width: w, height: h, windowWidth: w, windowHeight: h,
       onclone: (doc, clone) => {
         const scope = clone && clone.querySelectorAll ? clone : doc

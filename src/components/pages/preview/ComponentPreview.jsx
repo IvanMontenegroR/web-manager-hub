@@ -640,10 +640,10 @@ const RENDERERS = {
   // de contenido (color configurable). Los bloques se alternan por posicion: par =
   // imagen, impar = caja de contenido (titulo + texto).
   mosaic: (c, ctx) => {
-    const acc = T(c.color, ACCENT)
-    // Color secundario de las cajas alternas: si no se cargo uno, usa el de la marca de
-    // la pagina (ej. Pro Plan #d7bb77); si tampoco hay marca, cae al primario.
-    const acc2 = c.color2 ? c.color2 : (ctx?.brandSecondary || acc)
+    // TODAS las cajas de contenido usan el mismo color: el cargado, o el secundario de
+    // la marca de la pagina (ej. Pro Plan #d7bb77), o el rojo por defecto. Las celdas de
+    // imagen no llevan color.
+    const acc = c.color ? c.color : (ctx?.brandSecondary || ACCENT)
     const blocks = list(c.blocks)
     const defaults = [
       {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
@@ -661,7 +661,7 @@ const RENDERERS = {
         </div>
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
-            <div key={i} className="cp-mosaic-box" style={{ background: (Math.floor(i / 2) % 2 === 0) ? acc : acc2 }}>
+            <div key={i} className="cp-mosaic-box" style={{ background: acc }}>
               <div className="cp-mosaic-box-t">{T(b.title, 'Título del bloque')}</div>
               <p className="cp-mosaic-box-d">{T(b.text, 'Texto del bloque de contenido.')}</p>
             </div>
@@ -801,9 +801,10 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content, brandSecondary }) {
+export default function ComponentPreview({ componentKey, content, brandSecondary, dark }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
-  // ctx: contexto de la pagina (ej. color secundario de la marca para el mosaico).
-  return <div className="cp-render">{render(content || {}, { brandSecondary })}</div>
+  // ctx: contexto de la pagina (color secundario de la marca, tema oscuro).
+  // Con `dark` (paginas de marca oscura, ej. Pro Plan) el componente se pinta en oscuro.
+  return <div className={`cp-render${dark ? ' cp-dark' : ''}`}>{render(content || {}, { brandSecondary, dark })}</div>
 }
