@@ -280,7 +280,7 @@ export const COMPONENTS = [
   {
     key: 'gradient_cards',
     name: 'Banner con tarjetas',
-    category: 'Hero',
+    category: 'Contenido',
     help: 'Banner con fondo en gradiente (color configurable): título + subtítulo centrados arriba y una fila de tarjetas (ícono + título + texto) sobre el gradiente. La imagen de fondo es opcional.',
     fields: [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Dorem ipsum dolor sit' },
