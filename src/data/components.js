@@ -277,6 +277,91 @@ export const COMPONENTS = [
       ] },
     ],
   },
+  {
+    key: 'gradient_cards',
+    name: 'Hero con tarjetas',
+    category: 'Hero',
+    help: 'Sección con fondo en gradiente (color configurable): título + subtítulo centrados arriba y una fila de tarjetas (ícono + título + texto) sobre el gradiente. La imagen de fondo es opcional.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Dorem ipsum dolor sit' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      { key: 'color', label: 'Color del gradiente', type: 'color', cms: true },
+      { key: 'background', label: 'Imagen de fondo (opcional)', type: 'image' },
+      { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
+        { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'] },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+        { key: 'url', label: 'Link', type: 'url' },
+      ] },
+    ],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG / PNG' }],
+  },
+  {
+    key: 'text_wide_image',
+    name: 'Texto con imagen ancha',
+    category: 'Contenido',
+    help: 'Título a la izquierda, una imagen ancha debajo y un párrafo de texto al pie.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'image', label: 'Imagen', type: 'image' },
+      { key: 'body', label: 'Texto', type: 'textarea' },
+    ],
+    specs: [{ ratio: 'Desktop 16:6', desktop: '2100×760px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'image_features',
+    name: 'Imagen + destacados',
+    category: 'Contenido',
+    help: 'Título + subtítulo centrados, una imagen ancha y una fila de destacados (ícono + título de color configurable + texto).',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Worem ipsum dolor sit amet, consectetur adipiscing elit' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      { key: 'color', label: 'Color de los títulos', type: 'color', cms: true },
+      { key: 'image', label: 'Imagen', type: 'image' },
+      { key: 'features', label: 'Destacados', type: 'list', itemLabel: 'Destacado', item: [
+        { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'] },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'text', label: 'Texto', type: 'textarea' },
+      ] },
+    ],
+    specs: [{ ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'mosaic',
+    name: 'Mosaico',
+    category: 'Contenido',
+    help: 'Grilla tipo mosaico que alterna imágenes con cajas de contenido (color configurable) con título y texto. Los bloques se alternan automáticamente (imagen, caja, imagen…): cargá la imagen en los de imagen y el título/texto en los de contenido.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Worem ipsum dolor sit amet, consectetur adipiscing elit' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
+      { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', item: [
+        { key: 'image', label: 'Imagen (bloques de imagen)', type: 'image' },
+        { key: 'title', label: 'Título (bloques de contenido)', type: 'text' },
+        { key: 'text', label: 'Texto (bloques de contenido)', type: 'textarea' },
+      ] },
+    ],
+    specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG' }],
+  },
+  {
+    key: 'stats_grid',
+    name: 'Grilla de números',
+    category: 'Contenido',
+    help: 'Título centrado y una fila de estadísticas: número grande (color configurable), etiqueta y una línea inferior.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Forem ipsum dolor sit amet.' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'color', label: 'Color de los números', type: 'color', cms: true },
+      { key: 'stats', label: 'Números', type: 'list', itemLabel: 'Número', item: [
+        { key: 'value', label: 'Número', type: 'text', placeholder: '40+' },
+        { key: 'label', label: 'Etiqueta', type: 'text' },
+      ] },
+    ],
+  },
 ]
 
 export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key, c]))
@@ -307,6 +392,7 @@ function sampleFieldValue(f, i = 0) {
   switch (f.type) {
     case 'image': return '' // vacio: el placeholder muestra el tamaño recomendado
     case 'checkbox': return true
+    case 'color': return f.default || '#ED1C24'
     case 'select': return (f.options && f.options[0]) || ''
     case 'url': return `https://ejemplo.com/${f.key}-${n}`
     case 'textarea': return f.placeholder || `Texto de ejemplo ${n} para validar el campo “${f.label}”.`

@@ -32,6 +32,14 @@ function Img({ src, h = 160, aspect, dim, className = '' }) {
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 const list = (v) => (Array.isArray(v) ? v : [])
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
+const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
+
+// Icono decorativo elegido de una lista (pata / gato / perro).
+function FeatureIcon({ name, size = 26 }) {
+  if (/gato|cat/i.test(name)) return <Cat size={size} />
+  if (/perro|dog/i.test(name)) return <Dog size={size} />
+  return <PawPrint size={size} />
+}
 
 // "Banner Align Content" (opcion del CMS) -> posicion horizontal + vertical.
 // Por defecto = centro/centro (asi se ve el Main Hero real). Ej: "Banner Left Bottom".
@@ -536,6 +544,139 @@ const RENDERERS = {
           ) : (
             <p className="cp-half-rtext">{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</p>
           )}
+        </div>
+      </div>
+    )
+  },
+
+  // Hero con tarjetas: fondo en gradiente (color configurable, --acc) con una imagen
+  // de fondo opcional; titulo + subtitulo centrados arriba y una fila de tarjetas
+  // blancas (icono + titulo de color + texto) apoyadas sobre el gradiente.
+  gradient_cards: (c) => {
+    const acc = T(c.color, ACCENT)
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [
+      { title: 'Dorem ipsum', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit', icon: 'gato' },
+      { title: 'Adipiscing elit', text: 'Morem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
+      { title: 'Forem ipsum dolor', text: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
+    ]
+    return (
+      <div className="cp-gcards" style={{ '--acc': acc }}>
+        <div className="cp-gcards-bg">
+          {c.background ? <MediaEl className="cp-gcards-bgimg" src={c.background} /> : <div className="cp-gcards-bgph" />}
+          <div className="cp-gcards-grad" />
+        </div>
+        <div className="cp-gcards-head">
+          <div className="cp-gcards-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
+          <div className="cp-gcards-sub">{T(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+        </div>
+        <div className="cp-gcards-row">
+          {arr.map((card, i) => (
+            <div key={i} className="cp-gcard">
+              <span className="cp-gcard-ico"><FeatureIcon name={card.icon} /></span>
+              <div className="cp-gcard-t">{T(card.title, 'Título')}</div>
+              <p className="cp-gcard-d">{T(card.text, 'Texto de la tarjeta.')}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Texto con imagen ancha: titulo a la izquierda, imagen ancha (16:6) y un parrafo al pie.
+  text_wide_image: (c) => (
+    <div className="cp-twi">
+      <div className="cp-twi-title">{T(c.title, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+      <Img src={c.image} aspect="21/8" dim="2100×760px" className="cp-twi-img" />
+      <p className="cp-twi-body">{T(c.body, 'Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus.')}</p>
+    </div>
+  ),
+
+  // Imagen + destacados: titulo + subtitulo centrados, imagen ancha (16:9) y una fila
+  // de destacados (icono + titulo de color configurable + texto).
+  image_features: (c) => {
+    const acc = T(c.color, ACCENT)
+    const feats = list(c.features)
+    const arr = feats.length ? feats : [
+      { title: 'Rorem ipsum dolor sit amet, consectetur', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
+      { title: 'Jorem ipsum dolor sit amet, consectetur adipiscing elit', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
+      { title: 'Lorem ipsum dolor sit amet, consectetur', text: 'Porem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
+    ]
+    return (
+      <div className="cp-imgfeat" style={{ '--acc': acc }}>
+        <div className="cp-imgfeat-head">
+          <div className="cp-imgfeat-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
+          <div className="cp-imgfeat-sub">{T(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+        </div>
+        <Img src={c.image} aspect="16/9" dim="2160×1080px" className="cp-imgfeat-img" />
+        <div className="cp-imgfeat-row">
+          {arr.map((f, i) => (
+            <div key={i} className="cp-imgfeat-item">
+              <span className="cp-imgfeat-ico"><FeatureIcon name={f.icon} /></span>
+              <div className="cp-imgfeat-t">{T(f.title, 'Título del destacado')}</div>
+              <p className="cp-imgfeat-d">{T(f.text, 'Texto del destacado.')}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Mosaico: titulo + subtitulo centrados y una grilla que alterna imagenes con cajas
+  // de contenido (color configurable). Los bloques se alternan por posicion: par =
+  // imagen, impar = caja de contenido (titulo + texto).
+  mosaic: (c) => {
+    const acc = T(c.color, ACCENT)
+    const blocks = list(c.blocks)
+    const arr = blocks.length ? blocks : [
+      {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+      {}, { title: 'Porem ipsum dolor sit amet, consectetur.', text: 'Torem ipsum dolor sit amet, consectetur adipiscing elit.' },
+    ]
+    return (
+      <div className="cp-mosaic" style={{ '--acc': acc }}>
+        <div className="cp-mosaic-head">
+          <div className="cp-mosaic-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
+          <div className="cp-mosaic-sub">{T(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+        </div>
+        <div className="cp-mosaic-grid">
+          {arr.map((b, i) => (i % 2 === 1) ? (
+            <div key={i} className="cp-mosaic-box">
+              <div className="cp-mosaic-box-t">{T(b.title, 'Título del bloque')}</div>
+              <p className="cp-mosaic-box-d">{T(b.text, 'Texto del bloque de contenido.')}</p>
+            </div>
+          ) : (
+            <div key={i} className="cp-mosaic-cell">
+              <Img src={b.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Grilla de numeros: titulo centrado y una fila de estadisticas (numero grande de
+  // color configurable + etiqueta + linea inferior).
+  stats_grid: (c) => {
+    const acc = T(c.color, ACCENT)
+    const stats = list(c.stats)
+    const arr = stats.length ? stats : [
+      { value: '40+', label: 'Torem ipsum dolor sit amet' },
+      { value: '540+', label: 'Porem ipsum dolor sit amet' },
+      { value: '300+', label: 'Korem ipsum dolor sit amet' },
+      { value: '25+', label: 'Jorem ipsum dolor sit amet' },
+    ]
+    return (
+      <div className="cp-stats" style={{ '--acc': acc }}>
+        <div className="cp-stats-title">{T(c.title, 'Forem ipsum dolor sit amet.')}</div>
+        <div className="cp-stats-row">
+          {arr.map((s, i) => (
+            <div key={i} className="cp-stat">
+              <div className="cp-stat-v">{T(s.value, '00+')}</div>
+              <div className="cp-stat-l">{T(s.label, 'Etiqueta del número')}</div>
+              <div className="cp-stat-line" />
+            </div>
+          ))}
         </div>
       </div>
     )

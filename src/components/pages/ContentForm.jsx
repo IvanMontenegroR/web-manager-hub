@@ -66,6 +66,16 @@ function Field({ f, value, onChange }) {
     // Sin valor cargado = mostrado por defecto (value !== false).
     return <input type="checkbox" className="cf-check" checked={value !== false} onChange={(e) => onChange(e.target.checked)} />
   }
+  if (f.type === 'color') {
+    // Color de acento: swatch (input color) + hex editable. Default rojo Purina.
+    const v = value || '#ED1C24'
+    return (
+      <div className="cf-color">
+        <input type="color" className="cf-color-sw" value={v} onChange={(e) => onChange(e.target.value)} />
+        <input className="control cf-color-hex" value={v} onChange={(e) => onChange(e.target.value)} />
+      </div>
+    )
+  }
   // text / url
   return <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.type === 'url' ? 'https://...' : f.placeholder} />
 }
