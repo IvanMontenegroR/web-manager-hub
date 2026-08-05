@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { COMPONENTS, getComponent } from '../../data/components'
 import {
-  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder,
+  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark,
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
@@ -173,8 +173,9 @@ export default function PageBuilder({ page, onBack }) {
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
           <div ref={headerRef} className="pb-header-host"><SiteHeader /></div>
 
-          {/* Container: replica el gutter lateral de la pagina real. */}
-          <div className="pb-page">
+          {/* Container: replica el gutter lateral de la pagina real. Las paginas de
+              marca oscura (Pro Plan) usan fondo negro. */}
+          <div className={`pb-page${pageIsDark(page.brand) ? ' pb-page--dark' : ''}`}>
             {loading ? (
               <div className="center-state"><div className="spinner" /></div>
             ) : comps.length === 0 ? (

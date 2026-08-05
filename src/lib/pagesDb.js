@@ -19,6 +19,20 @@ function isMissingTable(error) {
   )
 }
 
+// Marca de la pagina (opcional). Define el tema visual del builder: Pro Plan usa
+// fondo negro. La lista es curada; se puede ampliar sin tocar el resto.
+export const PAGE_BRANDS = ['Pro Plan', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+
+// ¿La marca usa tema oscuro (fondo negro)? Hoy solo Pro Plan.
+export function pageIsDark(brand) {
+  return /pro\s*plan/i.test(brand || '')
+}
+
+// El color secundario de una marca (acento). Hoy solo Pro Plan (#d7bb77).
+export function brandSecondaryColor(brand) {
+  return /pro\s*plan/i.test(brand || '') ? '#d7bb77' : null
+}
+
 // Estados de una pagina (orden fijo, de menos a mas avanzado).
 export const PAGE_STATUSES = ['Not started', 'In progress', 'On hold', 'Done']
 export const PAGE_STATUS_LABEL = {
@@ -28,15 +42,21 @@ export const PAGE_STATUS_LABEL = {
   Done: 'Lista',
 }
 
+// Nota: si la tabla `pages` ya existe sin la columna `brand`, corré:
+//   alter table public.pages add column if not exists brand text;
+// La app igual funciona sin ella (guarda la pagina sin marca) hasta que la agregues.
 export const SETUP_SQL = `create table if not exists public.pages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   path text,
   status text not null default 'Not started',
+  brand text,
   notes text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table public.pages add column if not exists brand text;
 
 create table if not exists public.page_components (
   id uuid primary key default gen_random_uuid(),
@@ -66,23 +86,34 @@ function pagePayload(p) {
     name: p.name?.trim() || '',
     path: p.path?.trim() || null,
     status: PAGE_STATUSES.includes(p.status) ? p.status : 'Not started',
+    brand: p.brand?.trim() || null,
     notes: p.notes?.trim() || null,
   }
 }
 
+// La columna `brand` es nueva: si todavia no fue agregada a la tabla, el insert/update
+// falla apuntando a esa columna. En ese caso se reintenta SIN brand (se guarda igual).
+function isMissingBrand(error) {
+  if (!error) return false
+  return /brand/i.test(error.message || '') &&
+    (error.code === 'PGRST204' || error.code === '42703' || /column|schema cache|does not exist|find/i.test(error.message || ''))
+}
+
 export async function createPage(p, sort_order) {
-  const { data, error } = await supabase
-    .from('pages').insert({ ...pagePayload(p), sort_order: sort_order ?? 0 }).select().single()
-  throwIf(error)
-  return data
+  const payload = { ...pagePayload(p), sort_order: sort_order ?? 0 }
+  let res = await supabase.from('pages').insert(payload).select().single()
+  if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').insert(payload).select().single() }
+  throwIf(res.error)
+  return res.data
 }
 
 export async function updatePage(id, p) {
   const payload = pagePayload(p)
   if (p.sort_order != null) payload.sort_order = p.sort_order
-  const { data, error } = await supabase.from('pages').update(payload).eq('id', id).select().single()
-  throwIf(error)
-  return data
+  let res = await supabase.from('pages').update(payload).eq('id', id).select().single()
+  if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').update(payload).eq('id', id).select().single() }
+  throwIf(res.error)
+  return res.data
 }
 
 // Cambio rapido de estado sin tocar el resto.

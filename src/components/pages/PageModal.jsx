@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FileStack, Trash2 } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
-import { createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL } from '../../lib/pagesDb'
+import { createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_BRANDS } from '../../lib/pagesDb'
 
 // Alta/edicion de una pagina del tracker de "Creacion de paginas".
 export default function PageModal({ item, nextSort, onClose, onSaved }) {
@@ -10,6 +10,7 @@ export default function PageModal({ item, nextSort, onClose, onSaved }) {
     name: item?.name ?? '',
     path: item?.path ?? '',
     status: item?.status ?? 'Not started',
+    brand: item?.brand ?? '',
     notes: item?.notes ?? '',
   })
   const [err, setErr] = useState(null)
@@ -57,11 +58,20 @@ export default function PageModal({ item, nextSort, onClose, onSaved }) {
           <input className="control" value={form.path} onChange={set('path')} placeholder="Ej: /" />
         </div>
       </div>
-      <div className="field">
-        <label>Estado</label>
-        <select className="control" value={form.status} onChange={set('status')}>
-          {PAGE_STATUSES.map((s) => <option key={s} value={s}>{PAGE_STATUS_LABEL[s]}</option>)}
-        </select>
+      <div className="row-2">
+        <div className="field">
+          <label>Estado</label>
+          <select className="control" value={form.status} onChange={set('status')}>
+            {PAGE_STATUSES.map((s) => <option key={s} value={s}>{PAGE_STATUS_LABEL[s]}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label>Marca <span className="lbl-muted">(opcional)</span></label>
+          <select className="control" value={form.brand} onChange={set('brand')}>
+            <option value="">— Ninguna —</option>
+            {PAGE_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
+          </select>
+        </div>
       </div>
       <div className="field">
         <label>Notas <span className="lbl-muted">(opcional)</span></label>

@@ -1766,6 +1766,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Page container (gutter lateral, replica el .container real) ===== */
 .pb-page { width: 100%; max-width: 1680px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+/* Paginas de marca oscura (Pro Plan): fondo negro detras de los componentes. */
+.pb-page--dark { background: #0d0d0f; border-radius: 8px; padding: 14px; }
+.pb-canvas.preview .pb-page--dark { padding: 12px 60px 56px; }
 /* En vista previa: gutter lateral + espacio vertical entre secciones y respecto al
    header/footer, como la pagina real (container--padding-lg: max-width 1680, padding 0 60). */
 .pb-canvas.preview .pb-page { padding: 12px 60px 56px; gap: 40px; }
@@ -1896,6 +1899,26 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-stat-v { font-size: 40px; font-weight: 800; letter-spacing: -1px; color: var(--acc, #ED1C24); line-height: 1; }
 .cp-stat-l { margin-top: 8px; font-size: 12.5px; color: #3a424e; }
 .cp-stat-line { margin-top: 16px; border-bottom: 2px solid #1b252e; }
+
+/* ===== Cards con logo (logo_cards) — seccion oscura ===== */
+.cp-lcards { background: #0d0d0f; padding: 40px 34px 46px; }
+.cp-lcards-head { text-align: center; max-width: 720px; margin: 0 auto 30px; }
+.cp-lcards-title { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; color: #fff; }
+.cp-lcards-sub { margin-top: 12px; font-size: 13.5px; line-height: 1.55; color: #b6b8bd; }
+.cp-lcards-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.cp-lcard { position: relative; border-radius: 14px; overflow: hidden; min-height: 300px; display: flex; }
+.cp-lcard-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-lcard-ph { display: flex; align-items: center; justify-content: center; background: #2a2b30; color: #6b6d75; }
+.cp-lcard-scrim { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(10,10,12,0.92) 0%, rgba(10,10,12,0.72) 42%, rgba(10,10,12,0.15) 100%); }
+.cp-lcard-body { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 26px 28px; width: 100%; }
+.cp-lcard-logo { height: 40px; width: auto; max-width: 60%; object-fit: contain; object-position: left; }
+.cp-lcard-logo-ph { height: 40px; display: inline-flex; align-items: center; padding: 0 14px; background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.35); border-radius: 6px; color: #cfd1d6; font-size: 12px; font-weight: 700; letter-spacing: 1px; align-self: flex-start; }
+.cp-lcard-bottom { margin-top: 60px; }
+.cp-lcard-t { font-size: 20px; font-weight: 700; color: #fff; }
+.cp-lcard-list { list-style: none; margin: 14px 0 0; padding: 0; }
+.cp-lcard-list li { position: relative; padding-left: 16px; margin: 7px 0; font-size: 13px; color: #d7d9dd; line-height: 1.4; }
+.cp-lcard-list li::before { content: '·'; position: absolute; left: 3px; top: -2px; font-size: 18px; color: #d7d9dd; }
+.cp-lcard-cta { display: inline-block; margin-top: 20px; background: #f5f5f5; color: #14151a; font-weight: 700; font-size: 12.5px; padding: 10px 20px; border-radius: 24px; }
 
 /* Campo de color (swatch + hex) del builder. */
 .cf-color { display: flex; align-items: center; gap: 8px; }

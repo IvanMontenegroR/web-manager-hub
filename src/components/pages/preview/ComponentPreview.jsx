@@ -627,6 +627,7 @@ const RENDERERS = {
   // imagen, impar = caja de contenido (titulo + texto).
   mosaic: (c) => {
     const acc = T(c.color, ACCENT)
+    const acc2 = T(c.color2, acc) // color secundario: las cajas coloridas alternan acc/acc2
     const blocks = list(c.blocks)
     const arr = blocks.length ? blocks : [
       {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
@@ -641,7 +642,7 @@ const RENDERERS = {
         </div>
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
-            <div key={i} className="cp-mosaic-box">
+            <div key={i} className="cp-mosaic-box" style={{ background: (Math.floor(i / 2) % 2 === 0) ? acc : acc2 }}>
               <div className="cp-mosaic-box-t">{T(b.title, 'Título del bloque')}</div>
               <p className="cp-mosaic-box-d">{T(b.text, 'Texto del bloque de contenido.')}</p>
             </div>
@@ -677,6 +678,48 @@ const RENDERERS = {
               <div className="cp-stat-line" />
             </div>
           ))}
+        </div>
+      </div>
+    )
+  },
+
+  // Cards con logo (sección oscura): título + subtítulo centrados y cards grandes con
+  // imagen de fondo + scrim, logo arriba, título, lista de bullets y botón. Fondo negro
+  // propio (pensada para páginas de marca como Pro Plan).
+  logo_cards: (c) => {
+    const cards = list(c.cards)
+    const arr = cards.length ? cards : [
+      { title: 'Ciencia aplicada a la nutrición', bullets: 'Investigación actualizada en nutrición de perros y gatos\nContenidos educativos y formación continua\nHerramientas para la toma de decisiones nutricionales', cta_label: 'Explorar recursos' },
+      { title: 'Soluciones para la práctica diaria', bullets: 'Plataforma exclusiva para médicos veterinarios\nAcceso a materiales técnicos y guías clínicas\nContenidos profesionales y especializados', cta_label: 'Acceder a la plataforma' },
+    ]
+    return (
+      <div className="cp-lcards">
+        <div className="cp-lcards-head">
+          <div className="cp-lcards-title">{T(c.title, 'Respaldo experto para quienes cuidan su salud')}</div>
+          <p className="cp-lcards-sub">{T(c.subtitle, 'Purina® Pro Plan® acompaña a médicos veterinarios con herramientas, conocimiento y servicios diseñados para apoyar su práctica clínica y fortalecer cada decisión nutricional.')}</p>
+        </div>
+        <div className="cp-lcards-row">
+          {arr.map((card, i) => {
+            const bullets = String(card.bullets || '').split('\n').map((s) => s.trim()).filter(Boolean)
+            return (
+              <div key={i} className="cp-lcard">
+                {card.image ? <MediaEl className="cp-lcard-img" src={card.image} /> : <div className="cp-lcard-img cp-lcard-ph"><ImageIcon size={22} /></div>}
+                <div className="cp-lcard-scrim" />
+                <div className="cp-lcard-body">
+                  {card.logo
+                    ? <img className="cp-lcard-logo" src={card.logo} alt="" />
+                    : <div className="cp-lcard-logo cp-lcard-logo-ph">LOGO</div>}
+                  <div className="cp-lcard-bottom">
+                    <div className="cp-lcard-t">{T(card.title, 'Título de la card')}</div>
+                    <ul className="cp-lcard-list">
+                      {(bullets.length ? bullets : ['Primer beneficio', 'Segundo beneficio', 'Tercer beneficio']).map((b, j) => <li key={j}>{b}</li>)}
+                    </ul>
+                    {card.cta_label && <span className="cp-lcard-cta">{card.cta_label}</span>}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     )

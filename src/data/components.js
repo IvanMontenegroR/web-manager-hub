@@ -346,6 +346,7 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
+      { key: 'color2', label: 'Color secundario (cajas alternas)', type: 'color', cms: true },
       { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', sample: [
         {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
         {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
@@ -377,6 +378,29 @@ export const COMPONENTS = [
         { key: 'label', label: 'Etiqueta', type: 'text' },
       ] },
     ],
+  },
+  {
+    key: 'logo_cards',
+    name: 'Cards con logo',
+    category: 'Contenido',
+    help: 'Sección oscura: título + subtítulo centrados y dos (o más) cards grandes con imagen de fondo, un logo arriba, un título, una lista de bullets y un botón. Pensada para páginas de marca (ej. Pro Plan). Cada bullet va en una línea.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Respaldo experto para quienes cuidan su salud' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'subtitle', label: 'Subtítulo', type: 'textarea', placeholder: 'Purina® Pro Plan® acompaña a médicos veterinarios con herramientas, conocimiento y servicios diseñados para apoyar su práctica clínica y fortalecer cada decisión nutricional.' },
+      { key: 'cards', label: 'Cards', type: 'list', itemLabel: 'Card', sample: [
+        { title: 'Ciencia aplicada a la nutrición', bullets: 'Investigación actualizada en nutrición de perros y gatos\nContenidos educativos y formación continua\nHerramientas para la toma de decisiones nutricionales', cta_label: 'Explorar recursos' },
+        { title: 'Soluciones para la práctica diaria', bullets: 'Plataforma exclusiva para médicos veterinarios\nAcceso a materiales técnicos y guías clínicas\nContenidos profesionales y especializados', cta_label: 'Acceder a la plataforma' },
+      ], item: [
+        { key: 'logo', label: 'Logo (PNG con transparencia)', type: 'image' },
+        { key: 'image', label: 'Imagen de fondo', type: 'image' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'bullets', label: 'Bullets (uno por línea)', type: 'textarea' },
+        { key: 'cta_label', label: 'Botón — texto', type: 'text' },
+        { key: 'cta_url', label: 'Botón — link', type: 'url' },
+      ] },
+    ],
+    specs: [{ label: 'Imagen de fondo', ratio: 'Desktop 4:3', desktop: '1200×900px', max: '500kb', format: 'JPG / PNG' }],
   },
 ]
 
