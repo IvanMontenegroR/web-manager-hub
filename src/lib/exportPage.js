@@ -420,12 +420,17 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const visible = visibleFields(def, content, { excel: true })
     for (const f of visible) {
       if (f.type === 'list') {
-        const items = Array.isArray(content[f.key]) ? content[f.key] : []
-        const arr = items.length ? items : [{}] // al menos 1 plantilla vacia
-        const subFields = (f.item || []).filter((sf) => !sf.cms)
+        const stored = Array.isArray(content[f.key]) ? content[f.key] : []
+        // Lista de tamaño fijo (ej. mosaico = 6 bloques): se rellena a `fixed`.
+        const arr = f.fixed
+          ? Array.from({ length: f.fixed }, (_, i) => stored[i] || {})
+          : (stored.length ? stored : [{}])
         const one = f.itemLabel || f.label
         arr.forEach((item, i) => {
-          row = cardBand(row, `${one} ${i + 1}`, { disabled })
+          const role = f.roles ? f.roles[i] : null
+          row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
+          // Con roles, cada bloque muestra solo los subcampos de su rol.
+          const subFields = (f.item || []).filter((sf) => !sf.cms && (!sf.roles || !role || sf.roles.includes(role)))
           for (const sf of subFields) {
             row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
           }

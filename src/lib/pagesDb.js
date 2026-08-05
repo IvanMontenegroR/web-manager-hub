@@ -75,10 +75,25 @@ create policy "dummy_all_pages" on public.pages
 create policy "dummy_all_page_components" on public.page_components
   for all to anon, authenticated using (true) with check (true);`
 
+// La columna `brand` puede no existir todavia en la DB. Para que la marca funcione
+// igual (ej. el fondo negro de Pro Plan y el color del mosaico) se guarda tambien en
+// localStorage, keyeado por page id. Cuando exista la columna, gana el valor de la DB.
+const BRAND_LS_KEY = 'wmh_page_brands'
+function readBrandLS() { try { return JSON.parse(localStorage.getItem(BRAND_LS_KEY) || '{}') } catch { return {} } }
+function setBrandLS(id, brand) {
+  if (!id) return
+  const m = readBrandLS()
+  if (brand) m[id] = brand; else delete m[id]
+  try { localStorage.setItem(BRAND_LS_KEY, JSON.stringify(m)) } catch {}
+}
+
 export async function fetchPages() {
   const { data, error } = await supabase.from('pages').select('*').order('sort_order')
   if (error) return { data: [], error, tableMissing: isMissingTable(error) }
-  return { data: data ?? [], error: null, tableMissing: false }
+  const ls = readBrandLS()
+  // Si la DB no trae brand (columna ausente o vacia), se usa el de localStorage.
+  const rows = (data ?? []).map((p) => ({ ...p, brand: p.brand ?? ls[p.id] ?? null }))
+  return { data: rows, error: null, tableMissing: false }
 }
 
 function pagePayload(p) {
@@ -100,20 +115,24 @@ function isMissingBrand(error) {
 }
 
 export async function createPage(p, sort_order) {
+  const brand = p.brand?.trim() || null
   const payload = { ...pagePayload(p), sort_order: sort_order ?? 0 }
   let res = await supabase.from('pages').insert(payload).select().single()
   if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').insert(payload).select().single() }
   throwIf(res.error)
-  return res.data
+  setBrandLS(res.data?.id, brand) // espejo local (por si la columna no existe)
+  return { ...res.data, brand }
 }
 
 export async function updatePage(id, p) {
+  const brand = p.brand?.trim() || null
   const payload = pagePayload(p)
   if (p.sort_order != null) payload.sort_order = p.sort_order
   let res = await supabase.from('pages').update(payload).eq('id', id).select().single()
   if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').update(payload).eq('id', id).select().single() }
   throwIf(res.error)
-  return res.data
+  setBrandLS(id, brand) // espejo local (por si la columna no existe)
+  return { ...res.data, brand }
 }
 
 // Cambio rapido de estado sin tocar el resto.

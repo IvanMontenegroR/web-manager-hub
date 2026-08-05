@@ -81,27 +81,36 @@ function Field({ f, value, onChange }) {
 }
 
 function ListField({ f, value, onChange }) {
-  const items = Array.isArray(value) ? value : []
+  const stored = Array.isArray(value) ? value : []
+  // Lista de tamaño FIJO (ej. mosaico = 6 bloques): se rellena a `fixed` y no se puede
+  // agregar/quitar. Con `roles`, cada item muestra solo los subcampos de su rol.
+  const fixed = f.fixed || 0
+  const items = fixed ? Array.from({ length: fixed }, (_, i) => stored[i] || {}) : stored
   const setItem = (i, k, v) => onChange(items.map((it, j) => (j === i ? { ...it, [k]: v } : it)))
   const add = () => onChange([...items, {}])
   const del = (i) => onChange(items.filter((_, j) => j !== i))
+  const one = f.itemLabel || f.label
   return (
     <div className="cf-list">
-      {items.map((it, i) => (
-        <div key={i} className="cf-list-item">
-          <div className="cf-list-head">
-            <span>{f.label} {i + 1}</span>
-            <button className="ic-btn" onClick={() => del(i)} title="Quitar"><X size={13} /></button>
-          </div>
-          {f.item.map((sf) => (
-            <div key={sf.key} className="field cf-sub">
-              <label>{sf.label}</label>
-              <Field f={sf} value={it[sf.key]} onChange={(v) => setItem(i, sf.key, v)} />
+      {items.map((it, i) => {
+        const role = f.roles ? f.roles[i] : null
+        const subs = f.item.filter((sf) => !sf.roles || !role || sf.roles.includes(role))
+        return (
+          <div key={i} className="cf-list-item">
+            <div className="cf-list-head">
+              <span>{one} {i + 1}{role ? ` — ${role}` : ''}</span>
+              {!fixed && <button className="ic-btn" onClick={() => del(i)} title="Quitar"><X size={13} /></button>}
             </div>
-          ))}
-        </div>
-      ))}
-      <button className="btn btn-sm" onClick={add}><Plus size={13} /> Agregar {f.label.toLowerCase()}</button>
+            {subs.map((sf) => (
+              <div key={sf.key} className="field cf-sub">
+                <label>{sf.label}</label>
+                <Field f={sf} value={it[sf.key]} onChange={(v) => setItem(i, sf.key, v)} />
+              </div>
+            ))}
+          </div>
+        )
+      })}
+      {!fixed && <button className="btn btn-sm" onClick={add}><Plus size={13} /> Agregar {f.label.toLowerCase()}</button>}
     </div>
   )
 }

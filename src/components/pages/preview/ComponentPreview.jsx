@@ -631,11 +631,14 @@ const RENDERERS = {
     // la pagina (ej. Pro Plan #d7bb77); si tampoco hay marca, cae al primario.
     const acc2 = c.color2 ? c.color2 : (ctx?.brandSecondary || acc)
     const blocks = list(c.blocks)
-    const arr = blocks.length ? blocks : [
+    const defaults = [
       {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
       {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       {}, { title: 'Porem ipsum dolor sit amet, consectetur.', text: 'Torem ipsum dolor sit amet, consectetur adipiscing elit.' },
     ]
+    // El mosaico SIEMPRE tiene 6 bloques (ni mas, ni menos): se rellena/recorta a 6.
+    const src = blocks.length ? blocks : defaults
+    const arr = Array.from({ length: 6 }, (_, i) => src[i] || {})
     return (
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">

@@ -351,14 +351,17 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
       { key: 'color2', label: 'Color secundario (cajas alternas; por defecto el de la marca)', type: 'color', cms: true },
-      { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', sample: [
+      // El mosaico tiene SIEMPRE 6 bloques fijos que alternan imagen / contenido. Cada
+      // bloque muestra solo los campos de su rol (roles + subcampos con roles).
+      { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', fixed: 6,
+        roles: ['Imagen', 'Contenido', 'Imagen', 'Contenido', 'Imagen', 'Contenido'], sample: [
         {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
         {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
         {}, { title: 'Porem ipsum dolor sit amet, consectetur.', text: 'Torem ipsum dolor sit amet, consectetur adipiscing elit.' },
       ], item: [
-        { key: 'image', label: 'Imagen (bloques de imagen)', type: 'image' },
-        { key: 'title', label: 'Título (bloques de contenido)', type: 'text' },
-        { key: 'text', label: 'Texto (bloques de contenido)', type: 'textarea' },
+        { key: 'image', label: 'Imagen', type: 'image', roles: ['Imagen'] },
+        { key: 'title', label: 'Título', type: 'text', roles: ['Contenido'] },
+        { key: 'text', label: 'Texto', type: 'textarea', roles: ['Contenido'] },
       ] },
     ],
     specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
