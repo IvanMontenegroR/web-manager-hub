@@ -211,6 +211,12 @@ export const COMPONENTS = [
     category: 'Marcas',
     help: 'Sección "Más populares": tabs de filtro + carrusel de productos. Los productos los POPULA la vista del CMS (son pulleados): acá cada producto es solo un placeholder con el nombre, sin imagen. La card Pet ID es un componente fijo no editable (checkbox mostrar/ocultar).',
     fields: [
+      { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Explora Pro Plan® y encuentra la nutrición ideal con apoyo experto' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      // Imagen izquierda OPCIONAL: toggle del builder (cms). Si esta activo, se muestra
+      // la columna de imagen a la izquierda del carrusel y su campo se exporta.
+      { key: 'show_left_image', label: 'Mostrar imagen izquierda', type: 'checkbox', cms: true, default: false },
+      { key: 'left_image', label: 'Imagen izquierda', type: 'image', requiresTrue: 'show_left_image' },
       // Filtro por categoria: toggle SOLO del builder (cms, no se exporta). Si esta
       // activo, el campo de tabs SI se exporta (requires: 'show_filters'); si no, se oculta.
       { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true },
@@ -225,6 +231,9 @@ export const COMPONENTS = [
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
     ],
+    // Imagen izquierda opcional: mismo tamaño en desktop y mobile (por eso sin link
+    // mobile). La spec solo aplica si la imagen izquierda esta activada.
+    specs: [{ label: 'Imagen izquierda', ratio: 'Vertical ≈0.94:1 (650×692)', desktop: '650×692px', mobile: '650×692px', max: '500kb', format: 'JPG / PNG', requiresTrue: 'show_left_image' }],
   },
   {
     key: 'timeline',
@@ -427,7 +436,9 @@ export function getSpecs(component, content) {
     const key = content?.[component.specKey || 'type']
     return component.specsByType[key] || []
   }
-  return component.specs || []
+  // Una spec puede ser condicional (ej. la imagen izquierda opcional del carrusel de
+  // productos): solo aplica si su toggle esta activo.
+  return (component.specs || []).filter((s) => !s.requiresTrue || content?.[s.requiresTrue] === true)
 }
 
 // Contenido de EJEMPLO para un componente (galeria "Todos los componentes" + su
@@ -483,7 +494,10 @@ export function visibleFields(def, content = {}, opts = {}) {
     if (opts.excel && f.cms) return false
     // Campo condicional: depende de otro (ej. filtros de producto). Si el otro esta
     // apagado, este campo no se muestra ni se exporta.
+    // `requires` = toggle default ON (oculta solo si === false).
+    // `requiresTrue` = toggle default OFF (muestra solo si === true).
     if (f.requires && content[f.requires] === false) return false
+    if (f.requiresTrue && content[f.requiresTrue] !== true) return false
     if (f.hideTypes && type && f.hideTypes.includes(type)) return false
     if (f.onlyTypes && !f.onlyTypes.includes(type)) return false
     return true

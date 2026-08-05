@@ -403,33 +403,45 @@ const RENDERERS = {
     const showPetId = c.show_petid !== false
     // Tabs de filtro por categoria: solo si el toggle esta activo (default: mostrar).
     const showFilters = c.show_filters !== false
+    // Imagen izquierda OPCIONAL (650×692): solo si el toggle esta activo.
+    const showLeft = c.show_left_image === true
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
-      <div className="cp-plist">
-        <div className="cp-plist-head">
-          <div className="cp-plist-tabs">
-            {showFilters && filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
-          </div>
-          <div className="cp-plist-arrows">
-            <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>
-            <span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span>
-          </div>
-        </div>
-        <div className="cp-plist-row">
-          {showPetId && (
-            <div className="cp-plist-promo">
-              <div className="cp-plist-promo-t">Pet ID</div>
-              <p className="cp-plist-promo-d">Crea tu Pet ID y obtén sugerencias de alimentos y cuidados personalizados para tu mascota.</p>
-              <span className="cp-plist-promo-arrow">→</span>
+      <div className={`cp-plist${showLeft ? ' has-left' : ''}`}>
+        {c.title && <div className="cp-plist-h2">{c.title}</div>}
+        <div className="cp-plist-main">
+          {showLeft && (
+            <div className="cp-plist-left">
+              <Img src={c.left_image} aspect="650/692" dim="650×692px" className="cp-plist-leftimg" />
             </div>
           )}
-          {arr.map((p, i) => (
-            <div key={i} className="cp-plist-card">
-              <div className="cp-plist-ph"><span>{T(p.title, `Producto ${i + 1}`)}</span></div>
+          <div className="cp-plist-content">
+            <div className="cp-plist-head">
+              <div className="cp-plist-tabs">
+                {showFilters && filters.map((f, i) => <span key={i} className={`cp-plist-tab${i === 0 ? ' active' : ''}`}>{f}</span>)}
+              </div>
+              <div className="cp-plist-arrows">
+                <span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span>
+                <span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span>
+              </div>
             </div>
-          ))}
+            <div className="cp-plist-row">
+              {showPetId && (
+                <div className="cp-plist-promo">
+                  <div className="cp-plist-promo-t">Pet ID</div>
+                  <p className="cp-plist-promo-d">Crea tu Pet ID y obtén sugerencias de alimentos y cuidados personalizados para tu mascota.</p>
+                  <span className="cp-plist-promo-arrow">→</span>
+                </div>
+              )}
+              {arr.map((p, i) => (
+                <div key={i} className="cp-plist-card">
+                  <div className="cp-plist-ph"><span>{T(p.title, `Producto ${i + 1}`)}</span></div>
+                </div>
+              ))}
+            </div>
+            {moreText && <div className="cp-plist-more"><span className="cp-plist-more-btn">{moreText}</span></div>}
+          </div>
         </div>
-        {moreText && <div className="cp-plist-more"><span className="cp-plist-more-btn">{moreText}</span></div>}
       </div>
     )
   },

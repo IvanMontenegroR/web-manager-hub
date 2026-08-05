@@ -63,8 +63,9 @@ function Field({ f, value, onChange, brandSecondary }) {
     return <ImageField value={value} onChange={onChange} />
   }
   if (f.type === 'checkbox') {
-    // Sin valor cargado = mostrado por defecto (value !== false).
-    return <input type="checkbox" className="cf-check" checked={value !== false} onChange={(e) => onChange(e.target.checked)} />
+    // Sin valor cargado = default del campo (por defecto true; f.default:false = off).
+    const checked = typeof value === 'boolean' ? value : (f.default !== false)
+    return <input type="checkbox" className="cf-check" checked={checked} onChange={(e) => onChange(e.target.checked)} />
   }
   if (f.type === 'color') {
     // Color de acento: swatch (input color) + hex editable.
