@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { COMPONENTS, getComponent } from '../../data/components'
 import {
-  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark,
+  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandSecondaryColor,
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
@@ -200,7 +200,7 @@ export default function PageBuilder({ page, onBack }) {
                       <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
                     </div>
                   </div>
-                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} />
+                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} brandSecondary={brandSecondaryColor(page.brand)} />
                 </div>
               ))
             )}

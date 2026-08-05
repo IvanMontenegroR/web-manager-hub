@@ -39,11 +39,13 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, hideTypes: ['Promotional banner (Only image)'], options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'description', label: 'Descripción', type: 'textarea', hideTypes: ['Promotional banner (Only image)'] },
       { key: 'image', label: 'Imagen / Video (link)', type: 'image', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'image_mobile', label: 'Imagen / Video mobile (link)', type: 'image', hideTypes: ['Promotional banner (Only image)'] },
       { key: 'link_text', label: 'Botón — texto', type: 'text', hideTypes: ['Promotional banner (Only image)'] },
       { key: 'link_url', label: 'Botón — link', type: 'url', hideTypes: ['Promotional banner (Only image)'] },
       // Solo Promotional: varias imagenes; con mas de 1 el banner se vuelve un slider.
       { key: 'slides', label: 'Imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', onlyTypes: ['Promotional banner (Only image)'], item: [
         { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
         { key: 'link', label: 'Link', type: 'url' },
       ] },
       // Avanzado (CMS, no van al Excel de mercados)
@@ -102,6 +104,7 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
+      { key: 'background_mobile', label: 'Imagen de fondo mobile', type: 'image' },
       { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata'] },
         { key: 'title', label: 'Titulo', type: 'text' },
@@ -159,6 +162,7 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Antetítulo — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'items', label: 'Testimonios', type: 'list', itemLabel: 'Testimonio', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
         { key: 'image_title', label: 'Texto sobre la imagen (opcional)', type: 'text' },
         { key: 'quote', label: 'Cita', type: 'textarea' },
         { key: 'author', label: 'Autor', type: 'text' },
@@ -346,7 +350,7 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color de las cajas', type: 'color', cms: true },
-      { key: 'color2', label: 'Color secundario (cajas alternas)', type: 'color', cms: true },
+      { key: 'color2', label: 'Color secundario (cajas alternas; por defecto el de la marca)', type: 'color', cms: true },
       { key: 'blocks', label: 'Bloques', type: 'list', itemLabel: 'Bloque', sample: [
         {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
         {}, { title: 'Borem ipsum dolor sit amet, consectetur.', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },

@@ -625,9 +625,11 @@ const RENDERERS = {
   // Mosaico: titulo + subtitulo centrados y una grilla que alterna imagenes con cajas
   // de contenido (color configurable). Los bloques se alternan por posicion: par =
   // imagen, impar = caja de contenido (titulo + texto).
-  mosaic: (c) => {
+  mosaic: (c, ctx) => {
     const acc = T(c.color, ACCENT)
-    const acc2 = T(c.color2, acc) // color secundario: las cajas coloridas alternan acc/acc2
+    // Color secundario de las cajas alternas: si no se cargo uno, usa el de la marca de
+    // la pagina (ej. Pro Plan #d7bb77); si tampoco hay marca, cae al primario.
+    const acc2 = c.color2 ? c.color2 : (ctx?.brandSecondary || acc)
     const blocks = list(c.blocks)
     const arr = blocks.length ? blocks : [
       {}, { title: 'Sorem ipsum dolor sit amet, consectetur.', text: 'Worem ipsum dolor sit amet, consectetur adipiscing elit.' },
@@ -782,8 +784,9 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content }) {
+export default function ComponentPreview({ componentKey, content, brandSecondary }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
-  return <div className="cp-render">{render(content || {})}</div>
+  // ctx: contexto de la pagina (ej. color secundario de la marca para el mosaico).
+  return <div className="cp-render">{render(content || {}, { brandSecondary })}</div>
 }
