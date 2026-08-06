@@ -233,7 +233,7 @@ export const COMPONENTS = [
     ],
     // Imagen izquierda opcional: mismo tamaño en desktop y mobile (por eso sin link
     // mobile). La spec solo aplica si la imagen izquierda esta activada.
-    specs: [{ label: 'Imagen izquierda', ratio: 'Vertical ≈0.94:1 (650×692)', desktop: '650×692px', mobile: '650×692px', max: '500kb', format: 'JPG / PNG', requiresTrue: 'show_left_image' }],
+    specs: [{ label: 'Imagen izquierda (imagen única)', ratio: 'Vertical ≈0.94:1 (650×692)', desktop: '650×692px', mobile: '650×692px', max: '500kb', format: 'JPG / PNG', requiresTrue: 'show_left_image' }],
   },
   {
     key: 'timeline',
@@ -264,12 +264,13 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
       { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
         { key: 'image', label: 'Imagen', type: 'image' },
+        { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'description', label: 'Descripcion', type: 'textarea' },
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 411×520', desktop: '411×520px', mobile: '411×520px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ ratio: 'Desktop 1:1.5 · Mobile 1:1.15', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'fifty_fifty',
@@ -300,6 +301,7 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.' },
       { key: 'color', label: 'Color del gradiente', type: 'color', cms: true },
       { key: 'background', label: 'Imagen de fondo (opcional)', type: 'image' },
+      { key: 'background_mobile', label: 'Imagen de fondo mobile (opcional)', type: 'image' },
       { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', sample: [
         { icon: 'gato', title: 'Dorem ipsum', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit' },
         { icon: 'gato', title: 'Adipiscing elit', text: 'Morem ipsum dolor sit amet, consectetur adipiscing elit.' },
@@ -311,7 +313,7 @@ export const COMPONENTS = [
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
-    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 1:1 · Mobile ~9:16 (aprox., para adecuar a la cantidad de texto de la descripción)', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'text_wide_image',

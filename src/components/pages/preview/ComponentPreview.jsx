@@ -515,7 +515,7 @@ const RENDERERS = {
             <div key={i} className="cp-cmt-card">
               {it.image
                 ? <MediaEl className="cp-cmt-img" src={it.image} />
-                : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">411×520px</span></div>}
+                : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">822×1230px</span></div>}
               <div className="cp-cmt-scrim" />
               <div className="cp-cmt-ttl" style={titleStyle}>{T(it.title, 'Título')}</div>
               <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
