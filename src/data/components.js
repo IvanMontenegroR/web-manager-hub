@@ -402,7 +402,7 @@ export const COMPONENTS = [
     key: 'logo_cards',
     name: 'Cards con logo',
     category: 'Contenido',
-    help: 'Sección oscura: título + subtítulo centrados y dos (o más) cards grandes con imagen de fondo, un logo arriba, un título, una lista de bullets y un botón. Pensada para páginas de marca (ej. Pro Plan). Cada bullet va en una línea.',
+    help: 'Sección oscura: título + subtítulo centrados y dos (o más) cards grandes con imagen de fondo, un título, una lista de bullets y un botón. Pensada para páginas de marca (ej. Pro Plan). Cada bullet va en una línea.',
     fields: [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Respaldo experto para quienes cuidan su salud' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -411,7 +411,6 @@ export const COMPONENTS = [
         { title: 'Ciencia aplicada a la nutrición', bullets: 'Investigación actualizada en nutrición de perros y gatos\nContenidos educativos y formación continua\nHerramientas para la toma de decisiones nutricionales', cta_label: 'Explorar recursos' },
         { title: 'Soluciones para la práctica diaria', bullets: 'Plataforma exclusiva para médicos veterinarios\nAcceso a materiales técnicos y guías clínicas\nContenidos profesionales y especializados', cta_label: 'Acceder a la plataforma' },
       ], item: [
-        { key: 'logo', label: 'Logo (PNG con transparencia)', type: 'image' },
         { key: 'image', label: 'Imagen de fondo', type: 'image' },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'bullets', label: 'Bullets (uno por línea)', type: 'textarea' },

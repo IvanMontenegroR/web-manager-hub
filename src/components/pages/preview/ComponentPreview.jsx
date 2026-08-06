@@ -710,8 +710,8 @@ const RENDERERS = {
   },
 
   // Cards con logo (sección oscura): título + subtítulo centrados y cards grandes con
-  // imagen de fondo + scrim, logo arriba, título, lista de bullets y botón. Fondo negro
-  // propio (pensada para páginas de marca como Pro Plan).
+  // imagen de fondo + scrim, título, lista de bullets y botón (el "logo" es parte de la
+  // imagen, no un campo aparte). Fondo negro propio (páginas de marca como Pro Plan).
   logo_cards: (c) => {
     const cards = list(c.cards)
     const arr = cards.length ? cards : [
@@ -732,9 +732,6 @@ const RENDERERS = {
                 {card.image ? <MediaEl className="cp-lcard-img" src={card.image} /> : <div className="cp-lcard-img cp-lcard-ph"><ImageIcon size={22} /></div>}
                 <div className="cp-lcard-scrim" />
                 <div className="cp-lcard-body">
-                  {card.logo
-                    ? <img className="cp-lcard-logo" src={card.logo} alt="" />
-                    : <div className="cp-lcard-logo cp-lcard-logo-ph">LOGO</div>}
                   <div className="cp-lcard-bottom">
                     <div className="cp-lcard-t">{T(card.title, 'Título de la card')}</div>
                     <ul className="cp-lcard-list">
