@@ -412,13 +412,14 @@ export const COMPONENTS = [
         { title: 'Soluciones para la práctica diaria', bullets: 'Plataforma exclusiva para médicos veterinarios\nAcceso a materiales técnicos y guías clínicas\nContenidos profesionales y especializados', cta_label: 'Acceder a la plataforma' },
       ], item: [
         { key: 'image', label: 'Imagen de fondo', type: 'image' },
+        { key: 'image_mobile', label: 'Imagen de fondo mobile', type: 'image' },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'bullets', label: 'Bullets (uno por línea)', type: 'textarea' },
         { key: 'cta_label', label: 'Botón — texto', type: 'text' },
         { key: 'cta_url', label: 'Botón — link', type: 'url' },
       ] },
     ],
-    specs: [{ label: 'Imagen de fondo', ratio: 'Desktop 4:3', desktop: '1200×900px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.38:1 · Mobile ~2:3', desktop: '768×557px', mobile: '702×1048px', max: '500kb', format: 'JPG / PNG' }],
   },
 ]
 
