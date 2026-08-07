@@ -29,6 +29,8 @@ export const COMPONENTS = [
         { key: 'subitems', label: 'Subítems (uno por línea, opcional)', type: 'textarea' },
       ] },
     ],
+    // Mismo tamaño en desktop y mobile (por eso el logo no lleva link mobile).
+    specs: [{ label: 'Logo', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'breadcrumb',
