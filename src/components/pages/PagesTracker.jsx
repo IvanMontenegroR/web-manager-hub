@@ -3,7 +3,7 @@ import {
   ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, Pencil, Copy, Check, Layers,
 } from 'lucide-react'
 import {
-  fetchPages, seedPages, setPageStatus, persistPageOrder, PAGE_STATUSES, PAGE_STATUS_LABEL, SETUP_SQL,
+  fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage, PAGE_STATUSES, PAGE_STATUS_LABEL, SETUP_SQL,
 } from '../../lib/pagesDb'
 import PageModal from './PageModal.jsx'
 
@@ -37,6 +37,7 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
   const [state, setState] = useState('loading') // loading | ok | missing | error
   const [errMsg, setErrMsg] = useState(null)
   const [modal, setModal] = useState(null)
+  const [busyId, setBusyId] = useState(null) // pagina clonandose
 
   async function load() {
     setState('loading')
@@ -69,6 +70,14 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
     try { await setPageStatus(id, status) } catch (e) { setErrMsg(e.message); load() }
   }
 
+  // Clona una pagina (metadata + todos sus componentes) y recarga la lista.
+  async function clone(p) {
+    setBusyId(p.id); setErrMsg(null)
+    try { await clonePage(p, nextSort); await load() }
+    catch (e) { setErrMsg(e.message) }
+    finally { setBusyId(null) }
+  }
+
   if (state === 'loading') return <div className="content"><div className="center-state"><div className="spinner" /><div>Cargando...</div></div></div>
   if (state === 'missing') return <div className="content"><TrackerHead onBack={onBack} /><SetupBlock /></div>
   if (state === 'error') return <div className="content"><TrackerHead onBack={onBack} /><div className="center-state"><div style={{ color: 'var(--danger)', fontWeight: 600 }}>No se pudo cargar</div><div style={{ fontSize: 13 }}>{errMsg}</div><button className="btn" onClick={load}>Reintentar</button></div></div>
@@ -86,6 +95,8 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
           <Plus size={15} /> Nueva pagina
         </button>
       </div>
+
+      {errMsg && <div className="form-error" style={{ margin: '0 0 10px' }}>{errMsg}</div>}
 
       {rows.length === 0 ? (
         <div className="dir-empty">
@@ -120,6 +131,7 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
               >
                 {PAGE_STATUSES.map((s) => <option key={s} value={s}>{PAGE_STATUS_LABEL[s]}</option>)}
               </select>
+              <button className="ic-btn page-clone" disabled={busyId === p.id} onClick={() => clone(p)} title="Clonar pagina (copia con sus componentes)"><Copy size={14} /></button>
               <button className="ic-btn page-edit" onClick={() => setModal(p)} title="Editar"><Pencil size={14} /></button>
             </div>
           ))}

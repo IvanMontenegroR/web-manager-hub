@@ -157,6 +157,31 @@ export async function deletePage(id) {
   throwIf(error)
 }
 
+// Clona una pagina: crea una copia de su metadata (nombre + " (copia)") y duplica
+// TODOS sus componentes (component_key + content + orden) en la pagina nueva.
+export async function clonePage(page, sort_order) {
+  const dupe = await createPage({
+    name: `${page.name || 'Pagina'} (copia)`,
+    path: page.path,
+    status: page.status,
+    brand: page.brand,
+    notes: page.notes,
+  }, sort_order)
+  const { data: comps, error } = await fetchPageComponents(page.id)
+  throwIf(error)
+  if (comps && comps.length) {
+    const rows = comps.map((c) => ({
+      page_id: dupe.id,
+      component_key: c.component_key,
+      content: c.content || {},
+      sort_order: c.sort_order || 0,
+    }))
+    const { error: insErr } = await supabase.from('page_components').insert(rows)
+    throwIf(insErr)
+  }
+  return dupe
+}
+
 // Seed inicial: hoy solo la Homepage (el resto de la lista llega mas tarde).
 export async function seedPages() {
   const { data, error } = await supabase
