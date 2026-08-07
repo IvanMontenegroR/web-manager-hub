@@ -230,7 +230,7 @@ export default function PageBuilder({ page, onBack }) {
                 <button className="ic-btn" onClick={closeEditor} title="Cerrar"><X size={15} /></button>
               </div>
               {selectedDef.help && <div className="pb-editor-help">{selectedDef.help}</div>}
-              <ContentForm component={selectedDef} draft={draft} onChange={setDraftField} brandSecondary={brandSecondaryColor(page.brand)} />
+              <ContentForm component={selectedDef} draft={draft} onChange={setDraftField} brandSecondary={theme?.secondary || null} />
               <div className="pb-editor-foot">
                 <button className="btn btn-primary btn-sm" onClick={flushSave} disabled={busy || saving || !dirty}>
                   {saving ? <><Save size={14} /> Guardando…</> : dirty ? <><Save size={14} /> Guardar</> : <><Check size={14} /> Guardado</>}
