@@ -1519,7 +1519,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-svc-card { position: relative; flex: 0 0 380px; background: rgba(255,255,255,.82); backdrop-filter: blur(6px); border-radius: 18px; padding: 20px; min-height: 190px; color: #1f2530; }
 /* Pet ID (destacada roja): más delgada que el resto. */
 .cp-svc-card.hl { flex: 0 0 230px; background: var(--purina); color: #fff; }
-.cp-svc-ico { width: 34px; height: 34px; color: var(--purina); display: inline-grid; place-items: center; }
+.cp-svc-ico { width: 34px; height: 34px; color: var(--detail, var(--purina)); display: inline-grid; place-items: center; }
 .cp-svc-ico-img { width: 34px; height: 34px; object-fit: contain; }
 .cp-svc-card-t { font-size: 18px; font-weight: 700; margin-top: 46px; }
 .cp-svc-card.hl .cp-svc-card-t { margin-top: 0; }
@@ -1775,12 +1775,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Page container (gutter lateral, replica el .container real) ===== */
 .pb-page { width: 100%; max-width: 1680px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-/* Paginas de marca oscura (Pro Plan): fondo negro detras de los componentes. Los
-   bloques quedan transparentes para dejar ver el negro (el componente se pinta en
-   tema oscuro con .cp-dark). */
-.pb-page--dark { background: #0d0d0f; border-radius: 8px; padding: 14px; }
-.pb-canvas.preview .pb-page--dark { padding: 12px 60px 56px; }
-.pb-page--dark .pb-block { background: transparent; box-shadow: none; }
+/* Paginas con marca: el fondo lo pinta el color PRIMARIO de la marca (inline). Los
+   bloques quedan transparentes para dejar ver ese fondo (en las marcas oscuras el
+   componente ademas se pinta en tema oscuro con .cp-dark). */
+.pb-page--brand { border-radius: 8px; padding: 14px; }
+.pb-canvas.preview .pb-page--brand { padding: 12px 60px 56px; }
+.pb-page--brand .pb-block { background: transparent; box-shadow: none; }
 /* En vista previa: gutter lateral + espacio vertical entre secciones y respecto al
    header/footer, como la pagina real (container--padding-lg: max-width 1680, padding 0 60). */
 .pb-canvas.preview .pb-page { padding: 12px 60px 56px; gap: 40px; }
@@ -1870,8 +1870,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-gcards-sub { margin-top: 10px; font-size: 14px; color: #3a424e; }
 .cp-gcards-row { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 190px; }
 .cp-gcard { background: #fff; border-radius: 12px; padding: 34px 26px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
-.cp-gcard-ico { color: var(--acc, #ED1C24); display: inline-flex; }
-.cp-gcard-t { margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--acc, #ED1C24); }
+/* Iconos y titulos de las tarjetas usan el color de DETALLE (acento de marca), que
+   puede diferir del color del gradiente (--acc). */
+.cp-gcard-ico { color: var(--detail, var(--acc, #ED1C24)); display: inline-flex; }
+.cp-gcard-t { margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--detail, var(--acc, #ED1C24)); }
 .cp-gcard-d { margin-top: 12px; font-size: 13px; color: #545c67; line-height: 1.55; }
 
 /* ===== Texto con imagen ancha (text_wide_image) ===== */

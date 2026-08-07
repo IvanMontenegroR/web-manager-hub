@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { COMPONENTS, getComponent } from '../../data/components'
 import {
-  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandSecondaryColor, brandPrimaryColor,
+  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
@@ -36,6 +36,8 @@ export default function PageBuilder({ page, onBack }) {
   }
   useEffect(() => { load() }, [page.id])
 
+  // Tokens de color de la marca de la pagina (null si no tiene marca con tema).
+  const theme = useMemo(() => brandTheme(page.brand), [page.brand])
   const nextSort = useMemo(() => comps.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1, [comps])
   const selected = comps.find((c) => c.id === selId) || null
   const selectedDef = selected ? getComponent(selected.component_key) : null
@@ -173,9 +175,12 @@ export default function PageBuilder({ page, onBack }) {
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
           <div ref={headerRef} className="pb-header-host"><SiteHeader /></div>
 
-          {/* Container: replica el gutter lateral de la pagina real. Las paginas de
-              marca oscura (Pro Plan) usan fondo negro. */}
-          <div className={`pb-page${pageIsDark(page.brand) ? ' pb-page--dark' : ''}`}>
+          {/* Container: replica el gutter lateral de la pagina real. El fondo sale del
+              color PRIMARIO de la marca (Pro Plan negro, Fancy Feast blanco). */}
+          <div
+            className={`pb-page${theme ? ' pb-page--brand' : ''}${pageIsDark(page.brand) ? ' pb-page--dark' : ''}`}
+            style={brandPageBg(page.brand) ? { background: brandPageBg(page.brand) } : undefined}
+          >
             {loading ? (
               <div className="center-state"><div className="spinner" /></div>
             ) : comps.length === 0 ? (
@@ -200,7 +205,7 @@ export default function PageBuilder({ page, onBack }) {
                       <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
                     </div>
                   </div>
-                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} brandSecondary={brandSecondaryColor(page.brand)} brandPrimary={brandPrimaryColor(page.brand)} dark={pageIsDark(page.brand)} />
+                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} theme={theme} />
                 </div>
               ))
             )}

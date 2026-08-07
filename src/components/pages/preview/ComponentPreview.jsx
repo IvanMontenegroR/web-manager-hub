@@ -34,6 +34,35 @@ const list = (v) => (Array.isArray(v) ? v : [])
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
 
+// ---- Contraste de color -------------------------------------------------
+// Los tokens de marca se aplican sobre fondos variables (ej. el texto de las cajas
+// del mosaico va sobre el color secundario). Si el color elegido no contrasta con
+// su fondo (ej. el primario BLANCO de Fancy Feast sobre su secundario CREMA), el
+// texto seria ilegible: en ese caso se cae a negro/blanco segun el fondo.
+function hexToRgb(hex) {
+  const s = String(hex || '').replace('#', '').trim()
+  const full = s.length === 3 ? s.split('').map((ch) => ch + ch).join('') : s
+  if (!/^[0-9a-f]{6}$/i.test(full)) return null
+  return { r: parseInt(full.slice(0, 2), 16), g: parseInt(full.slice(2, 4), 16), b: parseInt(full.slice(4, 6), 16) }
+}
+function relLuminance(rgb) {
+  const ch = (v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4) }
+  return 0.2126 * ch(rgb.r) + 0.7152 * ch(rgb.g) + 0.0722 * ch(rgb.b)
+}
+function contrastRatio(a, b) {
+  const ra = hexToRgb(a), rb = hexToRgb(b)
+  if (!ra || !rb) return 21
+  const la = relLuminance(ra), lb = relLuminance(rb)
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+}
+// Color de texto legible sobre `bg`: usa `preferred` si contrasta; si no, negro/blanco.
+function readableOn(bg, preferred) {
+  if (preferred && contrastRatio(bg, preferred) >= 4.5) return preferred
+  const rgb = hexToRgb(bg)
+  if (!rgb) return preferred || '#fff'
+  return relLuminance(rgb) > 0.45 ? '#111114' : '#ffffff'
+}
+
 // Icono decorativo elegido de una lista (pata / gato / perro).
 function FeatureIcon({ name, size = 26 }) {
   if (/gato|cat/i.test(name)) return <Cat size={size} />
@@ -199,7 +228,7 @@ const RENDERERS = {
   // Aliados y Servicios: imagen de fondo a sangre con titulo + subtitulo y flechas
   // arriba; fila de tarjetas abajo (Pet ID roja destacada; el resto frosted con
   // icono, titulo, texto y flecha).
-  services_carousel: (c) => {
+  services_carousel: (c, ctx) => {
     const cards = list(c.cards)
     const arr = cards.length ? cards : [
       { title: 'Pet ID', text: 'Crea tu Pet ID y obtén una experiencia personalizada para ti y tu mascota.', highlighted: 'Si' },
@@ -208,8 +237,9 @@ const RENDERERS = {
       { title: 'Tiendas', text: 'Encuentra productos Purina® cerca de ti.' },
       { title: 'Cuidadores', text: 'Una red completa de hoteles y cuidadores.' },
     ]
+    // Los iconos de las tarjetas toman el acento de la marca (si hay).
     return (
-      <div className="cp-svc">
+      <div className="cp-svc" style={ctx?.brandAccent ? { '--detail': ctx.brandAccent } : undefined}>
         {c.background ? <MediaEl className="cp-svc-bg" src={c.background} /> : <div className="cp-svc-bg cp-svc-bg-ph"><span className="cp-dim-badge">Fondo 2160×1212px</span></div>}
         <div className="cp-svc-scrim" />
         <div className="cp-svc-bottom">
@@ -489,8 +519,8 @@ const RENDERERS = {
   // Carrusel "Compromiso Purina": header (titulo + subtitulo) con flechas + cards
   // verticales con imagen de fondo a sangre, titulo arriba y descripcion abajo.
   commitment_carousel: (c, ctx) => {
-    // Si hay marca seleccionada, los titulos de las cards toman su color secundario.
-    const titleStyle = ctx?.brandSecondary ? { color: ctx.brandSecondary } : undefined
+    // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
+    const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
     const items = list(c.items)
     const arr = items.length ? items : [
       { title: 'Para mascotas y personas', description: 'Enriquecer la vida de las mascotas y de las personas que las aman.' },
@@ -569,9 +599,12 @@ const RENDERERS = {
   // de fondo opcional; titulo + subtitulo centrados arriba y una fila de tarjetas
   // blancas (icono + titulo de color + texto) apoyadas sobre el gradiente.
   gradient_cards: (c, ctx) => {
-    const acc = T(c.color, ACCENT)
-    // Si hay marca seleccionada, los titulos de las tarjetas toman su color secundario.
-    const titleStyle = ctx?.brandSecondary ? { color: ctx.brandSecondary } : undefined
+    // El GRADIENTE usa el color de relleno: el cargado a mano, si no el secundario de
+    // la marca (ej. Fancy Feast crema), si no el rojo Purina.
+    const acc = c.color ? c.color : (ctx?.brandSecondary || ACCENT)
+    // Los ICONOS y TITULOS de las tarjetas usan el acento de la marca (detalle), que
+    // puede diferir del secundario (en Fancy Feast el secundario es casi blanco).
+    const detail = ctx?.brandAccent || (c.color ? c.color : ACCENT)
     const cards = list(c.cards)
     const arr = cards.length ? cards : [
       { title: 'Dorem ipsum', text: 'Yorem ipsum dolor sit amet, consectetur adipiscing elit', icon: 'gato' },
@@ -579,7 +612,7 @@ const RENDERERS = {
       { title: 'Forem ipsum dolor', text: 'Corem ipsum dolor sit amet, consectetur adipiscing elit.', icon: 'gato' },
     ]
     return (
-      <div className="cp-gcards" style={{ '--acc': acc }}>
+      <div className="cp-gcards" style={{ '--acc': acc, '--detail': detail }}>
         <div className="cp-gcards-bg">
           {c.background ? <MediaEl className="cp-gcards-bgimg" src={c.background} /> : <div className="cp-gcards-bgph" />}
           <div className="cp-gcards-grad" />
@@ -592,7 +625,7 @@ const RENDERERS = {
           {arr.map((card, i) => (
             <div key={i} className="cp-gcard">
               <span className="cp-gcard-ico"><FeatureIcon name={card.icon} /></span>
-              <div className="cp-gcard-t" style={titleStyle}>{T(card.title, 'Título')}</div>
+              <div className="cp-gcard-t">{T(card.title, 'Título')}</div>
               <p className="cp-gcard-d">{T(card.text, 'Texto de la tarjeta.')}</p>
             </div>
           ))}
@@ -658,8 +691,9 @@ const RENDERERS = {
     const src = blocks.length ? blocks : defaults
     const arr = Array.from({ length: 6 }, (_, i) => src[i] || {})
     // Texto de las cajas: por defecto blanco; si la marca define un color primario
-    // (ej. Pro Plan = negro), el texto usa ese color (mejor contraste sobre el dorado).
-    const boxTextStyle = ctx?.brandPrimary ? { color: ctx.brandPrimary } : undefined
+    // (ej. Pro Plan = negro), se usa ese color SIEMPRE QUE contraste con la caja. Si no
+    // (Fancy Feast: primario blanco sobre secundario crema), cae a negro/blanco legible.
+    const boxTextStyle = ctx?.brandPrimary ? { color: readableOn(acc, ctx.brandPrimary) } : undefined
     return (
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">
@@ -805,10 +839,16 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content, brandSecondary, brandPrimary, dark }) {
+export default function ComponentPreview({ componentKey, content, theme }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
-  // ctx: contexto de la pagina (colores primario/secundario de la marca, tema oscuro).
-  // Con `dark` (paginas de marca oscura, ej. Pro Plan) el componente se pinta en oscuro.
-  return <div className={`cp-render${dark ? ' cp-dark' : ''}`}>{render(content || {}, { brandSecondary, brandPrimary, dark })}</div>
+  // ctx: tokens de color de la marca de la pagina (ver BRAND_THEMES en pagesDb) +
+  // tema oscuro. Con `dark` (ej. Pro Plan) el componente se pinta en oscuro.
+  const ctx = {
+    brandPrimary: theme?.primary || null,
+    brandSecondary: theme?.secondary || null,
+    brandAccent: theme?.accent || null,
+    dark: !!theme?.dark,
+  }
+  return <div className={`cp-render${ctx.dark ? ' cp-dark' : ''}`}>{render(content || {}, ctx)}</div>
 }

@@ -19,24 +19,60 @@ function isMissingTable(error) {
   )
 }
 
-// Marca de la pagina (opcional). Define el tema visual del builder: Pro Plan usa
-// fondo negro. La lista es curada; se puede ampliar sin tocar el resto.
-export const PAGE_BRANDS = ['Pro Plan', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+// ===== Temas de marca =====
+// Cada marca define sus TOKENS de color; los componentes los consumen desde el
+// contexto de la pagina (ver ComponentPreview). Tokens:
+//   primary   = color principal/main de la marca (fondo de la pagina, textos base)
+//   secondary = color de "relleno": gradiente del banner con tarjetas + cards
+//               coloridas del mosaico
+//   accent    = color de detalle: iconos y titulos de cards (banner con tarjetas,
+//               carrusel de servicios, carrusel de cards). Puede coincidir con el
+//               secundario (Pro Plan) o no (Fancy Feast, cuyo secundario es casi
+//               blanco y no serviria para un icono).
+//   dark      = la pagina se pinta en tema oscuro (texto claro sobre fondo oscuro)
+const BRAND_THEMES = {
+  'Pro Plan': { primary: '#111114', secondary: '#d7bb77', accent: '#d7bb77', dark: true },
+  'Fancy Feast': { primary: '#ffffff', secondary: '#FFFCF1', accent: '#d7bb77', dark: false },
+}
+
+// Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
+// el builder con sus colores; el resto usa el tema Purina por defecto.
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+
+// Tema de una marca (o null si no tiene uno definido). Match tolerante al nombre
+// (mayusculas/espacios), igual que antes.
+export function brandTheme(brand) {
+  const key = String(brand || '').trim().toLowerCase().replace(/\s+/g, ' ')
+  if (!key) return null
+  for (const [name, theme] of Object.entries(BRAND_THEMES)) {
+    if (name.toLowerCase() === key) return theme
+  }
+  return null
+}
 
 // ¿La marca usa tema oscuro (fondo negro)? Hoy solo Pro Plan.
 export function pageIsDark(brand) {
-  return /pro\s*plan/i.test(brand || '')
+  return !!brandTheme(brand)?.dark
 }
 
-// El color secundario de una marca (acento). Hoy solo Pro Plan (#d7bb77).
+// Color de fondo de la pagina segun la marca (el primario). null = fondo por defecto.
+export function brandPageBg(brand) {
+  return brandTheme(brand)?.primary || null
+}
+
+// Color secundario (gradiente del banner con tarjetas + cards del mosaico).
 export function brandSecondaryColor(brand) {
-  return /pro\s*plan/i.test(brand || '') ? '#d7bb77' : null
+  return brandTheme(brand)?.secondary || null
 }
 
-// El color primario/main de una marca. Hoy solo Pro Plan (negro). Se usa, por ej.,
-// para el texto de las cajas del mosaico (negro sobre el dorado secundario).
+// Color principal/main de la marca.
 export function brandPrimaryColor(brand) {
-  return /pro\s*plan/i.test(brand || '') ? '#111114' : null
+  return brandTheme(brand)?.primary || null
+}
+
+// Color de acento (iconos y titulos de cards).
+export function brandAccentColor(brand) {
+  return brandTheme(brand)?.accent || null
 }
 
 // Estados de una pagina (orden fijo, de menos a mas avanzado).
