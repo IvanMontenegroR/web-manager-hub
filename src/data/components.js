@@ -13,6 +13,24 @@
 
 export const COMPONENTS = [
   {
+    key: 'brand_menu',
+    name: 'Menú de marca',
+    category: 'Navegacion',
+    help: 'Barra de navegación de la marca: logo a la izquierda y los ítems del menú. El PRIMER ítem es SIEMPRE el nombre de la marca (sale de la marca de la página, no se carga acá). El fondo usa el color primario de la marca. Cada ítem puede tener subítems (uno por línea) que se despliegan al pasar el mouse.',
+    fields: [
+      { key: 'logo', label: 'Logo de la marca', type: 'image' },
+      { key: 'items', label: 'Ítems del menú (después del nombre de la marca)', type: 'list', itemLabel: 'Ítem', sample: [
+        { label: 'Productos', subitems: 'Alimento seco\nAlimento húmedo\nSnacks' },
+        { label: 'Momento especial' },
+        { label: 'Calidad en tus manos' },
+      ], item: [
+        { key: 'label', label: 'Texto', type: 'text' },
+        { key: 'url', label: 'Link', type: 'url' },
+        { key: 'subitems', label: 'Subítems (uno por línea, opcional)', type: 'textarea' },
+      ] },
+    ],
+  },
+  {
     key: 'breadcrumb',
     name: 'Breadcrumb',
     category: 'Navegacion',

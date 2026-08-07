@@ -36,8 +36,13 @@ export default function PageBuilder({ page, onBack }) {
   }
   useEffect(() => { load() }, [page.id])
 
-  // Tokens de color de la marca de la pagina (null si no tiene marca con tema).
-  const theme = useMemo(() => brandTheme(page.brand), [page.brand])
+  // Contexto de marca de la pagina: nombre + tokens de color (los tokens pueden faltar
+  // si la marca no tiene tema definido; el nombre igual sirve, ej. para el menu de marca).
+  const theme = useMemo(() => {
+    const t = brandTheme(page.brand)
+    if (!t && !page.brand) return null
+    return { ...(t || {}), name: page.brand || null }
+  }, [page.brand])
   const nextSort = useMemo(() => comps.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1, [comps])
   const selected = comps.find((c) => c.id === selId) || null
   const selectedDef = selected ? getComponent(selected.component_key) : null
@@ -178,7 +183,7 @@ export default function PageBuilder({ page, onBack }) {
           {/* Container: replica el gutter lateral de la pagina real. El fondo sale del
               color PRIMARIO de la marca (Pro Plan negro, Fancy Feast blanco). */}
           <div
-            className={`pb-page${theme ? ' pb-page--brand' : ''}${pageIsDark(page.brand) ? ' pb-page--dark' : ''}`}
+            className={`pb-page${brandPageBg(page.brand) ? ' pb-page--brand' : ''}${pageIsDark(page.brand) ? ' pb-page--dark' : ''}`}
             style={brandPageBg(page.brand) ? { background: brandPageBg(page.brand) } : undefined}
           >
             {loading ? (

@@ -81,6 +81,51 @@ function parseBannerAlign(value, isHero) {
 }
 
 const RENDERERS = {
+  // Menu de marca: barra de navegacion con el logo a la izquierda y los items. El PRIMER
+  // item es SIEMPRE el nombre de la marca de la pagina (activo, subrayado); despues van
+  // los items cargados. El fondo sale del color PRIMARIO de la marca, y el color del
+  // texto se elige para que contraste con ese fondo (blanco en marcas oscuras).
+  // Los subitems (uno por linea) se despliegan al pasar el mouse.
+  brand_menu: (c, ctx) => {
+    const bg = ctx?.brandPrimary || '#ffffff'
+    const fg = readableOn(bg, null)
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { label: 'Productos', subitems: 'Alimento seco\nAlimento húmedo\nSnacks' },
+      { label: 'Momento especial' },
+      { label: 'Calidad en tus manos' },
+    ]
+    return (
+      <nav className="cp-bmenu" style={{ background: bg, color: fg, '--fg': fg }}>
+        <div className="cp-bmenu-logo">
+          {c.logo
+            ? <img className="cp-bmenu-logo-img" src={c.logo} alt="" />
+            : <div className="cp-bmenu-logo-ph"><ImageIcon size={16} /><span>Logo</span></div>}
+        </div>
+        <ul className="cp-bmenu-items">
+          {/* Primer item: siempre el nombre de la marca (no editable). */}
+          <li className="cp-bmenu-item is-brand">{T(ctx?.brandName, 'Marca')}</li>
+          {arr.map((it, i) => {
+            const subs = String(it.subitems || '').split('\n').map((s) => s.trim()).filter(Boolean)
+            return (
+              <li key={i} className={`cp-bmenu-item${subs.length ? ' has-sub' : ''}`}>
+                <span className="cp-bmenu-label">
+                  {T(it.label, `Ítem ${i + 1}`)}
+                  {!!subs.length && <ChevronDown size={13} className="cp-bmenu-chev" />}
+                </span>
+                {!!subs.length && (
+                  <ul className="cp-bmenu-sub" style={{ background: bg, color: fg }}>
+                    {subs.map((s, j) => <li key={j}>{s}</li>)}
+                  </ul>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+    )
+  },
+
   // Breadcrumb real (.breadcrumb): fs-caption, links #454545 (hover rojo), actual negro,
   // separador #797777. El ultimo item es la pagina actual (sin link).
   breadcrumb: (c) => {
@@ -845,6 +890,7 @@ export default function ComponentPreview({ componentKey, content, theme }) {
   // ctx: tokens de color de la marca de la pagina (ver BRAND_THEMES en pagesDb) +
   // tema oscuro. Con `dark` (ej. Pro Plan) el componente se pinta en oscuro.
   const ctx = {
+    brandName: theme?.name || null,
     brandPrimary: theme?.primary || null,
     brandSecondary: theme?.secondary || null,
     brandAccent: theme?.accent || null,

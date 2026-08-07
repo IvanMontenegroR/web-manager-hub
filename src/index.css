@@ -1790,6 +1790,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
 /* Carrusel de servicios: FULL BLEED (0 del borde del container). */
 .pb-canvas.preview .pb-block--services_carousel { margin-inline: -60px; }
+/* El menu de marca es una barra de navegacion: va a sangre y pegado a lo que sigue. */
+.pb-canvas.preview .pb-block--brand_menu { margin-inline: -60px; margin-bottom: -28px; }
 /* Listado de productos: la fila de cards sangra al borde derecho (carrusel). */
 .pb-canvas.preview .pb-block--product_list { margin-right: -60px; }
 /* Carruseles de marcas y blog: la fila de cards sangra al borde derecho. */
@@ -1913,6 +1915,25 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-stat-v { font-size: 40px; font-weight: 800; letter-spacing: -1px; color: var(--acc, #ED1C24); line-height: 1; }
 .cp-stat-l { margin-top: 8px; font-size: 12.5px; color: #3a424e; }
 .cp-stat-line { margin-top: 16px; border-bottom: 2px solid #1b252e; }
+
+/* ===== Menu de marca (brand_menu) ===== */
+/* Barra de navegacion: fondo = color primario de la marca (inline), texto = color que
+   contrasta con ese fondo (--fg, tambien inline). El primer item es la marca (activo). */
+.cp-bmenu { display: flex; align-items: center; gap: 40px; padding: 14px 30px; position: relative; }
+.cp-bmenu-logo { flex: none; }
+.cp-bmenu-logo-img { height: 46px; width: auto; max-width: 190px; object-fit: contain; display: block; }
+.cp-bmenu-logo-ph { height: 46px; min-width: 110px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px dashed currentColor; border-radius: 6px; opacity: .45; font-size: 12px; font-weight: 700; }
+.cp-bmenu-items { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 30px; }
+.cp-bmenu-item { position: relative; font-size: 14.5px; color: inherit; white-space: nowrap; padding: 6px 0; cursor: pointer; }
+.cp-bmenu-label { display: inline-flex; align-items: center; gap: 4px; }
+.cp-bmenu-chev { opacity: .6; }
+/* Item de la marca: activo, con subrayado. */
+.cp-bmenu-item.is-brand { font-weight: 700; border-bottom: 2px solid currentColor; }
+/* Submenu: se despliega al pasar el mouse por el item. */
+.cp-bmenu-sub { list-style: none; margin: 0; padding: 8px 0; position: absolute; top: 100%; left: 0; min-width: 190px; border: 1px solid rgba(128,128,128,.28); border-radius: 8px; box-shadow: 0 10px 26px rgba(0,0,0,.18); opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .15s ease, transform .15s ease; z-index: 5; }
+.cp-bmenu-item.has-sub:hover .cp-bmenu-sub { opacity: 1; visibility: visible; transform: translateY(0); }
+.cp-bmenu-sub li { padding: 7px 16px; font-size: 13.5px; white-space: nowrap; }
+.cp-bmenu-sub li:hover { background: rgba(128,128,128,.14); }
 
 /* ===== Cards con logo (logo_cards) — seccion oscura ===== */
 .cp-lcards { background: #0d0d0f; padding: 40px 34px 46px; }
