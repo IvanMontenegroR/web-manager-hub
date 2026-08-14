@@ -74,7 +74,10 @@ export default function Referencias() {
 // --- Seccion SLAs: lo que antes era el modulo completo (General + agencias). ---
 function SlasSection() {
   const { partners, slas, partnerSlas, loading, error, refresh } = useData()
-  const slaPartners = partners.filter((p) => ['BNN', 'NBS'].includes(p.name))
+  // Una pestaña por agencia que tenga SLAs cargados (antes era una lista fija). Asi,
+  // al cargar los SLAs de una agencia nueva su pestaña aparece sola.
+  const withSlas = new Set(partnerSlas.map((s) => s.partner_id))
+  const slaPartners = partners.filter((p) => withSlas.has(p.id))
   const [tab, setTab] = useState(() => localStorage.getItem('wmh_sla_tab') || 'general')
   const [modal, setModal] = useState(null) // { item?, partnerId, partnerName, prefill? }
   useEffect(() => { localStorage.setItem('wmh_sla_tab', tab) }, [tab])
