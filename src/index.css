@@ -1335,6 +1335,13 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* ===== Creacion de paginas — tracker ===== */
 .pages-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .pages-counts { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Pestañas de mercado del tracker de paginas (Mexico / Brasil / ...). */
+.pages-markets { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.pages-market { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 9px 16px; font-size: 14px; font-weight: 600; color: var(--muted, #868e99); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.pages-market:hover { color: var(--ink-2); }
+.pages-market.active { color: var(--purina, #ED1C24); border-bottom-color: var(--purina, #ED1C24); }
+.pages-market-n { font-size: 11px; font-weight: 700; min-width: 18px; padding: 1px 6px; border-radius: 9999px; background: var(--surface-2); color: var(--ink-2); }
+.pages-market.active .pages-market-n { background: var(--purina, #ED1C24); color: #fff; }
 .pg-count { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-2); }
 .pg-count b { font-weight: 800; margin-left: 2px; }
 .pg-count.ns { background: var(--surface-2); color: var(--ink-2); }

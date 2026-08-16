@@ -75,6 +75,14 @@ export function brandAccentColor(brand) {
   return brandTheme(brand)?.accent || null
 }
 
+// Mercados con paginas en armado. El tracker de "Creacion de paginas" separa por
+// mercado (una pestaña por cada uno). Los codigos son los de src/lib/countries.js.
+export const PAGE_MARKETS = [
+  { code: 'MX', label: 'México' },
+  { code: 'BR', label: 'Brasil' },
+]
+export const PAGE_MARKET_LABEL = Object.fromEntries(PAGE_MARKETS.map((m) => [m.code, m.label]))
+
 // Estados de una pagina (orden fijo, de menos a mas avanzado).
 export const PAGE_STATUSES = ['Not started', 'In progress', 'On hold', 'Done']
 export const PAGE_STATUS_LABEL = {
@@ -84,21 +92,23 @@ export const PAGE_STATUS_LABEL = {
   Done: 'Lista',
 }
 
-// Nota: si la tabla `pages` ya existe sin la columna `brand`, corré:
-//   alter table public.pages add column if not exists brand text;
-// La app igual funciona sin ella (guarda la pagina sin marca) hasta que la agregues.
+// Nota: si la tabla `pages` ya existe sin las columnas `brand` / `market`, los ALTER
+// de abajo las agregan. La app igual funciona sin ellas (guarda la pagina sin marca /
+// sin mercado) hasta que se corran.
 export const SETUP_SQL = `create table if not exists public.pages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   path text,
   status text not null default 'Not started',
   brand text,
+  market text,
   notes text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
 
 alter table public.pages add column if not exists brand text;
+alter table public.pages add column if not exists market text;
 
 create table if not exists public.page_components (
   id uuid primary key default gen_random_uuid(),
@@ -144,23 +154,40 @@ function pagePayload(p) {
     path: p.path?.trim() || null,
     status: PAGE_STATUSES.includes(p.status) ? p.status : 'Not started',
     brand: p.brand?.trim() || null,
+    market: p.market?.trim() || null,
     notes: p.notes?.trim() || null,
   }
 }
 
-// La columna `brand` es nueva: si todavia no fue agregada a la tabla, el insert/update
-// falla apuntando a esa columna. En ese caso se reintenta SIN brand (se guarda igual).
-function isMissingBrand(error) {
-  if (!error) return false
-  return /brand/i.test(error.message || '') &&
-    (error.code === 'PGRST204' || error.code === '42703' || /column|schema cache|does not exist|find/i.test(error.message || ''))
+// `brand` y `market` son columnas agregadas despues: si alguna todavia no existe en la
+// tabla, el insert/update falla nombrandola. En ese caso se saca del payload y se
+// reintenta (la pagina se guarda igual, sin ese dato).
+const OPTIONAL_COLS = ['brand', 'market']
+function missingOptionalCol(error) {
+  if (!error) return null
+  const msg = error.message || ''
+  const looksMissing = error.code === 'PGRST204' || error.code === '42703' ||
+    /column|schema cache|does not exist|find/i.test(msg)
+  if (!looksMissing) return null
+  return OPTIONAL_COLS.find((c) => new RegExp(`\\b${c}\\b`, 'i').test(msg)) || null
+}
+
+// Corre `run(payload)` sacando las columnas opcionales que la tabla no tenga.
+async function withOptionalCols(payload, run) {
+  let res = await run(payload)
+  for (let i = 0; i < OPTIONAL_COLS.length && res.error; i++) {
+    const col = missingOptionalCol(res.error)
+    if (!col || !(col in payload)) break
+    delete payload[col]
+    res = await run(payload)
+  }
+  return res
 }
 
 export async function createPage(p, sort_order) {
   const brand = p.brand?.trim() || null
   const payload = { ...pagePayload(p), sort_order: sort_order ?? 0 }
-  let res = await supabase.from('pages').insert(payload).select().single()
-  if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').insert(payload).select().single() }
+  const res = await withOptionalCols(payload, (pl) => supabase.from('pages').insert(pl).select().single())
   throwIf(res.error)
   setBrandLS(res.data?.id, brand) // espejo local (por si la columna no existe)
   return { ...res.data, brand }
@@ -170,8 +197,7 @@ export async function updatePage(id, p) {
   const brand = p.brand?.trim() || null
   const payload = pagePayload(p)
   if (p.sort_order != null) payload.sort_order = p.sort_order
-  let res = await supabase.from('pages').update(payload).eq('id', id).select().single()
-  if (res.error && isMissingBrand(res.error)) { delete payload.brand; res = await supabase.from('pages').update(payload).eq('id', id).select().single() }
+  const res = await withOptionalCols(payload, (pl) => supabase.from('pages').update(pl).eq('id', id).select().single())
   throwIf(res.error)
   setBrandLS(id, brand) // espejo local (por si la columna no existe)
   return { ...res.data, brand }
@@ -201,6 +227,7 @@ export async function clonePage(page, sort_order) {
     path: page.path,
     status: page.status,
     brand: page.brand,
+    market: page.market,
     notes: page.notes,
   }, sort_order)
   const { data: comps, error } = await fetchPageComponents(page.id)
@@ -219,11 +246,8 @@ export async function clonePage(page, sort_order) {
 }
 
 // Seed inicial: hoy solo la Homepage (el resto de la lista llega mas tarde).
-export async function seedPages() {
-  const { data, error } = await supabase
-    .from('pages').insert([{ name: 'Homepage', path: '/', status: 'Not started', sort_order: 0 }]).select()
-  throwIf(error)
-  return data
+export async function seedPages(market) {
+  return createPage({ name: 'Homepage', path: '/', status: 'Not started', market }, 0)
 }
 
 // ---- Componentes de una pagina (el "armado") ----

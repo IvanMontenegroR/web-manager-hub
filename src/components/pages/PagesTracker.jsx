@@ -3,7 +3,8 @@ import {
   ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, Pencil, Copy, Check, Layers,
 } from 'lucide-react'
 import {
-  fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage, PAGE_STATUSES, PAGE_STATUS_LABEL, SETUP_SQL,
+  fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage,
+  PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_MARKETS, PAGE_MARKET_LABEL, SETUP_SQL,
 } from '../../lib/pagesDb'
 import PageModal from './PageModal.jsx'
 
@@ -38,6 +39,9 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
   const [errMsg, setErrMsg] = useState(null)
   const [modal, setModal] = useState(null)
   const [busyId, setBusyId] = useState(null) // pagina clonandose
+  // Mercado activo (pestaña). Se recuerda entre sesiones.
+  const [market, setMarket] = useState(() => localStorage.getItem('wmh_pages_market') || PAGE_MARKETS[0].code)
+  useEffect(() => { localStorage.setItem('wmh_pages_market', market) }, [market])
 
   async function load() {
     setState('loading')
@@ -49,18 +53,33 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
   useEffect(() => { load() }, [])
 
   const nextSort = useMemo(() => rows.reduce((m, r) => Math.max(m, r.sort_order || 0), 0) + 1, [rows])
+  // Paginas del mercado activo. Las que no tienen mercado caen en el primero, para que
+  // nunca queden invisibles si les falta el dato.
+  const marketOf = (p) => p.market || PAGE_MARKETS[0].code
+  const visible = useMemo(() => rows.filter((r) => marketOf(r) === market), [rows, market])
+  // Cantidad de paginas por mercado (para el badge de cada pestaña).
+  const byMarket = useMemo(() => {
+    const m = {}
+    for (const r of rows) { const k = marketOf(r); m[k] = (m[k] || 0) + 1 }
+    return m
+  }, [rows])
   const counts = useMemo(() => {
     const c = Object.fromEntries(PAGE_STATUSES.map((s) => [s, 0]))
-    for (const r of rows) if (c[r.status] != null) c[r.status]++
+    for (const r of visible) if (c[r.status] != null) c[r.status]++
     return c
-  }, [rows])
+  }, [visible])
 
-  // Reordenar (optimista): mueve la fila i en direccion dir y persiste el orden.
+  // Reordenar (optimista): mueve la fila i (indice DENTRO del mercado activo) en
+  // direccion dir. El swap se hace sobre la lista completa para no alterar el orden
+  // de los otros mercados, y despues se persiste todo.
   async function move(i, dir) {
     const j = i + dir
-    if (j < 0 || j >= rows.length) return
+    if (j < 0 || j >= visible.length) return
+    const a = rows.findIndex((r) => r.id === visible[i].id)
+    const b = rows.findIndex((r) => r.id === visible[j].id)
+    if (a < 0 || b < 0) return
     const next = rows.slice()
-    ;[next[i], next[j]] = [next[j], next[i]]
+    ;[next[a], next[b]] = [next[b], next[a]]
     setRows(next)
     try { await persistPageOrder(next) } catch (e) { setErrMsg(e.message); load() }
   }
@@ -96,25 +115,38 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
         </button>
       </div>
 
+      {/* Una pestaña por mercado: las paginas se arman y se listan por separado. */}
+      <div className="pages-markets">
+        {PAGE_MARKETS.map((m) => (
+          <button
+            key={m.code}
+            className={`pages-market${market === m.code ? ' active' : ''}`}
+            onClick={() => setMarket(m.code)}
+          >
+            {m.label} <span className="pages-market-n">{byMarket[m.code] || 0}</span>
+          </button>
+        ))}
+      </div>
+
       {errMsg && <div className="form-error" style={{ margin: '0 0 10px' }}>{errMsg}</div>}
 
-      {rows.length === 0 ? (
+      {visible.length === 0 ? (
         <div className="dir-empty">
           <FileStack size={26} />
-          <div className="dir-empty-t">Sin paginas</div>
+          <div className="dir-empty-t">Sin paginas en {PAGE_MARKET_LABEL[market] || market}</div>
           <p>Cargá la Homepage para arrancar (el resto de la lista la sumás cuando la tengas), o creá a mano.</p>
           <div className="dir-empty-actions">
-            <button className="btn btn-primary" onClick={async () => { await seedPages(); load() }}><Database size={15} /> Cargar Homepage</button>
+            <button className="btn btn-primary" onClick={async () => { await seedPages(market); load() }}><Database size={15} /> Cargar Homepage</button>
             <button className="btn" onClick={() => setModal({})}><Plus size={15} /> Crear a mano</button>
           </div>
         </div>
       ) : (
         <div className="pages-list">
-          {rows.map((p, i) => (
+          {visible.map((p, i) => (
             <div key={p.id} className="page-row">
               <div className="page-reorder">
                 <button className="ic-btn" disabled={i === 0} onClick={() => move(i, -1)} title="Subir"><ChevronUp size={15} /></button>
-                <button className="ic-btn" disabled={i === rows.length - 1} onClick={() => move(i, 1)} title="Bajar"><ChevronDown size={15} /></button>
+                <button className="ic-btn" disabled={i === visible.length - 1} onClick={() => move(i, 1)} title="Bajar"><ChevronDown size={15} /></button>
               </div>
               <div className="page-idx">{i + 1}</div>
               <div className="page-main" onClick={() => onOpenBuilder?.(p)} title="Abrir el builder">
@@ -139,7 +171,7 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
       )}
 
       {modal && (
-        <PageModal item={modal.id ? modal : undefined} nextSort={nextSort} onClose={() => setModal(null)} onSaved={load} />
+        <PageModal item={modal.id ? modal : undefined} nextSort={nextSort} defaultMarket={market} onClose={() => setModal(null)} onSaved={load} />
       )}
     </div>
   )

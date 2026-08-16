@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { FileStack, Trash2 } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
-import { createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_BRANDS } from '../../lib/pagesDb'
+import { createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_BRANDS, PAGE_MARKETS } from '../../lib/pagesDb'
 
 // Alta/edicion de una pagina del tracker de "Creacion de paginas".
-export default function PageModal({ item, nextSort, onClose, onSaved }) {
+// `defaultMarket` = el mercado de la pestaña activa (para una pagina nueva).
+export default function PageModal({ item, nextSort, defaultMarket, onClose, onSaved }) {
   const editing = !!item
   const [form, setForm] = useState({
     name: item?.name ?? '',
     path: item?.path ?? '',
     status: item?.status ?? 'Not started',
+    market: item?.market ?? defaultMarket ?? '',
     brand: item?.brand ?? '',
     notes: item?.notes ?? '',
   })
@@ -60,18 +62,25 @@ export default function PageModal({ item, nextSort, onClose, onSaved }) {
       </div>
       <div className="row-2">
         <div className="field">
+          <label>Mercado</label>
+          <select className="control" value={form.market} onChange={set('market')}>
+            <option value="">— Sin mercado —</option>
+            {PAGE_MARKETS.map((m) => <option key={m.code} value={m.code}>{m.label}</option>)}
+          </select>
+        </div>
+        <div className="field">
           <label>Estado</label>
           <select className="control" value={form.status} onChange={set('status')}>
             {PAGE_STATUSES.map((s) => <option key={s} value={s}>{PAGE_STATUS_LABEL[s]}</option>)}
           </select>
         </div>
-        <div className="field">
-          <label>Marca <span className="lbl-muted">(opcional)</span></label>
-          <select className="control" value={form.brand} onChange={set('brand')}>
-            <option value="">— Ninguna —</option>
-            {PAGE_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
-          </select>
-        </div>
+      </div>
+      <div className="field">
+        <label>Marca <span className="lbl-muted">(opcional)</span></label>
+        <select className="control" value={form.brand} onChange={set('brand')}>
+          <option value="">— Ninguna —</option>
+          {PAGE_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
+        </select>
       </div>
       <div className="field">
         <label>Notas <span className="lbl-muted">(opcional)</span></label>
