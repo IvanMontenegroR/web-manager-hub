@@ -43,7 +43,7 @@ export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow',
 // El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es
 // ABIERTA: estas son sugerencias, se puede escribir una nueva. Sin categoria = pagina
 // suelta (ej. la Home), y va arriba de todo.
-export const PAGE_CATEGORIES = ['Marca', 'Purina Adopta']
+export const PAGE_CATEGORIES = ['Marca', 'Purina Adopta', 'Conoce Purina']
 
 // La categoria "Marca" es la unica con SUBcategoria, y la subcategoria es la MARCA de
 // la pagina: el campo `brand` que ya existe (el que define el tema visual). Asi no hay

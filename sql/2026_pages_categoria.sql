@@ -12,3 +12,5 @@ update public.pages set category = 'Marca', brand = 'Purina One'  where path = '
 update public.pages set category = 'Marca', brand = 'Dog Chow'    where path = '/dog-chow';
 
 update public.pages set category = 'Purina Adopta' where path like '/purina-adopta/%';
+
+update public.pages set category = 'Conoce Purina' where path = '/nuestra-historia';
