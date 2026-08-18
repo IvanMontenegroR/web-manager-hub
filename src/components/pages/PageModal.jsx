@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { FileStack, Trash2 } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
-import { createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_BRANDS, PAGE_MARKETS } from '../../lib/pagesDb'
+import {
+  createPage, updatePage, deletePage, PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_BRANDS,
+  PAGE_MARKETS, PAGE_CATEGORIES, BRAND_CATEGORY,
+} from '../../lib/pagesDb'
 
 // Alta/edicion de una pagina del tracker de "Creacion de paginas".
 // `defaultMarket` = el mercado de la pestaña activa (para una pagina nueva).
@@ -12,6 +15,7 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
     path: item?.path ?? '',
     status: item?.status ?? 'Not started',
     market: item?.market ?? defaultMarket ?? '',
+    category: item?.category ?? '',
     brand: item?.brand ?? '',
     notes: item?.notes ?? '',
   })
@@ -75,12 +79,26 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
           </select>
         </div>
       </div>
-      <div className="field">
-        <label>Marca <span className="lbl-muted">(opcional)</span></label>
-        <select className="control" value={form.brand} onChange={set('brand')}>
-          <option value="">— Ninguna —</option>
-          {PAGE_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
-        </select>
+      <div className="row-2">
+        <div className="field">
+          <label>Categoría <span className="lbl-muted">(opcional)</span></label>
+          {/* Lista abierta: las sugerencias son las categorias en uso, pero se puede
+              escribir una nueva. Sin categoria = pagina suelta (ej. la Home). */}
+          <input className="control" list="page-categories" value={form.category} onChange={set('category')} placeholder="Ej: Marca, Purina Adopta" />
+          <datalist id="page-categories">{PAGE_CATEGORIES.map((c) => <option key={c} value={c} />)}</datalist>
+        </div>
+        <div className="field">
+          <label>Marca <span className="lbl-muted">(opcional)</span></label>
+          <select className="control" value={form.brand} onChange={set('brand')}>
+            <option value="">— Ninguna —</option>
+            {PAGE_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
+          </select>
+          <div className="hint">
+            {form.category?.trim() === BRAND_CATEGORY
+              ? 'En la categoría Marca, la marca es la subcategoría: la página se agrupa acá.'
+              : 'Define el tema visual del builder.'}
+          </div>
+        </div>
       </div>
       <div className="field">
         <label>Notas <span className="lbl-muted">(opcional)</span></label>

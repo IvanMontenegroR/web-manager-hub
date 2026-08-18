@@ -37,7 +37,22 @@ const BRAND_THEMES = {
 
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
-export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+
+// ===== Categorias =====
+// El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es
+// ABIERTA: estas son sugerencias, se puede escribir una nueva. Sin categoria = pagina
+// suelta (ej. la Home), y va arriba de todo.
+export const PAGE_CATEGORIES = ['Marca', 'Purina Adopta']
+
+// La categoria "Marca" es la unica con SUBcategoria, y la subcategoria es la MARCA de
+// la pagina: el campo `brand` que ya existe (el que define el tema visual). Asi no hay
+// dos campos que decir lo mismo y desincronizarse: elegis la marca una sola vez y la
+// pagina cae sola en el grupo de esa marca.
+export const BRAND_CATEGORY = 'Marca'
+export function pageSubcategory(p) {
+  return p?.category === BRAND_CATEGORY ? (p.brand || null) : null
+}
 
 // Tema de una marca (o null si no tiene uno definido). Match tolerante al nombre
 // (mayusculas/espacios), igual que antes.
@@ -102,6 +117,7 @@ export const SETUP_SQL = `create table if not exists public.pages (
   status text not null default 'Not started',
   brand text,
   market text,
+  category text,
   notes text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
@@ -109,6 +125,7 @@ export const SETUP_SQL = `create table if not exists public.pages (
 
 alter table public.pages add column if not exists brand text;
 alter table public.pages add column if not exists market text;
+alter table public.pages add column if not exists category text;
 
 create table if not exists public.page_components (
   id uuid primary key default gen_random_uuid(),
@@ -155,14 +172,15 @@ function pagePayload(p) {
     status: PAGE_STATUSES.includes(p.status) ? p.status : 'Not started',
     brand: p.brand?.trim() || null,
     market: p.market?.trim() || null,
+    category: p.category?.trim() || null,
     notes: p.notes?.trim() || null,
   }
 }
 
-// `brand` y `market` son columnas agregadas despues: si alguna todavia no existe en la
+// `brand`, `market` y `category` son columnas agregadas despues: si alguna todavia no existe en la
 // tabla, el insert/update falla nombrandola. En ese caso se saca del payload y se
 // reintenta (la pagina se guarda igual, sin ese dato).
-const OPTIONAL_COLS = ['brand', 'market']
+const OPTIONAL_COLS = ['brand', 'market', 'category']
 function missingOptionalCol(error) {
   if (!error) return null
   const msg = error.message || ''
@@ -228,6 +246,7 @@ export async function clonePage(page, sort_order) {
     status: page.status,
     brand: page.brand,
     market: page.market,
+    category: page.category,
     notes: page.notes,
   }, sort_order)
   const { data: comps, error } = await fetchPageComponents(page.id)

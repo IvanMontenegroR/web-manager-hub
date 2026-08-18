@@ -1368,6 +1368,28 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pg-count.dn { background: var(--ok-tint); color: var(--ok); border-color: transparent; }
 
 .pages-list { display: flex; flex-direction: column; gap: 8px; max-width: 920px; }
+/* Agrupado por categoria y, dentro de Marca, por marca (la subcategoria). */
+.pages-group { display: flex; flex-direction: column; gap: 8px; }
+.pages-group + .pages-group { margin-top: 10px; }
+.pages-cat {
+  display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2);
+  border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 6px;
+}
+.pages-cat svg { color: var(--purina); }
+.pages-cat-n {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0; color: var(--ink-3);
+  background: var(--surface-2); border-radius: 20px; padding: 1px 7px;
+}
+.pages-sub { display: flex; flex-direction: column; gap: 8px; }
+.pages-sub + .pages-sub { margin-top: 4px; }
+.pages-subcat {
+  display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700;
+  color: var(--ink-2); padding-left: 2px;
+}
+.pages-subcat::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--purina); }
+/* Las paginas de una subcategoria van indentadas, para que se lea la jerarquia. */
+.pages-subcat ~ .page-row { margin-left: 14px; }
 .page-row {
   display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 10px 14px; box-shadow: var(--shadow-sm);

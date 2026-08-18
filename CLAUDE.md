@@ -180,7 +180,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   modulo para armar las paginas de la migracion. Dos capas:
   1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|In progress|On hold|
      Done, ver `PAGE_STATUS_LABEL`) y orden por prioridad (reordenable, persiste `sort_order`). El boton
-     "Armar" abre el builder de esa pagina.
+     "Armar" abre el builder de esa pagina. Se separa por **mercado** (pestañas, `PAGE_MARKETS`) y dentro
+     de cada mercado se agrupa por **categoria** (`pages.category`, lista ABIERTA — `PAGE_CATEGORIES` son
+     solo sugerencias; sin categoria = pagina suelta arriba de todo, ej. la Home). La **subcategoria**
+     existe solo dentro de la categoria `Marca` (`BRAND_CATEGORY`) y ES la columna `brand`
+     (`pageSubcategory`), la misma que define el tema visual: una sola fuente de verdad, para que no haya
+     dos campos diciendo lo mismo. El reordenar es DENTRO del grupo.
   2. **Builder** (`PageBuilder`) — 3 paneles: paleta de componentes | canvas con el preview EN VIVO de la
      pagina armandose | editor de contenido del componente seleccionado. Cada componente sale del catalogo
      `src/data/components.js` (define sus CAMPOS de Drupal: text|textarea|url|select|image|list). Los

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, Pencil, Copy, Check, Layers,
+  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, Pencil, Copy, Check, Layers, FolderOpen,
 } from 'lucide-react'
 import {
-  fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage,
+  fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage, pageSubcategory,
   PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_MARKETS, PAGE_MARKET_LABEL, SETUP_SQL,
 } from '../../lib/pagesDb'
 import PageModal from './PageModal.jsx'
@@ -69,14 +69,31 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
     return c
   }, [visible])
 
-  // Reordenar (optimista): mueve la fila i (indice DENTRO del mercado activo) en
-  // direccion dir. El swap se hace sobre la lista completa para no alterar el orden
-  // de los otros mercados, y despues se persiste todo.
-  async function move(i, dir) {
+  // Agrupado por categoria y, dentro de "Marca", por marca (la subcategoria). Las
+  // paginas SIN categoria (ej. la Home) van sueltas arriba de todo. Cada grupo aparece
+  // en el orden en que aparece su primera pagina, asi el orden manual sigue mandando.
+  const groups = useMemo(() => {
+    const out = []
+    const byCat = new Map()
+    for (const p of visible) {
+      const cat = p.category || null
+      if (!byCat.has(cat)) { const g = { cat, subs: [], bySub: new Map() }; byCat.set(cat, g); out.push(g) }
+      const g = byCat.get(cat)
+      const sub = pageSubcategory(p)
+      if (!g.bySub.has(sub)) { const s = { sub, items: [] }; g.bySub.set(sub, s); g.subs.push(s) }
+      g.bySub.get(sub).items.push(p)
+    }
+    return out
+  }, [visible])
+
+  // Reordenar (optimista): mueve la pagina dentro de SU grupo (la prioridad se lee por
+  // grupo). El swap se hace sobre la lista completa para no alterar el orden de los
+  // otros mercados ni de las otras categorias, y despues se persiste todo.
+  async function move(items, i, dir) {
     const j = i + dir
-    if (j < 0 || j >= visible.length) return
-    const a = rows.findIndex((r) => r.id === visible[i].id)
-    const b = rows.findIndex((r) => r.id === visible[j].id)
+    if (j < 0 || j >= items.length) return
+    const a = rows.findIndex((r) => r.id === items[i].id)
+    const b = rows.findIndex((r) => r.id === items[j].id)
     if (a < 0 || b < 0) return
     const next = rows.slice()
     ;[next[a], next[b]] = [next[b], next[a]]
@@ -142,29 +159,45 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
         </div>
       ) : (
         <div className="pages-list">
-          {visible.map((p, i) => (
-            <div key={p.id} className="page-row">
-              <div className="page-reorder">
-                <button className="ic-btn" disabled={i === 0} onClick={() => move(i, -1)} title="Subir"><ChevronUp size={15} /></button>
-                <button className="ic-btn" disabled={i === visible.length - 1} onClick={() => move(i, 1)} title="Bajar"><ChevronDown size={15} /></button>
-              </div>
-              <div className="page-idx">{i + 1}</div>
-              <div className="page-main" onClick={() => onOpenBuilder?.(p)} title="Abrir el builder">
-                <div className="page-name">{p.name}</div>
-                {p.path && <div className="page-path">{p.path}</div>}
-                {p.notes && <div className="page-notes">{p.notes}</div>}
-              </div>
-              <button className="btn btn-sm page-build" onClick={() => onOpenBuilder?.(p)}><Layers size={13} /> Armar</button>
-              <select
-                className={`page-status ${STATUS_CLASS[p.status]}`}
-                value={p.status}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => changeStatus(p.id, e.target.value)}
-              >
-                {PAGE_STATUSES.map((s) => <option key={s} value={s}>{PAGE_STATUS_LABEL[s]}</option>)}
-              </select>
-              <button className="ic-btn page-clone" disabled={busyId === p.id} onClick={() => clone(p)} title="Clonar pagina (copia con sus componentes)"><Copy size={14} /></button>
-              <button className="ic-btn page-edit" onClick={() => setModal(p)} title="Editar"><Pencil size={14} /></button>
+          {groups.map((g) => (
+            <div key={g.cat || '__none__'} className="pages-group">
+              {g.cat && (
+                <div className="pages-cat">
+                  <FolderOpen size={14} /> {g.cat}
+                  <span className="pages-cat-n">{g.subs.reduce((n, s) => n + s.items.length, 0)}</span>
+                </div>
+              )}
+              {g.subs.map((s) => (
+                <div key={s.sub || '__nosub__'} className="pages-sub">
+                  {/* La subcategoria hoy existe solo en "Marca" y es la marca de la pagina. */}
+                  {s.sub && <div className="pages-subcat">{s.sub} <span className="pages-cat-n">{s.items.length}</span></div>}
+                  {s.items.map((p, i) => (
+                    <div key={p.id} className="page-row">
+                      <div className="page-reorder">
+                        <button className="ic-btn" disabled={i === 0} onClick={() => move(s.items, i, -1)} title="Subir"><ChevronUp size={15} /></button>
+                        <button className="ic-btn" disabled={i === s.items.length - 1} onClick={() => move(s.items, i, 1)} title="Bajar"><ChevronDown size={15} /></button>
+                      </div>
+                      <div className="page-idx">{i + 1}</div>
+                      <div className="page-main" onClick={() => onOpenBuilder?.(p)} title="Abrir el builder">
+                        <div className="page-name">{p.name}</div>
+                        {p.path && <div className="page-path">{p.path}</div>}
+                        {p.notes && <div className="page-notes">{p.notes}</div>}
+                      </div>
+                      <button className="btn btn-sm page-build" onClick={() => onOpenBuilder?.(p)}><Layers size={13} /> Armar</button>
+                      <select
+                        className={`page-status ${STATUS_CLASS[p.status]}`}
+                        value={p.status}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => changeStatus(p.id, e.target.value)}
+                      >
+                        {PAGE_STATUSES.map((st) => <option key={st} value={st}>{PAGE_STATUS_LABEL[st]}</option>)}
+                      </select>
+                      <button className="ic-btn page-clone" disabled={busyId === p.id} onClick={() => clone(p)} title="Clonar pagina (copia con sus componentes)"><Copy size={14} /></button>
+                      <button className="ic-btn page-edit" onClick={() => setModal(p)} title="Editar"><Pencil size={14} /></button>
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           ))}
         </div>
