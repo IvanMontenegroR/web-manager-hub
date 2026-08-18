@@ -217,7 +217,10 @@ export const COMPONENTS = [
         { key: 'image', label: 'Imagen de marca', type: 'image' },
         { key: 'name', label: 'Nombre', type: 'text' },
         { key: 'description', label: 'Bajada', type: 'textarea' },
-        { key: 'pets', label: 'Aplica a', type: 'select', options: ['Perro + Gato', 'Perro', 'Gato'] },
+        // "Sin iconos" (noneOption) apaga los iconos perro/gato sobre la imagen: sirve
+        // cuando el carrusel se usa para algo que no es una marca (pasos, refugios...).
+        // Elegido, el campo tampoco baja al Excel: no hay nada que cargar.
+        { key: 'pets', label: 'Aplica a', type: 'select', options: ['Perro + Gato', 'Perro', 'Gato', 'Sin iconos'], noneOption: 'Sin iconos' },
         { key: 'url', label: 'Link', type: 'url' },
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todas' },
@@ -525,6 +528,13 @@ export function visibleFields(def, content = {}, opts = {}) {
     if (f.onlyTypes && !f.onlyTypes.includes(type)) return false
     return true
   })
+}
+
+// ¿Este campo se OMITE del Excel para este valor? Un campo con `noneOption` (ej.
+// "Aplica a" -> "Sin iconos") no tiene nada que cargar cuando esta en esa opcion,
+// asi que no se le pide una fila al mercado.
+export function excelSkip(field, value) {
+  return !!field?.noneOption && value === field.noneOption
 }
 
 // Valor legible de un campo para el export/preview (list -> texto multilinea).

@@ -6,7 +6,7 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs, visibleFields, componentHasImage } from '../data/components'
+import { getComponent, fieldToText, getSpecs, visibleFields, componentHasImage, excelSkip } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks } from './richText'
 
@@ -137,6 +137,45 @@ function loadSize(dataUrl) {
   })
 }
 
+function loadImgEl(dataUrl) {
+  return new Promise((res) => {
+    const img = new Image()
+    img.onload = () => res(img)
+    img.onerror = () => res(null)
+    img.src = dataUrl
+  })
+}
+
+// Apila varias capturas (header, cada componente, footer) en UNA sola imagen alta:
+// la pagina entera como se veria armada. Todas se llevan al mismo ancho.
+const STACK_W = 1180      // ancho de la pagina compuesta (desktop)
+const STACK_MAX_H = 24000 // tope de alto: arriba de esto el canvas del browser falla
+async function stackImages(dataUrls, bg = '#ffffff') {
+  const imgs = []
+  for (const d of dataUrls) { const im = d ? await loadImgEl(d) : null; if (im && im.naturalWidth) imgs.push(im) }
+  if (!imgs.length) return null
+  let w = STACK_W
+  const hAt = (width) => imgs.reduce((a, im) => a + Math.round(im.naturalHeight * (width / im.naturalWidth)), 0)
+  let h = hAt(w)
+  // Paginas muy largas: se achica el ancho para no pasar el tope de alto del canvas.
+  if (h > STACK_MAX_H) { w = Math.floor(w * (STACK_MAX_H / h)); h = hAt(w) }
+  try {
+    const cv = document.createElement('canvas')
+    cv.width = w
+    cv.height = h
+    const ctx = cv.getContext('2d')
+    ctx.fillStyle = bg
+    ctx.fillRect(0, 0, w, h)
+    let y = 0
+    for (const im of imgs) {
+      const ih = Math.round(im.naturalHeight * (w / im.naturalWidth))
+      ctx.drawImage(im, 0, y, w, ih)
+      y += ih
+    }
+    return cv.toDataURL('image/png')
+  } catch { return null }
+}
+
 // Alto estimado (pt) de una celda de contenido segun cuanto texto wrapea.
 function estHeight(text, charsPerLine = 48) {
   const s = String(text == null ? '' : text)
@@ -172,6 +211,7 @@ function drawBox(ws, r1, r2, c1, c2, argb, style = 'medium') {
 // getNode(id) devuelve el nodo DOM (.cp-render) del preview de ese componente.
 export async function exportPageMatrix(page, components, getNode, opts = {}) {
   const withMetas = opts.metas !== false // por defecto se incluyen las metas (SEO)
+  const withFull = opts.fullPage !== false // ...y la imagen de la pagina entera
   // Con 2+ banners (galeria de todos los tipos): el PRIMERO (Main Hero) queda en la
   // matriz como un componente normal, y los OTROS tipos se muestran a su DERECHA, en la
   // misma hoja (bloques en columnas F+). Con 1 solo (pagina del builder) queda inline.
@@ -197,6 +237,12 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // Columnas para los OTROS tipos de banner a la derecha (bloque: campo 20, contenido 42).
   const STRIP_C0 = columns.length + 2 // 1-based col del primer bloque (F=gap, G=label...)
   if (useStrip) { columns.push({ width: 3 }); for (const _ of otherBanners) columns.push({ width: 20 }, { width: 42 }, { width: 3 }) }
+  // Ultima columna, a la derecha de TODO: la pagina entera renderizada (una sola
+  // imagen, sin division por campos), para ver de un vistazo como quedaria armada.
+  const FULL_W = 64
+  if (withFull) columns.push({ width: 3 }, { width: FULL_W })
+  const FULL_COL = withFull ? columns.length - 1 : -1 // 0-based
+  const FULL_MAX_W = Math.round(FULL_W * 7 + 5) - 24
   ws.columns = columns
   const IMG_COL = 4 // 0-based -> columna E
   // Ancho interior de la col E en px (aprox Excel: chars*7 + 5). La imagen se topea
@@ -206,6 +252,15 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   const IMG_MAX_H = 320
 
   const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
+
+  // Capturas memoizadas por (componente, ancho): la imagen de cada seccion y la de la
+  // pagina entera comparten la misma captura cuando el ancho coincide.
+  const shots = new Map()
+  async function shotFor(id, node, w) {
+    const k = `${id}:${w}`
+    if (!shots.has(k)) shots.set(k, await snapshot(node, w))
+    return shots.get(k)
+  }
 
   // Prepara la imagen: la registra en el workbook y calcula su tamaño encajado en la
   // celda de imagen. Devuelve { id, w, h, hpt } o null. El alto en pt (hpt) sirve para
@@ -266,9 +321,11 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     for (const f of visibleFields(bdef, content, { excel: true })) {
       if (f.type === 'list') {
         const items = Array.isArray(content[f.key]) && content[f.key].length ? content[f.key] : [{}]
-        const subs = (f.item || []).filter((sf) => !sf.cms)
-        items.forEach((it, k) => { bc(`${f.itemLabel || f.label} ${k + 1}`); for (const sf of subs) bf(sf.label, fieldToText(sf, it[sf.key]), true) })
-      } else { bf(f.label, fieldToText(f, content[f.key])) }
+        items.forEach((it, k) => {
+          bc(`${f.itemLabel || f.label} ${k + 1}`)
+          for (const sf of (f.item || []).filter((sf) => !sf.cms && !excelSkip(sf, it[sf.key]))) bf(sf.label, fieldToText(sf, it[sf.key]), true)
+        })
+      } else if (!excelSkip(f, content[f.key])) { bf(f.label, fieldToText(f, content[f.key])) }
     }
     drawBox(ws, topRow, r - 1, c, c2, PURINA_RED)
     return r - 1
@@ -382,7 +439,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   title.alignment = { vertical: 'middle', indent: 1 }
   setH(2, 26)
   ws.mergeCells(3, 2, 3, 5)
-  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.'
+  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS. Al final de la hoja, más a la derecha, está la página entera armada para verla de un vistazo.'
   ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
   setH(3, 30)
@@ -459,12 +516,15 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           const role = f.roles ? f.roles[i] : null
           row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
           // Con roles, cada bloque muestra solo los subcampos de su rol.
-          const subFields = (f.item || []).filter((sf) => !sf.cms && (!sf.roles || !role || sf.roles.includes(role)))
+          // Ademas de los tecnicos (cms) y los que no son de este rol, se omiten los
+          // que quedaron en su `noneOption` (ej. "Aplica a: Sin iconos"): no hay nada
+          // que cargar, seria una fila de ruido.
+          const subFields = (f.item || []).filter((sf) => !sf.cms && (!sf.roles || !role || sf.roles.includes(role)) && !excelSkip(sf, item[sf.key]))
           for (const sf of subFields) {
             row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
           }
         })
-      } else {
+      } else if (!excelSkip(f, content[f.key])) {
         row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled })
       }
     }
@@ -472,7 +532,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // Imagen del componente en la columna E. Se captura a ancho DESKTOP (CAP_W) para
     // que renderice como en la pagina real; algunos (ej. 50/50) definen un exportWidth
     // mas angosto para no salir tan bajos. Se ubica centrada dentro del marco.
-    const dataUrl = await snapshot(getNode(comp.id), def?.exportWidth || CAP_W)
+    const dataUrl = await shotFor(comp.id, getNode(comp.id), def?.exportWidth || CAP_W)
     const img = await prepImage(dataUrl)
     const PAD = 12     // pt de aire arriba/abajo dentro del marco
     const CAP_GAP = 4  // aire entre la imagen y su Alt Text
@@ -525,6 +585,31 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     }
 
     row += 1 // separacion entre componentes
+  }
+
+  // La PAGINA ENTERA renderizada, a la derecha de todo: header + los componentes en
+  // orden + footer, apilados en una sola imagen. No lleva campos: es la referencia
+  // visual de como quedaria la pagina armada, al lado del detalle de cada seccion.
+  if (withFull) {
+    const chrome = opts.chrome || {}
+    const parts = []
+    if (chrome.header) parts.push(await snapshot(chrome.header, CAP_W))
+    for (const comp of components) parts.push(await shotFor(comp.id, getNode(comp.id), CAP_W))
+    if (chrome.footer) parts.push(await snapshot(chrome.footer, CAP_W))
+    const full = await stackImages(parts, opts.pageBg || '#ffffff')
+    if (full) {
+      const nat = (await loadSize(full)) || { w: STACK_W, h: STACK_W }
+      const w = Math.min(FULL_MAX_W, nat.w)
+      const h = Math.round(nat.h * (w / nat.w))
+      const band = ws.getCell(5, FULL_COL + 1)
+      band.value = 'La página completa'
+      band.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
+      band.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PURINA_RED } }
+      band.alignment = { vertical: 'middle', indent: 1 }
+      setH(5, 22)
+      const imgId = wb.addImage({ base64: full, extension: 'png' })
+      ws.addImage(imgId, { tl: { col: FULL_COL, row: 5 }, ext: { width: w, height: h }, editAs: 'oneCell' })
+    }
   }
 
   // Metas de la pagina (SEO) al final de la matriz. Las carga la agencia SEO, por eso

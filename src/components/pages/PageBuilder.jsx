@@ -136,6 +136,11 @@ export default function PageBuilder({ page, onBack }) {
       await exportPageMatrix(page, current, (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
+      }, {
+        // Header y footer globales: entran solo en la imagen de la pagina entera
+        // (no son componentes editables por pagina).
+        chrome: { header: headerRef.current, footer: footerRef.current },
+        pageBg: brandPageBg(page.brand) || undefined,
       })
     } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
   }

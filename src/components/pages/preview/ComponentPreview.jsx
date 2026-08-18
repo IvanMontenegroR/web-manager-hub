@@ -354,14 +354,19 @@ const RENDERERS = {
         <div className="cp-brands-row">
           {arr.map((card, i) => {
             const pets = card.pets || 'Perro + Gato'
+            // "Sin iconos": el carrusel se usa para algo que no es una marca (pasos de
+            // un proceso, refugios aliados...), asi que no van los iconos perro/gato.
+            const noIcons = pets === 'Sin iconos'
             return (
               <div key={i} className="cp-brandc">
                 <div className="cp-brandc-media">
                   <Img src={card.image} aspect="4/3" dim="822×616px" className="cp-brandc-img" />
-                  <div className="cp-brandc-pets">
-                    {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><Dog size={15} /></span>}
-                    {/gato/i.test(pets) && <span className="cp-brandc-pet"><Cat size={15} /></span>}
-                  </div>
+                  {!noIcons && (
+                    <div className="cp-brandc-pets">
+                      {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><Dog size={15} /></span>}
+                      {/gato/i.test(pets) && <span className="cp-brandc-pet"><Cat size={15} /></span>}
+                    </div>
+                  )}
                 </div>
                 <div className="cp-brandc-body">
                   <div className="cp-brandc-name">{T(card.name, 'Marca Purina®')}</div>

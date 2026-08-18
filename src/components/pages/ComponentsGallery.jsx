@@ -58,7 +58,9 @@ export default function ComponentsGallery({ onBack }) {
       await exportPageMatrix({ name: 'Todos los componentes', path: '' }, exportComps(), (id) => {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
-      }, { metas: false }) // la galeria no lleva metas (SEO)
+        // La galeria es un catalogo, no una pagina: no lleva metas (SEO) ni la imagen
+        // de "la pagina completa" (apilar los 21 componentes no representa nada).
+      }, { metas: false, fullPage: false })
     } catch (e) { setErr(e.message) } finally { setExporting(false) }
   }
 

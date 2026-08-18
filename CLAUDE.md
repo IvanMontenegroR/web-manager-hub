@@ -191,6 +191,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
      para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
+     A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
+     campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
+     para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
+     Un campo con `noneOption` (ej. "Aplica a" -> "Sin iconos" en el carrusel de marcas) NO baja al Excel
+     cuando esta en esa opcion: no hay nada que cargar (`excelSkip`).
   Fetch tolerante + SETUP_SQL en `src/lib/pagesDb.js`. Catalogo inicial (piloto): breadcrumb, banner,
   brand_logos, card_grid, text, text_image, big_number_grid, external_video, article_list. Los componentes
   se renderizan dentro de un container (`.pb-page`, gutter lateral que replica el `.container` real).
