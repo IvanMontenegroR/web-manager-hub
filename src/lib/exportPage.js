@@ -239,8 +239,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   if (useStrip) { columns.push({ width: 3 }); for (const _ of otherBanners) columns.push({ width: 20 }, { width: 42 }, { width: 3 }) }
   // Ultima columna, a la derecha de TODO: la pagina entera renderizada (una sola
   // imagen, sin division por campos), para ver de un vistazo como quedaria armada.
+  // El gap es ancho a proposito: la pagina entera es una referencia aparte, no una
+  // columna mas de la matriz, asi que queda claramente separada a la derecha.
   const FULL_W = 64
-  if (withFull) columns.push({ width: 3 }, { width: FULL_W })
+  if (withFull) columns.push({ width: 14 }, { width: FULL_W })
   const FULL_COL = withFull ? columns.length - 1 : -1 // 0-based
   const FULL_MAX_W = Math.round(FULL_W * 7 + 5) - 24
   ws.columns = columns
@@ -604,7 +606,8 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       const band = ws.getCell(5, FULL_COL + 1)
       band.value = 'La página completa'
       band.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
-      band.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PURINA_RED } }
+      // Oscura (no roja): no es una seccion de la matriz, es la referencia visual.
+      band.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
       band.alignment = { vertical: 'middle', indent: 1 }
       setH(5, 22)
       const imgId = wb.addImage({ base64: full, extension: 'png' })
