@@ -30,6 +30,11 @@ function Img({ src, h = 160, aspect, dim, className = '' }) {
 }
 
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
+// Texto OPCIONAL de una seccion (titulo/subtitulo que la pagina real puede no tener):
+//   sin cargar (undefined/null) -> se muestra el texto de ejemplo, para que el mockup
+//     de un componente recien agregado no quede vacio;
+//   cargado vacio ('') -> NO se renderiza, porque se vacio a proposito.
+const OPT = (v, fallback) => (v === '' ? null : T(v, fallback))
 const list = (v) => (Array.isArray(v) ? v : [])
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
@@ -332,7 +337,7 @@ const RENDERERS = {
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title">{T(c.title, 'Marcas Purina®')}</div>
-            <div className="cp-brands-sub">{T(c.subtitle, 'La variedad que buscas, con la confianza de Purina®')}</div>
+            {OPT(c.subtitle, 'La variedad que buscas, con la confianza de Purina®') && <div className="cp-brands-sub">{OPT(c.subtitle, 'La variedad que buscas, con la confianza de Purina®')}</div>}
           </div>
           <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
@@ -376,7 +381,7 @@ const RENDERERS = {
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title"><span className="cp-spark">✦</span> {T(c.title, 'Nuestro Blog')}</div>
-            <div className="cp-brands-sub">{T(c.subtitle, 'Artículos pensados para ti y tu mascota')}</div>
+            {OPT(c.subtitle, 'Artículos pensados para ti y tu mascota') && <div className="cp-brands-sub">{OPT(c.subtitle, 'Artículos pensados para ti y tu mascota')}</div>}
           </div>
           <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
@@ -537,8 +542,8 @@ const RENDERERS = {
     return (
       <div className="cp-tl">
         <div className="cp-tl-head">
-          <div className="cp-tl-h1">{T(c.title, 'Historia Purina®')}</div>
-          <div className="cp-tl-sub">{T(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.')}</div>
+          {OPT(c.title, 'Historia Purina®') && <div className="cp-tl-h1">{OPT(c.title, 'Historia Purina®')}</div>}
+          {OPT(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.') && <div className="cp-tl-sub">{OPT(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.')}</div>}
         </div>
         <div className="cp-tl-track">
           {arr.map((it, i) => (
@@ -578,7 +583,7 @@ const RENDERERS = {
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title">{T(c.title, 'Compromiso Purina®')}</div>
-            <div className="cp-brands-sub">{T(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.')}</div>
+            {OPT(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.') && <div className="cp-brands-sub">{OPT(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.')}</div>}
           </div>
           <div className="cp-plist-arrows">
             <span className="cp-plist-arrow" onClick={scrollCmt(-1)}>‹</span>
@@ -664,7 +669,7 @@ const RENDERERS = {
         </div>
         <div className="cp-gcards-head">
           <div className="cp-gcards-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
-          <div className="cp-gcards-sub">{T(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+          {OPT(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-gcards-sub">{OPT(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
         </div>
         <div className="cp-gcards-row">
           {arr.map((card, i) => (
@@ -702,7 +707,7 @@ const RENDERERS = {
       <div className="cp-imgfeat" style={{ '--acc': acc }}>
         <div className="cp-imgfeat-head">
           <div className="cp-imgfeat-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
-          <div className="cp-imgfeat-sub">{T(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-imgfeat-sub">{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
         </div>
         <Img src={c.image} aspect="16/9" dim="2160×1080px" className="cp-imgfeat-img" />
         <div className="cp-imgfeat-row">
@@ -743,7 +748,7 @@ const RENDERERS = {
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">
           <div className="cp-mosaic-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
-          <div className="cp-mosaic-sub">{T(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
+          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-mosaic-sub">{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
         </div>
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
@@ -774,7 +779,7 @@ const RENDERERS = {
     ]
     return (
       <div className="cp-stats" style={{ '--acc': acc }}>
-        <div className="cp-stats-title">{T(c.title, 'Forem ipsum dolor sit amet.')}</div>
+        {OPT(c.title, 'Forem ipsum dolor sit amet.') && <div className="cp-stats-title">{OPT(c.title, 'Forem ipsum dolor sit amet.')}</div>}
         <div className="cp-stats-row">
           {arr.map((s, i) => (
             <div key={i} className="cp-stat">
