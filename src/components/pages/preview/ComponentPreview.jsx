@@ -105,7 +105,7 @@ const RENDERERS = {
         <div className="cp-bmenu-logo">
           {c.logo
             ? <img className="cp-bmenu-logo-img" src={c.logo} alt="" />
-            : <div className="cp-bmenu-logo-ph"><ImageIcon size={16} /><span>670×502px</span></div>}
+            : <div className="cp-bmenu-logo-ph"><ImageIcon size={16} /><span>100×100px</span></div>}
         </div>
         <ul className="cp-bmenu-items">
           {/* Primer item: siempre el nombre de la marca (no editable). */}

@@ -30,7 +30,7 @@ export const COMPONENTS = [
       ] },
     ],
     // Mismo tamaño en desktop y mobile (por eso el logo no lleva link mobile).
-    specs: [{ label: 'Logo', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Logo', ratio: 'Desktop 1:1 - Mobile 1:1', desktop: '100×100px', mobile: '100×100px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'breadcrumb',

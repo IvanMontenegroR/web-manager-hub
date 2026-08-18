@@ -1929,7 +1929,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-bmenu { display: flex; align-items: center; gap: 40px; padding: 14px 30px; position: relative; }
 .cp-bmenu-logo { flex: none; }
 .cp-bmenu-logo-img { height: 46px; width: auto; max-width: 190px; object-fit: contain; display: block; }
-.cp-bmenu-logo-ph { height: 46px; min-width: 110px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px dashed currentColor; border-radius: 6px; opacity: .45; font-size: 12px; font-weight: 700; }
+/* El logo es 1:1, asi que el placeholder tambien va cuadrado. */
+.cp-bmenu-logo-ph { height: 56px; width: 56px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px dashed currentColor; border-radius: 6px; opacity: .45; font-size: 8px; font-weight: 700; text-align: center; }
 .cp-bmenu-items { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 30px; }
 .cp-bmenu-item { position: relative; font-size: 14.5px; color: inherit; white-space: nowrap; padding: 6px 0; cursor: pointer; }
 .cp-bmenu-label { display: inline-flex; align-items: center; gap: 4px; }
