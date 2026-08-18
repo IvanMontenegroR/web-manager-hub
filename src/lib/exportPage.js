@@ -356,7 +356,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   title.alignment = { vertical: 'middle', indent: 1 }
   setH(2, 26)
   ws.mergeCells(3, 2, 3, 5)
-  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.'
+  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.  |  Para enlazar una parte de un texto, escribila así: [texto del enlace](https://destino).'
   ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
   setH(3, 30)

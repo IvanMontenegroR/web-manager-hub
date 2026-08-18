@@ -1425,6 +1425,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Component mockups (preview) ===== */
 .cp-render { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2530; background: #fff; }
+/* Enlace marcado dentro de un cuerpo de texto ([texto](url)). */
+.cp-link { color: var(--purina, #ED1C24); text-decoration: underline; }
+.cp-dark .cp-link { color: #ff8a90; }
 .cp-block { padding: 26px 30px; }
 .cp-center { text-align: center; }
 .cp-h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; margin: 6px 0; }
@@ -1990,6 +1993,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-dark .cp-half-acc, .cp-dark .cp-acc-item { border-color: #33353b; }
 .cp-dark .cp-acc-sum { color: #e8e9ec; }
 .cp-dark .cp-acc-body { color: #9aa0a6; }
+
+/* Cuerpo de texto con enlaces: barra bajo el textarea. */
+.cf-rt-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.cf-rt-hint { font-size: 11px; color: var(--muted, #868e99); font-family: ui-monospace, monospace; }
 
 /* Campo de color (swatch + hex) del builder. */
 .cf-color { display: flex; align-items: center; gap: 8px; }

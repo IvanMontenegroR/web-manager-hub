@@ -1,4 +1,14 @@
 import { ImageIcon, Dog, Cat, PawPrint, ChevronDown } from 'lucide-react'
+import { parseLinks } from '../../../lib/richText'
+
+// Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
+function RT({ children }) {
+  const segs = parseLinks(children)
+  if (segs.length === 1 && !segs[0].link) return segs[0].text
+  return segs.map((s, i) => (s.link
+    ? <a key={i} className="cp-link" href={s.url || undefined}>{s.text}</a>
+    : <span key={i}>{s.text}</span>))
+}
 
 // Mockups aproximados de cada componente. Se llenan con el contenido cargado, asi
 // se ve la pagina armandose. La MISMA imagen renderizada se captura para el export.
@@ -254,7 +264,7 @@ const RENDERERS = {
       <div className="cp-block">
         {c.title && <div className="cp-h2">{c.title}</div>}
         <div className={two ? 'cp-cols-2' : ''}>
-          <p className="cp-p">{T(c.body, 'Texto del bloque...')}</p>
+          <p className="cp-p"><RT>{T(c.body, 'Texto del bloque...')}</RT></p>
           {two && <p className="cp-p">&nbsp;</p>}
         </div>
       </div>
@@ -268,7 +278,7 @@ const RENDERERS = {
         <div className="cp-ti-img"><Img src={c.image} h={220} /></div>
         <div className="cp-ti-txt">
           <div className="cp-h2">{T(c.title, 'Titulo')}</div>
-          <p className="cp-p">{T(c.body, 'Texto...')}</p>
+          <p className="cp-p"><RT>{T(c.body, 'Texto...')}</RT></p>
           {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
         </div>
       </div>
@@ -622,7 +632,7 @@ const RENDERERS = {
       <div className="cp-half">
         <div className="cp-half-left">
           <div className="cp-half-title">{T(c.title, 'Nutriendo mascotas. Enriqueciendo vidas.')}</div>
-          <p className="cp-half-text">{T(c.text, 'Desde hace más de 130 años creemos que las mascotas y las personas están mejor juntas. Por eso ponemos tanto cuidado en la calidad de nuestros alimentos: porque también amamos a las mascotas.')}</p>
+          <p className="cp-half-text"><RT>{T(c.text, 'Desde hace más de 130 años creemos que las mascotas y las personas están mejor juntas. Por eso ponemos tanto cuidado en la calidad de nuestros alimentos: porque también amamos a las mascotas.')}</RT></p>
         </div>
         <div className="cp-half-right">
           {drop ? (
@@ -633,12 +643,12 @@ const RENDERERS = {
                     <span className="cp-acc-label">{T(it.title, 'Título')}</span>
                     <ChevronDown size={18} className="cp-acc-chev" />
                   </summary>
-                  {it.text && <div className="cp-acc-body">{it.text}</div>}
+                  {it.text && <div className="cp-acc-body"><RT>{it.text}</RT></div>}
                 </details>
               ))}
             </div>
           ) : (
-            <p className="cp-half-rtext">{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</p>
+            <p className="cp-half-rtext"><RT>{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</RT></p>
           )}
         </div>
       </div>

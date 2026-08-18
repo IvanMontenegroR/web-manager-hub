@@ -1,7 +1,37 @@
 import { useRef, useState } from 'react'
-import { Plus, X, Image as ImageIcon, Ruler, Upload } from 'lucide-react'
+import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2 } from 'lucide-react'
 import { getSpecs, visibleFields } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
+import { wrapLink, hasLinks } from '../../lib/richText'
+
+// Cuerpo de texto con enlaces: seleccionas un pedazo y "Enlace" lo marca como
+// [texto](url). Esa notacion viaja tal cual al Excel, asi que el enlace queda dentro
+// de la misma celda del parrafo (ver src/lib/richText.js).
+function TextAreaField({ f, value, onChange }) {
+  const ref = useRef(null)
+  function addLink() {
+    const el = ref.current
+    if (!el) return
+    const url = prompt('Link de destino (https://...)')
+    if (!url || !url.trim()) return
+    const { value: next, selection } = wrapLink(value || '', el.selectionStart, el.selectionEnd, url.trim())
+    onChange(next)
+    // Devolver el foco con el texto del enlace seleccionado, para poder reescribirlo.
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(selection[0], selection[1]) })
+  }
+  return (
+    <div className="cf-rt">
+      <textarea ref={ref} className="control" rows={3} value={value || ''}
+        onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
+      <div className="cf-rt-bar">
+        <button type="button" className="btn btn-sm" onClick={addLink} title="Marcar el texto seleccionado como enlace">
+          <Link2 size={13} /> Enlace
+        </button>
+        {hasLinks(value) && <span className="cf-rt-hint">Los enlaces se marcan [texto](link)</span>}
+      </div>
+    </div>
+  )
+}
 
 // Campo de imagen/video: se puede pegar una URL o subir un archivo (se sube a
 // Supabase Storage y se guarda la URL publica). Preview con <video> si es video.
@@ -49,7 +79,7 @@ function ImageField({ value, onChange }) {
 // catalogo (incluye campos 'list' repetibles). Es controlado: draft + onChange(key,val).
 function Field({ f, value, onChange, brandSecondary }) {
   if (f.type === 'textarea') {
-    return <textarea className="control" rows={3} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
+    return <TextAreaField f={f} value={value} onChange={onChange} />
   }
   if (f.type === 'select') {
     return (
