@@ -185,7 +185,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      solo sugerencias; sin categoria = pagina suelta arriba de todo, ej. la Home). La **subcategoria**
      existe solo dentro de la categoria `Marca` (`BRAND_CATEGORY`) y ES la columna `brand`
      (`pageSubcategory`), la misma que define el tema visual: una sola fuente de verdad, para que no haya
-     dos campos diciendo lo mismo. El reordenar es DENTRO del grupo.
+     dos campos diciendo lo mismo. El reordenar es DENTRO del grupo. Categorias y subcategorias se pliegan
+     con un click en su cabecera; se persiste lo COLAPSADO (`localStorage['wmh_pages_collapsed']`, key
+     `mercado|categoria[|subcategoria]`) para que un grupo nuevo aparezca siempre abierto.
   2. **Builder** (`PageBuilder`) — 3 paneles: paleta de componentes | canvas con el preview EN VIVO de la
      pagina armandose | editor de contenido del componente seleccionado. Cada componente sale del catalogo
      `src/data/components.js` (define sus CAMPOS de Drupal: text|textarea|url|select|image|list). Los

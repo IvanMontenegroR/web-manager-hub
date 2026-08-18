@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, Pencil, Copy, Check, Layers, FolderOpen,
+  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, ChevronRight, Pencil, Copy, Check, Layers, FolderOpen,
 } from 'lucide-react'
 import {
   fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage, pageSubcategory,
   PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_MARKETS, PAGE_MARKET_LABEL, SETUP_SQL,
 } from '../../lib/pagesDb'
 import PageModal from './PageModal.jsx'
+
+// Grupos plegados del tracker (categorias y subcategorias), persistidos.
+const COLLAPSE_KEY = 'wmh_pages_collapsed'
+function readCollapsed() {
+  try { return new Set(JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]')) } catch { return new Set() }
+}
 
 // Clase de color por estado (para el pill).
 const STATUS_CLASS = {
@@ -42,6 +48,19 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
   // Mercado activo (pestaña). Se recuerda entre sesiones.
   const [market, setMarket] = useState(() => localStorage.getItem('wmh_pages_market') || PAGE_MARKETS[0].code)
   useEffect(() => { localStorage.setItem('wmh_pages_market', market) }, [market])
+
+  // Grupos plegados. Se guarda lo COLAPSADO (no lo abierto): asi una categoria nueva
+  // aparece siempre desplegada. La key lleva el mercado, para que plegar en MX no
+  // pliegue lo mismo en BR.
+  const [collapsed, setCollapsed] = useState(readCollapsed)
+  useEffect(() => {
+    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...collapsed])) } catch {}
+  }, [collapsed])
+  const toggle = (key) => setCollapsed((s) => {
+    const next = new Set(s)
+    if (next.has(key)) next.delete(key); else next.add(key)
+    return next
+  })
 
   async function load() {
     setState('loading')
@@ -159,19 +178,31 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
         </div>
       ) : (
         <div className="pages-list">
-          {groups.map((g) => (
+          {groups.map((g) => {
+            const catKey = `${market}|${g.cat}`
+            const catOpen = !g.cat || !collapsed.has(catKey)
+            return (
             <div key={g.cat || '__none__'} className="pages-group">
               {g.cat && (
-                <div className="pages-cat">
+                <button className={`pages-cat${catOpen ? '' : ' closed'}`} onClick={() => toggle(catKey)} title={catOpen ? 'Plegar' : 'Desplegar'}>
+                  {catOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <FolderOpen size={14} /> {g.cat}
                   <span className="pages-cat-n">{g.subs.reduce((n, s) => n + s.items.length, 0)}</span>
-                </div>
+                </button>
               )}
-              {g.subs.map((s) => (
+              {catOpen && g.subs.map((s) => {
+                const subKey = `${market}|${g.cat}|${s.sub}`
+                const subOpen = !s.sub || !collapsed.has(subKey)
+                return (
                 <div key={s.sub || '__nosub__'} className="pages-sub">
                   {/* La subcategoria hoy existe solo en "Marca" y es la marca de la pagina. */}
-                  {s.sub && <div className="pages-subcat">{s.sub} <span className="pages-cat-n">{s.items.length}</span></div>}
-                  {s.items.map((p, i) => (
+                  {s.sub && (
+                    <button className={`pages-subcat${subOpen ? '' : ' closed'}`} onClick={() => toggle(subKey)} title={subOpen ? 'Plegar' : 'Desplegar'}>
+                      {subOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                      {s.sub} <span className="pages-cat-n">{s.items.length}</span>
+                    </button>
+                  )}
+                  {subOpen && s.items.map((p, i) => (
                     <div key={p.id} className="page-row">
                       <div className="page-reorder">
                         <button className="ic-btn" disabled={i === 0} onClick={() => move(s.items, i, -1)} title="Subir"><ChevronUp size={15} /></button>
@@ -197,9 +228,11 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
                     </div>
                   ))}
                 </div>
-              ))}
+                )
+              })}
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

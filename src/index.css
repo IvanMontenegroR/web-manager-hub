@@ -1371,12 +1371,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Agrupado por categoria y, dentro de Marca, por marca (la subcategoria). */
 .pages-group { display: flex; flex-direction: column; gap: 8px; }
 .pages-group + .pages-group { margin-top: 10px; }
+/* Las cabeceras pliegan/despliegan su grupo (el estado se recuerda). */
 .pages-cat {
-  display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; gap: 7px; width: 100%; text-align: left;
+  background: none; border: none; border-bottom: 1px solid var(--border); cursor: pointer;
+  font-size: 12px; font-weight: 800; font-family: inherit;
   letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2);
-  border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 6px;
+  padding: 0 0 6px; margin-top: 6px;
 }
-.pages-cat svg { color: var(--purina); }
+.pages-cat:hover { color: var(--purina); }
+.pages-cat svg { color: var(--purina); flex: none; }
+.pages-cat.closed { border-bottom-color: transparent; }
 .pages-cat-n {
   font-size: 10.5px; font-weight: 700; letter-spacing: 0; color: var(--ink-3);
   background: var(--surface-2); border-radius: 20px; padding: 1px 7px;
@@ -1384,10 +1389,14 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pages-sub { display: flex; flex-direction: column; gap: 8px; }
 .pages-sub + .pages-sub { margin-top: 4px; }
 .pages-subcat {
-  display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700;
-  color: var(--ink-2); padding-left: 2px;
+  display: flex; align-items: center; gap: 6px; text-align: left;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12.5px; font-weight: 700; color: var(--ink-2); padding: 0 0 0 2px;
 }
-.pages-subcat::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--purina); }
+.pages-subcat:hover { color: var(--purina); }
+.pages-subcat svg { color: var(--ink-3); flex: none; }
+.pages-subcat:hover svg { color: var(--purina); }
+.pages-subcat::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--purina); flex: none; }
 /* Las paginas de una subcategoria van indentadas, para que se lea la jerarquia. */
 .pages-subcat ~ .page-row { margin-left: 14px; }
 .page-row {
