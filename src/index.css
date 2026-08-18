@@ -1913,7 +1913,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-mosaic-img { height: 100%; border-radius: 4px; }
 .cp-mosaic-box { aspect-ratio: 1/1; background: var(--acc, #ED1C24); border-radius: 10px; padding: 26px 24px; text-align: left; display: flex; flex-direction: column; }
 .cp-mosaic-box-t { font-size: 19px; font-weight: 700; color: #fff; line-height: 1.2; }
-.cp-mosaic-box-d { margin-top: auto; font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.5; }
+/* pre-line: los saltos de linea del texto se respetan (ej. una lista de años). */
+.cp-mosaic-box-d { margin-top: auto; font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.5; white-space: pre-line; }
 
 /* ===== Grilla de numeros (stats_grid) ===== */
 .cp-stats { padding: 30px; }
