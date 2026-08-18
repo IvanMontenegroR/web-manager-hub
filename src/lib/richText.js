@@ -35,6 +35,17 @@ export function hasLinks(value) {
   return LINK_RE.test(String(value == null ? '' : value))
 }
 
+// El texto SIN las marcas, para leerlo natural ("[Ver más](url)" -> "Ver más").
+export function stripLinks(value) {
+  return parseLinks(value).map((s) => s.text).join('')
+}
+
+// Solo los enlaces: [{ text, url }]. En el Excel cada uno va en su propia fila, con
+// el hipervinculo real (en xlsx el link es por CELDA, no por pedazo de texto).
+export function extractLinks(value) {
+  return parseLinks(value).filter((s) => s.link).map((s) => ({ text: s.text, url: s.url || '' }))
+}
+
 // Inserta la marca de enlace alrededor de [from, to) de `value`. Si no hay seleccion
 // (from === to) inserta un enlace con texto de ejemplo. Devuelve { value, selection }
 // con la posicion donde conviene dejar el cursor.

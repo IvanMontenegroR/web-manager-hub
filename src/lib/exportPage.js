@@ -8,6 +8,7 @@ import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import { getComponent, fieldToText, getSpecs, visibleFields, componentHasImage } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
+import { stripLinks, extractLinks } from './richText'
 
 const PURINA_RED = 'FFED1C24'
 const HEAD_BG = 'FF1F2530'
@@ -295,10 +296,23 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     c1.alignment = { vertical: 'top', wrapText: true, indent: opts.sub ? 1 : 0 }
     const c2 = ws.getCell(atRow, 3)
     const empty = value == null || value === ''
-    // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
-    c2.value = empty ? (opts.placeholder || EMPTY) : value
-    c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
-    c2.alignment = { vertical: 'top', wrapText: true }
+    if (opts.link != null) {
+      // Fila de ENLACE: la celda lleva el hipervinculo real (en xlsx el link es por
+      // celda). Sin URL cargada queda una pista gris para que el mercado la pegue.
+      if (opts.link) {
+        c2.value = { text: opts.link, hyperlink: opts.link }
+        c2.font = { size: 10, underline: true, color: { argb: 'FF0563C1' } }
+      } else {
+        c2.value = 'Pegá acá el link'
+        c2.font = { size: 10, italic: true, color: { argb: MUTED } }
+      }
+      c2.alignment = { vertical: 'top', wrapText: true }
+    } else {
+      // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
+      c2.value = empty ? (opts.placeholder || EMPTY) : value
+      c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
+      c2.alignment = { vertical: 'top', wrapText: true }
+    }
     const thin = { style: 'thin', color: { argb: BORDER } }
     const fill = opts.fill || (disabled ? SUBHEAD_BG : null)
     for (const col of [2, 3]) {
@@ -307,6 +321,18 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     }
     setH(atRow, estHeight(value))
     return atRow + 1
+  }
+
+  // Campo de texto + sus enlaces. El texto va SIN las marcas (se lee natural) y cada
+  // enlace baja a su propia fila, con el hipervinculo real: en xlsx el link es por
+  // celda, asi que un parrafo con varios enlaces no puede tenerlos todos adentro.
+  function textRows(atRow, label, value, opts = {}) {
+    const links = extractLinks(value)
+    let r = fieldRow(atRow, label, stripLinks(value), opts)
+    for (const l of links) {
+      r = fieldRow(r, `Link - ${l.text}`, '', { ...opts, sub: true, link: l.url })
+    }
+    return r
   }
 
   // Franja de card dentro de una lista (ej. "Marca 1"), merge B..C. Gris si disabled.
@@ -356,7 +382,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   title.alignment = { vertical: 'middle', indent: 1 }
   setH(2, 26)
   ws.mergeCells(3, 2, 3, 5)
-  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.  |  Para enlazar una parte de un texto, escribila así: [texto del enlace](https://destino).'
+  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS.'
   ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
   setH(3, 30)
@@ -435,11 +461,11 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           // Con roles, cada bloque muestra solo los subcampos de su rol.
           const subFields = (f.item || []).filter((sf) => !sf.cms && (!sf.roles || !role || sf.roles.includes(role)))
           for (const sf of subFields) {
-            row = fieldRow(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
+            row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
           }
         })
       } else {
-        row = fieldRow(row, f.label, fieldToText(f, content[f.key]), { disabled })
+        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled })
       }
     }
 
