@@ -1017,6 +1017,18 @@ textarea.control { resize: vertical; min-height: 64px; }
 .eco-empty h3 { font-size: 16px; }
 .eco-empty p { font-size: 13px; max-width: 420px; }
 
+/* Filtro principal: mercado (pestañas). El topic filtra dentro del mercado activo. */
+.eco-markets { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.eco-mk {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: none; border: 1px solid transparent; border-bottom: none;
+  border-radius: 6px 6px 0 0; padding: 6px 12px; font-size: 12.5px; font-weight: 700;
+  color: var(--ink-2); margin-bottom: -1px;
+}
+.eco-mk:hover { background: var(--surface-2); }
+.eco-mk.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+.eco-mk.active .chip-count { background: rgba(255,255,255,0.25); }
+
 /* Toolbar: filtro por seccion + leyenda */
 .eco-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .eco-filter { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -1061,7 +1073,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .eco-card.dragging { opacity: 0.5; }
 .eco-card.overdue { border-left-color: var(--danger); background: var(--danger-tint); }
 .eco-card.soon { border-left-color: var(--warn); background: var(--warn-tint); }
-.eco-card-sec { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; border-radius: 4px; padding: 1px 7px; margin-bottom: 5px; }
+.eco-card-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
+.eco-card-badges:empty { display: none; }
+.eco-card-sec { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; border-radius: 4px; padding: 1px 7px; }
+.eco-card-mk { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; border-radius: 4px; padding: 1px 7px; letter-spacing: 0.02em; }
 .eco-card-topic { font-weight: 700; font-size: 13px; color: var(--ink); }
 .eco-card-issue { font-size: 12px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .eco-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
@@ -1071,6 +1086,9 @@ textarea.control { resize: vertical; min-height: 64px; }
   border-radius: 20px; padding: 1px 9px; font-size: 11px; font-weight: 600; color: var(--ink-2);
 }
 .eco-tag.sm { padding: 0 7px; font-size: 10px; }
+/* Follow-up: tag calculado (mitad del camino al deadline), no guardado. */
+.eco-tag.fu { background: var(--warn-tint); border-color: var(--warn); color: var(--warn-ink, var(--ink)); }
+.eco-tag.fu svg { color: var(--warn); }
 .eco-tag svg { color: var(--ink-3); }
 .eco-card-foot { display: flex; align-items: center; gap: 8px; margin-top: 7px; flex-wrap: wrap; }
 .eco-owner { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--ink-2); }

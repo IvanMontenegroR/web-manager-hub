@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { Boxes, Plus, X, Check, Tag } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
-import { ECO_STATUSES, ECO_PRIORITIES, createEcoTask, updateEcoTask } from '../../lib/ecosystemDb'
+import {
+  ECO_STATUSES, ECO_PRIORITIES, ECO_MARKETS, ECO_MARKET_LABEL, ECO_TOPICS, DEFAULT_MARKET,
+  DEFAULT_DEADLINE_DAYS, createEcoTask, updateEcoTask,
+} from '../../lib/ecosystemDb'
+import { addDaysISO, toISO } from '../../lib/dates'
 
-export default function EcoTaskModal({ task, sections, owners, allTags = [], defaultStatus, nextSort, onClose, onSaved }) {
+export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTags = [], defaultStatus, defaultMarket, nextSort, onClose, onSaved }) {
   const editing = !!task
   const [form, setForm] = useState({
+    market: task?.market || defaultMarket || DEFAULT_MARKET,
     section: task?.section || '',
     topic: task?.topic || '',
     issue: task?.issue || '',
@@ -13,7 +18,8 @@ export default function EcoTaskModal({ task, sections, owners, allTags = [], def
     owner: task?.owner || '',
     status: task?.status || defaultStatus || 'Open',
     priority: task?.priority || 'media',
-    deadline: task?.deadline || '',
+    // Sin deadline propio, una tarjeta nueva arranca con 1 semana (editable).
+    deadline: task ? (task.deadline || '') : addDaysISO(toISO(new Date()), DEFAULT_DEADLINE_DAYS),
     notes: task?.notes || '',
     checklist: Array.isArray(task?.checklist) ? task.checklist.map((c) => ({ ...c })) : [],
     tags: Array.isArray(task?.tags) ? [...task.tags] : [],
@@ -83,19 +89,29 @@ export default function EcoTaskModal({ task, sections, owners, allTags = [], def
 
       <div className="row-3">
         <div className="field">
-          <label>Seccion</label>
-          <input className="control" list="eco-sections" value={form.section} onChange={set('section')} placeholder="Producto, Brands..." />
-          <datalist id="eco-sections">{sections.map((s) => <option key={s} value={s} />)}</datalist>
+          <label>Mercado</label>
+          <select className="control" value={form.market} onChange={set('market')}>
+            {ECO_MARKETS.map((m) => <option key={m} value={m}>{ECO_MARKET_LABEL[m] || m}</option>)}
+          </select>
+          <div className="hint">General = tarea transversal, no de un mercado.</div>
         </div>
         <div className="field">
-          <label>Tema</label>
-          <input className="control" value={form.topic} onChange={set('topic')} placeholder="Food type, Images..." />
+          <label>Topic</label>
+          <select className="control" value={form.section} onChange={set('section')}>
+            <option value="">—</option>
+            {topics.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
         </div>
         <div className="field">
           <label>Responsable</label>
-          <input className="control" list="eco-owners" value={form.owner} onChange={set('owner')} placeholder="Ivan, NBS, F5..." />
+          <input className="control" list="eco-owners" value={form.owner} onChange={set('owner')} placeholder="Ivan, Diana, NBS..." />
           <datalist id="eco-owners">{owners.map((o) => <option key={o} value={o} />)}</datalist>
         </div>
+      </div>
+
+      <div className="field">
+        <label>Tema</label>
+        <input className="control" value={form.topic} onChange={set('topic')} placeholder="Nombre corto de la tarea" />
       </div>
 
       <div className="row-3">
@@ -112,9 +128,9 @@ export default function EcoTaskModal({ task, sections, owners, allTags = [], def
           </select>
         </div>
         <div className="field">
-          <label>Deadline (opcional)</label>
+          <label>Deadline</label>
           <input type="date" className="control" value={form.deadline} onChange={set('deadline')} />
-          <div className="hint">El deadline manda sobre la prioridad en el orden.</div>
+          <div className="hint">Manda sobre la prioridad en el orden. A mitad de camino se marca Follow-up.</div>
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 // Tabla propia `ecosystem_tasks` (independiente de projects/tasks). Si la tabla no
 // existe todavia, el modulo muestra el SQL de setup en pantalla (ver SETUP_SQL).
 import { supabase } from './supabase'
+import { addDaysISO, daysBetween, toISO } from './dates'
 
 function throwIf(error) {
   if (error) throw new Error(error.message || 'Error de Supabase')
@@ -10,12 +11,47 @@ function throwIf(error) {
 // Columnas del Kanban (orden fijo, de izquierda a derecha).
 export const ECO_STATUSES = ['Open', 'In Progress', 'On Hold', 'Done']
 
+// El tablero se divide en DOS ejes independientes:
+//   - MERCADO (`market`): a que mercado le pega la tarea. "General" = transversal.
+//   - TOPIC (`section` en la DB, por historia): de que va la tarea. Lista CERRADA.
+// El filtro principal es el mercado; el topic filtra dentro de ese mercado.
+export const ECO_MARKETS = ['MX', 'BR', 'CAM', 'General']
+export const ECO_MARKET_LABEL = { MX: 'México', BR: 'Brasil', CAM: 'CAM', General: 'General' }
+export const DEFAULT_MARKET = 'MX'
+
+export const ECO_TOPICS = ['Web', 'CIAM', 'Buy Now', 'CRM', 'Proceso']
+
 // Prioridades (rank para ordenar: menor = mas arriba).
 export const ECO_PRIORITIES = ['alta', 'media', 'baja']
 export const PRIORITY_RANK = { alta: 0, media: 1, baja: 2 }
 
 // Tags sugeridos por defecto (se suman a los ya usados en el board).
 export const DEFAULT_TAGS = ['Helo']
+
+// Si una tarjeta nueva no trae deadline, se le pone 1 semana.
+export const DEFAULT_DEADLINE_DAYS = 7
+
+// Tag VIRTUAL (no se guarda en la DB, se calcula): a la MITAD del camino entre que
+// se creo la tarjeta y su deadline, la tarjeta se marca "Follow-up" (y se pinta en
+// amarillo) para acordarse de empujarla antes de que venza.
+export const FOLLOW_UP_TAG = 'Follow-up'
+
+export function isFollowUp(task, todayISO = toISO(new Date())) {
+  if (!task || task.status === 'Done') return false
+  const dl = effectiveDeadline(task)
+  if (!dl) return false
+  // Arranque = fecha de creacion; si no la tenemos, asumimos la ventana por defecto.
+  const start = task.created_at ? String(task.created_at).slice(0, 10) : addDaysISO(dl, -DEFAULT_DEADLINE_DAYS)
+  const span = daysBetween(start, dl)
+  if (span <= 0) return true
+  return todayISO >= addDaysISO(start, Math.ceil(span / 2))
+}
+
+// Tags de una tarjeta = los guardados + los virtuales (Follow-up).
+export function ecoTags(task, todayISO) {
+  const own = Array.isArray(task?.tags) ? task.tags : []
+  return isFollowUp(task, todayISO) ? [...own, FOLLOW_UP_TAG] : own
+}
 
 // Deadline efectivo de una tarjeta = la fecha mas temprana entre su propio deadline
 // y las deadlines de los items del checklist AUN NO hechos. Es lo que manda para el
@@ -58,15 +94,18 @@ export function ecoOrder(a, b) {
 // Crea la tabla con RLS abierta (fase dummy, igual que el resto de las tablas).
 export const SETUP_SQL = `create table if not exists public.ecosystem_tasks (
   id uuid primary key default gen_random_uuid(),
+  market text,
   section text,
   topic text,
   issue text,
   action text,
   owner text,
   status text not null default 'Open',
+  priority text not null default 'media',
   notes text,
   deadline date,
   checklist jsonb not null default '[]'::jsonb,
+  tags jsonb not null default '[]'::jsonb,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -97,6 +136,7 @@ export async function fetchEcoTasks() {
 
 function ecoPayload(t) {
   return {
+    market: ECO_MARKETS.includes(t.market) ? t.market : DEFAULT_MARKET,
     section: t.section?.trim() || null,
     topic: t.topic?.trim() || null,
     issue: t.issue?.trim() || null,
@@ -159,28 +199,28 @@ export async function seedEcoTasks() {
 // Estado de la planilla original -> columna del Kanban.
 //   Open -> Open ; After migration -> On Hold ; Closed -> Done
 export const SEED_TASKS = [
-  { section: 'Home page', topic: 'Faltan videos mobile en home', issue: 'Mobile videos are missing. (generic / cats / dogs)', action: 'Ivan needs to align with MRM.', owner: 'Ivan', status: 'Open', priority: 'media' },
-  { section: 'Producto', topic: 'Cambiar food types latas/sobres', issue: 'There are 2 food types, latas and sobres, which are not actual food types and they would not be migrated', action: 'Change food type of the products listed here: https://purina.com.mx/purina/productos?food_type_filter%5B109%5D=109&food_type_filter%5B110%5D=110&page=0 to ones of these: Húmedo, Seco, Snacks.', owner: 'Ivan', status: 'On Hold', priority: 'alta' },
-  { section: 'Producto', topic: 'Corregir taxonomía Life stage', issue: 'Product migrated with old content.', action: 'After migration, "Life stage" texonomy must be changed.', owner: 'Ivan', status: 'On Hold', priority: 'media' },
-  { section: 'Producto', topic: 'Alcance: ¿migrar productos despublicados?', issue: 'Definition of migration scope. Unpublished products must be migrated?', action: 'Define the scope.', owner: 'Ivan', status: 'Open', notes: 'Only published.', priority: 'alta' },
-  { section: 'Producto', topic: 'Acortar texto de Ingredientes', issue: 'Current ingredient text is too long. EX: https://content-ef5-purina-latam-mx.pantheonsite.io/productos/campeonr-adultos-todos-los-tamanos', action: 'Text of the current content type - Ingrediente needs to be reviewed. It can be done before or after migration', owner: 'NBS', status: 'On Hold', priority: 'baja' },
-  { section: 'Producto', topic: 'Imágenes de producto: fondo y tamaños', issue: 'There are products with white background.', action: 'Product image must have transparent background. Images need to be replaced after migration.\nDetail page - Desk = 1136 x 1136 / Mob = 670 x 670\nCards = 540 x 540', owner: 'NBS', status: 'On Hold', priority: 'media' },
-  { section: 'Producto', topic: 'Definir texto Plan C (reviews)', issue: 'Text AI en la pagina de producto, Plan B ratings and reviews, y PLAN C (TEXT)?', action: 'Ivan to be defined the text for plan C. MRM suggestion on column G', owner: 'Ivan', status: 'Done', notes: '¿Ya probaste este producto? ¡Sé el primero en reseñarlo!\nEscribir la primera reseña', priority: 'baja' },
-  { section: 'Producto', topic: 'Identificar productos multi-sabor', issue: 'Products with more than 1 flavour (or main ingredient) needs to be identified.', action: 'After migration, it will be required to update each product, if needed, with main ingredient and related product (different flavour)', owner: 'NBS', status: 'On Hold', priority: 'media' },
-  { section: 'Producto', topic: 'Acortar descripciones de producto', issue: 'Long descriptions. Example: https://purina.com.mx/dogchow/productos/adultos-medianos-grandes', action: 'Description needs to be reviewed after migration.', owner: 'NBS', status: 'On Hold', priority: 'baja' },
-  { section: 'Contact us', topic: 'Faltan Engage Keys de MX', issue: 'MX Engage Keys missing', action: 'Ivan will follow up on this.', owner: 'Ivan', status: 'Open', priority: 'alta' },
-  { section: 'Articles', topic: 'Repoblar metadata Patasencasa', issue: 'Migration of Patasencasa metadata', action: 'Content will not be migrated. It must be populated after migration.', owner: 'Hive', status: 'On Hold', priority: 'media' },
-  { section: 'Articles', topic: 'Recibir lista de artículos Patasencasa', issue: 'List of articles from Patas en Casa to be migrated', action: 'When are you going to receive this articles list?', owner: 'Ivan', status: 'Open', notes: 'Due date: July 17', deadline: '2026-07-17', priority: 'alta' },
-  { section: 'Articles', topic: 'Alcance: ¿migrar artículos despublicados?', issue: 'Definition of migration scope. Unpublished articles must be migrated?', action: 'Define the scope.', owner: 'Ivan', status: 'Open', notes: 'Only published.', priority: 'alta' },
-  { section: 'Brands', topic: 'Snacks no es marca (es componente)', issue: 'Snacks is not a brand but a component page', action: 'Align with market', owner: 'Ivan', status: 'Open', priority: 'media' },
-  { section: 'Brands', topic: 'Generar imágenes de marca (670×502)', issue: 'Images from the homepage', action: 'Brand images needs to be generated (all brands). One image with size = 670 x 502', owner: 'Ivan', status: 'Open', priority: 'media' },
-  { section: 'Brands', topic: 'Enviar guía de colores a F5', issue: 'Brand colors guide is missing. We have received only Proplan, Friskies and Fancy Feast.', action: 'Send to F5 brand guide colors.', owner: 'Ivan / Gaby', status: 'Open', priority: 'alta' },
-  { section: 'Menu', topic: 'Definir menú principal y submenús', issue: 'Definition of main menu and sub menus CTAs. Including brand menu', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'alta' },
-  { section: 'Menu', topic: 'Definir footer', issue: 'Definition of footer', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'media' },
-  { section: 'Menu', topic: 'Definir menú de usuario logueado', issue: 'Definition of user logged menu.', action: 'Check MRM proposal', owner: 'F5', status: 'Open', priority: 'media' },
-  { section: 'Club Purina', topic: 'Rediseñar Club Purina (no es componente)', issue: 'Page structure is totally different from a component page. https://www.figma.com/proto/esqBBkoMtEtiLSq23bNEfY/Purina---F5?node-id=4340-66404&t=E0fOZKhtY13qXAj5-0&scaling=scale-down&content-scaling=fixed&page-id=0%3A1', action: 'Ivan will align with MRM', owner: 'Ivan', status: 'Open', priority: 'media' },
-  { section: 'History', topic: 'Ajustar contenido de History al layout', issue: 'Actual content does not fit the layout.', action: 'Review of actual content', owner: 'Ivan', status: 'Open', priority: 'baja' },
-  { section: 'Menu', topic: 'Definir link de Sample request', issue: 'Sample request link', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'baja' },
-  { section: 'Vetline', topic: 'Definir link de Vetline', issue: 'Vetline link', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'baja' },
-  { section: 'General', topic: 'Sync de contenido post-migración', issue: 'Content synchronization after migration', action: 'Aignment date and how to proceed after content migrated', owner: 'Ivan + F5', status: 'Open', notes: 'Ivan + Helo will define a freeze period. Migration will happen after market architetural info file revision. Expected date: July 24', deadline: '2026-07-24', priority: 'alta' },
+  { section: 'Web', topic: 'Faltan videos mobile en home', issue: 'Mobile videos are missing. (generic / cats / dogs)', action: 'Ivan needs to align with MRM.', owner: 'Ivan', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Cambiar food types latas/sobres', issue: 'There are 2 food types, latas and sobres, which are not actual food types and they would not be migrated', action: 'Change food type of the products listed here: https://purina.com.mx/purina/productos?food_type_filter%5B109%5D=109&food_type_filter%5B110%5D=110&page=0 to ones of these: Húmedo, Seco, Snacks.', owner: 'Ivan', status: 'On Hold', priority: 'alta' },
+  { section: 'Web', topic: 'Corregir taxonomía Life stage', issue: 'Product migrated with old content.', action: 'After migration, "Life stage" texonomy must be changed.', owner: 'Ivan', status: 'On Hold', priority: 'media' },
+  { section: 'Web', topic: 'Alcance: ¿migrar productos despublicados?', issue: 'Definition of migration scope. Unpublished products must be migrated?', action: 'Define the scope.', owner: 'Ivan', status: 'Open', notes: 'Only published.', priority: 'alta' },
+  { section: 'Web', topic: 'Acortar texto de Ingredientes', issue: 'Current ingredient text is too long. EX: https://content-ef5-purina-latam-mx.pantheonsite.io/productos/campeonr-adultos-todos-los-tamanos', action: 'Text of the current content type - Ingrediente needs to be reviewed. It can be done before or after migration', owner: 'NBS', status: 'On Hold', priority: 'baja' },
+  { section: 'Web', topic: 'Imágenes de producto: fondo y tamaños', issue: 'There are products with white background.', action: 'Product image must have transparent background. Images need to be replaced after migration.\nDetail page - Desk = 1136 x 1136 / Mob = 670 x 670\nCards = 540 x 540', owner: 'NBS', status: 'On Hold', priority: 'media' },
+  { section: 'Web', topic: 'Definir texto Plan C (reviews)', issue: 'Text AI en la pagina de producto, Plan B ratings and reviews, y PLAN C (TEXT)?', action: 'Ivan to be defined the text for plan C. MRM suggestion on column G', owner: 'Ivan', status: 'Done', notes: '¿Ya probaste este producto? ¡Sé el primero en reseñarlo!\nEscribir la primera reseña', priority: 'baja' },
+  { section: 'Web', topic: 'Identificar productos multi-sabor', issue: 'Products with more than 1 flavour (or main ingredient) needs to be identified.', action: 'After migration, it will be required to update each product, if needed, with main ingredient and related product (different flavour)', owner: 'NBS', status: 'On Hold', priority: 'media' },
+  { section: 'Web', topic: 'Acortar descripciones de producto', issue: 'Long descriptions. Example: https://purina.com.mx/dogchow/productos/adultos-medianos-grandes', action: 'Description needs to be reviewed after migration.', owner: 'NBS', status: 'On Hold', priority: 'baja' },
+  { section: 'CRM', topic: 'Faltan Engage Keys de MX', issue: 'MX Engage Keys missing', action: 'Ivan will follow up on this.', owner: 'Ivan', status: 'Open', priority: 'alta' },
+  { section: 'Web', topic: 'Repoblar metadata Patasencasa', issue: 'Migration of Patasencasa metadata', action: 'Content will not be migrated. It must be populated after migration.', owner: 'Hive', status: 'On Hold', priority: 'media' },
+  { section: 'Web', topic: 'Recibir lista de artículos Patasencasa', issue: 'List of articles from Patas en Casa to be migrated', action: 'When are you going to receive this articles list?', owner: 'Ivan', status: 'Open', notes: 'Due date: July 17', deadline: '2026-07-17', priority: 'alta' },
+  { section: 'Web', topic: 'Alcance: ¿migrar artículos despublicados?', issue: 'Definition of migration scope. Unpublished articles must be migrated?', action: 'Define the scope.', owner: 'Ivan', status: 'Open', notes: 'Only published.', priority: 'alta' },
+  { section: 'Web', topic: 'Snacks no es marca (es componente)', issue: 'Snacks is not a brand but a component page', action: 'Align with market', owner: 'Ivan', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Generar imágenes de marca (670×502)', issue: 'Images from the homepage', action: 'Brand images needs to be generated (all brands). One image with size = 670 x 502', owner: 'Ivan', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Enviar guía de colores a F5', issue: 'Brand colors guide is missing. We have received only Proplan, Friskies and Fancy Feast.', action: 'Send to F5 brand guide colors.', owner: 'Ivan / Gaby', status: 'Open', priority: 'alta' },
+  { section: 'Web', topic: 'Definir menú principal y submenús', issue: 'Definition of main menu and sub menus CTAs. Including brand menu', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'alta' },
+  { section: 'Web', topic: 'Definir footer', issue: 'Definition of footer', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Definir menú de usuario logueado', issue: 'Definition of user logged menu.', action: 'Check MRM proposal', owner: 'F5', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Rediseñar Club Purina (no es componente)', issue: 'Page structure is totally different from a component page. https://www.figma.com/proto/esqBBkoMtEtiLSq23bNEfY/Purina---F5?node-id=4340-66404&t=E0fOZKhtY13qXAj5-0&scaling=scale-down&content-scaling=fixed&page-id=0%3A1', action: 'Ivan will align with MRM', owner: 'Ivan', status: 'Open', priority: 'media' },
+  { section: 'Web', topic: 'Ajustar contenido de History al layout', issue: 'Actual content does not fit the layout.', action: 'Review of actual content', owner: 'Ivan', status: 'Open', priority: 'baja' },
+  { section: 'Web', topic: 'Definir link de Sample request', issue: 'Sample request link', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'baja' },
+  { section: 'Web', topic: 'Definir link de Vetline', issue: 'Vetline link', action: 'Ivan will align with MX team.', owner: 'Ivan', status: 'Open', priority: 'baja' },
+  { section: 'Proceso', topic: 'Sync de contenido post-migración', issue: 'Content synchronization after migration', action: 'Aignment date and how to proceed after content migrated', owner: 'Ivan + F5', status: 'Open', notes: 'Ivan + Helo will define a freeze period. Migration will happen after market architetural info file revision. Expected date: July 24', deadline: '2026-07-24', priority: 'alta' },
 ]

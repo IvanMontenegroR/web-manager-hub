@@ -68,9 +68,14 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
   icono (Users / 👥) en el Gantt y en el export a Excel)
-- `ecosystem_tasks(id, section, topic, issue, action, owner, status, priority, notes, deadline,
+- `ecosystem_tasks(id, market, section, topic, issue, action, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
   migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.
+  El tablero se divide en **dos ejes**: `market` (filtro principal, pestañas — `ECO_MARKETS` =
+  MX|BR|CAM|**General**, donde General = tarea transversal; se persiste en `localStorage['wmh_eco_market']`)
+  y `section`, que por historia guarda el **topic** (lista CERRADA `ECO_TOPICS` = Web|CIAM|Buy Now|CRM|Proceso;
+  filtra DENTRO del mercado activo, y sus contadores tambien). La tarjeta muestra el badge de mercado solo
+  cuando se ven todos los mercados juntos.
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
@@ -84,7 +89,12 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `deadline` propio y las deadlines de los items del checklist NO hechos; manda para el color y el orden.
   La tarjeta muestra un chip con la deadline propia y otro (icono ListChecks) con la del checklist mas
   cercana. Orden dentro de cada columna (`ecoOrder`): PREDOMINA el deadline EFECTIVO (con fecha van arriba,
-  por fecha asc), luego la prioridad (alta>media>baja), y `sort_order` como desempate. RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
+  por fecha asc), luego la prioridad (alta>media>baja), y `sort_order` como desempate.
+  **Deadline por defecto**: una tarjeta nueva arranca con 1 semana (`DEFAULT_DEADLINE_DAYS`, editable en el
+  modal). **Follow-up** (`isFollowUp`) es un tag **VIRTUAL** (no se guarda): a la MITAD del camino entre
+  `created_at` y el deadline efectivo, la tarjeta se pinta amarilla (`.eco-card.soon`) y suma el chip
+  `Follow-up`, que tambien filtra desde la barra de tags (`ecoTags` = tags guardados + virtuales).
+  RLS abierta igual que el resto. Se crea con el SQL de `src/lib/ecosystemDb.js`
   -> `SETUP_SQL`; si falta, el modulo muestra ese SQL en pantalla. NO se carga en `fetchAll`: el modulo hace
   su propio fetch y tolera que la tabla no exista, para no romper el resto de la app)
 - `directory_brands(id, name, owners jsonb, species, color, guidelines, links jsonb, notes, sort_order,
@@ -156,8 +166,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Feriados) viven en un menu desplegable **Admin** (`.dropdown`) en vez de sueltos en la topbar.
   Tambien se recuerdan `hidePast` (`wmh_hidepast`) y el acordeon de archivados (`wmh_archived_open`).
   Otras preferencias persistidas: la vista del Calendario (`wmh_cal_view`, default mes; el cursor
-  arranca en hoy) y el filtro de seccion del Kanban de **Tareas** (`wmh_eco_filter`, key heredada de cuando
-  vivia en Ecosystem; cae a "Todas" si la seccion guardada ya no existe). Los popovers transitorios
+  arranca en hoy) y los filtros del Kanban de **Tareas**: mercado (`wmh_eco_market`), topic (`wmh_eco_filter`,
+  key heredada de cuando vivia en Ecosystem) y tag (`wmh_eco_tag`); los tres caen a "Todos" si el valor
+  guardado ya no existe. Los popovers transitorios
   (dropdown Admin, barra de ocultos) NO se recuerdan.
 - **Ecosystem 2.0 = hub** (`src/modules/Ecosystem.jsx`): ya no es el Kanban (se mudo a **Tareas**). Es un
   landing con dos secciones — Documentacion (playbooks del backend v2.0, ver `src/data/playbooks.js`) y
