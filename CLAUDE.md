@@ -68,7 +68,7 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
   icono (Users / 👥) en el Gantt y en el export a Excel)
-- `ecosystem_tasks(id, market, section, topic, action, owner, status, priority, notes, deadline,
+- `ecosystem_tasks(id, market, section, topic, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
   migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.
   El tablero se divide en **dos ejes**: `market` (filtro principal, pestañas — `ECO_MARKETS` =
@@ -76,11 +76,14 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   y `section`, que por historia guarda el **topic** (lista CERRADA `ECO_TOPICS` = Web|CIAM|Buy Now|CRM|Proceso;
   filtra DENTRO del mercado activo, y sus contadores tambien). La tarjeta muestra el badge de mercado solo
   cuando se ven todos los mercados juntos.
+  Una tarjeta es **TEMA + NOTA** y nada mas: los viejos `issue` (Problema / situacion) y `action` (Accion
+  a tomar) se sacaron del tablero y su contenido se migro a `notes` (ver `sql/2026_ecosystem_tasks_solo_nota.sql`);
+  las columnas siguen en la DB como respaldo pero la app ya no las escribe.
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
   "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag (lista plana, sin
-  agrupar por estado; cada una = tema en NEGRITA + accion a tomar + la nota en cursiva). Devuelve
+  agrupar por estado; cada una = tema en NEGRITA y debajo la nota, una linea por renglon). Devuelve
   `{ html, text }`: el modal muestra el HTML renderizado (lo que se va a pegar) y "Copiar con formato"
   escribe `text/html` + `text/plain` al portapapeles con `ClipboardItem`, asi Outlook pega negritas y
   listas de verdad (`copyRich`; si el navegador no soporta ClipboardItem cae al texto plano). El boton de

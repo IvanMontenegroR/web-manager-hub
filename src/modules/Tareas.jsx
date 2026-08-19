@@ -29,12 +29,14 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
     .filter((t) => ecoTags(t, todayISO).includes(tag))
-    // Tema (titulo), la accion a tomar y la nota.
+    // Una tarjeta es TEMA (titulo) + NOTA. La nota puede tener varias lineas: cada una
+    // baja como un renglon propio, asi un tema con varios puntos se lee.
     .map((t) => ({
       status: t.status, sort_order: t.sort_order, deadline: t.deadline, checklist: t.checklist,
-      topic: oneLine(t.topic), action: oneLine(t.action), note: oneLine(t.notes),
+      topic: oneLine(t.topic),
+      note: String(t.notes || '').split('\n').map((l) => l.trim()).filter(Boolean),
     }))
-    .filter((t) => t.topic || t.action || t.note)
+    .filter((t) => t.topic || t.note.length)
     .sort(ecoOrder)
 
   // Status de proyectos: una linea por marca (deduplicada), activos, para llenar a mano.
@@ -52,9 +54,9 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
   } else {
     parts.push(header)
     rows.forEach((t, i) => {
-      parts.push(`${i + 1}. ${t.topic || t.action}`)
-      if (t.topic && t.action) parts.push(`   ${t.action}`)
-      if (t.note) parts.push(`   ${t.note}`)
+      const lines = t.topic ? t.note : t.note.slice(1)
+      parts.push(`${i + 1}. ${t.topic || t.note[0]}`)
+      for (const l of lines) parts.push(`   ${l}`)
     })
   }
   if (brands.length) {
@@ -71,11 +73,11 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const body = rows.length === 0
     ? `<p style="${P}">Sin tareas con contenido para el tag "${esc(tag)}".</p>`
     : `<ol style="${LIST}">${rows.map((t) => {
-      const title = t.topic || t.action
-      const lines = []
-      if (t.topic && t.action) lines.push(esc(t.action))
-      if (t.note) lines.push(`<i>${esc(t.note)}</i>`)
-      return `<li style="margin:0 0 9px;"><b>${esc(title)}</b>${lines.length ? '<br>' + lines.join('<br>') : ''}</li>`
+      // Sin tema, la primera linea de la nota hace de titulo.
+      const title = t.topic || t.note[0]
+      const lines = t.topic ? t.note : t.note.slice(1)
+      return `<li style="margin:0 0 9px;"><b>${esc(title)}</b>${
+        lines.length ? '<br>' + lines.map((l) => esc(l)).join('<br>') : ''}</li>`
     }).join('')}</ol>`
   const projectsBlock = brands.length
     ? `<p style="${P}"><b>STATUS DE PROYECTOS</b></p><ul style="${LIST}">${
@@ -250,7 +252,7 @@ export default function Tareas() {
   }
 
   async function handleDelete(t) {
-    if (!confirm(`Borrar la tarjeta "${t.topic || t.action || ''}"?`)) return
+    if (!confirm(`Borrar la tarjeta "${t.topic || t.notes || ''}"?`)) return
     try { await deleteEcoTask(t.id); await load() }
     catch (e) { setError(e.message) }
   }
@@ -424,7 +426,7 @@ export default function Tareas() {
                               )}
                             </div>
                             {t.topic && <div className="eco-card-topic">{t.topic}</div>}
-                            {t.action && <div className="eco-card-issue">{t.action}</div>}
+                            {t.notes && <div className="eco-card-issue">{t.notes}</div>}
                             {cardTags.length > 0 && (
                               <div className="eco-card-tags">
                                 {cardTags.map((tg) => (

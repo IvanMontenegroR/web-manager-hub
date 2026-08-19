@@ -13,3 +13,16 @@ end
 where issue is not null and issue <> '';
 
 update public.ecosystem_tasks set issue = null;
+
+-- Segundo paso: tambien se elimina "Accion a tomar" (action). Una tarjeta queda con
+-- TEMA + NOTA y nada mas. La accion era lo que bajaba al resumen del 1:1, asi que va
+-- ARRIBA de la nota (primero que hacer, despues el contexto).
+-- (migracion `ecosystem_tasks_merge_action_into_notes`)
+update public.ecosystem_tasks
+set notes = case
+  when notes is null or notes = '' then action
+  else action || E'\n\n' || notes
+end
+where action is not null and action <> '';
+
+update public.ecosystem_tasks set action = null;

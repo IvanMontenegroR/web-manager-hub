@@ -13,7 +13,6 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
     market: task?.market || defaultMarket || DEFAULT_MARKET,
     section: task?.section || '',
     topic: task?.topic || '',
-    action: task?.action || '',
     owner: task?.owner || '',
     status: task?.status || defaultStatus || 'Open',
     priority: task?.priority || 'media',
@@ -53,7 +52,7 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
   const suggestions = allTags.filter((t) => !form.tags.some((x) => x.toLowerCase() === t.toLowerCase()))
 
   async function save() {
-    if (!form.topic.trim() && !form.action.trim()) return setErr('Ponele al menos un tema o una accion.')
+    if (!form.topic.trim() && !form.notes.trim()) return setErr('Ponele al menos un tema o una nota.')
     setSaving(true)
     setErr(null)
     try {
@@ -134,13 +133,9 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
       </div>
 
       <div className="field">
-        <label>Accion a tomar</label>
-        <textarea className="control" value={form.action} onChange={set('action')} rows={2} placeholder="Que hay que hacer" />
-      </div>
-      <div className="field">
         <label>Nota</label>
-        <textarea className="control" value={form.notes} onChange={set('notes')} rows={3} placeholder="Situacion, contexto, definiciones, links..." />
-        <div className="hint">Es lo que baja al resumen del 1:1, debajo del tema y la accion.</div>
+        <textarea className="control" value={form.notes} onChange={set('notes')} rows={4} placeholder="Que hay que hacer, contexto, definiciones, links..." />
+        <div className="hint">Es lo que baja al resumen del 1:1, debajo del tema.</div>
       </div>
 
       <div className="field">
