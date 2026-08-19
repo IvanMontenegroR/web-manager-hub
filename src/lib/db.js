@@ -164,6 +164,7 @@ function taskPayload(t) {
     excluded_holidays: Array.isArray(t.excluded_holidays) ? t.excluded_holidays : [],
     depends_on: Array.isArray(t.depends_on) ? t.depends_on : [],
     is_meeting: !!t.is_meeting,
+    is_extra: !!t.is_extra,
   }
 }
 

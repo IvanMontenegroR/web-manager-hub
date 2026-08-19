@@ -104,6 +104,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     ['Adelanto (-Nd)', AHEAD_FILL, null],
     ['Finde / feriado (F)', NONWORK_FILL, 'F'],
     ['Reunión', null, '👥'],
+    ['Tarea extra (no estaba en el plan)', null, '➕'],
   ]
   let row = startRow
   const setLabel = (r, text, bold = false, wrap = false) => {
@@ -349,11 +350,15 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   const delaysSeen = [] // {name, from, to, days, reason}
   sorted.forEach((t, r) => {
     const row = 4 + r
-    // TASK (con icono de reunion 👥 al frente si aplica)
-    const meetingRun = t.is_meeting ? [{ text: '👥 ', font: { size: 9 } }] : []
+    // TASK (con icono de reunion 👥 y/o de tarea extra ➕ al frente si aplica)
+    const marks = [
+      ...(t.is_meeting ? [{ text: '👥 ', font: { size: 9 } }] : []),
+      ...(t.is_extra ? [{ text: '➕ ', font: { size: 9 } }] : []),
+    ]
     const nameCell = ws.getCell(row, 1)
-    nameCell.value = meetingRun.length
-      ? { richText: [...meetingRun, { text: t.action_name || '', font: { size: 9 } }] }
+    // Las extra van en negrita ademas del icono: se tienen que poder saltear de un vistazo.
+    nameCell.value = marks.length
+      ? { richText: [...marks, { text: t.action_name || '', font: { size: 9, bold: !!t.is_extra } }] }
       : (t.action_name || '')
     nameCell.font = { size: 9 }
     nameCell.alignment = { vertical: 'middle', wrapText: false }

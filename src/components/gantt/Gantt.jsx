@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore, ChevronUp, ChevronDown, Users } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, EyeOff, CheckCircle2, Ban, Flag, Archive, ArchiveRestore, ChevronUp, ChevronDown, Users, CirclePlus } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import {
   toISO, parseDay, addDaysISO, daysBetween, eachDayISO, isWeekendISO,
@@ -362,7 +362,10 @@ export default function Gantt({
                       <div className="task-label">
                         <span className="swatch" style={{ background: color }} />
                         {t.is_meeting && <Users size={13} className="t-meeting" aria-label="Reunión" />}
+                        {/* Tarea extra: no estaba en el plan original. */}
+                        {t.is_extra && <CirclePlus size={13} className="t-extra" aria-label="Tarea extra (fuera del plan)" />}
                         <span className="t-name">{t.action_name}</span>
+                        {t.is_extra && <span className="t-extra-tag" title="Esta tarea no estaba en el plan original">EXTRA</span>}
                         <span className="t-days" title="Días hábiles del plan (+ retraso)">
                           {t.planned_days}d{t.isDelayed && <em className="t-delay"> (+{t.delayDays}d)</em>}
                         </span>
@@ -408,6 +411,7 @@ export default function Gantt({
                             onMouseLeave={() => setTip(null)}
                           >
                             {t.is_meeting && <Users size={11} className="bar-meeting" />}
+                            {t.is_extra && <CirclePlus size={11} className="bar-extra" />}
                             <span className="bar-txt">{t.action_name}</span>
                           </div>
                         )}

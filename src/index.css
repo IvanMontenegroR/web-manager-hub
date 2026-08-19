@@ -408,6 +408,13 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 }
 .task-label .swatch { width: 9px; height: 9px; border-radius: 3px; flex: none; }
 .task-label .t-meeting { color: var(--purina); flex: none; }
+/* Tarea extra: no estaba en el plan original. */
+.task-label .t-extra { color: var(--warn); flex: none; }
+.task-label .t-extra-tag {
+  flex: none; font-size: 9px; font-weight: 800; letter-spacing: 0.04em;
+  color: var(--warn); background: var(--warn-tint); border: 1px solid var(--warn);
+  border-radius: 4px; padding: 0 4px; line-height: 14px;
+}
 .task-label .t-name { font-size: 12.5px; font-weight: 550; white-space: nowrap; flex: none; }
 .task-label .t-days {
   font-size: 11px;
@@ -496,6 +503,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 }
 .bar .bar-txt { text-overflow: ellipsis; overflow: hidden; }
 .bar .bar-meeting { flex: none; margin-right: 3px; }
+.bar .bar-extra { flex: none; margin-right: 3px; }
 /* Conflicto: textura ademas de color (rayas diagonales) + borde marcado */
 .bar.conflict {
   box-shadow: inset 0 0 0 2px rgba(208, 67, 47, 0.95), var(--shadow-sm);

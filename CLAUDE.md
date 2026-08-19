@@ -64,10 +64,13 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, excluded_holidays,
-  depends_on, is_meeting, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
+  depends_on, is_meeting, is_extra, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
-  icono (Users / 👥) en el Gantt y en el export a Excel)
+  icono (Users / 👥) en el Gantt y en el export a Excel.
+  `is_extra` = bool: la tarea NO estaba en el plan original, se agrego porque aparecio trabajo no previsto
+  (ej. una vuelta adicional de feedback). Muestra icono CirclePlus + chip `EXTRA` en el Gantt y prefijo `➕`
+  + nombre en negrita en el Excel, con su entrada en Referencias. Ver "Vueltas extra de feedback" abajo)
 - `ecosystem_tasks(id, market, section, topic, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
   migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.
@@ -151,6 +154,19 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   habiles, de `actual_end` a `planned_end`) — mismo tratamiento que el rojo pero al reves. Solo cuenta
   con entrega REAL (`actual_end`), nunca por proyeccion. En el Excel: relleno verde en esas celdas +
   `Nd (-Nd)` verde en la columna DÍAS + entrada "Adelanto" en Referencias.
+- **Vueltas extra de feedback** (`is_extra`): cuando aparece una ronda que NO estaba en el plan (ej. la
+  region pide una revision adicional despues de haber cerrado su feedback), NUNCA se reabre la tarea ya
+  completada ni se estira su ventana: se agrega un **par nuevo** de tareas marcadas `is_extra`, y la
+  siguiente del plan pasa a depender de la ultima del par (asi la proyeccion empuja el resto y el fantasma
+  muestra cuanto se corrio el proyecto). La convencion de a QUIEN se le imputa el atraso:
+  - La tarea de **quien pidio la vuelta** (ej. "Feedback Adicional Purina Región") nace con
+    `planned_days = 1`, arrancando el dia habil siguiente al cierre de la ronda anterior. Como el plan es
+    de 1 dia, TODO lo que consuma por encima cae como atraso rojo imputado a ese partner: es tiempo de
+    calendario que no deberia haberse gastado.
+  - La tarea de **quien ejecuta el ajuste** (ej. "Ajustes Adicionales BNN") nace con
+    `planned_days = el SLA del partner para una ronda de ajustes` (no con lo que efectivamente tardo).
+    Si entra en SLA no se pinta rojo — el ajuste es consecuencia forzosa del feedback, no culpa suya —
+    pero si se pasa del SLA, ese exceso SI es suyo y se ve. La agencia se mide por lo que controla.
 - **Proyeccion / forecast** (`src/lib/projection.js` -> `computeProjection`): NO destructiva. El
   baseline (`planned_start`/`planned_days`) no se toca. `computeProjection` indexa TODAS las tareas,
   asi que resuelve dependencias **entre proyectos** (rollouts regionales). Por dependencias

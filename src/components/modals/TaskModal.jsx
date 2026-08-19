@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ListPlus, Users } from 'lucide-react'
+import { ListPlus, Users, CirclePlus } from 'lucide-react'
 import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
@@ -40,6 +40,7 @@ export default function TaskModal({ task, project, onClose }) {
     excluded_holidays: Array.isArray(task?.excluded_holidays) ? task.excluded_holidays : [],
     depends_on: defaultDeps,
     is_meeting: !!task?.is_meeting,
+    is_extra: !!task?.is_extra,
   })
 
   const toggleDep = (id) =>
@@ -245,6 +246,22 @@ export default function TaskModal({ task, project, onClose }) {
           <span className="hol-name">Reunión</span>
         </label>
         <div className="hint">Muestra un icono de reunión en el cronograma y en el Excel.</div>
+      </div>
+
+      <div className="field">
+        <label className="hol-item" style={{ cursor: 'pointer', display: 'inline-flex' }}>
+          <input
+            type="checkbox"
+            checked={form.is_extra}
+            onChange={(e) => setForm((f) => ({ ...f, is_extra: e.target.checked }))}
+          />
+          <CirclePlus size={15} color="var(--purina)" />
+          <span className="hol-name">Tarea extra (fuera del plan)</span>
+        </label>
+        <div className="hint">
+          Apareció trabajo que no estaba previsto (ej. una vuelta adicional de feedback). Se marca en el
+          cronograma y en el Excel para que se vea que el proyecto se corrió por algo no planificado.
+        </div>
       </div>
 
       {siblings.length > 0 && (
