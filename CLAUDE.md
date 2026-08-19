@@ -68,7 +68,7 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
   icono (Users / 👥) en el Gantt y en el export a Excel)
-- `ecosystem_tasks(id, market, section, topic, issue, action, owner, status, priority, notes, deadline,
+- `ecosystem_tasks(id, market, section, topic, action, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
   migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.
   El tablero se divide en **dos ejes**: `market` (filtro principal, pestañas — `ECO_MARKETS` =
@@ -79,9 +79,14 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
-  "Resumen <tag>" (`buildTagSummary`) genera un texto plano de las tarjetas de ese tag (lista plana, sin
-  agrupar por estado; cada una muestra solo nombre=tema + accion a tomar) para copiar o abrir en el email
-  semanal (`mailto:`). Al pie agrega un bloque "STATUS DE PROYECTOS" con una linea por proyecto deduplicado
+  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag (lista plana, sin
+  agrupar por estado; cada una = tema en NEGRITA + accion a tomar + la nota en cursiva). Devuelve
+  `{ html, text }`: el modal muestra el HTML renderizado (lo que se va a pegar) y "Copiar con formato"
+  escribe `text/html` + `text/plain` al portapapeles con `ClipboardItem`, asi Outlook pega negritas y
+  listas de verdad (`copyRich`; si el navegador no soporta ClipboardItem cae al texto plano). El boton de
+  email sigue siendo `mailto:`, que solo admite texto plano. El texto de las tarjetas va ESCAPADO (`esc`)
+  porque el HTML se inyecta con `dangerouslySetInnerHTML`.
+  Al pie agrega un bloque "STATUS DE PROYECTOS" con una linea por proyecto deduplicado
   por `brand` (los archivados se excluyen; ej. los 5 Fancy Feast quedan en una sola linea "Fancy Feast"),
   con el status en blanco para completar a mano; usa `projects` de `DataContext`. `checklist` = jsonb array de
   {text, done, deadline?} (cada sub-item puede tener su

@@ -13,7 +13,6 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
     market: task?.market || defaultMarket || DEFAULT_MARKET,
     section: task?.section || '',
     topic: task?.topic || '',
-    issue: task?.issue || '',
     action: task?.action || '',
     owner: task?.owner || '',
     status: task?.status || defaultStatus || 'Open',
@@ -54,7 +53,7 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
   const suggestions = allTags.filter((t) => !form.tags.some((x) => x.toLowerCase() === t.toLowerCase()))
 
   async function save() {
-    if (!form.issue.trim() && !form.topic.trim()) return setErr('Ponele al menos un tema o una descripcion.')
+    if (!form.topic.trim() && !form.action.trim()) return setErr('Ponele al menos un tema o una accion.')
     setSaving(true)
     setErr(null)
     try {
@@ -135,16 +134,13 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
       </div>
 
       <div className="field">
-        <label>Problema / situacion</label>
-        <textarea className="control" value={form.issue} onChange={set('issue')} rows={2} placeholder="Que pasa" />
-      </div>
-      <div className="field">
         <label>Accion a tomar</label>
         <textarea className="control" value={form.action} onChange={set('action')} rows={2} placeholder="Que hay que hacer" />
       </div>
       <div className="field">
-        <label>Notas</label>
-        <textarea className="control" value={form.notes} onChange={set('notes')} rows={2} placeholder="Contexto, definiciones, links..." />
+        <label>Nota</label>
+        <textarea className="control" value={form.notes} onChange={set('notes')} rows={3} placeholder="Situacion, contexto, definiciones, links..." />
+        <div className="hint">Es lo que baja al resumen del 1:1, debajo del tema y la accion.</div>
       </div>
 
       <div className="field">

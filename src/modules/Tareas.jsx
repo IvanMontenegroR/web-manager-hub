@@ -12,33 +12,30 @@ import { useData } from '../context/DataContext.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 
-// Genera un resumen en texto plano (para pegar en un email) de las tarjetas con un tag.
-// Arranca con un saludo para el 1:1 (usa el nombre del tag). Cada tarjeta muestra solo el
-// nombre (tema) y la accion a tomar; sin agrupar por estado. Al pie agrega un bloque
-// "STATUS DE PROYECTOS" con los proyectos (deduplicados por marca, una sola linea por marca
-// aunque haya varios mercados) para completar el status a mano.
+// Resumen de las tarjetas con un tag, listo para PEGAR EN EL EMAIL YA FORMATEADO:
+// se genera en HTML (lista numerada, tema en negrita, la nota en cursiva) y se copia
+// al portapapeles como text/html + text/plain, asi Outlook pega el formato y cualquier
+// otro lugar recibe el texto plano. Arranca con el saludo del 1:1 (usa el nombre del
+// tag) y al pie agrega "STATUS DE PROYECTOS" con una linea por marca (deduplicada,
+// solo activos) para completar a mano.
+// Devuelve { html, text }.
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+}
+
 function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const oneLine = (s) => String(s || '').replace(/\s*\n\s*/g, ' ').trim()
-  const greeting = `Hola ${tag}!!\n\nTe paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenés en mente y no esta acá.`
+  const intro = 'Te paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenés en mente y no esta acá.'
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
     .filter((t) => ecoTags(t, todayISO).includes(tag))
-    // nombre = tema, y la accion a tomar; nada mas.
-    .map((t) => ({ status: t.status, sort_order: t.sort_order, deadline: t.deadline, checklist: t.checklist,
-      fields: [oneLine(t.topic), oneLine(t.action)].filter(Boolean) }))
-    .filter((t) => t.fields.length > 0)
+    // Tema (titulo), la accion a tomar y la nota.
+    .map((t) => ({
+      status: t.status, sort_order: t.sort_order, deadline: t.deadline, checklist: t.checklist,
+      topic: oneLine(t.topic), action: oneLine(t.action), note: oneLine(t.notes),
+    }))
+    .filter((t) => t.topic || t.action || t.note)
     .sort(ecoOrder)
-
-  const parts = [greeting, '']
-  if (rows.length === 0) {
-    parts.push(`${header}\n\nSin tareas con contenido para el tag "${tag}".`)
-  } else {
-    parts.push(header)
-    rows.forEach((t, i) => {
-      parts.push(`${i + 1}. ${t.fields[0]}`)
-      for (const f of t.fields.slice(1)) parts.push(`   ${f}`)
-    })
-  }
 
   // Status de proyectos: una linea por marca (deduplicada), activos, para llenar a mano.
   const brands = []
@@ -47,15 +44,67 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
     const b = (p.brand || p.name || '').trim()
     if (b && !brands.includes(b)) brands.push(b)
   }
+
+  // ---- Texto plano (fallback y mailto, que no acepta HTML) ----
+  const parts = [`Hola ${tag}!!`, '', intro, '']
+  if (rows.length === 0) {
+    parts.push(`${header}`, '', `Sin tareas con contenido para el tag "${tag}".`)
+  } else {
+    parts.push(header)
+    rows.forEach((t, i) => {
+      parts.push(`${i + 1}. ${t.topic || t.action}`)
+      if (t.topic && t.action) parts.push(`   ${t.action}`)
+      if (t.note) parts.push(`   ${t.note}`)
+    })
+  }
   if (brands.length) {
-    parts.push('\nSTATUS DE PROYECTOS')
+    parts.push('', 'STATUS DE PROYECTOS')
     for (const b of brands) parts.push(`- ${b}: `)
   }
+  parts.push('', 'Saludos,') // la firma de Outlook va despues, a mano
+  const text = parts.join('\n')
 
-  // Cierre. La firma de Outlook va despues, a mano.
-  parts.push('\nSaludos,')
+  // ---- HTML (lo que se pega en el mail) ----
+  // Estilos INLINE y etiquetas simples: es lo unico que respetan los clientes de mail.
+  const P = 'margin:0 0 10px;'
+  const LIST = 'margin:0 0 14px;padding-left:22px;'
+  const body = rows.length === 0
+    ? `<p style="${P}">Sin tareas con contenido para el tag "${esc(tag)}".</p>`
+    : `<ol style="${LIST}">${rows.map((t) => {
+      const title = t.topic || t.action
+      const lines = []
+      if (t.topic && t.action) lines.push(esc(t.action))
+      if (t.note) lines.push(`<i>${esc(t.note)}</i>`)
+      return `<li style="margin:0 0 9px;"><b>${esc(title)}</b>${lines.length ? '<br>' + lines.join('<br>') : ''}</li>`
+    }).join('')}</ol>`
+  const projectsBlock = brands.length
+    ? `<p style="${P}"><b>STATUS DE PROYECTOS</b></p><ul style="${LIST}">${
+      brands.map((b) => `<li style="margin:0 0 4px;"><b>${esc(b)}:</b> </li>`).join('')}</ul>`
+    : ''
+  const html =
+    `<div style="font-family:Aptos,Calibri,Arial,sans-serif;font-size:11pt;color:#000000;">` +
+    `<p style="${P}">Hola ${esc(tag)}!!</p>` +
+    `<p style="${P}">${esc(intro)}</p>` +
+    `<p style="${P}"><b>${esc(header)}</b></p>` +
+    body + projectsBlock +
+    `<p style="${P}">Saludos,</p></div>`
 
-  return parts.join('\n')
+  return { html, text }
+}
+
+// Copia el resumen con FORMATO: text/html para el mail y text/plain de respaldo.
+// Si el navegador no soporta ClipboardItem, cae al texto plano.
+async function copyRich({ html, text }) {
+  try {
+    if (window.ClipboardItem && navigator.clipboard?.write) {
+      await navigator.clipboard.write([new window.ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+      })])
+      return true
+    }
+  } catch { /* sigue al fallback */ }
+  try { await navigator.clipboard.writeText(text); return true } catch { return false }
 }
 
 // Color fijo por topic (la lista es cerrada). Si aparece uno viejo/desconocido, cae a
@@ -201,7 +250,7 @@ export default function Tareas() {
   }
 
   async function handleDelete(t) {
-    if (!confirm(`Borrar la tarjeta "${t.topic || t.issue || ''}"?`)) return
+    if (!confirm(`Borrar la tarjeta "${t.topic || t.action || ''}"?`)) return
     try { await deleteEcoTask(t.id); await load() }
     catch (e) { setError(e.message) }
   }
@@ -308,7 +357,7 @@ export default function Tareas() {
                   const target = activeTag === '__all__' ? 'Helo' : activeTag
                   return (
                     <button className="btn btn-sm" style={{ marginLeft: 4 }}
-                      onClick={() => { setSumCopied(false); setSummary({ tag: target, text: buildTagSummary(tasks, target, today, projects) }) }}>
+                      onClick={() => { setSumCopied(false); setSummary({ tag: target, ...buildTagSummary(tasks, target, today, projects) }) }}>
                       <FileText size={14} /> Resumen {target}
                     </button>
                   )
@@ -375,7 +424,7 @@ export default function Tareas() {
                               )}
                             </div>
                             {t.topic && <div className="eco-card-topic">{t.topic}</div>}
-                            {t.issue && <div className="eco-card-issue">{t.issue}</div>}
+                            {t.action && <div className="eco-card-issue">{t.action}</div>}
                             {cardTags.length > 0 && (
                               <div className="eco-card-tags">
                                 {cardTags.map((tg) => (
@@ -454,16 +503,18 @@ export default function Tareas() {
               >
                 <Mail size={15} /> Abrir email
               </a>
-              <button className="btn btn-primary" onClick={() => { navigator.clipboard?.writeText(summary.text); setSumCopied(true) }}>
-                {sumCopied ? <><Check size={15} /> Copiado</> : <><Copy size={15} /> Copiar</>}
+              <button className="btn btn-primary" onClick={async () => { if (await copyRich(summary)) setSumCopied(true) }}>
+                {sumCopied ? <><Check size={15} /> Copiado</> : <><Copy size={15} /> Copiar con formato</>}
               </button>
             </>
           }
         >
           <p className="hint" style={{ marginTop: 0 }}>
-            Lista lista para pegar en el email semanal. Copiala o abrila directamente en tu cliente de correo.
+            Así se va a ver en el mail. <b>Copiar con formato</b> se pega tal cual en Outlook (negritas y lista incluidas).
+            El botón de email abre el borrador en texto plano — el formato solo viaja por el portapapeles.
           </p>
-          <textarea className="control eco-summary" readOnly rows={18} value={summary.text} onFocus={(e) => e.target.select()} />
+          {/* Contenido generado por nosotros; el texto de las tarjetas va escapado (ver esc). */}
+          <div className="eco-summary-html" dangerouslySetInnerHTML={{ __html: summary.html }} />
         </Modal>
       )}
     </>
