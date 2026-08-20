@@ -9,6 +9,10 @@ import { textOn, partnerColor, partnerName, statusColor } from '../../lib/colors
 import { countryName } from '../../lib/countries'
 import { flagSrc } from '../../lib/flags'
 
+// Ambar de las tareas EXTRA (fuera del plan). Distinto del rojo de atraso: el rojo
+// dice "se paso de su SLA", el ambar dice "esto no estaba en el plan".
+const EXTRA_COLOR = '#E0A526'
+
 const DOW = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES_LARGO = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -314,7 +318,11 @@ export default function Gantt({
 
                 {tks.map((t, ti) => {
                   const color = partnerColor(partners, t.partner_id) // punto del partner en la etiqueta
-                  const barColor = statusColor(t.status) // color de la barra segun estado
+                  // Color de la barra: por estado. Las tareas EXTRA van en AMBAR: no
+                  // estaban en el plan, asi que su sola existencia corrio el proyecto.
+                  // El rojo queda reservado para "se paso de su SLA" (la extension
+                  // rayada), asi los dos colores dicen cosas distintas y no se pisan.
+                  const barColor = t.is_extra ? EXTRA_COLOR : statusColor(t.status)
                   const isConflict = conflictIds.has(t.id)
                   // Fin del plan EFECTIVO (baseline corrido al arranque efectivo). El atraso
                   // y el adelanto se miden contra este, no contra el planned_end original.

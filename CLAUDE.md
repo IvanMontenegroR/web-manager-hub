@@ -70,7 +70,13 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   icono (Users / 👥) en el Gantt y en el export a Excel.
   `is_extra` = bool: la tarea NO estaba en el plan original, se agrego porque aparecio trabajo no previsto
   (ej. una vuelta adicional de feedback). Muestra icono CirclePlus + chip `EXTRA` en el Gantt y prefijo `➕`
-  + nombre en negrita en el Excel, con su entrada en Referencias. Ver "Vueltas extra de feedback" abajo)
+  + nombre en negrita en el Excel, con su entrada en Referencias. Su barra va en **AMBAR** (`EXTRA_COLOR`
+  `#E0A526` en el Gantt, `EXTRA_BAR` `FFF2D08A` en el Excel) en vez del color por estado: son DOS colores
+  con DOS significados que no se pisan — **ambar = esto no estaba en el plan** (corre el proyecto igual de
+  quien sea la culpa), **rojo rayado = se paso de su SLA** (imputable al partner). Una tarea extra que
+  ademas se pasa muestra las dos cosas. En la hoja "Timeline unificado" las barras van por AGENCIA, no por
+  estado, asi que ahi el ambar no aplica y las extra se distinguen solo por el `➕`.
+  Ver "Vueltas extra de feedback" abajo)
 - `ecosystem_tasks(id, market, section, topic, owner, status, priority, notes, deadline,
   checklist jsonb, tags jsonb, sort_order, created_at)` (tabla del **Kanban de coordinacion** de la
   migracion, que hoy vive en el modulo **Tareas** (antes en Ecosystem 2.0); independiente de projects/tasks.

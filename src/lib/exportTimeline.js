@@ -46,7 +46,12 @@ const OVERRUN_FILL = { type: 'pattern', pattern: 'darkUp', fgColor: { argb: 'FFD
 const AHEAD_FILL = { type: 'pattern', pattern: 'darkUp', fgColor: { argb: 'FF2F8F5B' }, bgColor: { argb: 'FFFFFFFF' } }
 const solidFill = (a) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: a } })
 
-function barFill(status) {
+// Ambar de las tareas EXTRA (fuera del plan). El rojo del atraso dice "se paso de su
+// SLA"; este ambar dice "esto no estaba en el plan", que corre el proyecto igual.
+const EXTRA_BAR = 'FFF2D08A'
+
+function barFill(status, isExtra) {
+  if (isExtra) return EXTRA_BAR
   return BAR[status] || BAR.Pendiente
 }
 
@@ -104,7 +109,7 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
     ['Adelanto (-Nd)', AHEAD_FILL, null],
     ['Finde / feriado (F)', NONWORK_FILL, 'F'],
     ['Reunión', null, '👥'],
-    ['Tarea extra (no estaba en el plan)', null, '➕'],
+    ['Fuera del plan / extra (➕)', solidFill(EXTRA_BAR), '➕'],
   ]
   let row = startRow
   const setLabel = (r, text, bold = false, wrap = false) => {
@@ -413,7 +418,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       if (nonWorking) cell.fill = NONWORK_FILL
       else if (isOverrun) cell.fill = OVERRUN_FILL
       else if (isSaved) cell.fill = AHEAD_FILL
-      else if (inReal) cell.fill = solidFill(barFill(t.status))
+      else if (inReal) cell.fill = solidFill(barFill(t.status, t.is_extra))
       // Feriado (solo si NO cae en finde): "F" en la celda + se agrega al listado de Referencias.
       if (isHoliday) {
         markCell(cell, 'F')
@@ -608,8 +613,10 @@ function buildSummarySheet(wb, projects, enriched, partners) {
     for (const t of pd.tasks) {
       taskRow.set(t.id, row)
       const nameCell = ws.getCell(row, 1)
-      nameCell.value = `    ${t.action_name || ''}`
-      nameCell.font = { size: 9 }
+      // Las EXTRA tambien se marcan aca: en esta hoja las barras van por AGENCIA, no
+      // por estado, asi que el ambar no aplica y el ➕ es lo que las distingue.
+      nameCell.value = `    ${t.is_extra ? '➕ ' : ''}${t.action_name || ''}`
+      nameCell.font = { size: 9, bold: !!t.is_extra }
       nameCell.alignment = { vertical: 'middle' }
       nameCell.border = border
       const [s, e] = rng(t)
