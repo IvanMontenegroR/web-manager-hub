@@ -99,8 +99,17 @@ function isGoLive(name) {
   return /go[\s_-]*live/i.test(name || '')
 }
 
-// Leyenda + listado de feriados y retrasos (columnas congeladas 1-2).
-function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
+// Dias HABILES que ocupa un rango, contando los dos extremos. Es "cuanto consumio"
+// una tarea, no cuanto se paso: sirve para medir el costo de las vueltas extra.
+// Devuelve la LISTA de dias, para poder unir varias tareas sin contar dos veces el
+// dia en que una cierra y arranca la siguiente.
+function busyDays(sISO, eISO, holidays) {
+  if (!sISO || !eISO || daysBetween(sISO, eISO) < 0) return []
+  return eachDayISO(sISO, eISO).filter((iso) => !isWeekendISO(iso) && !(holidays && holidays.has(iso)))
+}
+
+// Leyenda + listado de feriados, retrasos y vueltas extra (columnas congeladas 1-2).
+function buildLegend(ws, startRow, holList = [], delayList = [], info = {}, extraList = []) {
   const items = [
     ['Completado', solidFill(BAR.Completado), null],
     ['En curso', solidFill(BAR['En curso']), null],
@@ -187,6 +196,28 @@ function buildLegend(ws, startRow, holList = [], delayList = [], info = {}) {
       const dLabel = d.days ? `+${d.days} día${d.days === 1 ? '' : 's'} hábil${d.days === 1 ? '' : 'es'}` : 'atraso'
       setLabel(row, `${d.name}: ${dLabel}${d.reason ? ` — ${d.reason}` : ''}`, false, true)
       setSwatch(row, OVERRUN_FILL, 'X')
+      row++
+    }
+  }
+
+  // VUELTAS EXTRA: lo que el proyecto perdio en trabajo que no estaba planificado.
+  // El total NO es la suma de cada tarea: es la UNION de sus dias habiles, para no
+  // contar dos veces el dia en que una cierra y arranca la siguiente.
+  if (extraList.length) {
+    const union = new Set()
+    for (const e of extraList) for (const iso of e.days) union.add(iso)
+    row++
+    subheader(row, 'VUELTAS EXTRA (FUERA DEL PLAN)'); row++
+    const n = extraList.length
+    const d = union.size
+    setLabel(row, `${n} tarea${n === 1 ? '' : 's'} fuera del plan — ${d} día${d === 1 ? '' : 's'} hábil${d === 1 ? '' : 'es'} que el proyecto no tenía`, true, true)
+    setSwatch(row, solidFill(EXTRA_BAR), '➕')
+    row++
+    for (const e of extraList) {
+      const dd = e.days.length
+      const dur = `${dd} día${dd === 1 ? '' : 's'} hábil${dd === 1 ? '' : 'es'}${e.open ? ' (en curso)' : ''}`
+      setLabel(row, `${e.name} (${e.partner}): ${dur}${e.reason ? ` — ${e.reason}` : ''}`, false, true)
+      setSwatch(row, solidFill(EXTRA_BAR), '➕')
       row++
     }
   }
@@ -353,6 +384,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
   const goLiveCols = new Set()
   const holidaysSeen = new Map() // country|date -> {date, country, name}
   const delaysSeen = [] // {name, from, to, days, reason}
+  const extrasSeen = [] // {name, partner, days: [ISO habiles], open, reason}
   sorted.forEach((t, r) => {
     const row = 4 + r
     // TASK (con icono de reunion 👥 y/o de tarea extra ➕ al frente si aplica)
@@ -403,6 +435,18 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
 
     // Barras por dia
     const realEnd = t.isDelayed ? t.delayEnd : t.renderEnd
+
+    // Vuelta extra: se anota lo que consumio (dias habiles reales, no el atraso) para
+    // el bloque "VUELTAS EXTRA" de Referencias.
+    if (t.is_extra) {
+      extrasSeen.push({
+        name: t.action_name || 'Tarea',
+        partner: partnerName(partners, t.partner_id, '—'),
+        days: busyDays(t.renderStart, realEnd, t.holidaysSet),
+        open: !t.actual_end,
+        reason: t.delay_reason || '',
+      })
+    }
     days.forEach((iso, i) => {
       const col = C0 + i
       const cell = ws.getCell(row, col)
@@ -476,7 +520,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
 
   // Leyenda de colores + listado de feriados y retrasos (debajo de la ultima tarea).
   const holList = [...holidaysSeen.values()].sort((a, b) => (a.date < b.date ? -1 : 1))
-  buildLegend(ws, 4 + sorted.length + 1, holList, delaysSeen, { goLiveOriginal: goLiveOriginal(tasks, project) })
+  buildLegend(ws, 4 + sorted.length + 1, holList, delaysSeen, { goLiveOriginal: goLiveOriginal(tasks, project) }, extrasSeen)
 
   return ws
 }
