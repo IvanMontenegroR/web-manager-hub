@@ -442,7 +442,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     if (isGoLive(t.action_name)) {
       nameCell.value = {
         richText: [
-          ...meetingRun,
+          ...marks,
           { text: '✔ ', font: { bold: true, color: { argb: GREEN } } },
           { text: t.action_name || '', font: { size: 9 } },
         ],
