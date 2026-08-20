@@ -1,4 +1,4 @@
-import { ImageIcon, Dog, Cat, PawPrint, ChevronDown } from 'lucide-react'
+import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
@@ -737,6 +737,23 @@ const RENDERERS = {
       </div>
     )
   },
+
+  // Video externo: titulo opcional arriba y el video a lo ancho (16:9) con su imagen
+  // de portada y el boton de play encima. Sin portada cargada queda el placeholder con
+  // la medida, igual que cualquier imagen.
+  external_video: (c) => (
+    <div className="cp-vid">
+      {OPT(c.title, 'External Video') && (
+        <div className="cp-vid-title">{OPT(c.title, 'External Video')}</div>
+      )}
+      <div className="cp-vid-frame">
+        <Img src={c.poster} aspect="16/9" dim="1920×1080px" className="cp-vid-img" />
+        <span className="cp-vid-play" aria-hidden="true">
+          <Play size={26} />
+        </span>
+      </div>
+    </div>
+  ),
 
   // Mosaico: titulo + subtitulo centrados y una grilla que alterna imagenes con cajas
   // de contenido (color configurable). Los bloques se alternan por posicion: par =

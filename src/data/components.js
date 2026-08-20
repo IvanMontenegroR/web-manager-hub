@@ -375,6 +375,24 @@ export const COMPONENTS = [
     specs: [{ ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
+    key: 'external_video',
+    name: 'Video externo',
+    category: 'Contenido',
+    help: 'Video embebido a lo ancho (YouTube o MP4), con una imagen de portada y el botón de play encima. El título de arriba es opcional.',
+    fields: [
+      { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'External Video' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'video_url', label: 'Link del video (YouTube o MP4)', type: 'url' },
+      // La portada es lo que se ve antes de darle play. Si no se carga, YouTube usa
+      // su propio thumbnail; por eso es opcional.
+      { key: 'poster', label: 'Imagen de portada (opcional)', type: 'image' },
+    ],
+    specs: [
+      { label: 'Video', ratio: 'Desktop 16:9 - Mobile 16:9', max: '2-4MB', format: 'MP4 / YouTube' },
+      { label: 'Imagen de portada', ratio: 'Desktop 16:9 - Mobile 16:9', desktop: '1920×1080px', mobile: '1920×1080px', max: '500kb', format: 'JPG / PNG' },
+    ],
+  },
+  {
     key: 'mosaic',
     name: 'Mosaico',
     category: 'Contenido',
