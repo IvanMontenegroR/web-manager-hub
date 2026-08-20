@@ -39,6 +39,22 @@ function Img({ src, h = 160, aspect, dim, className = '' }) {
   )
 }
 
+// ID de un video de YouTube a partir de cualquiera de sus formas de link
+// (watch?v=, youtu.be/, /embed/, /shorts/). null si no es de YouTube.
+const YT_ID = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/
+export function youtubeThumb(url) {
+  const m = YT_ID.exec(String(url || ''))
+  // hqdefault existe SIEMPRE; maxresdefault falta en videos viejos o de baja calidad.
+  return m ? `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` : null
+}
+
+// Que mostrar en el cuadro del video: el thumbnail de YouTube, o el propio MP4 (su
+// primer frame). Con un link que no es ninguna de las dos cosas devuelve null, para
+// que se vea el placeholder en vez de una imagen rota.
+function videoPreview(url) {
+  return youtubeThumb(url) || (isVideo(url) ? url : null)
+}
+
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 // Texto OPCIONAL de una seccion (titulo/subtitulo que la pagina real puede no tener):
 //   sin cargar (undefined/null) -> se muestra el texto de ejemplo, para que el mockup
@@ -755,7 +771,9 @@ const RENDERERS = {
         </div>
       )}
       <div className="cp-vid-frame">
-        <Img src={c.poster} aspect="16/9" dim="1920×1080px" className="cp-vid-img" />
+        {/* La portada NO se carga a mano: si el link es de YouTube se usa su propio
+            thumbnail, igual que en el sitio. Un MP4 muestra su primer frame. */}
+        <Img src={videoPreview(c.video_url)} aspect="16/9" dim="Preview del video" className="cp-vid-img" />
         <span className="cp-vid-play" aria-hidden="true">
           <Play size={26} />
         </span>
