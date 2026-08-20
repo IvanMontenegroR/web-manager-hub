@@ -743,8 +743,16 @@ const RENDERERS = {
   // la medida, igual que cualquier imagen.
   external_video: (c) => (
     <div className="cp-vid">
-      {OPT(c.title, 'External Video') && (
-        <div className="cp-vid-title">{OPT(c.title, 'External Video')}</div>
+      {/* Cabecera opcional: si no hay ni titulo ni subtitulo no ocupa lugar. */}
+      {(OPT(c.title, 'External Video') || OPT(c.subtitle, 'Un texto corto que acompaña al video.')) && (
+        <div className="cp-vid-head">
+          {OPT(c.title, 'External Video') && (
+            <div className="cp-vid-title">{OPT(c.title, 'External Video')}</div>
+          )}
+          {OPT(c.subtitle, 'Un texto corto que acompaña al video.') && (
+            <p className="cp-vid-sub"><RT>{OPT(c.subtitle, 'Un texto corto que acompaña al video.')}</RT></p>
+          )}
+        </div>
       )}
       <div className="cp-vid-frame">
         <Img src={c.poster} aspect="16/9" dim="1920×1080px" className="cp-vid-img" />

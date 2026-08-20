@@ -1964,7 +1964,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Video externo (external_video) ===== */
 .cp-vid { padding: 26px 30px; }
-.cp-vid-title { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; color: #1b252e; margin-bottom: 14px; }
+.cp-vid-head { margin-bottom: 14px; }
+.cp-vid-title { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; color: #1b252e; }
+.cp-vid-sub { font-size: 14px; color: #545c67; line-height: 1.55; margin-top: 6px; max-width: 720px; }
 .cp-vid-frame { position: relative; border-radius: 6px; overflow: hidden; }
 .cp-vid-img { border-radius: 6px; display: block; }
 /* Boton de play centrado, igual que el de un embed de YouTube. */
@@ -1977,6 +1979,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-vid-play svg { margin-left: 3px; fill: currentColor; }
 /* Tema oscuro (paginas de marca oscura). */
 .cp-dark .cp-vid-title { color: #f4f5f7; }
+.cp-dark .cp-vid-sub { color: #b9c0c9; }
 
 /* ===== Imagen + destacados (image_features) ===== */
 .cp-imgfeat { padding: 30px; text-align: center; }
