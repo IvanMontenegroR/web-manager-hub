@@ -231,9 +231,27 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      subcampos de una lista, que ademas filtra por `roles`), y las medidas de imagen con
      `specKey`/`specsByType`. La variante por DEFECTO (`type` sin cargar) tiene que ser la que ya existia,
      asi las paginas armadas antes no cambian.
+     **CONTENEDORES (pestañas)**: un componente marcado `container: true` (hoy solo `tabs`, "Pestañas") no
+     tiene contenido visual propio mas alla de su cabecera: su contenido son OTROS componentes. La pagina
+     pasa a ser un ARBOL de un nivel — `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y
+     `tab_index` (la pestaña en la que cae). Los sueltos tienen `parent_id` NULL. El `sort_order` es por
+     GRUPO: los hijos de una pestaña se ordenan entre ellos, aparte de los bloques sueltos. Cada pestaña
+     tiene nombre + descripcion opcional (campo lista `tabs`); si no hay ninguna cargada se usan las de
+     ejemplo (`tabList` / `TAB_SAMPLE`), y el `tab_index` de los hijos apunta a esa lista. Si se borra una
+     pestaña, sus hijos NO se pierden: caen en la ULTIMA (mismo criterio en el builder y en el Excel).
+     En el builder, el contenido de la pestaña se le pasa al preview por `slot` y se agrega con el boton
+     "Agregar componente acá" DENTRO de la pestaña activa (la paleta de ese boton excluye los contenedores:
+     no se anidan pestañas dentro de pestañas). Se montan TODAS las pestañas — las inactivas fuera de
+     pantalla (`.pb-tabpanel--off`) — para que el export pueda capturar tambien lo que esta en las
+     pestañas cerradas. Ver `sql/2026_page_components_tabs.sql`.
   3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): por pagina, una seccion por componente
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
-     para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
+     numeradas `1`, `2`, `3`… Un bloque de pestañas suma **una banda oscura por pestaña** (`3.1 — Pestaña:
+     Gato`) y debajo las secciones de sus componentes (`3.1.1`, `3.1.2`…); la imagen del contenedor muestra
+     la pestaña abierta, y la de la pagina entera solo apila los bloques SUELTOS (los hijos ya van adentro
+     de la captura de su contenedor). Durante la captura, el body lleva la clase `pb-exporting` para que
+     los bloques anidados se capturen SIN el chrome del builder (barra de edicion y boton de agregar).
+     Todo esto para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)

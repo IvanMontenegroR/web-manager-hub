@@ -1,6 +1,6 @@
 import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
-import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP } from '../../../data/components'
+import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, tabList } from '../../../data/components'
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
 function RT({ children }) {
@@ -785,6 +785,42 @@ const RENDERERS = {
     )
   },
 
+  // Pestañas: CONTENEDOR. Titulo/subtitulo opcionales, la barra de pestañas y, debajo,
+  // la descripcion de la pestaña activa + el contenido, que NO es de este componente:
+  // son OTROS componentes (los hijos), que llegan renderizados en `ctx.slot`.
+  tabs: (c, ctx) => {
+    const items = tabList(c)
+    const active = Math.min(Math.max(0, ctx?.activeTab || 0), items.length - 1)
+    const cur = items[active] || {}
+    const acc = ctx?.brandAccent || ACCENT
+    const title = OPT(c.title, null)
+    const subtitle = OPT(c.subtitle, null)
+    return (
+      <div className="cp-tabs" style={{ '--tab-acc': acc }}>
+        {(title || subtitle) && (
+          <div className="cp-tabs-head">
+            {title && <div className="cp-tabs-title">{title}</div>}
+            {subtitle && <p className="cp-tabs-sub"><RT>{subtitle}</RT></p>}
+          </div>
+        )}
+        <div className="cp-tabs-bar" role="tablist">
+          {items.map((t, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`cp-tab${i === active ? ' on' : ''}`}
+              onClick={ctx?.onTab ? (e) => { e.stopPropagation(); ctx.onTab(i) } : undefined}
+            >
+              {T(t.label, `Pestaña ${i + 1}`)}
+            </button>
+          ))}
+        </div>
+        {cur.description && <p className="cp-tabs-desc"><RT>{cur.description}</RT></p>}
+        <div className="cp-tabs-slot">{ctx?.slot}</div>
+      </div>
+    )
+  },
+
   // Video externo: titulo opcional arriba y el video a lo ancho (16:9) con su imagen
   // de portada y el boton de play encima. Sin portada cargada queda el placeholder con
   // la medida, igual que cualquier imagen.
@@ -978,17 +1014,22 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content, theme }) {
+export default function ComponentPreview({ componentKey, content, theme, slot, activeTab, onTab }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
   // ctx: tokens de color de la marca de la pagina (ver BRAND_THEMES en pagesDb) +
   // tema oscuro. Con `dark` (ej. Pro Plan) el componente se pinta en oscuro.
+  // `slot` / `activeTab` / `onTab` solo los usan los componentes CONTENEDOR (pestañas):
+  // su contenido son otros componentes, que renderiza quien llama (el builder).
   const ctx = {
     brandName: theme?.name || null,
     brandPrimary: theme?.primary || null,
     brandSecondary: theme?.secondary || null,
     brandAccent: theme?.accent || null,
     dark: !!theme?.dark,
+    slot: slot || null,
+    activeTab: activeTab || 0,
+    onTab: onTab || null,
   }
   return <div className={`cp-render${ctx.dark ? ' cp-dark' : ''}`}>{render(content || {}, ctx)}</div>
 }

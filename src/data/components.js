@@ -19,6 +19,20 @@ export const CMT_WIDE_BOTTOM = 'Cards apaisadas con texto abajo'    // Slider ba
 export const CMT_WIDE_TOP = 'Cards apaisadas con título arriba'     // Slider cards
 export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP]
 
+// Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
+// estas dos, para poder meterle contenido adentro antes de renombrarlas.
+export const TAB_SAMPLE = [
+  { label: 'Gato', description: 'TABS gato description' },
+  { label: 'Cachorro', description: 'TABS cachorro description' },
+]
+
+// Pestañas EFECTIVAS de un bloque: las cargadas o, si no hay ninguna, las de ejemplo.
+// El `tab_index` de los componentes hijos apunta a la posicion en ESTA lista.
+export function tabList(content) {
+  const arr = Array.isArray(content?.tabs) ? content.tabs.filter(Boolean) : []
+  return arr.length ? arr : TAB_SAMPLE
+}
+
 export const COMPONENTS = [
   {
     key: 'brand_menu',
@@ -395,6 +409,24 @@ export const COMPONENTS = [
       ] },
     ],
     specs: [{ ratio: 'Desktop 16:9', desktop: '2160×1080px', max: '500kb', format: 'JPG / PNG' }],
+  },
+  {
+    key: 'tabs',
+    name: 'Pestañas',
+    category: 'Contenido',
+    help: 'Bloque con pestañas (ej. Gato / Cachorro). Cada pestaña tiene su nombre y una descripción opcional, y ADENTRO puede llevar los componentes que hagan falta: se agregan desde el botón que aparece dentro de la pestaña activa.',
+    // Contenedor: su contenido real son OTROS componentes (page_components con
+    // parent_id = este bloque y tab_index = la pestaña).
+    container: true,
+    fields: [
+      { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Título de la sección' },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'textarea' },
+      { key: 'tabs', label: 'Pestañas', type: 'list', itemLabel: 'Pestaña', sample: TAB_SAMPLE, item: [
+        { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
+        { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
+      ] },
+    ],
   },
   {
     key: 'external_video',

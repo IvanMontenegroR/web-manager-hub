@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil,
 } from 'lucide-react'
-import { COMPONENTS, getComponent } from '../../data/components'
+import { COMPONENTS, getComponent, tabList } from '../../data/components'
 import {
   fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
 } from '../../lib/pagesDb'
@@ -23,6 +23,8 @@ export default function PageBuilder({ page, onBack }) {
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [editMode, setEditMode] = useState(true) // false = vista previa (pagina real, sin toolbars)
+  const [activeTab, setActiveTab] = useState({}) // { [id del bloque de pestañas]: pestaña abierta }
+  const [picker, setPicker] = useState(null)     // { parent_id, tab_index } con la paleta abierta adentro
   const nodes = useRef(new Map())
   const headerRef = useRef(null)
   const footerRef = useRef(null)
@@ -43,7 +45,20 @@ export default function PageBuilder({ page, onBack }) {
     if (!t && !page.brand) return null
     return { ...(t || {}), name: page.brand || null }
   }, [page.brand])
-  const nextSort = useMemo(() => comps.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1, [comps])
+  // La pagina es un ARBOL de un nivel: bloques sueltos (parent_id null) y, dentro de un
+  // contenedor (bloque de pestañas), sus hijos agrupados por pestaña (tab_index).
+  const roots = useMemo(() => comps.filter((c) => !c.parent_id), [comps])
+  // Hijos de una pestaña. En la ULTIMA pestaña caen ademas los hijos que quedaron
+  // apuntando a una pestaña que ya no existe (si se borraron pestañas), asi no se
+  // pierden en el limbo: se ven y se pueden mover o borrar.
+  const kidsOf = (id, ti, isLast = false) => comps.filter((c) => c.parent_id === id
+    && (isLast ? (c.tab_index ?? 0) >= ti : (c.tab_index ?? 0) === ti))
+  // El orden es por GRUPO: el sort_order de los hijos de una pestaña es independiente
+  // del de los bloques sueltos.
+  const nextSortIn = (parent_id, tab_index) => {
+    const group = parent_id ? kidsOf(parent_id, tab_index) : roots
+    return group.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1
+  }
   const selected = comps.find((c) => c.id === selId) || null
   const selectedDef = selected ? getComponent(selected.component_key) : null
 
@@ -97,11 +112,14 @@ export default function PageBuilder({ page, onBack }) {
     setDirty(false)
   }
 
-  async function add(key) {
+  // `at` = { parent_id, tab_index } para que caiga DENTRO de una pestaña; sin `at`
+  // queda suelto al final de la pagina.
+  async function add(key, at = {}) {
     setBusy(true)
     try {
       await flushSave() // no perder lo del componente actual al agregar otro
-      const created = await addPageComponent(page.id, key, nextSort)
+      const created = await addPageComponent(page.id, key, nextSortIn(at.parent_id || null, at.tab_index ?? 0), at)
+      setPicker(null)
       await load()
       await select(created)
     } catch (e) { setErrMsg(e.message) } finally { setBusy(false) }
@@ -118,12 +136,18 @@ export default function PageBuilder({ page, onBack }) {
     } catch (e) { setErrMsg(e.message) } finally { setBusy(false) }
   }
 
-  async function move(i, dir) {
+  // Reordena DENTRO de un grupo (los sueltos de la pagina, o los hijos de una pestaña):
+  // se reescribe el sort_order de ese grupo y el resto queda igual.
+  async function move(group, i, dir) {
     const j = i + dir
-    if (j < 0 || j >= comps.length) return
-    const next = comps.slice()
+    if (j < 0 || j >= group.length) return
+    const next = group.slice()
     ;[next[i], next[j]] = [next[j], next[i]]
-    setComps(next)
+    const order = new Map(next.map((c, k) => [c.id, k]))
+    setComps((cs) => cs
+      .map((c) => (order.has(c.id) ? { ...c, sort_order: order.get(c.id) } : c))
+      .slice()
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)))
     try { await persistComponentOrder(next) } catch (e) { setErrMsg(e.message); load() }
   }
 
@@ -147,6 +171,75 @@ export default function PageBuilder({ page, onBack }) {
 
   const setDraftField = (next) => { setDraft(next); setDirty(true) }
   const contentFor = (c) => (c.id === selId ? draft : c.content || {})
+
+  // ---- Render de un bloque (recursivo: un contenedor renderiza sus hijos adentro) ----
+  // El contenido de un bloque de PESTAÑAS son otros componentes: se le pasan al preview
+  // por `slot`. Se montan TODAS las pestañas (las inactivas fuera de pantalla) para que
+  // el export pueda capturar tambien los componentes de las pestañas cerradas.
+  function tabSlot(c) {
+    const tabs = tabList(contentFor(c))
+    const active = Math.min(activeTab[c.id] || 0, tabs.length - 1)
+    return tabs.map((t, ti) => {
+      const kids = kidsOf(c.id, ti, ti === tabs.length - 1)
+      const off = ti !== active
+      const open = picker && picker.parent_id === c.id && picker.tab_index === ti
+      return (
+        <div key={ti} className={`pb-tabpanel${off ? ' pb-tabpanel--off' : ''}`}>
+          {kids.map((k, i) => renderBlock(k, i, kids))}
+          {editMode && !off && (
+            <div className="pb-addhere" onClick={(e) => e.stopPropagation()}>
+              <button className="btn btn-sm" disabled={busy} onClick={() => setPicker(open ? null : { parent_id: c.id, tab_index: ti })}>
+                <Plus size={13} /> Agregar componente acá
+              </button>
+              {open && (
+                <div className="pb-picker">
+                  {/* Sin contenedores: no se anidan pestañas dentro de pestañas. */}
+                  {COMPONENTS.filter((d) => !d.container).map((d) => (
+                    <button key={d.key} className="pb-pal-item" disabled={busy} title={d.help}
+                      onClick={() => add(d.key, { parent_id: c.id, tab_index: ti })}>
+                      <Plus size={13} /> <span>{d.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )
+    })
+  }
+
+  function renderBlock(c, i, group) {
+    const def = getComponent(c.component_key)
+    const isContainer = !!def?.container
+    const tabs = isContainer ? tabList(contentFor(c)) : []
+    const active = isContainer ? Math.min(activeTab[c.id] || 0, tabs.length - 1) : 0
+    return (
+      <div
+        key={c.id}
+        className={`pb-block pb-block--${c.component_key}${selId === c.id ? ' sel' : ''}${c.parent_id ? ' pb-block--kid' : ''}`}
+        ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
+        onClick={(e) => { if (!editMode) return; e.stopPropagation(); select(c) }}
+      >
+        <div className="pb-block-bar">
+          <span className="pb-block-name">{def?.name || c.component_key}</span>
+          <div className="pb-block-actions">
+            <button className="ic-btn" disabled={i === 0} onClick={(e) => { e.stopPropagation(); move(group, i, -1) }} title="Subir"><ChevronUp size={14} /></button>
+            <button className="ic-btn" disabled={i === group.length - 1} onClick={(e) => { e.stopPropagation(); move(group, i, 1) }} title="Bajar"><ChevronDown size={14} /></button>
+            <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
+          </div>
+        </div>
+        <ComponentPreview
+          componentKey={c.component_key}
+          content={contentFor(c)}
+          theme={theme}
+          slot={isContainer ? tabSlot(c) : null}
+          activeTab={active}
+          onTab={isContainer ? ((ti) => setActiveTab((m) => ({ ...m, [c.id]: ti }))) : null}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="content pb-content">
@@ -193,31 +286,14 @@ export default function PageBuilder({ page, onBack }) {
           >
             {loading ? (
               <div className="center-state"><div className="spinner" /></div>
-            ) : comps.length === 0 ? (
+            ) : roots.length === 0 ? (
               <div className="pb-empty">
                 <LayoutGrid size={26} />
                 <div className="dir-empty-t">Pagina vacia</div>
                 <p>Agregá componentes desde la paleta de la izquierda. Se van apilando acá y podés cargar su contenido.</p>
               </div>
             ) : (
-              comps.map((c, i) => (
-                <div
-                  key={c.id}
-                  className={`pb-block pb-block--${c.component_key}${selId === c.id ? ' sel' : ''}`}
-                  ref={(el) => { if (el) nodes.current.set(c.id, el); else nodes.current.delete(c.id) }}
-                  onClick={() => editMode && select(c)}
-                >
-                  <div className="pb-block-bar">
-                    <span className="pb-block-name">{getComponent(c.component_key)?.name || c.component_key}</span>
-                    <div className="pb-block-actions">
-                      <button className="ic-btn" disabled={i === 0} onClick={(e) => { e.stopPropagation(); move(i, -1) }} title="Subir"><ChevronUp size={14} /></button>
-                      <button className="ic-btn" disabled={i === comps.length - 1} onClick={(e) => { e.stopPropagation(); move(i, 1) }} title="Bajar"><ChevronDown size={14} /></button>
-                      <button className="ic-btn danger" onClick={(e) => { e.stopPropagation(); remove(c) }} title="Quitar"><Trash2 size={13} /></button>
-                    </div>
-                  </div>
-                  <ComponentPreview componentKey={c.component_key} content={contentFor(c)} theme={theme} />
-                </div>
-              ))
+              roots.map((c, i) => renderBlock(c, i, roots))
             )}
           </div>
 

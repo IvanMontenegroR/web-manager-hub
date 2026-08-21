@@ -6,7 +6,7 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields, componentHasImage, excelSkip } from '../data/components'
+import { getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields, componentHasImage, excelSkip, tabList } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks } from './richText'
 
@@ -91,6 +91,10 @@ async function snapshot(node, forceWidth) {
   const w = forceWidth || node.offsetWidth || 800
   const prevWidth = node.style.width
   node.style.width = w + 'px'
+  // Los componentes anidados (dentro de una pestaña) traen su barra de edicion y el
+  // boton de agregar: se ocultan ANTES de medir el alto, asi no entran en la captura
+  // ni dejan un hueco. html2canvas clona el documento entero, se lleva la clase.
+  document.body.classList.add('pb-exporting')
   try {
     const h = node.offsetHeight || 300
     // Componentes de tema oscuro (paginas de marca oscura): se capturan sobre fondo
@@ -125,6 +129,7 @@ async function snapshot(node, forceWidth) {
     return null
   } finally {
     node.style.width = prevWidth
+    document.body.classList.remove('pb-exporting')
   }
 }
 
@@ -449,18 +454,17 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
 
   // Componentes: banda -> [campos izquierda | imagen derecha].
   // El breadcrumb (matrixExclude) no se exporta: se arma solo, no lleva contenido.
-  let idx = 0
-  for (const comp of mainComps) {
+  // `label` = numeracion de la seccion ("3", o "3.1.2" para un componente que vive
+  // dentro de una pestaña).
+  async function emitComponent(comp, label) {
     const def = getComponent(comp.component_key)
-    if (def?.matrixExclude) continue
-    idx++
     const content = comp.content || {}
     const topRow = row
 
     // Banda de titulo (bloque izquierdo). En los banners, el subtipo (Banner Type)
     // va entre parentesis para saber de que banner se trata.
     const subtype = def?.key === 'banner' && content.type ? ` (${content.type})` : ''
-    row = bandTitle(row, `${idx}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
+    row = bandTitle(row, `${label}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
     // vez para todo el sitio. Los campos SE MUESTRAN pero DESHABILITADOS (grises) para
@@ -589,6 +593,41 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     row += 1 // separacion entre componentes
   }
 
+  // Recorrido del arbol: los bloques sueltos en orden y, cuando uno es CONTENEDOR
+  // (bloque de pestañas), una seccion por pestaña con los componentes que tiene adentro.
+  const roots = mainComps.filter((c) => !c.parent_id)
+  // En la ULTIMA pestaña entran ademas los hijos que apuntan a una pestaña que ya no
+  // existe (mismo criterio que el builder), asi el Excel no se come contenido.
+  const kidsOf = (id, ti, isLast) => mainComps.filter((c) => c.parent_id === id
+    && (isLast ? (c.tab_index ?? 0) >= ti : (c.tab_index ?? 0) === ti))
+  let idx = 0
+  for (const comp of roots) {
+    const def = getComponent(comp.component_key)
+    if (def?.matrixExclude) continue
+    idx++
+    await emitComponent(comp, String(idx))
+    if (!def?.container) continue
+    const tabs = tabList(comp.content || {})
+    for (let ti = 0; ti < tabs.length; ti++) {
+      const tabNo = `${idx}.${ti + 1}`
+      // Banda oscura: no es un componente, es la pestaña que agrupa a los de abajo.
+      row = bandTitle(row, `${tabNo} — Pestaña: ${tabs[ti]?.label || `Pestaña ${ti + 1}`}`, HEAD_BG)
+      const kids = kidsOf(comp.id, ti, ti === tabs.length - 1).filter((k) => !getComponent(k.component_key)?.matrixExclude)
+      if (!kids.length) {
+        ws.mergeCells(row, 2, row, 3)
+        const nc = ws.getCell(row, 2)
+        nc.value = 'Esta pestaña todavía no tiene componentes.'
+        nc.font = { italic: true, size: 10, color: { argb: MUTED } }
+        nc.alignment = { vertical: 'middle', indent: 1 }
+        setH(row, 18)
+        row += 2
+        continue
+      }
+      let k = 0
+      for (const kid of kids) { k++; await emitComponent(kid, `${tabNo}.${k}`) }
+    }
+  }
+
   // La PAGINA ENTERA renderizada, a la derecha de todo: header + los componentes en
   // orden + footer, apilados en una sola imagen. No lleva campos: es la referencia
   // visual de como quedaria la pagina armada, al lado del detalle de cada seccion.
@@ -596,7 +635,9 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const chrome = opts.chrome || {}
     const parts = []
     if (chrome.header) parts.push(await snapshot(chrome.header, CAP_W))
-    for (const comp of components) parts.push(await shotFor(comp.id, getNode(comp.id), CAP_W))
+    // Solo los bloques SUELTOS: los de adentro de una pestaña ya entran en la captura
+    // de su contenedor (se ve la pestaña abierta, como en la pagina real).
+    for (const comp of components.filter((c) => !c.parent_id)) parts.push(await shotFor(comp.id, getNode(comp.id), CAP_W))
     if (chrome.footer) parts.push(await snapshot(chrome.footer, CAP_W))
     const full = await stackImages(parts, opts.pageBg || '#ffffff')
     if (full) {

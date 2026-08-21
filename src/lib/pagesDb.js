@@ -252,14 +252,29 @@ export async function clonePage(page, sort_order) {
   const { data: comps, error } = await fetchPageComponents(page.id)
   throwIf(error)
   if (comps && comps.length) {
-    const rows = comps.map((c) => ({
+    // Primero los sueltos, para conocer el id NUEVO de cada contenedor; despues los
+    // hijos, reapuntando su parent_id al clon. Si se insertara todo junto, los hijos
+    // quedarian colgando del bloque de pestañas de la pagina ORIGINAL.
+    const roots = comps.filter((c) => !c.parent_id)
+    const kids = comps.filter((c) => c.parent_id)
+    const row = (c, parent_id) => ({
       page_id: dupe.id,
       component_key: c.component_key,
       content: c.content || {},
       sort_order: c.sort_order || 0,
-    }))
-    const { error: insErr } = await supabase.from('page_components').insert(rows)
-    throwIf(insErr)
+      parent_id: parent_id ?? null,
+      tab_index: parent_id ? (c.tab_index ?? 0) : null,
+    })
+    const { data: newRoots, error: rootErr } = await supabase
+      .from('page_components').insert(roots.map((c) => row(c, null))).select()
+    throwIf(rootErr)
+    // Mapa id viejo -> id nuevo (el insert respeta el orden de las filas enviadas).
+    const idMap = new Map(roots.map((c, i) => [c.id, newRoots[i]?.id]))
+    if (kids.length) {
+      const { error: kidErr } = await supabase
+        .from('page_components').insert(kids.map((c) => row(c, idMap.get(c.parent_id) || null)))
+      throwIf(kidErr)
+    }
   }
   return dupe
 }
@@ -277,10 +292,19 @@ export async function fetchPageComponents(pageId) {
   return { data: data ?? [], error: null, tableMissing: false }
 }
 
-export async function addPageComponent(pageId, componentKey, sort_order) {
+// `at` = donde cae: { parent_id, tab_index } para meterlo dentro de una pestaña,
+// nada para dejarlo suelto en la pagina.
+export async function addPageComponent(pageId, componentKey, sort_order, at = {}) {
   const { data, error } = await supabase
     .from('page_components')
-    .insert({ page_id: pageId, component_key: componentKey, content: {}, sort_order: sort_order ?? 0 })
+    .insert({
+      page_id: pageId,
+      component_key: componentKey,
+      content: {},
+      sort_order: sort_order ?? 0,
+      parent_id: at.parent_id ?? null,
+      tab_index: at.parent_id ? (at.tab_index ?? 0) : null,
+    })
     .select().single()
   throwIf(error)
   return data
