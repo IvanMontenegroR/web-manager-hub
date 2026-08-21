@@ -11,6 +11,14 @@
 // Es un catalogo INICIAL (piloto). Se van sumando componentes/campos a medida que se
 // documentan; agregar uno = una entrada aca + un render en ComponentPreview.
 
+// Variantes del "Carrusel de cards". Nombres en español; entre parentesis, como se
+// llaman en el CMS, para que el editor las pueda mapear.
+export const CMT_VERTICAL = 'Cards verticales'                      // la de Compromiso Purina®
+export const CMT_ICON = 'Cards con icono'                           // Card icon square
+export const CMT_WIDE_BOTTOM = 'Cards apaisadas con texto abajo'    // Slider background cards
+export const CMT_WIDE_TOP = 'Cards apaisadas con título arriba'     // Slider cards
+export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP]
+
 export const COMPONENTS = [
   {
     key: 'brand_menu',
@@ -280,20 +288,34 @@ export const COMPONENTS = [
     key: 'commitment_carousel',
     name: 'Carrusel de cards',
     category: 'Carruseles',
-    help: 'Sección "Compromiso Purina®": header (título + subtítulo) con flechas y un carrusel de cards verticales con imagen de fondo a sangre, título arriba y descripción abajo (overlaid en blanco).',
+    help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cuatro VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, y dos apaisadas que se diferencian en dónde va el texto. La flecha circular de una card aparece cuando esa card tiene link.',
     fields: [
+      // `type` (y no otro nombre) porque es la key que filtra campos por variante y
+      // resuelve las specs, igual que el Banner Type.
+      { key: 'type', label: 'Variante', type: 'select', cms: true, options: CMT_VARIANTS },
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Compromiso Purina®' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
+      // Solo la variante con iconos tiene banda de color de fondo.
+      { key: 'color', label: 'Color del bloque', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_ICON] },
       { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
+        { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'], onlyTypes: [CMT_ICON] },
+        { key: 'image', label: 'Imagen', type: 'image', hideTypes: [CMT_ICON] },
+        { key: 'image_mobile', label: 'Imagen mobile', type: 'image', onlyTypes: [CMT_VERTICAL] },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'description', label: 'Descripcion', type: 'textarea' },
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 1:1.5 · Mobile 1:1.15', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
+    specKey: 'type',
+    specsByType: {
+      [CMT_VERTICAL]: [{ ratio: 'Desktop 1:1.5 - Mobile 1:1.15', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
+      // Sin imagen: la card es un icono sobre la banda de color.
+      [CMT_ICON]: [],
+      // Medidas en px PENDIENTES de confirmar con desarrollo; por ahora solo el ratio.
+      [CMT_WIDE_BOTTOM]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
+      [CMT_WIDE_TOP]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
+    },
   },
   {
     key: 'fifty_fifty',
@@ -550,6 +572,22 @@ export function visibleFields(def, content = {}, opts = {}) {
 // asi que no se le pide una fila al mercado.
 export function excelSkip(field, value) {
   return !!field?.noneOption && value === field.noneOption
+}
+
+// Sub-campos VISIBLES de un item de una lista. Filtra por:
+//   - `roles`: el rol del item (mosaico: bloque de imagen vs de contenido)
+//   - `onlyTypes`/`hideTypes`: la variante del componente (misma key `type` que arriba;
+//     ej. el icono solo existe en la variante con iconos del carrusel de cards)
+//   - `cms`: los tecnicos, solo con { excel: true }
+export function visibleSubFields(field, role, content = {}, opts = {}) {
+  const type = content && content.type
+  return (field?.item || []).filter((sf) => {
+    if (opts.excel && sf.cms) return false
+    if (sf.roles && role && !sf.roles.includes(role)) return false
+    if (sf.hideTypes && type && sf.hideTypes.includes(type)) return false
+    if (sf.onlyTypes && !sf.onlyTypes.includes(type)) return false
+    return true
+  })
 }
 
 // Valor legible de un campo para el export/preview (list -> texto multilinea).

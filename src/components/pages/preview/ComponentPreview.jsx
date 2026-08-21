@@ -1,5 +1,6 @@
-import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play } from 'lucide-react'
+import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
+import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP } from '../../../data/components'
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
 function RT({ children }) {
@@ -63,6 +64,7 @@ const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 const OPT = (v, fallback) => (v === '' ? null : T(v, fallback))
 const list = (v) => (Array.isArray(v) ? v : [])
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
+const CMT_BAND = '#F5B92B' // amarillo del diseño para la banda de "Cards con icono"
 const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
 
 // ---- Contraste de color -------------------------------------------------
@@ -600,17 +602,36 @@ const RENDERERS = {
   // Carrusel "Compromiso Purina": header (titulo + subtitulo) con flechas + cards
   // verticales con imagen de fondo a sangre, titulo arriba y descripcion abajo.
   commitment_carousel: (c, ctx) => {
+    // Cuatro variantes del mismo carrusel. Por defecto la vertical (la que ya existia,
+    // "Compromiso Purina®"), asi las paginas ya armadas no cambian.
+    const v = c.type || CMT_VERTICAL
+    const icon = v === CMT_ICON
+    const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
+    // Banda de color (solo la variante con iconos): color propio > secundario de la
+    // marca > amarillo del diseño. El relleno de las cards se aclara a partir de ella.
+    const band = T(c.color, ctx?.brandSecondary || CMT_BAND)
     const items = list(c.items)
-    const arr = items.length ? items : [
-      { title: 'Para mascotas y personas', description: 'Enriquecer la vida de las mascotas y de las personas que las aman.' },
-      { title: 'Nutrición y calidad', description: 'Defender la seguridad y la nutrición de alta calidad.' },
-      { title: 'Innovación', description: 'Impulsar innovaciones que ayuden a las mascotas a prosperar.' },
-      { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
-    ]
+    const arr = items.length ? items : (icon
+      ? [
+        { icon: 'perro', title: 'Card 1 - title', description: 'Lorem ipsum dolor sit amet. Praesent tincidunt sem sit amet tellus sagittis congue.', url: 'https://ejemplo.com' },
+        { icon: 'perro', title: 'Card item 2 - grid - title', description: 'Praesent tincidunt sem sit amet tellus sagittis congue. Proin aliquet.' },
+        { icon: 'gato', title: 'Title - Praesent tincidunt sem sit amet tellus', description: 'Praesent tincidunt sem sit amet tellus sagittis congue. Proin aliquet.' },
+        { icon: 'pata', title: 'Card grid item 4', description: 'Sed a ex gravida, ornare urna vitae, faucibus justo.' },
+      ]
+      : [
+        { title: 'Para mascotas y personas', description: 'Enriquecer la vida de las mascotas y de las personas que las aman.' },
+        { title: 'Nutrición y calidad', description: 'Defender la seguridad y la nutrición de alta calidad.' },
+        { title: 'Innovación', description: 'Impulsar innovaciones que ayuden a las mascotas a prosperar.' },
+        { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
+      ])
+    const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
     return (
-      <div className="cp-brands cp-cmt">
+      <div
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}`}
+        style={icon ? { '--band': band, '--card': readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)' } : undefined}
+      >
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title">{T(c.title, 'Compromiso Purina®')}</div>
@@ -624,12 +645,22 @@ const RENDERERS = {
         <div className="cp-cmt-row">
           {arr.map((it, i) => (
             <div key={i} className="cp-cmt-card">
-              {it.image
-                ? <MediaEl className="cp-cmt-img" src={it.image} />
-                : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">822×1230px</span></div>}
-              <div className="cp-cmt-scrim" />
-              <div className="cp-cmt-ttl" style={titleStyle}>{T(it.title, 'Título')}</div>
-              <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
+              {icon ? (
+                <span className="cp-cmt-icon"><FeatureIcon name={it.icon} size={34} /></span>
+              ) : (
+                <>
+                  {it.image
+                    ? <MediaEl className="cp-cmt-img" src={it.image} />
+                    : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">{dim}</span></div>}
+                  <div className="cp-cmt-scrim" />
+                </>
+              )}
+              <div className="cp-cmt-body">
+                <div className="cp-cmt-ttl" style={icon || wide ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
+                <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
+              </div>
+              {/* La flecha aparece cuando la card tiene link cargado. */}
+              {it.url && <span className="cp-cmt-go" aria-hidden="true"><ArrowRight size={18} /></span>}
             </div>
           ))}
         </div>

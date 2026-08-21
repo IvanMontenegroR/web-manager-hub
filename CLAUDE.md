@@ -224,6 +224,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      mockups se renderizan en `ComponentPreview` (`preview/`); agregar un componente = una entrada en el
      catalogo + un render ahi. Los componentes colocados viven en `page_components` (page_id, component_key,
      content jsonb, sort_order).
+     **VARIANTES**: un componente puede tener un campo `type` (select) que cambia su layout y que campos
+     pide — lo usan el Banner (Banner Type) y el **Carrusel de cards** (`CMT_VARIANTS`: verticales / con
+     icono / apaisadas con texto abajo / apaisadas con titulo arriba). Los campos se filtran con
+     `onlyTypes`/`hideTypes` (`visibleFields` para los de primer nivel, `visibleSubFields` para los
+     subcampos de una lista, que ademas filtra por `roles`), y las medidas de imagen con
+     `specKey`/`specsByType`. La variante por DEFECTO (`type` sin cargar) tiene que ser la que ya existia,
+     asi las paginas armadas antes no cambian.
   3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): por pagina, una seccion por componente
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
      para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija

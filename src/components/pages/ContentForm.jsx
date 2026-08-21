@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2 } from 'lucide-react'
-import { getSpecs, visibleFields } from '../../data/components'
+import { getSpecs, visibleFields, visibleSubFields } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
 import { wrapLink, hasLinks } from '../../lib/richText'
 
@@ -120,7 +120,7 @@ function Field({ f, value, onChange, brandSecondary }) {
   return <input className="control" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={f.type === 'url' ? 'https://...' : f.placeholder} />
 }
 
-function ListField({ f, value, onChange }) {
+function ListField({ f, value, onChange, content }) {
   const stored = Array.isArray(value) ? value : []
   // Lista de tamaño FIJO (ej. mosaico = 6 bloques): se rellena a `fixed` y no se puede
   // agregar/quitar. Con `roles`, cada item muestra solo los subcampos de su rol.
@@ -134,7 +134,7 @@ function ListField({ f, value, onChange }) {
     <div className="cf-list">
       {items.map((it, i) => {
         const role = f.roles ? f.roles[i] : null
-        const subs = f.item.filter((sf) => !sf.roles || !role || sf.roles.includes(role))
+        const subs = visibleSubFields(f, role, content)
         return (
           <div key={i} className="cf-list-item">
             <div className="cf-list-head">
@@ -189,7 +189,7 @@ export default function ContentForm({ component, draft, onChange, brandSecondary
         <div key={f.key} className="field">
           <label>{f.label}</label>
           {f.type === 'list'
-            ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} />
+            ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} content={draft} />
             : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
         </div>
       ))}

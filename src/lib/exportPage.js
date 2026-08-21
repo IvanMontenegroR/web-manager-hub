@@ -6,7 +6,7 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs, visibleFields, componentHasImage, excelSkip } from '../data/components'
+import { getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields, componentHasImage, excelSkip } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks } from './richText'
 
@@ -325,7 +325,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
         const items = Array.isArray(content[f.key]) && content[f.key].length ? content[f.key] : [{}]
         items.forEach((it, k) => {
           bc(`${f.itemLabel || f.label} ${k + 1}`)
-          for (const sf of (f.item || []).filter((sf) => !sf.cms && !excelSkip(sf, it[sf.key]))) bf(sf.label, fieldToText(sf, it[sf.key]), true)
+          for (const sf of visibleSubFields(f, null, content, { excel: true }).filter((sf) => !excelSkip(sf, it[sf.key]))) bf(sf.label, fieldToText(sf, it[sf.key]), true)
         })
       } else if (!excelSkip(f, content[f.key])) { bf(f.label, fieldToText(f, content[f.key])) }
     }
@@ -521,7 +521,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           // Ademas de los tecnicos (cms) y los que no son de este rol, se omiten los
           // que quedaron en su `noneOption` (ej. "Aplica a: Sin iconos"): no hay nada
           // que cargar, seria una fila de ruido.
-          const subFields = (f.item || []).filter((sf) => !sf.cms && (!sf.roles || !role || sf.roles.includes(role)) && !excelSkip(sf, item[sf.key]))
+          const subFields = visibleSubFields(f, role, content, { excel: true }).filter((sf) => !excelSkip(sf, item[sf.key]))
           for (const sf of subFields) {
             row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
           }

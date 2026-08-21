@@ -1920,8 +1920,50 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt-ph { display: grid; place-items: center; gap: 8px; color: #aeb6bf; }
 /* Scrim para legibilidad del texto blanco (oscurece arriba y abajo). */
 .cp-cmt-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .38) 0%, rgba(0, 0, 0, .05) 26%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, .58) 100%); }
-.cp-cmt-ttl { position: absolute; top: 24px; left: 28px; right: 28px; color: #fff; font-size: 28px; font-weight: 600; line-height: 1.15; text-shadow: 0 1px 8px rgba(0, 0, 0, .25); }
-.cp-cmt-desc { position: absolute; bottom: 26px; left: 28px; right: 28px; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35; text-shadow: 0 1px 8px rgba(0, 0, 0, .3); }
+.cp-cmt-ttl { color: #fff; font-size: 28px; font-weight: 600; line-height: 1.15; text-shadow: 0 1px 8px rgba(0, 0, 0, .25); }
+.cp-cmt-desc { color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35; text-shadow: 0 1px 8px rgba(0, 0, 0, .3); }
+/* Flecha circular: aparece en la card que tiene link cargado. */
+.cp-cmt-go {
+  position: absolute; right: 24px; bottom: 24px; width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center; background: #fff; color: #111114; z-index: 2;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+
+/* --- Variante VERTICAL (la de Compromiso Purina®): titulo arriba, texto abajo --- */
+.cp-cmt--vert .cp-cmt-body { position: absolute; inset: 24px 28px 26px; display: flex; flex-direction: column; justify-content: space-between; }
+
+/* --- Variante APAISADA con titulo arriba (Slider cards) --- */
+.cp-cmt--widet .cp-cmt-card { flex: 0 0 380px; height: 254px; }
+.cp-cmt--widet .cp-cmt-body { position: absolute; inset: 20px 24px 22px; display: flex; flex-direction: column; justify-content: space-between; }
+.cp-cmt--widet .cp-cmt-ttl { font-size: 21px; }
+.cp-cmt--widet .cp-cmt-desc { font-size: 13.5px; font-weight: 600; max-width: 78%; }
+.cp-cmt--widet .cp-cmt-go { width: 36px; height: 36px; right: 20px; bottom: 20px; background: #111114; color: #fff; }
+
+/* --- Variante APAISADA con el texto agrupado abajo (Slider background cards) --- */
+.cp-cmt--wideb .cp-cmt-card { flex: 0 0 380px; height: 254px; }
+.cp-cmt--wideb .cp-cmt-scrim { background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.72) 100%); }
+.cp-cmt--wideb .cp-cmt-body { position: absolute; left: 24px; right: 24px; bottom: 22px; }
+.cp-cmt--wideb .cp-cmt-ttl { font-size: 21px; margin-bottom: 6px; }
+.cp-cmt--wideb .cp-cmt-desc { font-size: 13.5px; font-weight: 600; }
+/* La fila apoya sobre un degradado oscuro, como en el diseño. */
+.cp-cmt--wideb { background: linear-gradient(180deg, #fff 0%, #fff 42%, #6b7480 100%); border-radius: 14px; padding: 22px 22px 30px; }
+
+/* --- Variante con ICONO sobre banda de color (Card icon square) --- */
+.cp-cmt--icon { background: var(--band); border-radius: 14px; padding: 26px 26px 32px; }
+.cp-cmt--icon .cp-brands-title, .cp-cmt--icon .cp-brands-sub { color: #111114; }
+.cp-cmt--icon .cp-plist-arrow { border-color: rgba(0, 0, 0, .45); color: #111114; }
+.cp-cmt--icon .cp-cmt-card {
+  flex: 0 0 300px; height: 300px; background: var(--card); border-radius: 14px;
+  display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px;
+}
+.cp-cmt--icon .cp-cmt-icon { color: var(--acc, #ED1C24); display: block; }
+.cp-cmt--icon .cp-cmt-body { position: static; }
+.cp-cmt--icon .cp-cmt-ttl { color: #111114; font-size: 17px; font-weight: 700; line-height: 1.25; text-shadow: none; margin-bottom: 8px; }
+.cp-cmt--icon .cp-cmt-desc {
+  color: #3d444d; font-size: 13.5px; font-weight: 400; text-shadow: none;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cp-cmt--icon .cp-cmt-go { box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
 
 /* ===== Bloque 50/50 (titulo + texto | texto o desplegable) ===== */
 /* padding 26px 30px = mismo spacing interno que el resto de los bloques de contenido. */
