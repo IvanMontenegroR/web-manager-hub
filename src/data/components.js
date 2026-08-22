@@ -304,7 +304,7 @@ export const COMPONENTS = [
     key: 'commitment_carousel',
     name: 'Carrusel de cards',
     category: 'Carruseles',
-    help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cinco VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, dos apaisadas que se diferencian en dónde va el texto, y numeradas (cards blancas sin imagen, con el número en un chip arriba). El número NO se carga: sale del orden de las cards. La flecha circular de una card aparece cuando esa card tiene link.',
+    help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cinco VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, dos apaisadas que se diferencian en dónde va el texto, y numeradas (cards blancas sin imagen, con el número en un chip arriba). El número NO se carga: sale del orden de las cards. La flecha circular de una card aparece cuando esa card tiene link. El color de fondo del bloque y el del título/subtítulo se configuran por página; el color del texto NO toca el contenido de las cards.',
     fields: [
       // `type` (y no otro nombre) porque es la key que filtra campos por variante y
       // resuelve las specs, igual que el Banner Type.
@@ -312,10 +312,16 @@ export const COMPONENTS = [
       { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Compromiso Purina®' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
-      // Solo la variante con iconos tiene banda de color de fondo.
-      { key: 'color', label: 'Color del bloque', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_ICON] },
+      // FONDO DEL BLOQUE. Son dos keys para el mismo concepto, y nunca se ven juntas:
+      // en la variante con iconos la banda de color es parte del diseño y HEREDA de la
+      // marca (`color`, que ya existia); en el resto el fondo es opcional y por defecto
+      // NO hay ninguno (`background_color`), para no repintar las paginas ya armadas.
+      { key: 'color', label: 'Color de fondo del bloque', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_ICON] },
+      { key: 'background_color', label: 'Color de fondo del bloque', type: 'color', cms: true, clearable: true, hideTypes: [CMT_ICON] },
+      // Afecta SOLO al header (titulo, subtitulo y flechas), no al texto de las cards.
+      { key: 'text_color', label: 'Color del título y subtítulo', type: 'color', cms: true, clearable: true },
       // En las numeradas el color no es un fondo: pinta el chip del numero y el titulo.
-      { key: 'accent', label: 'Color de los números y títulos', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_NUMBERS] },
+      { key: 'accent', label: 'Color de los números y títulos de las cards', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_NUMBERS] },
       { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'], onlyTypes: [CMT_ICON] },
         { key: 'image', label: 'Imagen', type: 'image', hideTypes: [CMT_ICON, CMT_NUMBERS] },
@@ -553,7 +559,8 @@ function sampleFieldValue(f, i = 0) {
   switch (f.type) {
     case 'image': return '' // vacio: el placeholder muestra el tamaño recomendado
     case 'checkbox': return true
-    case 'color': return f.default || '#ED1C24'
+    // `clearable` = vacio significa "sin color": el ejemplo tiene que quedar sin cargar.
+    case 'color': return f.clearable ? '' : (f.default || '#ED1C24')
     case 'select': return (f.options && f.options[0]) || ''
     case 'url': return `https://ejemplo.com/${f.key}-${n}`
     case 'textarea': return f.placeholder || `Texto de ejemplo ${n} para validar el campo “${f.label}”.`

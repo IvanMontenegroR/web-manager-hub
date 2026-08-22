@@ -234,6 +234,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      un componente recien agregado se quedaria sin medidas). La variante por DEFECTO tiene que ser la que
      ya existia, asi las paginas armadas antes no cambian. El "Alt Text" del Excel se pide por VARIANTE
      (`componentHasImage(def, content)`): las que no llevan imagen no lo muestran.
+     El Carrusel de cards ademas configura por pagina el **fondo del bloque** y el **color del header**
+     (titulo, subtitulo y flechas — NO el texto de las cards, `--txt` + la clase `cp-cmt--hastxt`). El
+     fondo son dos keys que nunca conviven: `color` en la variante con iconos (la banda, que hereda de la
+     marca) y `background_color` en las demas, donde por defecto NO hay fondo. Un campo de color
+     `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
+     quitarlo, en vez de un rojo que parece cargado.
      **CONTENEDORES (pestañas)**: un componente marcado `container: true` (hoy solo `tabs`, "Pestañas") no
      tiene contenido visual propio mas alla de su cabecera: su contenido son OTROS componentes. La pagina
      pasa a ser un ARBOL de un nivel — `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y

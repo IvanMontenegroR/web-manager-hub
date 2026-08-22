@@ -1911,6 +1911,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Carrusel de compromiso (cards verticales con imagen de fondo) ===== */
 .cp-cmt .cp-plist-arrow { cursor: pointer; }
+/* Color del HEADER (titulo, subtitulo y flechas), configurable por pagina. Solo aplica
+   cuando hay color cargado (`--hastxt`): sin cargar no se toca nada y valen los colores
+   de siempre, incluidos los del tema oscuro. Va con 3 clases a proposito, para ganarle
+   a `.cp-dark .cp-brands-title` sin depender del orden del archivo. Se scopea a .cp-cmt
+   porque `.cp-brands-head` lo comparten varios carruseles, y NO toca el texto de las
+   cards: el color es del header. */
+.cp-render .cp-cmt--hastxt .cp-brands-title { color: var(--txt); }
+.cp-render .cp-cmt--hastxt .cp-brands-sub { color: var(--txt); opacity: .82; }
+.cp-render .cp-cmt--hastxt .cp-plist-arrow { color: var(--txt); border-color: var(--txt); }
+/* Con fondo cargado el bloque se lee como seccion: mismo aire que la banda de iconos. */
+.cp-cmt--hasbg { border-radius: 14px; padding: 26px 26px 32px; }
 .cp-cmt-row { display: flex; flex-wrap: nowrap; gap: 20px; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; margin-right: -60px; padding-bottom: 4px; }
 .cp-cmt-row::-webkit-scrollbar { height: 8px; }
 .cp-cmt-row::-webkit-scrollbar-thumb { background: #d8d8d8; border-radius: 4px; }

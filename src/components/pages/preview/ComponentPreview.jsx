@@ -615,6 +615,11 @@ const RENDERERS = {
     const band = T(c.color, ctx?.brandSecondary || CMT_BAND)
     // Numeradas: el chip y el titulo van con el acento (color propio > marca > rojo).
     const acc = T(c.accent, ctx?.brandAccent || ACCENT)
+    // Fondo del bloque (fuera de la variante con iconos, que usa su banda) y color del
+    // HEADER (titulo, subtitulo, flechas). Sin cargar = como estaba: sin fondo y con los
+    // colores por defecto. El color del texto NO baja a las cards.
+    const bg = T(c.background_color, null)
+    const txt = T(c.text_color, null)
     const items = list(c.items)
     const arr = items.length ? items : (nums
       ? [
@@ -637,12 +642,17 @@ const RENDERERS = {
         { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
       ])
     const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
+    const style = {}
+    if (icon) {
+      style['--band'] = band
+      style['--card'] = readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)'
+    } else if (bg) style.background = bg
+    if (nums) style['--acc'] = acc
+    if (txt) style['--txt'] = txt
     return (
       <div
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}`}
-        style={icon
-          ? { '--band': band, '--card': readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)' }
-          : nums ? { '--acc': acc } : undefined}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
           <div>

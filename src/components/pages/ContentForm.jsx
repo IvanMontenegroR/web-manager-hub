@@ -106,13 +106,17 @@ function Field({ f, value, onChange, brandSecondary }) {
     // igual que el mosaico (acc2 = brandSecondary || primario).
     const inheritColor = f.brandDefault ? (brandSecondary || null) : null
     const explicit = value != null && value !== ''
-    const shown = explicit ? value : (inheritColor || '#ED1C24')
+    // `clearable` = campo OPCIONAL cuyo vacio significa "sin color" (ej. el fondo del
+    // bloque). Vacio no puede mostrarse como rojo: pareceria que ya hay un color puesto.
+    const none = !!f.clearable && !explicit
+    const shown = explicit ? value : (inheritColor || (f.clearable ? '#FFFFFF' : '#ED1C24'))
     return (
       <div className="cf-color">
         <input type="color" className="cf-color-sw" value={shown} onChange={(e) => onChange(e.target.value)} />
-        <input className="control cf-color-hex" value={shown} onChange={(e) => onChange(e.target.value)} />
+        <input className="control cf-color-hex" value={none ? '' : shown} placeholder={none ? 'Sin color' : undefined} onChange={(e) => onChange(e.target.value)} />
         {f.brandDefault && !explicit && inheritColor && <span className="cf-color-inherit">de la marca</span>}
         {f.brandDefault && explicit && <button type="button" className="btn btn-sm cf-color-reset" title="Volver al color de la marca" onClick={() => onChange('')}>↺ marca</button>}
+        {f.clearable && explicit && <button type="button" className="btn btn-sm cf-color-reset" title="Quitar el color" onClick={() => onChange('')}>✕ quitar</button>}
       </div>
     )
   }
