@@ -561,7 +561,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       ws.addImage(img.id, { tl: { col: IMG_COL, row: rr - 1 }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
       // Alt Text (placeholder "SEO Agency") SOLO en componentes que tienen imagen(es).
       // La primera fila cuyo TOPE queda por debajo del pie de la imagen, asi no la pisa.
-      if (componentHasImage(def)) {
+      if (componentHasImage(def, content)) {
         const capTop = a + img.hpt + CAP_GAP
         let b = a, cr = rr
         while (cr < lastRow && b < capTop) { b += ws.getRow(cr).height || 15; cr++ }

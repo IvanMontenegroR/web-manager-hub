@@ -17,7 +17,8 @@ export const CMT_VERTICAL = 'Cards verticales'                      // la de Com
 export const CMT_ICON = 'Cards con icono'                           // Card icon square
 export const CMT_WIDE_BOTTOM = 'Cards apaisadas con texto abajo'    // Slider background cards
 export const CMT_WIDE_TOP = 'Cards apaisadas con título arriba'     // Slider cards
-export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP]
+export const CMT_NUMBERS = 'Cards numeradas'                        // Cards numbers
+export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS]
 
 // Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
 // estas dos, para poder meterle contenido adentro antes de renombrarlas.
@@ -101,6 +102,7 @@ export const COMPONENTS = [
     ],
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
+    defaultType: 'Main Hero',
     specsByType: {
       'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
       'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
@@ -302,7 +304,7 @@ export const COMPONENTS = [
     key: 'commitment_carousel',
     name: 'Carrusel de cards',
     category: 'Carruseles',
-    help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cuatro VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, y dos apaisadas que se diferencian en dónde va el texto. La flecha circular de una card aparece cuando esa card tiene link.',
+    help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cinco VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, dos apaisadas que se diferencian en dónde va el texto, y numeradas (cards blancas sin imagen, con el número en un chip arriba). El número NO se carga: sale del orden de las cards. La flecha circular de una card aparece cuando esa card tiene link.',
     fields: [
       // `type` (y no otro nombre) porque es la key que filtra campos por variante y
       // resuelve las specs, igual que el Banner Type.
@@ -312,9 +314,11 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
       // Solo la variante con iconos tiene banda de color de fondo.
       { key: 'color', label: 'Color del bloque', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_ICON] },
+      // En las numeradas el color no es un fondo: pinta el chip del numero y el titulo.
+      { key: 'accent', label: 'Color de los números y títulos', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_NUMBERS] },
       { key: 'items', label: 'Cards', type: 'list', itemLabel: 'Card', item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'], onlyTypes: [CMT_ICON] },
-        { key: 'image', label: 'Imagen', type: 'image', hideTypes: [CMT_ICON] },
+        { key: 'image', label: 'Imagen', type: 'image', hideTypes: [CMT_ICON, CMT_NUMBERS] },
         { key: 'image_mobile', label: 'Imagen mobile', type: 'image', onlyTypes: [CMT_VERTICAL] },
         { key: 'title', label: 'Titulo', type: 'text' },
         { key: 'description', label: 'Descripcion', type: 'textarea' },
@@ -322,10 +326,12 @@ export const COMPONENTS = [
       ] },
     ],
     specKey: 'type',
+    defaultType: CMT_VERTICAL,
     specsByType: {
       [CMT_VERTICAL]: [{ ratio: 'Desktop 1:1.5 - Mobile 1:1.15', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
-      // Sin imagen: la card es un icono sobre la banda de color.
+      // Sin imagen: la card es un icono sobre la banda de color / un numero en un chip.
       [CMT_ICON]: [],
+      [CMT_NUMBERS]: [],
       // Medidas en px PENDIENTES de confirmar con desarrollo; por ahora solo el ratio.
       [CMT_WIDE_BOTTOM]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
       [CMT_WIDE_TOP]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
@@ -528,7 +534,9 @@ export function getComponent(key) {
 export function getSpecs(component, content) {
   if (!component) return []
   if (component.specsByType) {
-    const key = content?.[component.specKey || 'type']
+    // Sin variante cargada vale la variante POR DEFECTO (la que renderiza el preview),
+    // no "ninguna": si no, un componente recien agregado se quedaria sin medidas.
+    const key = content?.[component.specKey || 'type'] || component.defaultType
     return component.specsByType[key] || []
   }
   // Una spec puede ser condicional (ej. la imagen izquierda opcional del carrusel de
@@ -577,8 +585,12 @@ export function sampleContent(def) {
 
 // ¿El componente tiene algun campo de imagen (propio o dentro de una lista)? Se usa
 // para poner el "Alt Text" en el Excel solo en los componentes que tienen imagenes.
-export function componentHasImage(def) {
-  return (def?.fields || []).some((f) => f.type === 'image' || (f.type === 'list' && (f.item || []).some((sf) => sf.type === 'image')))
+// Con `content` se mira solo la VARIANTE cargada: las que no llevan imagen (cards con
+// icono, cards numeradas) no tienen que pedir Alt Text.
+export function componentHasImage(def, content) {
+  const fields = content ? visibleFields(def, content) : (def?.fields || [])
+  return fields.some((f) => f.type === 'image'
+    || (f.type === 'list' && (content ? visibleSubFields(f, null, content) : (f.item || [])).some((sf) => sf.type === 'image')))
 }
 
 // Campos VISIBLES de un componente segun su contenido: filtra por Banner Type

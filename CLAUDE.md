@@ -226,11 +226,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      content jsonb, sort_order).
      **VARIANTES**: un componente puede tener un campo `type` (select) que cambia su layout y que campos
      pide — lo usan el Banner (Banner Type) y el **Carrusel de cards** (`CMT_VARIANTS`: verticales / con
-     icono / apaisadas con texto abajo / apaisadas con titulo arriba). Los campos se filtran con
-     `onlyTypes`/`hideTypes` (`visibleFields` para los de primer nivel, `visibleSubFields` para los
-     subcampos de una lista, que ademas filtra por `roles`), y las medidas de imagen con
-     `specKey`/`specsByType`. La variante por DEFECTO (`type` sin cargar) tiene que ser la que ya existia,
-     asi las paginas armadas antes no cambian.
+     icono / apaisadas con texto abajo / apaisadas con titulo arriba / **numeradas** — card blanca sin
+     imagen con el numero en un chip, que NO es un campo: sale del orden de las cards). Los campos se
+     filtran con `onlyTypes`/`hideTypes` (`visibleFields` para los de primer nivel, `visibleSubFields` para
+     los subcampos de una lista, que ademas filtra por `roles`), y las medidas de imagen con
+     `specKey`/`specsByType` + `defaultType` (la variante que vale cuando `type` no esta cargado; sin el,
+     un componente recien agregado se quedaria sin medidas). La variante por DEFECTO tiene que ser la que
+     ya existia, asi las paginas armadas antes no cambian. El "Alt Text" del Excel se pide por VARIANTE
+     (`componentHasImage(def, content)`): las que no llevan imagen no lo muestran.
      **CONTENEDORES (pestañas)**: un componente marcado `container: true` (hoy solo `tabs`, "Pestañas") no
      tiene contenido visual propio mas alla de su cabecera: su contenido son OTROS componentes. La pagina
      pasa a ser un ARBOL de un nivel — `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y

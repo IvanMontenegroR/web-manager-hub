@@ -1,6 +1,6 @@
 import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
-import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, tabList } from '../../../data/components'
+import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS, tabList } from '../../../data/components'
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
 function RT({ children }) {
@@ -602,18 +602,28 @@ const RENDERERS = {
   // Carrusel "Compromiso Purina": header (titulo + subtitulo) con flechas + cards
   // verticales con imagen de fondo a sangre, titulo arriba y descripcion abajo.
   commitment_carousel: (c, ctx) => {
-    // Cuatro variantes del mismo carrusel. Por defecto la vertical (la que ya existia,
+    // Cinco variantes del mismo carrusel. Por defecto la vertical (la que ya existia,
     // "Compromiso Purina®"), asi las paginas ya armadas no cambian.
     const v = c.type || CMT_VERTICAL
     const icon = v === CMT_ICON
+    const nums = v === CMT_NUMBERS
     const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
     // Banda de color (solo la variante con iconos): color propio > secundario de la
     // marca > amarillo del diseño. El relleno de las cards se aclara a partir de ella.
     const band = T(c.color, ctx?.brandSecondary || CMT_BAND)
+    // Numeradas: el chip y el titulo van con el acento (color propio > marca > rojo).
+    const acc = T(c.accent, ctx?.brandAccent || ACCENT)
     const items = list(c.items)
-    const arr = items.length ? items : (icon
+    const arr = items.length ? items : (nums
+      ? [
+        { title: 'Card grid item title number 1', description: 'Card grid item description number 1' },
+        { title: 'Card grid item title number 2', description: 'Card grid item description number 2' },
+        { title: 'Card grid item title number 3', description: 'Card grid item description number 3' },
+        { title: 'Card item 4 title', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus id fermentum massa.' },
+      ]
+      : icon
       ? [
         { icon: 'perro', title: 'Card 1 - title', description: 'Lorem ipsum dolor sit amet. Praesent tincidunt sem sit amet tellus sagittis congue.', url: 'https://ejemplo.com' },
         { icon: 'perro', title: 'Card item 2 - grid - title', description: 'Praesent tincidunt sem sit amet tellus sagittis congue. Proin aliquet.' },
@@ -629,8 +639,10 @@ const RENDERERS = {
     const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
     return (
       <div
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}`}
-        style={icon ? { '--band': band, '--card': readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)' } : undefined}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}`}
+        style={icon
+          ? { '--band': band, '--card': readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)' }
+          : nums ? { '--acc': acc } : undefined}
       >
         <div className="cp-brands-head">
           <div>
@@ -647,6 +659,9 @@ const RENDERERS = {
             <div key={i} className="cp-cmt-card">
               {icon ? (
                 <span className="cp-cmt-icon"><FeatureIcon name={it.icon} size={34} /></span>
+              ) : nums ? (
+                // El numero NO es un campo: sale de la posicion de la card.
+                <span className="cp-cmt-num">{i + 1}</span>
               ) : (
                 <>
                   {it.image
@@ -656,7 +671,7 @@ const RENDERERS = {
                 </>
               )}
               <div className="cp-cmt-body">
-                <div className="cp-cmt-ttl" style={icon || wide ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
+                <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
                 <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
               </div>
               {/* La flecha aparece cuando la card tiene link cargado. */}
