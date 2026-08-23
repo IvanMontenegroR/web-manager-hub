@@ -352,8 +352,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   negrita es negrita, las listas salen con viñeta o numero y los saltos se ven (`toExcelRich`, con
   `wrapText`). En un `richText` ExcelJS IGNORA la fuente de la celda, por eso cada pedazo se lleva puesta
   la fuente base. Un texto sin ninguna marca vuelve como string pelado: una celda comun se edita mejor.
-  Los ENLACES siguen bajando ademas a su propia fila con el hipervinculo real (en xlsx el link es por
-  CELDA, no por pedazo de texto). La hoja CMS no repite el formato: sus celdas son formulas a la hoja
+  El enlace se PINTA como enlace (azul y subrayado) adentro del parrafo, pero no es clickeable ahi: en
+  xlsx el hipervinculo es por CELDA, no por pedazo de texto, asi que el link de verdad baja ademas a su
+  propia fila. La hoja CMS no repite el formato: sus celdas son formulas a la hoja
   Contenido, y una formula devuelve texto.
   El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
   opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es

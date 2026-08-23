@@ -124,12 +124,20 @@ export function parseRich(value) {
 // Devuelve un STRING cuando no hay ninguna marca (una celda comun se edita mejor) y
 // `{ richText }` cuando si la hay.
 
-// Los pedazos de una linea, con la fuente ya resuelta. Un enlace va como texto plano:
-// el hipervinculo de verdad baja en su propia fila (en xlsx el link es por celda).
+// Los pedazos de una linea, con la fuente ya resuelta. El enlace se PINTA como enlace
+// (azul y subrayado) para que se vea que ese pedazo va enlazado, pero no es clickeable:
+// en xlsx el hipervinculo es por CELDA, no por pedazo de texto, asi que el link de
+// verdad baja ademas en su propia fila.
+const LINK_COLOR = { argb: 'FF0563C1' }
 function inlineRuns(text, base) {
   return parseInline(text).map((s) => ({
     text: s.text,
-    font: { ...base, ...(s.bold ? { bold: true } : null), ...(s.italic ? { italic: true } : null) },
+    font: {
+      ...base,
+      ...(s.bold ? { bold: true } : null),
+      ...(s.italic ? { italic: true } : null),
+      ...(s.link ? { underline: true, color: LINK_COLOR } : null),
+    },
   }))
 }
 
