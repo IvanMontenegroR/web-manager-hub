@@ -96,12 +96,12 @@ where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 -- adopciones se abren AÑO POR AÑO, con los datos del sitio real: el titulo de la card
 -- es el AÑO y el orden es del mas RECIENTE al mas viejo, que es como se leen.
 --
--- Se van las dos cards de totales que estaban antes ("+1,700,000 platos de alimento
--- donados" y "+994 adopciones responsables"): con el desglose a la vista repetian lo
--- mismo, y ademas sus titulos no eran años, que es lo que ahora ordena el bloque.
--- Estan en el respaldo por si hay que volver a ponerlas. Los numeros tampoco cerraban:
--- +994 es EXACTAMENTE 231 + 398 + 365, pero los platos de los dos años que los tienen
--- suman 2,493,686.39, no 1,700,000.
+-- Las dos cards de TOTALES van primero, como en el sitio: numero destacado arriba y la
+-- bajada abajo ("+1,700,000 / de platos de alimento donados").
+--
+-- OJO con los numeros: +994 es EXACTAMENTE 231 + 398 + 365, asi que esa card es el
+-- total de las tres de abajo. Los platos NO cierran: los dos años que los tienen suman
+-- 2,493,686.39, no 1,700,000. Se deja lo que dice el sitio.
 --
 -- OJO: 2024 no trae platos donados. En el sitio esa card muestra la meta en su lugar,
 -- asi que se respeta; si el dato existe, va como los otros dos años.
@@ -109,6 +109,10 @@ update page_components
 set content = (content - 'view_mode')
   || jsonb_build_object('view_mode', 'slider-card-icons-square')
   || jsonb_build_object('items', jsonb_build_array(
+    jsonb_build_object('title', '+1,700,000',
+      'description', 'de platos de alimento donados'),
+    jsonb_build_object('title', '+994 adopciones responsables',
+      'description', 'de perros y gatos sin hogar'),
     jsonb_build_object('title', '2024', 'description',
       E'**365 adopciones**\n\n¡Nuestra meta es llegar a más de 470 adopciones!'),
     jsonb_build_object('title', '2023', 'description',
