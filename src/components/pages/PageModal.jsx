@@ -17,6 +17,9 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
     market: item?.market ?? defaultMarket ?? '',
     category: item?.category ?? '',
     brand: item?.brand ?? '',
+    url_old: item?.url_old ?? '',
+    url_new: item?.url_new ?? '',
+    url_copydeck: item?.url_copydeck ?? '',
     notes: item?.notes ?? '',
   })
   const [err, setErr] = useState(null)
@@ -99,6 +102,22 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
               : 'Define el tema visual del builder.'}
           </div>
         </div>
+      </div>
+      {/* Enlaces de referencia de la pagina. Bajan a la matriz de contenido exportada
+          (las dos webs se precargan ahi; el Figma se completa en el Excel). */}
+      <div className="row-2">
+        <div className="field">
+          <label>Sitio viejo <span className="lbl-muted">(opcional)</span></label>
+          <input className="control" value={form.url_old} onChange={set('url_old')} placeholder="https://..." />
+        </div>
+        <div className="field">
+          <label>Sitio nuevo <span className="lbl-muted">(opcional)</span></label>
+          <input className="control" value={form.url_new} onChange={set('url_new')} placeholder="https://..." />
+        </div>
+      </div>
+      <div className="field">
+        <label>Copydeck <span className="lbl-muted">(opcional)</span></label>
+        <input className="control" value={form.url_copydeck} onChange={set('url_copydeck')} placeholder="https://..." />
       </div>
       <div className="field">
         <label>Notas <span className="lbl-muted">(opcional)</span></label>

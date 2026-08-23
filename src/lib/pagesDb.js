@@ -98,18 +98,24 @@ export const PAGE_MARKETS = [
 ]
 export const PAGE_MARKET_LABEL = Object.fromEntries(PAGE_MARKETS.map((m) => [m.code, m.label]))
 
-// Estados de una pagina (orden fijo, de menos a mas avanzado).
-export const PAGE_STATUSES = ['Not started', 'In progress', 'On hold', 'Done']
+// Estados de una pagina (orden fijo, de menos a mas avanzado). Los valores guardados
+// son los del CMS/proceso en ingles; la UI muestra la etiqueta en castellano.
+export const PAGE_STATUSES = [
+  'Not started', 'Filling Copydeck', 'Scheduled', 'In progress', 'On hold', 'QA MRM', 'Done',
+]
 export const PAGE_STATUS_LABEL = {
   'Not started': 'No iniciada',
+  'Filling Copydeck': 'Armando copydeck',
+  Scheduled: 'Agendada',
   'In progress': 'En progreso',
   'On hold': 'En pausa',
+  'QA MRM': 'QA MRM',
   Done: 'Lista',
 }
 
-// Nota: si la tabla `pages` ya existe sin las columnas `brand` / `market`, los ALTER
-// de abajo las agregan. La app igual funciona sin ellas (guarda la pagina sin marca /
-// sin mercado) hasta que se corran.
+// Nota: si la tabla `pages` ya existe sin las columnas `brand` / `market` / las urls,
+// los ALTER de abajo las agregan. La app igual funciona sin ellas (guarda la pagina sin
+// marca / sin mercado / sin links) hasta que se corran.
 export const SETUP_SQL = `create table if not exists public.pages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -119,6 +125,9 @@ export const SETUP_SQL = `create table if not exists public.pages (
   market text,
   category text,
   notes text,
+  url_old text,
+  url_new text,
+  url_copydeck text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -126,6 +135,9 @@ export const SETUP_SQL = `create table if not exists public.pages (
 alter table public.pages add column if not exists brand text;
 alter table public.pages add column if not exists market text;
 alter table public.pages add column if not exists category text;
+alter table public.pages add column if not exists url_old text;
+alter table public.pages add column if not exists url_new text;
+alter table public.pages add column if not exists url_copydeck text;
 
 create table if not exists public.page_components (
   id uuid primary key default gen_random_uuid(),
@@ -174,13 +186,16 @@ function pagePayload(p) {
     market: p.market?.trim() || null,
     category: p.category?.trim() || null,
     notes: p.notes?.trim() || null,
+    url_old: p.url_old?.trim() || null,
+    url_new: p.url_new?.trim() || null,
+    url_copydeck: p.url_copydeck?.trim() || null,
   }
 }
 
-// `brand`, `market` y `category` son columnas agregadas despues: si alguna todavia no existe en la
-// tabla, el insert/update falla nombrandola. En ese caso se saca del payload y se
-// reintenta (la pagina se guarda igual, sin ese dato).
-const OPTIONAL_COLS = ['brand', 'market', 'category']
+// `brand`, `market`, `category` y las urls son columnas agregadas despues: si alguna
+// todavia no existe en la tabla, el insert/update falla nombrandola. En ese caso se
+// saca del payload y se reintenta (la pagina se guarda igual, sin ese dato).
+const OPTIONAL_COLS = ['brand', 'market', 'category', 'url_old', 'url_new', 'url_copydeck']
 function missingOptionalCol(error) {
   if (!error) return null
   const msg = error.message || ''

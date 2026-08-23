@@ -467,6 +467,23 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   setH(3, 30)
   let row = 5
 
+  // Referencias de la pagina: el diseño y las dos webs. Van arriba de todo porque son
+  // lo primero que se busca al abrir la matriz. Las dos urls salen de la ficha de la
+  // pagina si estan cargadas; el Figma se completa en el Excel (no lo guardamos: cambia
+  // por pagina y por vuelta de diseño).
+  // La galeria de componentes es un catalogo, no una pagina: no tiene ni Figma ni webs
+  // (pasa metas:false, la misma señal).
+  if (withMetas) {
+    const refTop = row
+    row = bandTitle(row, 'Referencias', PURINA_RED)
+    row = fieldRow(row, 'Link del Figma', '', { link: '' })
+    row = fieldRow(row, 'Contraseña del Figma', '', { placeholder: 'Escribí acá la contraseña' })
+    row = fieldRow(row, 'Web vieja', '', { link: page.url_old || '' })
+    row = fieldRow(row, 'Web nueva', '', { link: page.url_new || '' })
+    boxBorder(refTop, row - 1, 2, 3, PURINA_RED)
+    row++
+  }
+
   // Componentes: banda -> [campos izquierda | imagen derecha].
   // El breadcrumb (matrixExclude) no se exporta: se arma solo, no lleva contenido.
   // `label` = numeracion de la seccion ("3", o "3.1.2" para un componente que vive
@@ -637,6 +654,9 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // pestaña borrada; mismo criterio que el builder), asi el Excel no se come contenido.
   const kidsOf = (id, ti, isLast) => mainComps.filter((c) => c.parent_id === id
     && (isLast ? (c.tab_index ?? 0) >= ti : (c.tab_index ?? 0) === ti))
+  // Fila donde arranca la primera seccion: la imagen de la pagina entera se alinea con
+  // ella (antes era la 5 fija, pero arriba puede haber bloque de Referencias).
+  const firstCompRow = row
   let idx = 0
   for (const comp of roots) {
     const def = getComponent(comp.component_key)
@@ -683,15 +703,15 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       const nat = (await loadSize(full)) || { w: STACK_W, h: STACK_W }
       const w = Math.min(FULL_MAX_W, nat.w)
       const h = Math.round(nat.h * (w / nat.w))
-      const band = ws.getCell(5, FULL_COL + 1)
+      const band = ws.getCell(firstCompRow, FULL_COL + 1)
       band.value = 'La página completa'
       band.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
       // Oscura (no roja): no es una seccion de la matriz, es la referencia visual.
       band.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
       band.alignment = { vertical: 'middle', indent: 1 }
-      setH(5, 22)
+      setH(firstCompRow, 22)
       const imgId = wb.addImage({ base64: full, extension: 'png' })
-      ws.addImage(imgId, { tl: { col: FULL_COL, row: 5 }, ext: { width: w, height: h }, editAs: 'oneCell' })
+      ws.addImage(imgId, { tl: { col: FULL_COL, row: firstCompRow }, ext: { width: w, height: h }, editAs: 'oneCell' })
     }
   }
 

@@ -208,8 +208,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   `import.meta.env.BASE_URL`.
 - **Creacion de paginas** (`src/components/pages/`, se abre desde la seccion Modulos de Ecosystem 2.0):
   modulo para armar las paginas de la migracion. Dos capas:
-  1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|In progress|On hold|
-     Done, ver `PAGE_STATUS_LABEL`) y orden por prioridad (reordenable, persiste `sort_order`). El boton
+  1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|Filling Copydeck|
+     Scheduled|In progress|On hold|QA MRM|Done, ver `PAGE_STATUS_LABEL`: el valor guardado es el del
+     proceso en ingles y la UI muestra la etiqueta en castellano) y orden por prioridad (reordenable,
+     persiste `sort_order`). Cada pagina lleva ademas tres enlaces de referencia opcionales —
+     `url_old` (sitio viejo), `url_new` (sitio nuevo) y `url_copydeck` — que se editan en el PageModal;
+     los dos primeros bajan precargados a la matriz de contenido exportada. Son columnas OPCIONALES:
+     `withOptionalCols` las saca del payload si la tabla todavia no las tiene (ver
+     `sql/2026_pages_urls_y_status.sql`). El boton
      "Armar" abre el builder de esa pagina. Se separa por **mercado** (pestañas, `PAGE_MARKETS`) y dentro
      de cada mercado se agrupa por **categoria** (`pages.category`, lista ABIERTA — `PAGE_CATEGORIES` son
      solo sugerencias; sin categoria = pagina suelta arriba de todo, ej. la Home). La **subcategoria**
@@ -289,6 +295,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      aparece del otro lado sin copiar nada. `cellRef` registra en que fila quedo cada campo mientras se
      arma la hoja Contenido. Esas celdas van en gris y la hoja CMS se **protege** (sin contraseña) para que
      nadie pise una formula. Los nombres de las hojas son FIJOS porque las formulas los referencian.
+     Arriba de todo, debajo del logo Purina, va el bloque **Referencias**: link del Figma, contraseña del
+     Figma, web vieja y web nueva. Las dos webs se precargan desde `pages.url_old` / `pages.url_new` (si
+     no hay valor queda la pista gris "Pegá acá el link"); las dos del Figma se completan siempre en el
+     Excel — cambian por pagina y por vuelta de diseño, no vale la pena guardarlas. La galeria "Todos los
+     componentes" no lo lleva (es un catalogo, no una pagina: misma señal que `metas:false`).
      La hoja Contenido tiene, por pagina, una seccion por componente
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
      numeradas `1`, `2`, `3`… Un bloque de pestañas suma **una banda oscura por pestaña** (`3.1 — Pestaña:
