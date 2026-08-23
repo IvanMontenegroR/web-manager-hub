@@ -79,7 +79,18 @@ set component_key = 'text',
     )
 where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 
--- PENDIENTE, no se toca sin confirmarlo: el Card Grid de las estadisticas
--- ("Juntos, hacemos la diferencia cada día") esta en `grid-cards`, que es el mosaico
--- que alterna imagen y caja de contenido — y el bloque no tiene ni una imagen cargada.
--- El componente ya es el correcto; lo que habria que revisar es el modo de vista.
+-- 3) Las estadisticas ("Juntos, hacemos la diferencia cada día") salen de `grid-cards`.
+-- Ese modo es el mosaico que alterna imagen y caja de contenido, y el bloque no tiene
+-- ni una imagen: quedaban tres placeholders vacios. Pasa a `cards-numbers`, que no
+-- pide imagen y pinta el titulo de cada card con el acento — o sea el numero
+-- destacado, que es de lo que se trata el bloque.
+--
+-- OJO: `cards-numbers` ademas numera las cards con un chip (1, 2, 3) que sale del
+-- ORDEN. En los pasos eso es lo correcto — son una secuencia — pero en las
+-- estadisticas es un numero de mas al lado del que importa, y los dos bloques quedan
+-- iguales uno arriba del otro. Lo que corresponderia es `cards-icons` (icono + titulo
+-- + descripcion, sin imagen), pero todavia no tenemos ese mockup: sin render propio
+-- cae a las cards verticales, que si piden imagen. Ver CG_TO_CMT en ComponentPreview.
+update page_components
+set content = (content - 'view_mode') || jsonb_build_object('view_mode', 'cards-numbers')
+where id = '28d6a366-90bf-40a9-939f-340626ea309d';
