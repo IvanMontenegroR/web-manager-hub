@@ -134,7 +134,6 @@ const btnClass = (v) => (/secondary/.test(v || '') ? ' cp-cta--sec'
   : /outline/.test(v || '') ? ' cp-cta--out'
     : /text/.test(v || '') ? ' cp-cta--txt' : '')
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
-const CMT_BAND = '#F5B92B' // amarillo del diseño para la banda de "Cards con icono"
 const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
 
 // ---- Contraste de color -------------------------------------------------
@@ -751,9 +750,10 @@ const RENDERERS = {
     const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
-    // Banda de color (solo la variante con iconos): color propio > secundario de la
-    // marca > amarillo del diseño. El relleno de las cards se aclara a partir de ella.
-    const band = T(c.color, ctx?.brandSecondary || CMT_BAND)
+    // Banda de color (solo la variante con iconos). Es OPCIONAL, igual que el fondo de
+    // las demas variantes: sin color cargado NO hay banda. El relleno de las cards se
+    // aclara a partir de ella cuando la hay.
+    const band = T(c.color, null)
     // Numeradas: el chip y el titulo van con el acento (color propio > marca > rojo).
     const acc = T(c.accent, ctx?.brandAccent || ACCENT)
     // Fondo del bloque (fuera de la variante con iconos, que usa su banda) y color del
@@ -784,18 +784,20 @@ const RENDERERS = {
       ])
     const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
     const style = {}
-    if (icon) {
+    if (icon && band) {
       style['--band'] = band
       style['--card'] = readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)'
-    } else if (bg) style.background = bg
+    } else if (!icon && bg) style.background = bg
+    // Lo que el bloque pinta de verdad: la banda en la variante con iconos, el fondo en
+    // las demas. Es lo que decide si es una seccion (a sangre) o no.
+    const painted = icon ? band : bg
     if (nums) style['--acc'] = acc
     if (txt) style['--txt'] = txt
     return (
       <div
         // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
-        // sangre (ver la regla generica en el CSS). La banda de la variante con iconos
-        // siempre tiene color, asi que siempre es seccion.
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon || bg ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        // sangre (ver la regla generica en el CSS). Sin fondo no se toca.
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${painted ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">

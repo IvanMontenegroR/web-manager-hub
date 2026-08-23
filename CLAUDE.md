@@ -249,8 +249,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      la paleta, se agrega la entrada y el mockup la toma sola.
      El Carrusel de cards ademas configura por pagina el **fondo del bloque** y el **color del header**
      (titulo, subtitulo y flechas — NO el texto de las cards, `--txt` + la clase `cp-cmt--hastxt`). El
-     fondo son dos keys que nunca conviven: `color` en la variante con iconos (la banda, que hereda de la
-     marca) y `background_color` en las demas, donde por defecto NO hay fondo. Un campo de color
+     fondo son dos keys que nunca conviven: `color` en la variante con iconos (la banda) y
+     `background_color` en las demas. En las DOS, por defecto NO hay fondo: sin color cargado la banda no
+     se pinta y el bloque se comporta como cualquier otro. Un campo de color
      `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
      quitarlo, en vez de un rojo que parece cargado.
      **FULL BLEED**: un bloque con FONDO PINTADO es una **seccion**, no una card: la banda de color cubre
@@ -259,8 +260,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      sitio no existe). El criterio es el FONDO, no el componente ni la posicion: un bloque sin fondo no
      tiene nada que se vea cortarse y no se toca. Lo marca el preview con la clase `.cp-bleed` cuando
      efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
-     variantes de carrusel (con fondo cargado, o con la banda de la variante con iconos, que siempre tiene
-     color). Un token que todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
+     variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
+     todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
      El breakout va en el `.pb-block` (tiene `overflow:hidden`, adentro se recortaria) y apunta al render
      PROPIO del bloque (`> .cp-render > .cp-bleed`), asi un texto con fondo metido en una columna de un
      layout no hace sangrar al contenedor. `--bleed-x` es el padding lateral propio de cada bloque, para

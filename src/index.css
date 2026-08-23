@@ -1951,7 +1951,7 @@ textarea.control { resize: vertical; min-height: 64px; }
    `--bleed-x` es el padding lateral propio del bloque, para compensarlo con el gutter
    y que el contenido no se corra respecto de los bloques sin fondo. */
 .cp-bleed { --bleed-x: 30px; }
-.cp-cmt--hasbg, .cp-cmt--icon { --bleed-x: 26px; }
+.cp-cmt--hasbg, .cp-cmt--band { --bleed-x: 26px; }
 /* Con dos clases a proposito: hay variantes que traen su propio radio mas abajo en el
    archivo (ej. .cp-cmt--wideb) y no queremos depender del orden para ganarles. */
 .cp-render .cp-bleed { border-radius: 0; }
@@ -2062,11 +2062,14 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt--wideb { background: linear-gradient(180deg, #fff 0%, #fff 42%, #6b7480 100%); border-radius: 14px; padding: 22px 22px 30px; }
 
 /* --- Variante con ICONO sobre banda de color (Card icon square) --- */
-.cp-cmt--icon { background: var(--band); padding: 26px 26px 32px; }
+/* La banda de color es OPCIONAL: sin color cargado el bloque no tiene fondo y se
+   comporta como cualquier otro. Solo con banda (`--band`) se pinta y se vuelve seccion. */
+.cp-cmt--band { background: var(--band); padding: 26px 26px 32px; }
 .cp-cmt--icon .cp-brands-title, .cp-cmt--icon .cp-brands-sub { color: #111114; }
 .cp-cmt--icon .cp-plist-arrow { border-color: rgba(0, 0, 0, .45); color: #111114; }
 .cp-cmt--icon .cp-cmt-card {
-  flex: 0 0 300px; height: 300px; background: var(--card); border-radius: 14px;
+  /* Sin banda, la card necesita su propio relleno: sobre blanco no se veria. */
+  flex: 0 0 300px; height: 300px; background: var(--card, #f1f3f5); border-radius: 14px;
   display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px;
 }
 .cp-cmt--icon .cp-cmt-icon { color: var(--acc, #ED1C24); display: block; }

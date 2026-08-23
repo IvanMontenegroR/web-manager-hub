@@ -764,7 +764,7 @@ export const COMPONENTS = [
       // en la variante con iconos la banda de color es parte del diseño y HEREDA de la
       // marca (`color`, que ya existia); en el resto el fondo es opcional y por defecto
       // NO hay ninguno (`background_color`), para no repintar las paginas ya armadas.
-      { key: 'color', label: 'Color de fondo del bloque', type: 'color', cms: true, brandDefault: true, onlyTypes: [CMT_ICON] },
+      { key: 'color', label: 'Color de fondo del bloque', type: 'color', cms: true, clearable: true, onlyTypes: [CMT_ICON] },
       { key: 'background_color', label: 'Color de fondo del bloque', type: 'color', cms: true, clearable: true, hideTypes: [CMT_ICON] },
       // Afecta SOLO al header (titulo, subtitulo y flechas), no al texto de las cards.
       { key: 'text_color', label: 'Color del título y subtítulo', type: 'color', cms: true, clearable: true },
