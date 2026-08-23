@@ -342,8 +342,16 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
-     Un campo con `noneOption` (ej. "Aplica a" -> "Sin iconos" en el carrusel de marcas) NO baja al Excel
-     cuando esta en esa opcion: no hay nada que cargar (`excelSkip`). Un componente sin NINGUN campo de
+     La hoja Contenido lista lo que ESTA pagina lleva, no el catalogo de todo lo que el componente podria
+     llevar: un campo VACIO no baja (`excelSkip` + `isEmptyValue`), y tampoco los que quedaron en su
+     `noneOption` (ej. "Aplica a" -> "Sin iconos" en el carrusel de marcas). Un campo que se dejo vacio al
+     armar la pagina es un campo que esa pagina no usa; mostrarlo con un guion solo hace dudar al mercado.
+     Un item de lista sin nada cargado tampoco dibuja su banda, y un bloque sin un solo campo cargado
+     muestra una linea que lo aclara en vez de la tabla vacia. La hoja CMS NO filtra nada: es la guia del
+     editor y lista todos los campos, tecnicos incluidos.
+     Al pie de cada lista repetible va una linea "¿Falta <item>?" que explica como pedir uno mas: el
+     mercado no tiene otra forma de saber que el bloque admite mas de los que la pagina tiene. Las listas
+     de tamaño FIJO (el mosaico de 6 bloques) no la llevan, no se pueden estirar. Un componente sin NINGUN campo de
      mercado (los contenedores de columnas: todo lo suyo es tecnico) no dibuja la tabla, solo una linea
      que aclara que el contenido va en los componentes de adentro.
   **AVANZADO y CLASSY**: no son campos de un componente, son dos bloques que Drupal le agrega a CADA

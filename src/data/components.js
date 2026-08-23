@@ -1173,8 +1173,22 @@ export function visibleFields(def, content = {}, opts = {}) {
 // ¿Este campo se OMITE del Excel para este valor? Un campo con `noneOption` (ej.
 // "Aplica a" -> "Sin iconos") no tiene nada que cargar cuando esta en esa opcion,
 // asi que no se le pide una fila al mercado.
+// ¿Este campo NO baja a la hoja Contenido? Se saca cuando no hay NADA que cargar:
+//   - quedo en su `noneOption` (ej. "Aplica a: Sin iconos"): no hay dato que pedir.
+//   - esta VACIO. La hoja es lo que ESTA pagina lleva, no el catalogo de todo lo que el
+//     componente podria llevar: un campo que se dejo vacio al armarla es un campo que
+//     esta pagina no usa, y mostrarlo con un guion solo hace dudar al mercado.
 export function excelSkip(field, value) {
-  return !!field?.noneOption && value === field.noneOption
+  if (!field) return false
+  if (field.noneOption && value === field.noneOption) return true
+  return isEmptyValue(value)
+}
+
+// Vacio = sin dato. Un booleano SI es dato (false = destildado a proposito).
+export function isEmptyValue(value) {
+  if (value == null || value === '') return true
+  if (Array.isArray(value)) return value.length === 0
+  return false
 }
 
 // Sub-campos VISIBLES de un item de una lista. Filtra por:

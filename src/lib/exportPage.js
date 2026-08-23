@@ -191,6 +191,14 @@ async function stackImages(dataUrls, bg = '#ffffff') {
 }
 
 // Alto estimado (pt) de una celda de contenido segun cuanto texto wrapea.
+// Los items de una lista tal como se exportan. Una lista de tamaño FIJO (ej. el mosaico
+// de 6 bloques) se rellena hasta `fixed`; el resto va tal cual esta cargada — sin items
+// no hay nada que mostrar.
+function listItems(f, content) {
+  const stored = Array.isArray(content?.[f.key]) ? content[f.key] : []
+  return f.fixed ? Array.from({ length: f.fixed }, (_, i) => stored[i] || {}) : stored
+}
+
 // Que tanto formato admite un campo, igual que el mockup: el CUERPO (`textarea`) es
 // rich text con bloques — parrafos y listas, como <Rich> —; un campo de una linea
 // (titulos, subtitulos, textos de boton) admite solo lo inline, como <RT>. El resto
@@ -550,15 +558,24 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // ninguno: todo lo suyo es tecnico y su contenido son los hijos, que van en sus
     // propias secciones. En ese caso no se dibuja la tabla — una cabecera "Campo |
     // Contenido a cargar" sin una sola fila debajo es ruido para el mercado.
-    const visible = visibleFields(def, content, { excel: true })
+    // Ademas se sacan los campos VACIOS (`excelSkip`): la hoja lista lo que esta
+    // pagina lleva, no todo lo que el componente podria llevar. Una lista sin items
+    // tampoco baja — seria una card vacia con diez guiones.
+    const visible = visibleFields(def, content, { excel: true }).filter((f) => (f.type === 'list'
+      ? listItems(f, content).some((it) => visibleSubFields(f, null, content, { excel: true })
+        .some((sf) => !excelSkip(sf, it[sf.key])))
+      : !excelSkip(f, content[f.key])))
 
     if (!visible.length) {
-      // Un CONTENEDOR de columnas no tiene campos propios: todo lo suyo es tecnico y
-      // su contenido son los hijos, que van en sus propias secciones. Dibujar una
-      // cabecera "Campo | Contenido a cargar" sin una sola fila debajo seria ruido.
+      // Sin una sola fila que mostrar no se dibuja la tabla: una cabecera "Campo |
+      // Contenido a cargar" vacia es ruido. Pasa en dos casos y se aclara cual: un
+      // CONTENEDOR de columnas (todo lo suyo es tecnico, el contenido son los hijos) o
+      // un bloque al que no se le cargo nada.
       ws.mergeCells(row, 2, row, 3)
       const nc = ws.getCell(row, 2)
-      nc.value = 'Este bloque no lleva contenido propio: se carga en los componentes de adentro.'
+      nc.value = def?.container
+        ? 'Este bloque no lleva contenido propio: se carga en los componentes de adentro.'
+        : 'Este bloque todavía no tiene contenido cargado.'
       nc.font = { italic: true, size: 10, color: { argb: MUTED } }
       nc.alignment = { vertical: 'middle', indent: 1 }
       setH(row, 18)
@@ -583,26 +600,32 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
     for (const f of visible) {
       if (f.type === 'list') {
-        const stored = Array.isArray(content[f.key]) ? content[f.key] : []
-        // Lista de tamaño fijo (ej. mosaico = 6 bloques): se rellena a `fixed`.
-        const arr = f.fixed
-          ? Array.from({ length: f.fixed }, (_, i) => stored[i] || {})
-          : (stored.length ? stored : [{}])
+        const arr = listItems(f, content)
         const one = f.itemLabel || f.label
+        let shown = 0
         arr.forEach((item, i) => {
           const role = f.roles ? f.roles[i] : null
-          row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
           // Con roles, cada bloque muestra solo los subcampos de su rol.
           // Ademas de los tecnicos (cms) y los que no son de este rol, se omiten los
-          // que quedaron en su `noneOption` (ej. "Aplica a: Sin iconos"): no hay nada
-          // que cargar, seria una fila de ruido.
+          // que quedaron en su `noneOption` y los VACIOS (ver excelSkip).
           const subFields = visibleSubFields(f, role, content, { excel: true }).filter((sf) => !excelSkip(sf, item[sf.key]))
+          if (!subFields.length) return // item sin nada: no se dibuja la banda sola
+          shown++
+          row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
           for (const sf of subFields) {
             row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), {
               sub: true, disabled, rich: richKind(sf), ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
             })
           }
         })
+        // El componente admite MAS items de los que tiene la pagina, y eso el mercado no
+        // tiene forma de saberlo: la lista se corta donde se corto al armarla. Las de
+        // tamaño FIJO (ej. el mosaico de 6 bloques) no lo llevan, no se pueden estirar.
+        if (!f.fixed && shown && !disabled) {
+          row = fieldRow(row, `¿Falta ${one.toLowerCase()}?`,
+            `Este bloque admite las que hagan falta. Para pedir otra, copiá el bloque "${one} ${shown}" completo y numerá el siguiente.`,
+            { sub: true, italic: true, fill: SUBHEAD_BG, color: MUTED })
+        }
       } else if (!excelSkip(f, content[f.key])) {
         row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, rich: richKind(f), ref: `${comp.id}|${f.key}` })
       }
