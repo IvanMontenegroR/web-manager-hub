@@ -1514,6 +1514,15 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--purina); }
 .cp-p { font-size: 14px; line-height: 1.6; color: #3a424e; margin: 6px 0; }
 .cp-cta { display: inline-block; margin-top: 12px; background: var(--purina); color: #fff; font-weight: 700; font-size: 13px; padding: 9px 20px; border-radius: 24px; }
+/* Alineacion del bloque de texto. Arrastra al CTA porque es inline-block. */
+.cp-al-center { text-align: center; }
+.cp-al-right { text-align: right; }
+/* Con fondo por token, el texto hereda el color legible que calcula el render y el
+   bloque respira como seccion (en vez de quedar el color pegado al borde). */
+.cp-text--bg { border-radius: 10px; padding: 30px; }
+.cp-text--bg .cp-h2, .cp-text--bg .cp-p { color: inherit; }
+/* Sobre un fondo oscuro (ej. Primary Red) el boton rojo desaparece: se invierte. */
+.cp-text--ondark .cp-cta { background: #fff; color: var(--bg, var(--purina)); }
 .cp-img { width: 100%; object-fit: cover; display: block; background: #e5e9f0; }
 .cp-img-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aab2bd; }
 /* Dimension recomendada dentro del placeholder de imagen. */

@@ -1,6 +1,6 @@
 import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
-import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS, tabList } from '../../../data/components'
+import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS, BG_TOKENS, tabList } from '../../../data/components'
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
 function RT({ children }) {
@@ -278,13 +278,23 @@ const RENDERERS = {
 
   text: (c) => {
     const two = /dos/i.test(c.style)
+    // La alineacion arrastra al CTA (en el CMS hoy no lo hace: es un bug reportado).
+    const al = /centro/i.test(c.align) ? 'center' : /derecha/i.test(c.align) ? 'right' : 'left'
+    // Fondo por TOKEN del CMS. Los que no tenemos mapeados quedan sin pintar.
+    const bg = BG_TOKENS[c.background_color] || null
+    const ink = bg ? readableOn(bg) : null
+    // Sobre fondo oscuro el boton rojo no se ve: se invierte a blanco con el texto
+    // del color del fondo.
+    const onDark = ink === '#ffffff'
+    const style = bg ? { background: bg, color: ink, '--bg': bg } : undefined
     return (
-      <div className="cp-block">
+      <div className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg' : ''}${onDark ? ' cp-text--ondark' : ''}`} style={style}>
         {c.title && <div className="cp-h2">{c.title}</div>}
         <div className={two ? 'cp-cols-2' : ''}>
           <p className="cp-p"><RT>{T(c.body, 'Texto del bloque...')}</RT></p>
           {two && <p className="cp-p">&nbsp;</p>}
         </div>
+        {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
       </div>
     )
   },

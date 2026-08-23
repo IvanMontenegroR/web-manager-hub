@@ -195,6 +195,8 @@ export default function ContentForm({ component, draft, onChange, brandSecondary
           {f.type === 'list'
             ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} content={draft} />
             : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
+          {/* Aclaracion del catalogo (ej. que un token no se pinta en el mockup). */}
+          {f.hint && <div className="hint">{f.hint}</div>}
         </div>
       ))}
     </div>

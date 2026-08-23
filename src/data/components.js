@@ -20,6 +20,30 @@ export const CMT_WIDE_TOP = 'Cards apaisadas con título arriba'     // Slider c
 export const CMT_NUMBERS = 'Cards numeradas'                        // Cards numbers
 export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS]
 
+// Background Color del CMS: paleta de TOKENS (no hex). La comparten el Banner y el
+// bloque de Texto, por eso vive aca y no duplicada en cada componente.
+export const BG_COLORS = [
+  'Por defecto',
+  'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04',
+  'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400',
+  'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800',
+  'Primary Black', 'Primary Red', 'Primary White',
+  'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600',
+  'Secondary Red',
+]
+
+// Hex de cada token, para poder PINTAR el fondo en el mockup. Solo estan los que
+// conocemos con certeza; el resto queda sin pintar a proposito (inventar un color de
+// un design system seria peor que no mostrarlo). Completar cuando desarrollo pase la
+// paleta: agregar la entrada aca y el mockup la toma sola.
+export const BG_TOKENS = {
+  'Primary Red': '#ED1C24',
+  'Primary White': '#FFFFFF',
+}
+
+// Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
+export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
+
 // Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
 // estas dos, para poder meterle contenido adentro antes de renombrarlas.
 export const TAB_SAMPLE = [
@@ -93,7 +117,7 @@ export const COMPONENTS = [
       ] },
       // Avanzado (CMS, no van al Excel de mercados)
       { key: 'banner_align', label: 'Banner Align Content', type: 'select', cms: true, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
-      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: ['Por defecto', 'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04', 'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400', 'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800', 'Primary Black', 'Primary Red', 'Primary White', 'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600', 'Secondary Red'] },
+      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: BG_COLORS },
       { key: 'visibility', label: 'Visibilidad (pet type)', type: 'select', cms: true, options: ['Genérica (todas)', 'Gato', 'Perro', 'Gato + Perro'] },
       { key: 'see_more_text', label: 'See more — texto', type: 'text', cms: true },
       { key: 'see_more_url', label: 'See more — link', type: 'url', cms: true },
@@ -115,12 +139,19 @@ export const COMPONENTS = [
     key: 'text',
     name: 'Texto',
     category: 'Contenido',
-    help: 'Bloque de texto (una o dos columnas).',
+    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo con los mismos tokens que el Banner, y puede tener un CTA.',
     fields: [
       { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
       { key: 'title', label: 'Titulo', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
+      // La alineacion arrastra al CTA. En el CMS hoy NO lo hace (esta reportado como
+      // bug a F5); el mockup muestra como TIENE que quedar.
+      { key: 'align', label: 'Alineación', type: 'select', cms: true, options: TEXT_ALIGNS },
+      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: BG_COLORS,
+        hint: 'Token del CMS, los mismos del Banner. En el mockup solo se pintan los que tenemos mapeados a un hex; el resto se ve sin fondo.' },
+      { key: 'cta_label', label: 'Botón — texto', type: 'text' },
+      { key: 'cta_url', label: 'Botón — link', type: 'url' },
     ],
   },
   {

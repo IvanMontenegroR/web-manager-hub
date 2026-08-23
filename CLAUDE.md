@@ -234,6 +234,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      un componente recien agregado se quedaria sin medidas). La variante por DEFECTO tiene que ser la que
      ya existia, asi las paginas armadas antes no cambian. El "Alt Text" del Excel se pide por VARIANTE
      (`componentHasImage(def, content)`): las que no llevan imagen no lo muestran.
+     El **Background Color** del CMS es una lista de TOKENS (`BG_COLORS`, compartida por el Banner y el
+     bloque de Texto), no un hex. Para poder pintarlo en el mockup hay un mapa `BG_TOKENS` token -> hex
+     con SOLO los que conocemos con certeza (Primary Red, Primary White); el resto queda sin pintar a
+     proposito — inventar el color de un design system seria peor que no mostrarlo. Cuando desarrollo pase
+     la paleta, se agrega la entrada y el mockup la toma sola.
      El Carrusel de cards ademas configura por pagina el **fondo del bloque** y el **color del header**
      (titulo, subtitulo y flechas — NO el texto de las cards, `--txt` + la clase `cp-cmt--hastxt`). El
      fondo son dos keys que nunca conviven: `color` en la variante con iconos (la banda, que hereda de la
