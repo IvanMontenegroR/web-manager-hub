@@ -81,16 +81,16 @@ where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 
 -- 3) Las estadisticas ("Juntos, hacemos la diferencia cada día") salen de `grid-cards`.
 -- Ese modo es el mosaico que alterna imagen y caja de contenido, y el bloque no tiene
--- ni una imagen: quedaban tres placeholders vacios. Pasa a `cards-numbers`, que no
--- pide imagen y pinta el titulo de cada card con el acento — o sea el numero
--- destacado, que es de lo que se trata el bloque.
+-- ni una imagen: quedaban tres placeholders vacios. Pasa a `slider-card-icons-square`
+-- (Card Icon Square): banda de color a lo ancho con cards cuadradas de icono + titulo
+-- + descripcion, sin una sola imagen. La cifra es el titulo de la card.
 --
--- OJO: `cards-numbers` ademas numera las cards con un chip (1, 2, 3) que sale del
--- ORDEN. En los pasos eso es lo correcto — son una secuencia — pero en las
--- estadisticas es un numero de mas al lado del que importa, y los dos bloques quedan
--- iguales uno arriba del otro. Lo que corresponderia es `cards-icons` (icono + titulo
--- + descripcion, sin imagen), pero todavia no tenemos ese mockup: sin render propio
--- cae a las cards verticales, que si piden imagen. Ver CG_TO_CMT en ComponentPreview.
+-- Los pasos se quedan en `cards-numbers` — ahi el chip 1/2/3 que sale del ORDEN es lo
+-- correcto, son una secuencia — y asi ademas los dos bloques dejan de verse iguales.
+--
+-- Quedan dos cosas para cargar, que el mockup marca solas: el ICONO de cada card (sin
+-- elegir se dibuja la pata por defecto) y el Background Color de la banda (sin cargar
+-- toma el ambar por defecto del mockup).
 update page_components
-set content = (content - 'view_mode') || jsonb_build_object('view_mode', 'cards-numbers')
+set content = (content - 'view_mode') || jsonb_build_object('view_mode', 'slider-card-icons-square')
 where id = '28d6a366-90bf-40a9-939f-340626ea309d';
