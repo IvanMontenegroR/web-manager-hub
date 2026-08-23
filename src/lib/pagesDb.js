@@ -101,17 +101,17 @@ export const PAGE_MARKET_LABEL = Object.fromEntries(PAGE_MARKETS.map((m) => [m.c
 // Estados de una pagina (orden fijo, de menos a mas avanzado). Los valores guardados
 // son los del CMS/proceso en ingles; la UI muestra la etiqueta en castellano.
 export const PAGE_STATUSES = [
-  'Not started', 'Filling Matrix', 'Complete (outliers)', 'In progress', 'On hold', 'Done',
+  'Not started', 'Filling Matrix', 'In progress', 'On hold', 'Complete (outliers)', 'Done',
 ]
 export const PAGE_STATUS_LABEL = {
   'Not started': 'No iniciada',
   'Filling Matrix': 'Llenando matriz',
-  // La matriz esta completa salvo los outliers: lo que quedo colgado por algo de
-  // afuera (un link que no llego, una pieza que falta).
-  'Complete (outliers)': 'Completo (outliers)',
   'In progress': 'En progreso',
   'On hold': 'On hold',
-  Done: 'Lista',
+  // El anteultimo paso: esta todo salvo lo que quedo colgado por algo de afuera (un
+  // link que no llego, una pieza que falta). Cuando eso se destraba, pasa a Completo.
+  'Complete (outliers)': 'Completo (outliers)',
+  Done: 'Completo',
 }
 
 // Nota: si la tabla `pages` ya existe sin las columnas `brand` / `market` / las urls,

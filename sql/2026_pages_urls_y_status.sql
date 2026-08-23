@@ -5,8 +5,8 @@
 --    `pagesDb.withOptionalCols` tolera que no existan todavia (guarda la pagina sin
 --    ellas), asi que correr esto es lo que las activa. La CONTRASEÑA del Figma no se
 --    guarda: cambia por vuelta de diseño y se completa en el Excel.
--- 2) Estados: quedan seis — Not started, Filling Matrix, Complete (outliers),
---    In progress, On hold, Done (ver `PAGE_STATUSES`). `status` es texto libre en la
+-- 2) Estados: quedan seis — Not started, Filling Matrix, In progress, On hold,
+--    Complete (outliers), Done (ver `PAGE_STATUSES`). `status` es texto libre en la
 --    DB, asi que la lista no es una constraint: el UPDATE de abajo esta por si alguna
 --    fila quedo con un valor de las vueltas anteriores (cuando el estado se llamaba
 --    "Filling Copydeck" / "Missing links", o existian "Scheduled" y "QA MRM").
