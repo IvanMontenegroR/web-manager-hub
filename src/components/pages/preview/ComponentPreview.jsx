@@ -414,7 +414,9 @@ const RENDERERS = {
     return (
       <div className="cp-block cp-cimg">
         <Img src={c.image} h={340} />
-        {(c.title || c.subtitle || c.body || ctas.length) && (
+        {/* `> 0` y no `ctas.length` a secas: sin CTAs la cadena vale 0 y React dibuja
+            el cero como texto debajo de la imagen. */}
+        {(c.title || c.subtitle || c.body || ctas.length > 0) && (
           <div className="cp-cimg-box">
             {c.title && <div className="cp-h2">{c.title}</div>}
             {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
