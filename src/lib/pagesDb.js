@@ -294,13 +294,15 @@ export async function fetchPageComponents(pageId) {
 
 // `at` = donde cae: { parent_id, tab_index } para meterlo dentro de una pestaña,
 // nada para dejarlo suelto en la pagina.
-export async function addPageComponent(pageId, componentKey, sort_order, at = {}) {
+export async function addPageComponent(pageId, componentKey, sort_order, at = {}, content = {}) {
   const { data, error } = await supabase
     .from('page_components')
     .insert({
       page_id: pageId,
       component_key: componentKey,
-      content: {},
+      // Los atajos de la paleta traen contenido inicial (ej. el modo de vista del
+      // Card Grid); los componentes a secas arrancan vacios.
+      content: content || {},
       sort_order: sort_order ?? 0,
       parent_id: at.parent_id ?? null,
       tab_index: at.parent_id ? (at.tab_index ?? 0) : null,

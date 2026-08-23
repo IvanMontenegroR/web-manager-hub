@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil,
 } from 'lucide-react'
-import { COMPONENTS, getComponent, tabList } from '../../data/components'
+import { PALETTE, getComponent, tabList } from '../../data/components'
 import {
   fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
 } from '../../lib/pagesDb'
@@ -112,13 +112,16 @@ export default function PageBuilder({ page, onBack }) {
     setDirty(false)
   }
 
+  // `p` = item de la PALETA (un componente o un atajo con contenido inicial).
   // `at` = { parent_id, tab_index } para que caiga DENTRO de una pestaña; sin `at`
   // queda suelto al final de la pagina.
-  async function add(key, at = {}) {
+  async function add(p, at = {}) {
     setBusy(true)
     try {
       await flushSave() // no perder lo del componente actual al agregar otro
-      const created = await addPageComponent(page.id, key, nextSortIn(at.parent_id || null, at.tab_index ?? 0), at)
+      const created = await addPageComponent(
+        page.id, p.component_key, nextSortIn(at.parent_id || null, at.tab_index ?? 0), at, p.content,
+      )
       setPicker(null)
       await load()
       await select(created)
@@ -194,9 +197,9 @@ export default function PageBuilder({ page, onBack }) {
               {open && (
                 <div className="pb-picker">
                   {/* Sin contenedores: no se anidan pestañas dentro de pestañas. */}
-                  {COMPONENTS.filter((d) => !d.container).map((d) => (
+                  {PALETTE.filter((d) => !d.container).map((d) => (
                     <button key={d.key} className="pb-pal-item" disabled={busy} title={d.help}
-                      onClick={() => add(d.key, { parent_id: c.id, tab_index: ti })}>
+                      onClick={() => add(d, { parent_id: c.id, tab_index: ti })}>
                       <Plus size={13} /> <span>{d.name}</span>
                     </button>
                   ))}
@@ -265,8 +268,8 @@ export default function PageBuilder({ page, onBack }) {
         {/* Paleta */}
         <div className="pb-palette">
           <div className="pb-palette-h">Componentes</div>
-          {COMPONENTS.map((c) => (
-            <button key={c.key} className="pb-pal-item" disabled={busy} onClick={() => add(c.key)} title={c.help}>
+          {PALETTE.map((c) => (
+            <button key={c.key} className="pb-pal-item" disabled={busy} onClick={() => add(c)} title={c.help}>
               <Plus size={13} /> <span>{c.name}</span>
             </button>
           ))}

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2 } from 'lucide-react'
-import { getSpecs, visibleFields, visibleSubFields } from '../../data/components'
+import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
 import { wrapLink, hasLinks } from '../../lib/richText'
 
@@ -82,10 +82,12 @@ function Field({ f, value, onChange, brandSecondary }) {
     return <TextAreaField f={f} value={value} onChange={onChange} />
   }
   if (f.type === 'select') {
+    // Las opciones pueden ser strings o { value, label } (se guarda el valor de maquina
+    // del CMS y se muestra la etiqueta del desplegable de Drupal).
     return (
       <select className="control" value={value || ''} onChange={(e) => onChange(e.target.value)}>
         <option value="">—</option>
-        {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
+        {f.options.map((o) => <option key={optValue(o)} value={optValue(o)}>{optLabel(o)}</option>)}
       </select>
     )
   }

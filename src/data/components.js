@@ -78,6 +78,90 @@ export const CMS_ICONS = [
   'x', 'youtube',
 ]
 
+// ---- Content: Card Grid --------------------------------------------------------
+// UN solo paragraph del CMS (`ln_c_cardgrid`) del que salen todas estas variantes: el
+// "Modo de vista" cambia el layout, no el componente. Se guarda el VALOR de maquina
+// (grid-cards, cards-numbers...) que es el identificador estable; la etiqueta es la que
+// ve el editor en el desplegable de Drupal y es la que baja al Excel.
+export const CARD_GRID_MODES = [
+  { value: 'cards-icons', label: 'Cards Icons' },
+  { value: 'cards-numbers', label: 'Cards Numbers' },
+  { value: 'cards-simple', label: 'Cards Simple (Only Image + Title)' },
+  { value: 'full-background-card-icons', label: 'Full Background Card Icons (Without Box - Max 3 cards)' },
+  { value: 'full-background-card-icons-box', label: 'Full Background Card Icons (Max 3 cards)' },
+  { value: 'grid-cards', label: 'Grid Cards (Max 3 Cards)' },
+  { value: 'image-card-icons', label: 'Box Image + Card Icons' },
+  { value: 'slider-default-card', label: 'Slider Cards Default' },
+  { value: 'slider-background-default-card', label: 'Slider Background Cards Default (Max 3 cards)' },
+  { value: 'slider-card-icons-square', label: 'Card Icon Square' },
+  { value: 'full-background-card-icons-square', label: 'Full Background Card Icons Square' },
+]
+export const CARD_GRID_DEFAULT_MODE = 'grid-cards'
+
+// Un `option` de un select puede ser un string (valor = etiqueta) o { value, label }
+// cuando lo que se guarda y lo que se muestra son distintos (ej. el Modo de vista).
+export const optValue = (o) => (o && typeof o === 'object' ? o.value : o)
+export const optLabel = (o) => (o && typeof o === 'object' ? o.label : o)
+export function labelOf(options, value) {
+  const hit = (options || []).find((o) => optValue(o) === value)
+  return hit ? optLabel(hit) : (value || '')
+}
+
+// Opciones del panel Classy que NO son de color (esas usan BG_COLORS).
+export const BG_POSITIONS = [
+  { value: 'bg_position_boxed', label: 'Boxed' },
+  { value: 'bg_position_full_width', label: 'Full Width' },
+]
+export const CARD_STYLES = [
+  { value: 'card_grid_default_square', label: 'Card Grid Default Square' },
+  { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },
+]
+export const CARD_TITLE_POSITIONS = [
+  { value: 'card_grid_title_bottom', label: 'Card Grid Title Bottom' },
+]
+export const ARROW_POSITIONS = [
+  { value: 'position_arrows_bottom_left', label: 'bottom left' },
+  { value: 'position_arrows_bottom_right', label: 'bottom right' },
+  { value: 'position_arrows_top_left', label: 'top left' },
+  { value: 'position_arrows_top_right', label: 'top right' },
+]
+export const CLASSY_ALIGNS = [
+  { value: 'text_align_center', label: 'Text Align Center' },
+  { value: 'text_align_left', label: 'Text Align Left' },
+  { value: 'text_align_right', label: 'Text Align Right' },
+]
+export const SPACINGS = [
+  { value: 'space_py_0', label: 'Sem espaço vertical' },
+  { value: 'space_py_1', label: 'Espaço vertical mínimo — 4px' },
+  { value: 'space_py_2', label: 'Espaço vertical muito pequeno — 8px' },
+  { value: 'space_py_3', label: 'Espaço vertical pequeno — 12px' },
+  { value: 'space_py_4', label: 'Espaço vertical regular — 16px' },
+  { value: 'space_py_5', label: 'Espaço vertical médio — 20px' },
+  { value: 'space_py_6', label: 'Espaço vertical médio plus — 24px' },
+  { value: 'space_py_7', label: 'Espaço vertical grande — 32px' },
+  { value: 'space_py_8', label: 'Espaço vertical grande plus — 36px' },
+  { value: 'space_py_9', label: 'Espaço vertical extra grande — 40px' },
+  { value: 'space_py_10', label: 'Espaço vertical máximo — 60px' },
+  { value: 'space_py_11', label: 'Espaço vertical super máximo — 80px' },
+  { value: 'space_py_12', label: 'Espaço vertical extremo — 120px' },
+  { value: 'space_section_2xs', label: 'Espaçamento de Seção: Mínimo' },
+  { value: 'space_section_xs', label: 'Espaçamento de Seção: Extra Pequeno' },
+  { value: 'space_section_sm', label: 'Espaçamento de Seção: Pequeno' },
+  { value: 'space_section_md', label: 'Espaçamento de Seção: Médio' },
+  { value: 'space_section_lg', label: 'Espaçamento de Seção: Grande' },
+  { value: 'space_section_xl', label: 'Espaçamento de Seção: Extra Grande' },
+]
+export const LINK_TARGETS = [
+  { value: '_self', label: 'Same window (_self)' },
+  { value: '_blank', label: 'New window (_blank)' },
+]
+export const PET_VISIBILITY = ['Gato', 'Perro', 'Gato + Perro']
+export const HTML_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p']
+
+// Nombre de los grupos plegables del form (ver ContentForm).
+export const G_ADV = 'Avanzado (CMS)'
+export const G_CLASSY = 'Classy — estilos (CMS)'
+
 // Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
 export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
 
@@ -382,6 +466,8 @@ export const COMPONENTS = [
     key: 'commitment_carousel',
     name: 'Carrusel de cards',
     category: 'Carruseles',
+    // REEMPLAZADO por card_grid: sus variantes son modos de vista del mismo paragraph.
+    deprecated: 'Card Grid',
     help: 'Carrusel de cards con header (título + subtítulo) y flechas. Cinco VARIANTES: verticales con imagen a sangre (la de "Compromiso Purina®"), con icono sobre una banda de color, dos apaisadas que se diferencian en dónde va el texto, y numeradas (cards blancas sin imagen, con el número en un chip arriba). El número NO se carga: sale del orden de las cards. La flecha circular de una card aparece cuando esa card tiene link. El color de fondo del bloque y el del título/subtítulo se configuran por página; el color del texto NO toca el contenido de las cards.',
     fields: [
       // `type` (y no otro nombre) porque es la key que filtra campos por variante y
@@ -419,6 +505,72 @@ export const COMPONENTS = [
       // Medidas en px PENDIENTES de confirmar con desarrollo; por ahora solo el ratio.
       [CMT_WIDE_BOTTOM]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
       [CMT_WIDE_TOP]: [{ ratio: 'Desktop 3:2 - Mobile 3:2', max: '500kb', format: 'JPG / PNG' }],
+    },
+  },
+  {
+    key: 'card_grid',
+    name: 'Card Grid',
+    cmsName: 'Content: Card Grid',
+    category: 'Carruseles',
+    help: 'El componente del CMS del que salen el mosaico y todas las variantes de cards: lo que cambia el layout es el "Modo de vista", no el componente. Cada card es un "Content: Card Grid Item" con su título, icono, descripción, imagen (desktop y mobile, con alt) y CTA.',
+    fields: [
+      { key: 'view_mode', label: 'Modo de vista', cmsLabel: 'Modo de vista', type: 'select', cms: true, options: CARD_GRID_MODES,
+        hint: 'Es el campo obligatorio del CMS. Cambia el layout de todo el bloque.' },
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea' },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS },
+      { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
+      { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS },
+        { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea' },
+        { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
+        { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
+        { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
+        { key: 'image_alt', label: 'Alt de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
+          placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+        { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
+        { key: 'image_mobile_alt', label: 'Alt de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
+          placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+        { key: 'cta_label', label: 'CTA — texto', cmsLabel: 'Texto del enlace', type: 'text' },
+        { key: 'cta_url', label: 'CTA — link', cmsLabel: 'URL', type: 'url' },
+        { key: 'cta_target', label: 'CTA — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+        { key: 'bg_color', label: 'Color de fondo de la card', cmsLabel: 'Background Color (item)', type: 'select', cms: true, options: BG_COLORS },
+        { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true },
+        { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true },
+      ] },
+      // ---- Avanzado (mismos campos que el "Avanzado" del paragraph) ----
+      { key: 'see_more', label: 'Mostrar botón "See more"', cmsLabel: 'Show "See more" button', type: 'checkbox', cms: true, default: false, group: G_ADV },
+      { key: 'see_more_label', label: 'See more — texto', cmsLabel: 'Texto del enlace (See more)', type: 'text', cms: true, group: G_ADV, requiresTrue: 'see_more' },
+      { key: 'see_more_url', label: 'See more — link', cmsLabel: 'URL (See more)', type: 'url', cms: true, group: G_ADV, requiresTrue: 'see_more' },
+      { key: 'visibility', label: 'Visibilidad (pet type)', cmsLabel: 'Paragraph visibility', type: 'select', cms: true, options: PET_VISIBILITY, group: G_ADV,
+        hint: 'Vacío = se ve en la vista genérica. Con una opción elegida, el bloque solo aparece para esa especie.' },
+      { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true, group: G_ADV },
+      { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true, group: G_ADV },
+      // ---- Classy (Paragraph styles). Vacio = Default en el CMS. ----
+      { key: 'background_color', label: 'Background Color', cmsLabel: 'Background Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'background_card_color', label: 'Card - Background Color', cmsLabel: 'Card - Background Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'background_degrade_color', label: 'Background Degrade Color', cmsLabel: 'Background Degrade Color Cards Grid', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'text_color', label: 'Text Color', cmsLabel: 'Text Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'title_card_color', label: 'Card - Title Color', cmsLabel: 'Card - Title Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'text_card_color', label: 'Card - Text Color', cmsLabel: 'Card - Text Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'icon_card_color', label: 'Card - Icon Color', cmsLabel: 'Card - Icon Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
+      { key: 'background_position', label: 'Background Position', cmsLabel: 'Background Position', type: 'select', cms: true, options: BG_POSITIONS, group: G_CLASSY },
+      { key: 'card_style_card', label: 'Card - Style Card', cmsLabel: 'Card - Style Card', type: 'select', cms: true, options: CARD_STYLES, group: G_CLASSY },
+      { key: 'card_title_position', label: 'Card - Title Position', cmsLabel: 'Card - Title Position', type: 'select', cms: true, options: CARD_TITLE_POSITIONS, group: G_CLASSY },
+      { key: 'position_arrows', label: 'Position Arrows', cmsLabel: 'Position Arrows', type: 'select', cms: true, options: ARROW_POSITIONS, group: G_CLASSY },
+      { key: 'text_align', label: 'Text Align', cmsLabel: 'Text Align', type: 'select', cms: true, options: CLASSY_ALIGNS, group: G_CLASSY },
+      { key: 'spacing', label: 'Spacing', cmsLabel: 'Spacing', type: 'select', cms: true, options: SPACINGS, group: G_CLASSY },
+    ],
+    specKey: 'view_mode',
+    defaultType: CARD_GRID_DEFAULT_MODE,
+    specsByType: {
+      // Medidas PENDIENTES de confirmar por modo de vista; la unica que tenemos
+      // documentada es la de las cards verticales (Brand cards del Design Guidelines).
+      'slider-default-card': [{ ratio: 'Desktop 1:1.5 - Mobile 1:1.5', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
+      'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
     },
   },
   {
@@ -537,6 +689,9 @@ export const COMPONENTS = [
     key: 'mosaic',
     name: 'Mosaico',
     category: 'Contenido',
+    // REEMPLAZADO por card_grid en modo grid-cards, que es lo que existe en el CMS.
+    // Sigue renderizando las paginas ya armadas, pero no se puede agregar uno nuevo.
+    deprecated: 'Card Grid — Grid Cards',
     help: 'Grilla tipo mosaico que alterna imágenes con cajas de contenido (color configurable) con título y texto. Los bloques se alternan automáticamente (imagen, caja, imagen…): cargá la imagen en los de imagen y el título/texto en los de contenido.',
     fields: [
       { key: 'title', label: 'Título', type: 'text', placeholder: 'Worem ipsum dolor sit amet, consectetur adipiscing elit' },
@@ -610,6 +765,26 @@ export const COMPONENT_BY_KEY = Object.fromEntries(COMPONENTS.map((c) => [c.key,
 export function getComponent(key) {
   return COMPONENT_BY_KEY[key] || null
 }
+
+// PALETA del builder. Un item puede ser un componente a secas, o un ATAJO: el mismo
+// componente con algo de contenido ya puesto. Los modos de vista del Card Grid entran
+// como atajos, asi se elige por como se ve y no por el nombre tecnico del modo — pero
+// lo que se guarda es siempre un `card_grid` con su `view_mode`, o sea exactamente lo
+// que existe en el CMS.
+const CG = (name, view_mode, help) => ({
+  key: `card_grid:${view_mode}`, name, help, component_key: 'card_grid', content: { view_mode },
+})
+export const PALETTE = [
+  ...COMPONENTS.filter((c) => c.key !== 'card_grid' && !c.deprecated).map((c) => ({
+    key: c.key, name: c.name, help: c.help, component_key: c.key, content: {}, container: c.container,
+  })),
+  CG('Mosaico', 'grid-cards', 'Card Grid en modo Grid Cards: la grilla que alterna imagen y caja de contenido. Máximo 3 cards.'),
+  CG('Cards verticales', 'slider-default-card', 'Card Grid en modo Slider Cards Default: cards altas con la imagen a sangre, título arriba y texto abajo (la de Compromiso Purina®).'),
+  CG('Cards numeradas', 'cards-numbers', 'Card Grid en modo Cards Numbers: cards blancas sin imagen, con el número en un chip arriba. El número sale del orden de las cards.'),
+  CG('Cards con icono', 'slider-card-icons-square', 'Card Grid en modo Card Icon Square: cards cuadradas con icono sobre una banda de color.'),
+  CG('Cards apaisadas', 'slider-background-default-card', 'Card Grid en modo Slider Background Cards Default: cards apaisadas con la imagen de fondo y el texto agrupado abajo. Máximo 3 cards.'),
+  CG('Card Grid (elegir modo)', '', 'El componente crudo: lo agregás y elegís cualquiera de los 11 modos de vista adentro.'),
+]
 
 // Tamanos de imagen recomendados (Design Guidelines) de un componente, segun su
 // contenido: si el componente tiene specsByType, se resuelve por el campo specKey
@@ -733,5 +908,9 @@ export function fieldToText(field, value) {
       })
       .join('\n')
   }
+  if (field.type === 'checkbox') return value ? 'Sí' : 'No'
+  // Selects con { value, label }: se guarda el valor, se muestra la etiqueta (que es
+  // lo que el editor ve en el desplegable de Drupal).
+  if (field.type === 'select' && Array.isArray(field.options)) return labelOf(field.options, value)
   return String(value)
 }

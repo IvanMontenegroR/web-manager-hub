@@ -6,7 +6,19 @@ import {
   Cookie, Zap, Dna, Facebook, Instagram, Linkedin, Youtube,
 } from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
-import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS, BG_TOKENS, tabList } from '../../../data/components'
+import {
+  CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
+  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList,
+} from '../../../data/components'
+
+// Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
+// Los que faltan estan pendientes de mapear con el CMS.
+const CG_TO_CMT = {
+  'slider-default-card': CMT_VERTICAL,
+  'slider-card-icons-square': CMT_ICON,
+  'slider-background-default-card': CMT_WIDE_BOTTOM,
+  'cards-numbers': CMT_NUMBERS,
+}
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
 function RT({ children }) {
@@ -957,6 +969,62 @@ const RENDERERS = {
         </div>
       </div>
     )
+  },
+
+  // CARD GRID: el componente del CMS. El layout lo decide el "Modo de vista", asi que
+  // el render despacha al mockup que corresponda reusando los que ya teniamos. Los
+  // colores llegan como TOKENS: se pintan los que estan en BG_TOKENS y el resto no.
+  card_grid: (c, ctx) => {
+    const mode = c.view_mode || CARD_GRID_DEFAULT_MODE
+    const tok = (v) => BG_TOKENS[v] || null
+    const items = list(c.items)
+    if (mode === 'grid-cards') {
+      // Cada card del CMS son DOS celdas del mosaico: su imagen y su caja de texto.
+      const acc = tok(c.background_card_color) || ctx?.brandSecondary || ACCENT
+      const arr = items.length ? items : [
+        { title: 'Título de la card', description: 'Texto de la card.' },
+        { title: 'Segunda card', description: 'Texto de la segunda card.' },
+        { title: 'Tercera card', description: 'Texto de la tercera card.' },
+      ]
+      const boxTextStyle = ctx?.brandPrimary ? { color: readableOn(acc, ctx.brandPrimary) } : undefined
+      return (
+        <div className="cp-mosaic" style={{ '--acc': acc }}>
+          {(OPT(c.title, null) || OPT(c.subtitle, null)) && (
+            <div className="cp-mosaic-head">
+              {OPT(c.title, null) && <div className="cp-mosaic-title">{c.title}</div>}
+              {OPT(c.subtitle, null) && <div className="cp-mosaic-sub">{c.subtitle}</div>}
+            </div>
+          )}
+          <div className="cp-mosaic-grid">
+            {arr.flatMap((it, i) => [
+              <div key={`i${i}`} className="cp-mosaic-cell">
+                <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
+              </div>,
+              <div key={`b${i}`} className="cp-mosaic-box" style={{ background: acc }}>
+                <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>
+                <p className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</p>
+              </div>,
+            ])}
+          </div>
+        </div>
+      )
+    }
+    // El resto de los modos son variantes del carrusel de cards: se adapta el contenido
+    // a la forma que ese render ya sabe dibujar. Los modos que todavia no tienen mockup
+    // propio caen a las cards verticales, que es el layout mas neutro.
+    return RENDERERS.commitment_carousel({
+      type: CG_TO_CMT[mode] || CMT_VERTICAL,
+      title: c.title,
+      subtitle: c.subtitle,
+      color: tok(c.background_color),
+      background_color: tok(c.background_color),
+      text_color: tok(c.text_color),
+      accent: tok(c.title_card_color),
+      items: items.map((it) => ({
+        icon: it.icon, image: it.image, image_mobile: it.image_mobile,
+        title: it.title, description: it.description, url: it.cta_url,
+      })),
+    }, ctx)
   },
 
   // Grilla de numeros: titulo centrado y una fila de estadisticas (numero grande de
