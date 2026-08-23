@@ -112,14 +112,6 @@ export function parseRich(value) {
   return blocks
 }
 
-// ¿El texto tiene alguna marca de formato? Se usa para mostrar la ayuda en el editor
-// solo cuando hace falta.
-export function hasRich(value) {
-  const s = String(value == null ? '' : value)
-  INLINE_RE.lastIndex = 0
-  return INLINE_RE.test(s) || /(^|\n)\s*([-*•]\s+|\d+[.)]\s+)/.test(s) || /\n/.test(s)
-}
-
 // ---- Rich text -> celda de Excel -------------------------------------------------
 // Una celda de xlsx SI soporta formato: `{ richText: [{ text, font }] }` pinta cada
 // pedazo con su propia fuente. Asi el mercado no ve las marcas (`**negrita**`) sino la

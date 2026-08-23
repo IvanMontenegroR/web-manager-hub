@@ -2294,7 +2294,6 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* Cuerpo de texto con enlaces: barra bajo el textarea. */
 .cf-rt-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-.cf-rt-hint { font-size: 11px; color: var(--muted, #868e99); font-family: ui-monospace, monospace; }
 
 /* Campo de color (swatch + hex) del builder. */
 .cf-color { display: flex; align-items: center; gap: 8px; }

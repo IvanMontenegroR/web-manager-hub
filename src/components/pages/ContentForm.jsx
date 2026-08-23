@@ -2,12 +2,13 @@ import { useRef, useState } from 'react'
 import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2, Bold, Italic, List, ListOrdered } from 'lucide-react'
 import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
-import { wrapLink, wrapMark, toggleList, hasRich } from '../../lib/richText'
+import { wrapLink, wrapMark, toggleList } from '../../lib/richText'
 
-// Cuerpo de un componente: es RICH TEXT en el CMS (negritas, saltos, listas), pero una
-// celda del Excel es texto plano, asi que el formato se marca con una notacion tipo
-// markdown y el dato viaja entero en una celda. Estos botones la insertan solos sobre
-// lo que tengas seleccionado; el mockup lo renderiza (ver src/lib/richText.js).
+// Cuerpo de un componente: es RICH TEXT en el CMS (negritas, saltos, listas). Por
+// debajo el formato se guarda con una notacion tipo markdown, para que el dato viaje
+// entero en un solo campo, pero esa notacion NO se muestra: estos botones la insertan
+// solos sobre lo que tengas seleccionado, el mockup lo renderiza y el Excel baja con el
+// formato de verdad (ver src/lib/richText.js).
 function TextAreaField({ f, value, onChange }) {
   const ref = useRef(null)
   // Aplica una transformacion sobre la SELECCION y devuelve el foco donde corresponde,
@@ -29,9 +30,9 @@ function TextAreaField({ f, value, onChange }) {
       <textarea ref={ref} className="control" rows={3} value={value || ''}
         onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
       <div className="cf-rt-bar">
-        <button type="button" className="ic-btn" title="Negrita (**texto**)"
+        <button type="button" className="ic-btn" title="Negrita"
           onClick={() => apply((v, a, b) => wrapMark(v, a, b, '**'))}><Bold size={13} /></button>
-        <button type="button" className="ic-btn" title="Cursiva (_texto_)"
+        <button type="button" className="ic-btn" title="Cursiva"
           onClick={() => apply((v, a, b) => wrapMark(v, a, b, '_'))}><Italic size={13} /></button>
         <button type="button" className="ic-btn" title="Lista con viñetas"
           onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ul'))}><List size={13} /></button>
@@ -39,7 +40,6 @@ function TextAreaField({ f, value, onChange }) {
           onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ol'))}><ListOrdered size={13} /></button>
         <button type="button" className="ic-btn" title="Marcar el texto seleccionado como enlace"
           onClick={addLink}><Link2 size={13} /></button>
-        {hasRich(value) && <span className="cf-rt-hint">**negrita** - _cursiva_ - [texto](link) - “- ” lista</span>}
       </div>
     </div>
   )
