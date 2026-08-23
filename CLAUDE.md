@@ -253,6 +253,18 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      marca) y `background_color` en las demas, donde por defecto NO hay fondo. Un campo de color
      `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
      quitarlo, en vez de un rojo que parece cargado.
+     **FULL BLEED**: un bloque con FONDO PINTADO es una **seccion**, no una card: la banda de color cubre
+     todo el ancho y solo el contenido queda dentro del container, sin borde redondeado, y si es el ULTIMO
+     bloque de la pagina va PEGADO al footer (una franja que corta antes del pie deja un blanco que en el
+     sitio no existe). El criterio es el FONDO, no el componente ni la posicion: un bloque sin fondo no
+     tiene nada que se vea cortarse y no se toca. Lo marca el preview con la clase `.cp-bleed` cuando
+     efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
+     variantes de carrusel (con fondo cargado, o con la banda de la variante con iconos, que siempre tiene
+     color). Un token que todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
+     El breakout va en el `.pb-block` (tiene `overflow:hidden`, adentro se recortaria) y apunta al render
+     PROPIO del bloque (`> .cp-render > .cp-bleed`), asi un texto con fondo metido en una columna de un
+     layout no hace sangrar al contenedor. `--bleed-x` es el padding lateral propio de cada bloque, para
+     compensarlo con el gutter y que el contenido no se corra respecto de los bloques sin fondo.
      **CONTENEDORES y SLOTS**: un componente marcado `container: true` no tiene contenido visual propio
      mas alla de su cabecera: su contenido son OTROS componentes. La pagina es un ARBOL de un nivel —
      `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y `tab_index`. Los sueltos tienen

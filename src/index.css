@@ -1526,20 +1526,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Alineacion del bloque de texto. Arrastra al CTA porque es inline-block. */
 .cp-al-center { text-align: center; }
 .cp-al-right { text-align: right; }
-/* Con fondo por token el bloque es FULL BLEED, como en el sitio: la banda de color
-   cubre todo el ancho y solo el TEXTO queda dentro del container. Por eso no lleva
-   borde redondeado (seria una card, no una seccion). */
 .cp-text--bg { padding: 30px; }
-/* En vista previa hay gutter lateral, asi que la banda tiene que salirse de el. El
-   breakout va en el .pb-block y no adentro porque el bloque tiene overflow:hidden;
-   el padding compensa el gutter para que el texto no se corra. */
-.pb-canvas.preview .pb-block--text:has(.cp-text--bg) { margin-inline: -60px; }
-.pb-canvas.preview .pb-block--text:has(.cp-text--bg) .cp-text--bg { padding-inline: 90px; }
-/* Y si ademas es el ULTIMO bloque de la pagina, va PEGADO al footer: una franja de
-   color que corta antes del pie deja una banda blanca que en el sitio no existe.
-   Se come el padding de abajo del container (56px). Va con `>` a proposito: un texto
-   adentro de una columna tambien es :last-child de su slot y ahi no aplica. */
-.pb-canvas.preview .pb-page > .pb-block--text:has(.cp-text--bg):last-child { margin-bottom: -56px; }
 /* Titulo y cuerpo toman el color del bloque: el token de Text Color, o el que se
    calcula para que contraste con el fondo. */
 .cp-text--ink .cp-h2, .cp-text--ink .cp-h3, .cp-text--ink .cp-p { color: inherit; }
@@ -1952,6 +1939,34 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* El breadcrumb es nav (no seccion): va pegado al header y al componente siguiente. */
 .pb-canvas.preview .pb-block--breadcrumb { margin-bottom: -28px; }
 /* Banners: casi a sangre, a 24px del borde del container (rompen el gutter de 60px). */
+/* ===== Bloques a sangre (full bleed) =====================================
+   Un bloque con FONDO PINTADO es una SECCION, no una card: en el sitio la banda de
+   color cubre todo el ancho y solo el contenido queda dentro del container. El que
+   manda es el fondo y no el componente ni la posicion — un bloque sin fondo no tiene
+   nada que se vea cortarse, asi que no se toca.
+   Lo marca el preview con `.cp-bleed` cuando efectivamente pinta un color (hoy: el
+   bloque de Texto con Background Color, y el Card Grid en las variantes de carrusel,
+   con fondo cargado o con la banda de la variante con iconos). Un token del CMS que
+   todavia no sabemos pintar no lleva la clase: la regla sigue lo que SE VE.
+   `--bleed-x` es el padding lateral propio del bloque, para compensarlo con el gutter
+   y que el contenido no se corra respecto de los bloques sin fondo. */
+.cp-bleed { --bleed-x: 30px; }
+.cp-cmt--hasbg, .cp-cmt--icon { --bleed-x: 26px; }
+/* Con dos clases a proposito: hay variantes que traen su propio radio mas abajo en el
+   archivo (ej. .cp-cmt--wideb) y no queremos depender del orden para ganarles. */
+.cp-render .cp-bleed { border-radius: 0; }
+/* El breakout va en el .pb-block y no adentro porque el bloque tiene overflow:hidden.
+   `> .cp-render >` a proposito: apunta al render PROPIO del bloque, asi un texto con
+   fondo metido en una columna de layout no hace sangrar al contenedor. */
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) { margin-inline: -60px; }
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-bleed {
+  padding-inline: calc(var(--bleed-x) + 60px);
+}
+/* Si ademas es el ULTIMO bloque, va PEGADO al footer: la banda que corta antes del pie
+   deja una franja blanca que en el sitio no existe. Se come el padding de abajo del
+   container (56px). */
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed):last-child { margin-bottom: -56px; }
+
 .pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
 /* Carrusel de servicios: FULL BLEED (0 del borde del container). */
 .pb-canvas.preview .pb-block--services_carousel { margin-inline: -60px; }
@@ -2008,7 +2023,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-render .cp-cmt--hastxt .cp-brands-sub { color: var(--txt); opacity: .82; }
 .cp-render .cp-cmt--hastxt .cp-plist-arrow { color: var(--txt); border-color: var(--txt); }
 /* Con fondo cargado el bloque se lee como seccion: mismo aire que la banda de iconos. */
-.cp-cmt--hasbg { border-radius: 14px; padding: 26px 26px 32px; }
+.cp-cmt--hasbg { padding: 26px 26px 32px; }
 .cp-cmt-row { display: flex; flex-wrap: nowrap; gap: 20px; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; margin-right: -60px; padding-bottom: 4px; }
 .cp-cmt-row::-webkit-scrollbar { height: 8px; }
 .cp-cmt-row::-webkit-scrollbar-thumb { background: #d8d8d8; border-radius: 4px; }
@@ -2047,7 +2062,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt--wideb { background: linear-gradient(180deg, #fff 0%, #fff 42%, #6b7480 100%); border-radius: 14px; padding: 22px 22px 30px; }
 
 /* --- Variante con ICONO sobre banda de color (Card icon square) --- */
-.cp-cmt--icon { background: var(--band); border-radius: 14px; padding: 26px 26px 32px; }
+.cp-cmt--icon { background: var(--band); padding: 26px 26px 32px; }
 .cp-cmt--icon .cp-brands-title, .cp-cmt--icon .cp-brands-sub { color: #111114; }
 .cp-cmt--icon .cp-plist-arrow { border-color: rgba(0, 0, 0, .45); color: #111114; }
 .cp-cmt--icon .cp-cmt-card {

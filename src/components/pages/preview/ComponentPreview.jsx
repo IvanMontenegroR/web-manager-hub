@@ -365,7 +365,7 @@ const RENDERERS = {
     if (ink) style.color = ink
     return (
       <div
-        className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
+        className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg cp-bleed' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         {c.title && <div className="cp-h2">{c.title}</div>}
@@ -792,7 +792,10 @@ const RENDERERS = {
     if (txt) style['--txt'] = txt
     return (
       <div
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
+        // sangre (ver la regla generica en el CSS). La banda de la variante con iconos
+        // siempre tiene color, asi que siempre es seccion.
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon || bg ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
