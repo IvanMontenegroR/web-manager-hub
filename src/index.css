@@ -1535,6 +1535,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    el padding compensa el gutter para que el texto no se corra. */
 .pb-canvas.preview .pb-block--text:has(.cp-text--bg) { margin-inline: -60px; }
 .pb-canvas.preview .pb-block--text:has(.cp-text--bg) .cp-text--bg { padding-inline: 90px; }
+/* Y si ademas es el ULTIMO bloque de la pagina, va PEGADO al footer: una franja de
+   color que corta antes del pie deja una banda blanca que en el sitio no existe.
+   Se come el padding de abajo del container (56px). Va con `>` a proposito: un texto
+   adentro de una columna tambien es :last-child de su slot y ahi no aplica. */
+.pb-canvas.preview .pb-page > .pb-block--text:has(.cp-text--bg):last-child { margin-bottom: -56px; }
 /* Titulo y cuerpo toman el color del bloque: el token de Text Color, o el que se
    calcula para que contraste con el fondo. */
 .cp-text--ink .cp-h2, .cp-text--ink .cp-h3, .cp-text--ink .cp-p { color: inherit; }
