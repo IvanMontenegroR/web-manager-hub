@@ -8,7 +8,7 @@ import {
 import { parseLinks } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
-  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList,
+  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS,
 } from '../../../data/components'
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
@@ -81,6 +81,20 @@ const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
 //   cargado vacio ('') -> NO se renderiza, porque se vacio a proposito.
 const OPT = (v, fallback) => (v === '' ? null : T(v, fallback))
 const list = (v) => (Array.isArray(v) ? v : [])
+
+// CTAs de un bloque de texto. En el CMS el link es multivaluado (`ctas`); las paginas
+// armadas antes del cambio tienen un solo boton en cta_label/cta_url, asi que se
+// siguen leyendo para que no se les caiga el boton.
+const ctaList = (c) => {
+  const arr = list(c.ctas).filter((b) => b && (b.label || b.url))
+  if (arr.length) return arr
+  return c.cta_label || c.cta_url ? [{ label: c.cta_label, url: c.cta_url }] : []
+}
+
+// Estilo del boton (`style_button` de Classy). Vacio = Default, el rojo.
+const btnClass = (v) => (/secondary/.test(v || '') ? ' cp-cta--sec'
+  : /outline/.test(v || '') ? ' cp-cta--out'
+    : /text/.test(v || '') ? ' cp-cta--txt' : '')
 const PETCLUB_LOGO = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 const CMT_BAND = '#F5B92B' // amarillo del diseño para la banda de "Cards con icono"
 const ACCENT = '#ED1C24' // rojo Purina por defecto (componentes con color configurable)
@@ -315,9 +329,11 @@ const RENDERERS = {
   },
 
   text: (c) => {
-    const two = /dos/i.test(c.style)
+    // Todo lo visual sale del panel Classy, igual que en el CMS.
+    const two = /two_columns/.test(c.content_text_styles || '')
     // La alineacion arrastra al CTA (en el CMS hoy no lo hace: es un bug reportado).
-    const al = /centro/i.test(c.align) ? 'center' : /derecha/i.test(c.align) ? 'right' : 'left'
+    const al = /center/.test(c.text_align || '') ? 'center'
+      : /right/.test(c.text_align || '') ? 'right' : 'left'
     // Fondo por TOKEN del CMS. Los que no tenemos mapeados quedan sin pintar.
     const bg = BG_TOKENS[c.background_color] || null
     // Color del texto: el token elegido; si no hay, el que contraste con el fondo.
@@ -325,7 +341,6 @@ const RENDERERS = {
     // Sobre fondo oscuro el boton rojo no se ve: se invierte a blanco con el texto del
     // color del fondo. Se mira el FONDO, no el color del texto elegido.
     const onDark = bg ? readableOn(bg) === '#ffffff' : false
-    const sec = /secondary/i.test(c.cta_style || '')
     const style = {}
     if (bg) { style.background = bg; style['--bg'] = bg }
     if (ink) style.color = ink
@@ -335,14 +350,58 @@ const RENDERERS = {
         style={Object.keys(style).length ? style : undefined}
       >
         {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         <div className={two ? 'cp-cols-2' : ''}>
           <p className="cp-p"><RT>{T(c.body, 'Texto del bloque...')}</RT></p>
           {two && <p className="cp-p">&nbsp;</p>}
         </div>
-        {c.cta_label && <span className={`cp-cta${sec ? ' cp-cta--sec' : ''}`}>{c.cta_label}</span>}
+        {/* El CTA es repetible: se dibujan todos los cargados. */}
+        {ctaList(c).map((b, i) => (
+          <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
+        ))}
       </div>
     )
   },
+
+  // `accordion_grid`: la lista de desplegables sola (en el CMS suele ir dentro de una
+  // columna de un layout). El primer item con texto arranca abierto.
+  accordion_grid: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { title: 'Primera pregunta', text: 'Dorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.' },
+      { title: 'Segunda pregunta' },
+      { title: 'Tercera pregunta' },
+    ]
+    const openIdx = arr.findIndex((it) => it.text)
+    return (
+      <div className="cp-block cp-half-acc">
+        {arr.map((it, i) => (
+          <details key={i} className="cp-acc-item" open={i === (openIdx < 0 ? 0 : openIdx)}>
+            <summary className="cp-acc-sum">
+              <span className="cp-acc-label">{T(it.title, 'Título')}</span>
+              <ChevronDown size={18} className="cp-acc-chev" />
+            </summary>
+            {it.text && <div className="cp-acc-body"><RT>{it.text}</RT></div>}
+          </details>
+        ))}
+      </div>
+    )
+  },
+
+  // `c_image`: imagen a lo ancho con el texto encima. Provisorio, igual que su
+  // definicion en el catalogo (falta el subform real del CMS).
+  content_image: (c) => (
+    <div className="cp-block cp-cimg">
+      <Img src={c.image} h={340} />
+      {(c.title || c.subtitle || c.cta_label) && (
+        <div className="cp-cimg-box">
+          {c.title && <div className="cp-h2">{c.title}</div>}
+          {c.subtitle && <p className="cp-p"><RT>{c.subtitle}</RT></p>}
+          {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
+        </div>
+      )}
+    </div>
+  ),
 
   text_image: (c) => {
     const right = /derecha/i.test(c.image_position)
@@ -896,7 +955,7 @@ const RENDERERS = {
           ))}
         </div>
         {cur.description && <p className="cp-tabs-desc"><RT>{cur.description}</RT></p>}
-        <div className="cp-tabs-slot">{ctx?.slot}</div>
+        <div className="cp-tabs-slot">{ctx?.slots}</div>
       </div>
     )
   },
@@ -1150,20 +1209,37 @@ function scrollCarousel(dir) {
   }
 }
 
-export default function ComponentPreview({ componentKey, content, theme, slot, activeTab, onTab }) {
+// Los 12 layouts de columnas comparten un solo render: cambia cuantas columnas hay y
+// que ancho tiene cada una. El contenido de cada columna llega ya renderizado en
+// `ctx.slots[i]`. Los anchos van en `fr` proporcionales para que el gap no desborde.
+for (const def of LAYOUT_COLUMNS) {
+  RENDERERS[def.key] = (c, ctx) => (
+    <div
+      className="cp-block cp-cols"
+      style={{ gridTemplateColumns: def.slots.map((s) => `${s.width}fr`).join(' ') }}
+    >
+      {def.slots.map((s, i) => (
+        <div key={i} className="cp-col">{ctx?.slots?.[i]}</div>
+      ))}
+    </div>
+  )
+}
+
+export default function ComponentPreview({ componentKey, content, theme, slots, activeTab, onTab }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
   // ctx: tokens de color de la marca de la pagina (ver BRAND_THEMES en pagesDb) +
   // tema oscuro. Con `dark` (ej. Pro Plan) el componente se pinta en oscuro.
-  // `slot` / `activeTab` / `onTab` solo los usan los componentes CONTENEDOR (pestañas):
-  // su contenido son otros componentes, que renderiza quien llama (el builder).
+  // `slots` / `activeTab` / `onTab` solo los usan los CONTENEDORES (pestañas, columnas):
+  // su contenido son otros componentes, ya renderizados por quien llama (el builder).
+  // `slots` es un nodo por slot, en orden.
   const ctx = {
     brandName: theme?.name || null,
     brandPrimary: theme?.primary || null,
     brandSecondary: theme?.secondary || null,
     brandAccent: theme?.accent || null,
     dark: !!theme?.dark,
-    slot: slot || null,
+    slots: slots || null,
     activeTab: activeTab || 0,
     onTab: onTab || null,
   }

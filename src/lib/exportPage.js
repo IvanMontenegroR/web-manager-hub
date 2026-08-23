@@ -8,7 +8,7 @@ import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
-  componentHasImage, excelSkip, tabList, emptyLabelFor,
+  componentHasImage, excelSkip, slotsOf, emptyLabelFor,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks } from './richText'
@@ -613,10 +613,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   }
 
   // Recorrido del arbol: los bloques sueltos en orden y, cuando uno es CONTENEDOR
-  // (bloque de pestañas), una seccion por pestaña con los componentes que tiene adentro.
+  // (pestañas o columnas), una seccion por SLOT con los componentes que tiene adentro.
   const roots = mainComps.filter((c) => !c.parent_id)
-  // En la ULTIMA pestaña entran ademas los hijos que apuntan a una pestaña que ya no
-  // existe (mismo criterio que el builder), asi el Excel no se come contenido.
+  // En el ULTIMO slot entran ademas los hijos que apuntan a uno que ya no existe (una
+  // pestaña borrada; mismo criterio que el builder), asi el Excel no se come contenido.
   const kidsOf = (id, ti, isLast) => mainComps.filter((c) => c.parent_id === id
     && (isLast ? (c.tab_index ?? 0) >= ti : (c.tab_index ?? 0) === ti))
   let idx = 0
@@ -626,16 +626,18 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     idx++
     await emitComponent(comp, String(idx))
     if (!def?.container) continue
-    const tabs = tabList(comp.content || {})
-    for (let ti = 0; ti < tabs.length; ti++) {
-      const tabNo = `${idx}.${ti + 1}`
-      // Banda oscura: no es un componente, es la pestaña que agrupa a los de abajo.
-      row = bandTitle(row, `${tabNo} — Pestaña: ${tabs[ti]?.label || `Pestaña ${ti + 1}`}`, HEAD_BG)
-      const kids = kidsOf(comp.id, ti, ti === tabs.length - 1).filter((k) => !getComponent(k.component_key)?.matrixExclude)
+    const slots = slotsOf(def, comp.content || {})
+    // Como se llama el slot en la banda: la pestaña o la columna.
+    const kind = def.slots ? '' : 'Pestaña: '
+    for (let ti = 0; ti < slots.length; ti++) {
+      const slotNo = `${idx}.${ti + 1}`
+      // Banda oscura: no es un componente, es el slot que agrupa a los de abajo.
+      row = bandTitle(row, `${slotNo} — ${kind}${slots[ti]?.label || `Slot ${ti + 1}`}`, HEAD_BG)
+      const kids = kidsOf(comp.id, ti, ti === slots.length - 1).filter((k) => !getComponent(k.component_key)?.matrixExclude)
       if (!kids.length) {
         ws.mergeCells(row, 2, row, 3)
         const nc = ws.getCell(row, 2)
-        nc.value = 'Esta pestaña todavía no tiene componentes.'
+        nc.value = def.slots ? 'Esta columna todavía no tiene componentes.' : 'Esta pestaña todavía no tiene componentes.'
         nc.font = { italic: true, size: 10, color: { argb: MUTED } }
         nc.alignment = { vertical: 'middle', indent: 1 }
         setH(row, 18)
@@ -643,7 +645,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
         continue
       }
       let k = 0
-      for (const kid of kids) { k++; await emitComponent(kid, `${tabNo}.${k}`) }
+      for (const kid of kids) { k++; await emitComponent(kid, `${slotNo}.${k}`) }
     }
   }
 

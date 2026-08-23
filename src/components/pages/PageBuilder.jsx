@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil,
 } from 'lucide-react'
-import { PALETTE, getComponent, tabList } from '../../data/components'
+import { PALETTE, getComponent, slotsOf, paletteGroups } from '../../data/components'
 import {
   fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
 } from '../../lib/pagesDb'
@@ -176,30 +176,33 @@ export default function PageBuilder({ page, onBack }) {
   const contentFor = (c) => (c.id === selId ? draft : c.content || {})
 
   // ---- Render de un bloque (recursivo: un contenedor renderiza sus hijos adentro) ----
-  // El contenido de un bloque de PESTAÑAS son otros componentes: se le pasan al preview
-  // por `slot`. Se montan TODAS las pestañas (las inactivas fuera de pantalla) para que
-  // el export pueda capturar tambien los componentes de las pestañas cerradas.
-  function tabSlot(c) {
-    const tabs = tabList(contentFor(c))
-    const active = Math.min(activeTab[c.id] || 0, tabs.length - 1)
-    return tabs.map((t, ti) => {
-      const kids = kidsOf(c.id, ti, ti === tabs.length - 1)
-      const off = ti !== active
-      const open = picker && picker.parent_id === c.id && picker.tab_index === ti
+  // El contenido de un CONTENEDOR son otros componentes: se le pasan al preview ya
+  // renderizados, un nodo por SLOT. Hay dos clases de contenedor y la diferencia es
+  // solo esta: en las pestañas se ve un slot por vez (los demas se montan fuera de
+  // pantalla para que el export capture tambien lo que esta en las pestañas cerradas),
+  // y en las columnas se ven todos a la vez.
+  function slotNodes(c, def) {
+    const slots = slotsOf(def, contentFor(c))
+    const isTabs = !def.slots // slots variables (uno por pestaña cargada)
+    const active = Math.min(activeTab[c.id] || 0, slots.length - 1)
+    return slots.map((s, si) => {
+      const kids = kidsOf(c.id, si, si === slots.length - 1)
+      const off = isTabs && si !== active
+      const open = picker && picker.parent_id === c.id && picker.tab_index === si
       return (
-        <div key={ti} className={`pb-tabpanel${off ? ' pb-tabpanel--off' : ''}`}>
+        <div key={si} className={`pb-slot${isTabs ? ' pb-tabpanel' : ''}${off ? ' pb-tabpanel--off' : ''}`}>
           {kids.map((k, i) => renderBlock(k, i, kids))}
           {editMode && !off && (
             <div className="pb-addhere" onClick={(e) => e.stopPropagation()}>
-              <button className="btn btn-sm" disabled={busy} onClick={() => setPicker(open ? null : { parent_id: c.id, tab_index: ti })}>
-                <Plus size={13} /> Agregar componente acá
+              <button className="btn btn-sm" disabled={busy} onClick={() => setPicker(open ? null : { parent_id: c.id, tab_index: si })}>
+                <Plus size={13} /> {isTabs ? 'Agregar componente acá' : `Agregar en ${s.label}`}
               </button>
               {open && (
                 <div className="pb-picker">
-                  {/* Sin contenedores: no se anidan pestañas dentro de pestañas. */}
+                  {/* Sin contenedores: el arbol es de UN nivel, no se anidan. */}
                   {PALETTE.filter((d) => !d.container).map((d) => (
                     <button key={d.key} className="pb-pal-item" disabled={busy} title={d.help}
-                      onClick={() => add(d, { parent_id: c.id, tab_index: ti })}>
+                      onClick={() => add(d, { parent_id: c.id, tab_index: si })}>
                       <Plus size={13} /> <span>{d.name}</span>
                     </button>
                   ))}
@@ -215,8 +218,8 @@ export default function PageBuilder({ page, onBack }) {
   function renderBlock(c, i, group) {
     const def = getComponent(c.component_key)
     const isContainer = !!def?.container
-    const tabs = isContainer ? tabList(contentFor(c)) : []
-    const active = isContainer ? Math.min(activeTab[c.id] || 0, tabs.length - 1) : 0
+    const slots = isContainer ? slotsOf(def, contentFor(c)) : []
+    const active = isContainer ? Math.min(activeTab[c.id] || 0, slots.length - 1) : 0
     return (
       <div
         key={c.id}
@@ -236,7 +239,7 @@ export default function PageBuilder({ page, onBack }) {
           componentKey={c.component_key}
           content={contentFor(c)}
           theme={theme}
-          slot={isContainer ? tabSlot(c) : null}
+          slots={isContainer ? slotNodes(c, def) : null}
           activeTab={active}
           onTab={isContainer ? ((ti) => setActiveTab((m) => ({ ...m, [c.id]: ti }))) : null}
         />
@@ -268,10 +271,16 @@ export default function PageBuilder({ page, onBack }) {
         {/* Paleta */}
         <div className="pb-palette">
           <div className="pb-palette-h">Componentes</div>
-          {PALETTE.map((c) => (
-            <button key={c.key} className="pb-pal-item" disabled={busy} onClick={() => add(c)} title={c.help}>
-              <Plus size={13} /> <span>{c.name}</span>
-            </button>
+          {/* Agrupada por familia: con los layouts adentro, una lista plana no se lee. */}
+          {paletteGroups().map((g) => (
+            <div key={g.category} className="pb-pal-group">
+              <div className="pb-pal-cat">{g.category}</div>
+              {g.items.map((c) => (
+                <button key={c.key} className="pb-pal-item" disabled={busy} onClick={() => add(c)} title={c.help}>
+                  <Plus size={13} /> <span>{c.name}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </div>
 

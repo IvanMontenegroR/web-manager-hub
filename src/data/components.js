@@ -158,6 +158,21 @@ export const LINK_TARGETS = [
 export const PET_VISIBILITY = ['Gato', 'Perro', 'Gato + Perro']
 export const HTML_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p']
 
+// Estilo del bloque de texto (`content_text_styles` del panel Classy). Vacio = Default.
+export const CONTENT_TEXT_STYLES = [
+  { value: 'one_column_texts', label: 'One Column Texts' },
+  { value: 'two_columns_expansive_space_texts', label: 'Two Columns Expansive Space Texts' },
+  { value: 'two_columns_texts', label: 'Two Columns Texts' },
+]
+
+// Estilo del boton (`style_button`). Vacio = Default, el boton rojo — igual que el
+// resto de Classy, por eso "Default" no esta en la lista: seria la opcion dos veces.
+export const BUTTON_STYLES = [
+  { value: 'style_btn_outline', label: 'Style Outline' },
+  { value: 'style_btn_secondary', label: 'Style Secondary' },
+  { value: 'style_btn_text', label: 'Style Text' },
+]
+
 // Que dice Drupal cuando el select esta vacio. No es siempre lo mismo ("Default" en el
 // panel Classy, "- Ninguno -" en los HTML tag), y el editor tiene que buscar esa opcion
 // exacta en el desplegable. Se resuelve por la LISTA de opciones, asi no hay que
@@ -166,6 +181,7 @@ const EMPTY_LABELS = new Map([
   [BG_COLORS, TOKEN_DEFAULT], [BG_POSITIONS, TOKEN_DEFAULT], [CARD_STYLES, TOKEN_DEFAULT],
   [CARD_TITLE_POSITIONS, TOKEN_DEFAULT], [ARROW_POSITIONS, TOKEN_DEFAULT],
   [CLASSY_ALIGNS, TOKEN_DEFAULT], [SPACINGS, TOKEN_DEFAULT],
+  [CONTENT_TEXT_STYLES, TOKEN_DEFAULT], [BUTTON_STYLES, TOKEN_DEFAULT],
   [HTML_TAGS, '- Ninguno -'], [LINK_TARGETS, '- Ninguno -'],
   [CMS_ICONS, '- Select an icon -'],
   [PET_VISIBILITY, 'Vista genérica (todas)'],
@@ -178,13 +194,58 @@ export function emptyLabelFor(field) {
 export const G_ADV = 'Avanzado (CMS)'
 export const G_CLASSY = 'Classy — estilos (CMS)'
 
-// Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
-export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
+// ---- Los dos grupos que Drupal repite en TODOS los paragraphs -------------------
+// "Avanzado" y "Classy" no son campos de UN componente: el CMS se los agrega a cada
+// paragraph. Antes estaban copiados a mano adentro de card_grid, asi que cada
+// componente nuevo tenia que repetir veinte campos. Ahora se declaran una sola vez:
+// el Avanzado es siempre el mismo, y del Classy cada componente pide los selects que
+// le aplican (`classy('background_color', 'spacing', ...)`), en el mismo orden en que
+// los muestra el formulario de Drupal.
 
-// Estilo del boton: "Default" es el rojo y "Secondary" el negro con texto blanco.
-// Sin cargar vale Default, asi que un "Predefinido" aparte seria la misma opcion
-// dos veces.
-export const CTA_STYLES = ['Default', 'Secondary']
+// Bloque "Avanzado": visibilidad por especie, boton See more, Section ID y CSS.
+// Devuelve objetos NUEVOS en cada llamada para que un componente no pise al otro.
+export function advanced() {
+  return [
+    { key: 'see_more', label: 'Mostrar botón "See more"', cmsLabel: 'Show "See more" button', type: 'checkbox', cms: true, default: false, group: G_ADV },
+    { key: 'see_more_label', label: 'See more — texto', cmsLabel: 'Texto del enlace (See more)', type: 'text', cms: true, group: G_ADV, requiresTrue: 'see_more' },
+    { key: 'see_more_url', label: 'See more — link', cmsLabel: 'URL (See more)', type: 'url', cms: true, group: G_ADV, requiresTrue: 'see_more' },
+    { key: 'visibility', label: 'Visibilidad (pet type)', cmsLabel: 'Paragraph visibility', type: 'select', cms: true, options: PET_VISIBILITY, group: G_ADV,
+      hint: 'Vacío = se ve en la vista genérica. Con una opción elegida, el bloque solo aparece para esa especie.' },
+    { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true, group: G_ADV },
+    { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true, group: G_ADV },
+  ]
+}
+
+// Catalogo de selects del panel Classy. La key es la del CMS; `options` apunta SIEMPRE
+// al mismo array (de ahi sale la etiqueta de "vacio", ver emptyLabelFor).
+const CLASSY_FIELDS = {
+  background_color: { label: 'Background Color', options: BG_COLORS },
+  background_position: { label: 'Background Position', options: BG_POSITIONS },
+  spacing: { label: 'Spacing', options: SPACINGS },
+  text_align: { label: 'Text Align', options: CLASSY_ALIGNS },
+  text_color: { label: 'Text Color', options: BG_COLORS },
+  content_text_styles: { label: 'Content Text Styles', options: CONTENT_TEXT_STYLES },
+  style_button: { label: 'Style Button', options: BUTTON_STYLES },
+  background_card_color: { label: 'Card - Background Color', options: BG_COLORS },
+  background_degrade_color: { label: 'Background Degrade Color', cmsLabel: 'Background Degrade Color Cards Grid', options: BG_COLORS },
+  title_card_color: { label: 'Card - Title Color', options: BG_COLORS },
+  text_card_color: { label: 'Card - Text Color', options: BG_COLORS },
+  icon_card_color: { label: 'Card - Icon Color', options: BG_COLORS },
+  card_style_card: { label: 'Card - Style Card', options: CARD_STYLES },
+  card_title_position: { label: 'Card - Title Position', options: CARD_TITLE_POSITIONS },
+  position_arrows: { label: 'Position Arrows', options: ARROW_POSITIONS },
+}
+
+export function classy(...keys) {
+  return keys.map((k) => {
+    const f = CLASSY_FIELDS[k]
+    if (!f) throw new Error(`Classy: no existe el campo "${k}"`)
+    return {
+      key: k, label: f.label, cmsLabel: f.cmsLabel || f.label,
+      type: 'select', cms: true, options: f.options, group: G_CLASSY,
+    }
+  })
+}
 
 // Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
 // estas dos, para poder meterle contenido adentro antes de renombrarlas.
@@ -200,7 +261,66 @@ export function tabList(content) {
   return arr.length ? arr : TAB_SAMPLE
 }
 
+// ---- Contenedores: SLOTS --------------------------------------------------------
+// Un contenedor no tiene contenido visual propio: su contenido son OTROS componentes.
+// Cada contenedor declara sus SLOTS, las ranuras donde caen los hijos. Hay dos clases:
+//   - slots FIJOS, declarados en el componente (`slots`): las columnas de un layout.
+//   - slots VARIABLES, que salen del contenido: una pestaña por cada `tabs` cargada.
+// El hijo apunta a su slot con `page_components.tab_index`. La columna se sigue
+// llamando asi por historia (nacio con las pestañas) pero es el INDICE DE SLOT y vale
+// para cualquier contenedor.
+export function slotsOf(def, content) {
+  if (!def?.container) return []
+  if (def.slots) return def.slots
+  return tabList(content).map((t, i) => ({
+    label: t.label || `Pestaña ${i + 1}`, description: t.description || '',
+  }))
+}
+
+// ---- Layout Columns -------------------------------------------------------------
+// La familia de contenedores de COLUMNAS del CMS. Igual que las pestañas, no tienen
+// contenido visual propio: cada columna es un SLOT donde caen otros componentes. Los
+// `widths` son porcentajes reales y los usa el mockup para dibujar la grilla.
+const COL_ES = ['Primera', 'Segunda', 'Tercera', 'Cuarta', 'Quinta']
+const COL_EN = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
+
+function layoutColumns(key, cmsName, label, widths) {
+  return {
+    key,
+    name: `Columnas ${label}`,
+    cmsName,
+    category: 'Layout',
+    container: true,
+    slots: widths.map((w, i) => ({
+      label: `${COL_ES[i]} columna`, cmsLabel: `${COL_EN[i]} column`, width: w,
+    })),
+    help: `Contenedor de ${widths.length} columna${widths.length > 1 ? 's' : ''} (${label}). Cada columna acepta los componentes que hagan falta.`,
+    fields: [
+      ...advanced(),
+      // Orden exacto del panel Classy de `layout_columns_2` en Drupal.
+      ...classy('background_color', 'background_position', 'spacing'),
+    ],
+  }
+}
+
+const T3 = 100 / 3
+export const LAYOUT_COLUMNS = [
+  layoutColumns('layout_columns_1', 'Layout Columns - 100', '100', [100]),
+  layoutColumns('layout_columns_2', 'Layout Columns - 50', '50/50', [50, 50]),
+  layoutColumns('layout_columns_3', 'Layout Columns - 33', '33/33/33', [T3, T3, T3]),
+  layoutColumns('layout_columns_4', 'Layout Columns - 25', '25/25/25/25', [25, 25, 25, 25]),
+  layoutColumns('layout_columns_20', 'Layout Columns - 20', '20 x5', [20, 20, 20, 20, 20]),
+  layoutColumns('layout_25_75', 'Layout_25_75', '25/75', [25, 75]),
+  layoutColumns('layout_75_25', 'Layout_75_25', '75/25', [75, 25]),
+  layoutColumns('layout_33_66', 'Layout_33_66', '33/66', [T3, T3 * 2]),
+  layoutColumns('layout_66_33', 'Layout_66_33', '66/33', [T3 * 2, T3]),
+  layoutColumns('layout_25_25_50', 'Layout_25_25_50', '25/25/50', [25, 25, 50]),
+  layoutColumns('layout_25_50_25', 'Layout_25_50_25', '25/50/25', [25, 50, 25]),
+  layoutColumns('layout_50_25_25', 'Layout_50_25_25', '50/25/25', [50, 25, 25]),
+]
+
 export const COMPONENTS = [
+  ...LAYOUT_COLUMNS,
   {
     key: 'brand_menu',
     name: 'Menú de marca',
@@ -257,14 +377,12 @@ export const COMPONENTS = [
         { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
         { key: 'link', label: 'Link', type: 'url' },
       ] },
-      // Avanzado (CMS, no van al Excel de mercados)
-      { key: 'banner_align', label: 'Banner Align Content', type: 'select', cms: true, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
-      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: BG_COLORS },
-      { key: 'visibility', label: 'Visibilidad (pet type)', type: 'select', cms: true, options: ['Genérica (todas)', 'Gato', 'Perro', 'Gato + Perro'] },
-      { key: 'see_more_text', label: 'See more — texto', type: 'text', cms: true },
-      { key: 'see_more_url', label: 'See more — link', type: 'url', cms: true },
-      { key: 'section_id', label: 'Section ID', type: 'text', cms: true },
-      { key: 'css_class', label: 'Custom CSS classes', type: 'text', cms: true },
+      ...advanced(),
+      // Classy del Banner. `banner_align` es propio de este paragraph y todavia esta
+      // con las etiquetas en español: faltan los valores de maquina del CMS (pendiente
+      // de que nos pasen el subform del Banner, ver TODO al pie del archivo).
+      { key: 'banner_align', label: 'Banner Align Content', cmsLabel: 'Banner Align Content', type: 'select', cms: true, group: G_CLASSY, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
+      ...classy('background_color'),
     ],
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
@@ -280,40 +398,94 @@ export const COMPONENTS = [
   {
     key: 'text',
     name: 'Texto',
+    cmsName: 'Content: Text',
     category: 'Contenido',
-    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo y de texto con los mismos tokens que el Banner, y puede tener un CTA en estilo Default (rojo, el que vale si no elegís nada) o Secondary (negro con texto blanco).',
+    help: 'El paragraph `c_text` del CMS. El cuerpo es el único campo propio; título y subtítulo (cada uno con su HTML tag) son opcionales. El CTA es REPETIBLE: se pueden cargar varios botones, cada uno con su destino, rel y ARIA label. La alineación, los colores, el estilo del botón y el layout de columnas salen del panel Classy.',
     fields: [
-      { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
-      { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'body', label: 'Cuerpo', type: 'textarea' },
-      // La alineacion arrastra al CTA. En el CMS hoy NO lo hace (esta reportado como
-      // bug a F5); el mockup muestra como TIENE que quedar.
-      { key: 'align', label: 'Alineación', type: 'select', cms: true, options: TEXT_ALIGNS },
-      { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: BG_COLORS,
-        hint: 'Token del CMS, los mismos del Banner. En el mockup solo se pintan los que tenemos mapeados a un hex; el resto se ve sin fondo.' },
-      // Pinta titulo y cuerpo. El boton NO lo toca: tiene su propio estilo.
-      { key: 'text_color', label: 'Text Color', type: 'select', cms: true, options: BG_COLORS,
-        hint: 'Misma paleta de tokens. Afecta al título y al cuerpo, no al botón. Sin cargar, sobre un fondo de color se calcula solo para que contraste.' },
-      { key: 'cta_label', label: 'Botón — texto', type: 'text' },
-      { key: 'cta_url', label: 'Botón — link', type: 'url' },
-      { key: 'cta_style', label: 'Botón — estilo', type: 'select', cms: true, options: CTA_STYLES,
-        hint: 'Default = el botón rojo, y es lo que vale si no elegís nada. Secondary = fondo negro con texto blanco.' },
+      { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea' },
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text' },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
+      // `field_c_link` es multivaluado en el CMS ("Añadir otro elemento"): un bloque de
+      // texto puede llevar mas de un boton.
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'CTA', item: [
+        { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
+        { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
+        { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+        { key: 'rel', label: 'Rel (follow / nofollow)', cmsLabel: 'Rel (follow/nofollow tags). Default is blank', type: 'text', cms: true },
+        { key: 'aria_label', label: 'ARIA Label', cmsLabel: 'ARIA Label', type: 'text', cms: true },
+      ] },
+      ...advanced(),
+      // Orden exacto del panel Classy de `c_text` en Drupal.
+      ...classy('background_color', 'background_position', 'content_text_styles', 'spacing', 'style_button', 'text_align', 'text_color'),
     ],
   },
   {
     key: 'text_image',
     name: 'Texto + Imagen',
+    cmsName: 'Content: Text + Image',
     category: 'Contenido',
-    help: 'Texto con imagen a un costado.',
+    help: 'Texto con imagen a un costado (`c_sideimagetext`).',
     fields: [
       { key: 'title', label: 'Titulo', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
       { key: 'image', label: 'Imagen', type: 'image' },
       { key: 'image_position', label: 'Posicion de la imagen', type: 'select', options: ['Izquierda', 'Derecha'] },
       { key: 'cta_label', label: 'Botón — texto', type: 'text' },
       { key: 'cta_url', label: 'Botón — link', type: 'url' },
+      // Classy PENDIENTE: falta el subform real de `c_sideimagetext` (ver TODO al pie).
+      ...advanced(),
+    ],
+  },
+  {
+    key: 'accordion_grid',
+    name: 'Acordeón',
+    cmsName: 'Accordion Grid',
+    category: 'Contenido',
+    help: 'Lista de desplegables (`accordion_grid`). Cada item es un "Accordion Item" del CMS: título obligatorio con su HTML tag, y cuerpo. En el CMS cada item es un paragraph hijo, pero como lo único que lleva es título + texto, acá va como campo repetible: son los mismos datos con mucha menos maquinaria.',
+    exportWidth: 820,
+    fields: [
+      { key: 'items', label: 'Items', cmsLabel: 'Items', type: 'list', itemLabel: 'Accordion Item', item: [
+        { key: 'title', label: 'Título', cmsLabel: 'Title', type: 'text' },
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Title)', type: 'select', cms: true, options: HTML_TAGS },
+        { key: 'text', label: 'Cuerpo', cmsLabel: 'Body', type: 'textarea' },
+        // El "Avanzado" del item. El accordion_item NO tiene panel Classy en el CMS
+        // (el wrapper viene vacio en el formulario), asi que aca tampoco.
+        { key: 'visibility', label: 'Visibilidad (pet type)', cmsLabel: 'Paragraph visibility', type: 'select', cms: true, options: PET_VISIBILITY },
+        { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true },
+        { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true },
+      ] },
+      ...advanced(),
+      // Orden exacto del panel Classy de `accordion_grid` en Drupal.
+      ...classy('background_color', 'background_position', 'spacing', 'text_align', 'text_color'),
+    ],
+  },
+  {
+    key: 'content_image',
+    name: 'Imagen',
+    cmsName: 'Content: Image',
+    category: 'Contenido',
+    // Los campos salen de como se comporta el componente en la pagina, NO de su
+    // subform: todavia no tenemos el HTML del formulario de Drupal. Hay que
+    // confirmarlos (ver TODO al pie del archivo).
+    help: 'Imagen a lo ancho con texto superpuesto y CTA opcional (`c_image`). OJO: los campos son provisorios, faltan confirmar contra el formulario real del CMS.',
+    fields: [
+      { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
+      { key: 'image_alt', label: 'Alt de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
+        placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+      { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
+      { key: 'image_mobile_alt', label: 'Alt de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
+        placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'textarea' },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
+      { key: 'cta_label', label: 'Botón — texto', cmsLabel: 'Texto del enlace', type: 'text' },
+      { key: 'cta_url', label: 'Botón — link', cmsLabel: 'URL', type: 'url' },
+      { key: 'cta_target', label: 'Botón — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+      ...advanced(),
     ],
   },
   {
@@ -557,28 +729,12 @@ export const COMPONENTS = [
         { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true },
         { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true },
       ] },
-      // ---- Avanzado (mismos campos que el "Avanzado" del paragraph) ----
-      { key: 'see_more', label: 'Mostrar botón "See more"', cmsLabel: 'Show "See more" button', type: 'checkbox', cms: true, default: false, group: G_ADV },
-      { key: 'see_more_label', label: 'See more — texto', cmsLabel: 'Texto del enlace (See more)', type: 'text', cms: true, group: G_ADV, requiresTrue: 'see_more' },
-      { key: 'see_more_url', label: 'See more — link', cmsLabel: 'URL (See more)', type: 'url', cms: true, group: G_ADV, requiresTrue: 'see_more' },
-      { key: 'visibility', label: 'Visibilidad (pet type)', cmsLabel: 'Paragraph visibility', type: 'select', cms: true, options: PET_VISIBILITY, group: G_ADV,
-        hint: 'Vacío = se ve en la vista genérica. Con una opción elegida, el bloque solo aparece para esa especie.' },
-      { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true, group: G_ADV },
-      { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true, group: G_ADV },
-      // ---- Classy (Paragraph styles). Vacio = Default en el CMS. ----
-      { key: 'background_color', label: 'Background Color', cmsLabel: 'Background Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'background_card_color', label: 'Card - Background Color', cmsLabel: 'Card - Background Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'background_degrade_color', label: 'Background Degrade Color', cmsLabel: 'Background Degrade Color Cards Grid', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'text_color', label: 'Text Color', cmsLabel: 'Text Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'title_card_color', label: 'Card - Title Color', cmsLabel: 'Card - Title Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'text_card_color', label: 'Card - Text Color', cmsLabel: 'Card - Text Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'icon_card_color', label: 'Card - Icon Color', cmsLabel: 'Card - Icon Color', type: 'select', cms: true, options: BG_COLORS, group: G_CLASSY },
-      { key: 'background_position', label: 'Background Position', cmsLabel: 'Background Position', type: 'select', cms: true, options: BG_POSITIONS, group: G_CLASSY },
-      { key: 'card_style_card', label: 'Card - Style Card', cmsLabel: 'Card - Style Card', type: 'select', cms: true, options: CARD_STYLES, group: G_CLASSY },
-      { key: 'card_title_position', label: 'Card - Title Position', cmsLabel: 'Card - Title Position', type: 'select', cms: true, options: CARD_TITLE_POSITIONS, group: G_CLASSY },
-      { key: 'position_arrows', label: 'Position Arrows', cmsLabel: 'Position Arrows', type: 'select', cms: true, options: ARROW_POSITIONS, group: G_CLASSY },
-      { key: 'text_align', label: 'Text Align', cmsLabel: 'Text Align', type: 'select', cms: true, options: CLASSY_ALIGNS, group: G_CLASSY },
-      { key: 'spacing', label: 'Spacing', cmsLabel: 'Spacing', type: 'select', cms: true, options: SPACINGS, group: G_CLASSY },
+      ...advanced(),
+      // Orden exacto del panel Classy de `ln_c_cardgrid` en Drupal.
+      ...classy('background_color', 'background_card_color', 'background_degrade_color',
+        'text_color', 'title_card_color', 'text_card_color', 'icon_card_color',
+        'background_position', 'card_style_card', 'card_title_position', 'position_arrows',
+        'text_align', 'spacing'),
     ],
     specKey: 'view_mode',
     defaultType: CARD_GRID_DEFAULT_MODE,
@@ -593,6 +749,10 @@ export const COMPONENTS = [
     key: 'fifty_fifty',
     name: '50/50',
     category: 'Contenido',
+    // REEMPLAZADO: en el CMS esto no es un componente, son TRES — un `layout_columns_2`
+    // con un `c_text` en la primera columna y un `accordion_grid` (o otro texto) en la
+    // segunda. Sigue renderizando lo ya armado, pero no se puede agregar uno nuevo.
+    deprecated: 'Columnas 50/50 + Acordeón',
     help: 'Bloque a dos columnas (50/50): título + texto a la izquierda; a la derecha, un texto o un desplegable (acordeón) de items (título + texto). El item abierto marca su título en rojo.',
     exportWidth: 820, // se captura mas angosto para que la imagen del Excel no salga tan baja
     fields: [
@@ -671,19 +831,22 @@ export const COMPONENTS = [
   {
     key: 'tabs',
     name: 'Pestañas',
+    cmsName: 'Tabs',
     category: 'Contenido',
-    help: 'Bloque con pestañas (ej. Gato / Cachorro). Cada pestaña tiene su nombre y una descripción opcional, y ADENTRO puede llevar los componentes que hagan falta: se agregan desde el botón que aparece dentro de la pestaña activa.',
-    // Contenedor: su contenido real son OTROS componentes (page_components con
-    // parent_id = este bloque y tab_index = la pestaña).
+    help: 'Bloque con pestañas (`comp_tabs`, con un `comp_tabs_tab_item` por pestaña). Cada pestaña tiene su nombre y una descripción opcional, y ADENTRO puede llevar los componentes que hagan falta: se agregan desde el botón que aparece dentro de la pestaña activa.',
+    // Contenedor de slots VARIABLES: hay un slot por pestaña cargada, y los hijos
+    // apuntan al suyo con `tab_index` (ver slotsOf).
     container: true,
     fields: [
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Título de la sección' },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'textarea' },
       { key: 'tabs', label: 'Pestañas', type: 'list', itemLabel: 'Pestaña', sample: TAB_SAMPLE, item: [
         { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
         { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
       ] },
+      // Classy PENDIENTE: falta el subform real de `comp_tabs` (ver TODO al pie).
+      ...advanced(),
     ],
   },
   {
@@ -789,10 +952,12 @@ export function getComponent(key) {
 // que existe en el CMS.
 const CG = (name, view_mode, help) => ({
   key: `card_grid:${view_mode}`, name, help, component_key: 'card_grid', content: { view_mode },
+  category: 'Carruseles',
 })
 export const PALETTE = [
   ...COMPONENTS.filter((c) => c.key !== 'card_grid' && !c.deprecated).map((c) => ({
-    key: c.key, name: c.name, help: c.help, component_key: c.key, content: {}, container: c.container,
+    key: c.key, name: c.name, help: c.help, component_key: c.key, content: {},
+    container: c.container, category: c.category || 'Otros',
   })),
   CG('Mosaico', 'grid-cards', 'Card Grid en modo Grid Cards: la grilla que alterna imagen y caja de contenido. Máximo 3 cards.'),
   CG('Cards verticales', 'slider-default-card', 'Card Grid en modo Slider Cards Default: cards altas con la imagen a sangre, título arriba y texto abajo (la de Compromiso Purina®).'),
@@ -801,6 +966,26 @@ export const PALETTE = [
   CG('Cards apaisadas', 'slider-background-default-card', 'Card Grid en modo Slider Background Cards Default: cards apaisadas con la imagen de fondo y el texto agrupado abajo. Máximo 3 cards.'),
   CG('Card Grid (elegir modo)', '', 'El componente crudo: lo agregás y elegís cualquiera de los 11 modos de vista adentro.'),
 ]
+
+// La paleta se muestra agrupada por familia: con los 12 layouts adentro, una lista
+// plana de 30 items no se puede leer. Lo que no este en el orden va al final.
+const PALETTE_ORDER = [
+  'Hero', 'Contenido', 'Carruseles', 'Layout', 'Marcas', 'Navegacion',
+  'Componentes reusables', 'Otros',
+]
+
+export function paletteGroups(items = PALETTE) {
+  const by = new Map()
+  for (const it of items) {
+    const k = it.category || 'Otros'
+    if (!by.has(k)) by.set(k, [])
+    by.get(k).push(it)
+  }
+  const rank = (c) => { const i = PALETTE_ORDER.indexOf(c); return i < 0 ? 99 : i }
+  return [...by.entries()]
+    .sort((a, b) => rank(a[0]) - rank(b[0]))
+    .map(([category, list]) => ({ category, items: list }))
+}
 
 // Tamanos de imagen recomendados (Design Guidelines) de un componente, segun su
 // contenido: si el componente tiene specsByType, se resuelve por el campo specKey
@@ -929,4 +1114,33 @@ export function fieldToText(field, value) {
   // lo que el editor ve en el desplegable de Drupal).
   if (field.type === 'select' && Array.isArray(field.options)) return labelOf(field.options, value)
   return String(value)
+}
+
+// ---- Lo que todavia NO esta -----------------------------------------------------
+// Inventario, para no perder de vista cuanto falta para espejar el CMS. Sale del
+// dialogo "Add Component" de Drupal (la lista completa de paragraphs disponibles).
+// No se usa en la app: es documentacion viva, al lado del catalogo que describe.
+
+// Paragraphs que existen en el CMS y no tenemos construidos.
+export const CMS_PENDING_PARAGRAPHS = [
+  'Additional Information', 'Additional Information Item',
+  'Feeding Guide Grid', 'Feeding Guide Item',
+  'Nutritional Table', 'Nutritional Item',
+  'History Grid', 'History Grid Item',
+  'Media Gallery', 'Media Gallery Modal', 'Media',
+  'Contact Card', 'Contact Card Grid',
+  'Content: Tint', 'TINT Component', 'TINT Component Item CTA',
+  'Content: Forms', 'Block', 'HTML', 'Banner Wrapper', 'Flag Anonymous Modal',
+]
+
+// Componentes NUESTROS a los que les falta el subform real del CMS para cerrarlos.
+// Hasta tener el HTML del formulario de Drupal, sus campos son una aproximacion y no
+// se les puede declarar el panel Classy sin inventar.
+export const CMS_PENDING_SUBFORMS = {
+  banner: 'Faltan los valores de maquina del Banner Type (sabemos title-description, only-image y full-image-box-content) y el panel Classy completo.',
+  text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
+  tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
+  content_image: 'Falta el subform de `c_image` entero: los campos de hoy se dedujeron de la pagina, no del formulario.',
+  brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',
+  articles_carousel: 'Idem: confirmar si es un View/bloque y no un paragraph.',
 }
