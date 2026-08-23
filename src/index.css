@@ -1517,12 +1517,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Alineacion del bloque de texto. Arrastra al CTA porque es inline-block. */
 .cp-al-center { text-align: center; }
 .cp-al-right { text-align: right; }
-/* Con fondo por token, el texto hereda el color legible que calcula el render y el
-   bloque respira como seccion (en vez de quedar el color pegado al borde). */
+/* Con fondo por token el bloque respira como seccion, en vez de quedar el color
+   pegado al borde. */
 .cp-text--bg { border-radius: 10px; padding: 30px; }
-.cp-text--bg .cp-h2, .cp-text--bg .cp-p { color: inherit; }
+/* Titulo y cuerpo toman el color del bloque: el token de Text Color, o el que se
+   calcula para que contraste con el fondo. */
+.cp-text--ink .cp-h2, .cp-text--ink .cp-p { color: inherit; }
+/* Boton Secondary: negro con texto blanco (gana sobre la inversion automatica). */
+.cp-cta--sec { background: #111114; color: #fff; }
 /* Sobre un fondo oscuro (ej. Primary Red) el boton rojo desaparece: se invierte. */
-.cp-text--ondark .cp-cta { background: #fff; color: var(--bg, var(--purina)); }
+.cp-text--ondark .cp-cta:not(.cp-cta--sec) { background: #fff; color: var(--bg, var(--purina)); }
 .cp-img { width: 100%; object-fit: cover; display: block; background: #e5e9f0; }
 .cp-img-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aab2bd; }
 /* Dimension recomendada dentro del placeholder de imagen. */

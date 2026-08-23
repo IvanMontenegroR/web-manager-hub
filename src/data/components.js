@@ -44,6 +44,10 @@ export const BG_TOKENS = {
 // Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
 export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
 
+// Estilo del boton. "Predefinido" = lo que decida el tema, que hoy es lo mismo que
+// "Default" (el boton rojo); "Secondary" es el negro con texto blanco.
+export const CTA_STYLES = ['Predefinido', 'Default', 'Secondary']
+
 // Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
 // estas dos, para poder meterle contenido adentro antes de renombrarlas.
 export const TAB_SAMPLE = [
@@ -139,7 +143,7 @@ export const COMPONENTS = [
     key: 'text',
     name: 'Texto',
     category: 'Contenido',
-    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo con los mismos tokens que el Banner, y puede tener un CTA.',
+    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo y de texto con los mismos tokens que el Banner, y puede tener un CTA en estilo Default (rojo) o Secondary (negro con texto blanco).',
     fields: [
       { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
       { key: 'title', label: 'Titulo', type: 'text' },
@@ -150,8 +154,13 @@ export const COMPONENTS = [
       { key: 'align', label: 'Alineación', type: 'select', cms: true, options: TEXT_ALIGNS },
       { key: 'background_color', label: 'Background Color', type: 'select', cms: true, options: BG_COLORS,
         hint: 'Token del CMS, los mismos del Banner. En el mockup solo se pintan los que tenemos mapeados a un hex; el resto se ve sin fondo.' },
+      // Pinta titulo y cuerpo. El boton NO lo toca: tiene su propio estilo.
+      { key: 'text_color', label: 'Text Color', type: 'select', cms: true, options: BG_COLORS,
+        hint: 'Misma paleta de tokens. Afecta al título y al cuerpo, no al botón. Sin cargar, sobre un fondo de color se calcula solo para que contraste.' },
       { key: 'cta_label', label: 'Botón — texto', type: 'text' },
       { key: 'cta_url', label: 'Botón — link', type: 'url' },
+      { key: 'cta_style', label: 'Botón — estilo', type: 'select', cms: true, options: CTA_STYLES,
+        hint: 'Default = el botón rojo. Secondary = fondo negro con texto blanco. Predefinido lo deja a criterio del tema (hoy se ve igual que Default).' },
     ],
   },
   {
