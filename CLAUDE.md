@@ -245,19 +245,27 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      marca) y `background_color` en las demas, donde por defecto NO hay fondo. Un campo de color
      `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
      quitarlo, en vez de un rojo que parece cargado.
-     **CONTENEDORES (pestañas)**: un componente marcado `container: true` (hoy solo `tabs`, "Pestañas") no
-     tiene contenido visual propio mas alla de su cabecera: su contenido son OTROS componentes. La pagina
-     pasa a ser un ARBOL de un nivel — `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y
-     `tab_index` (la pestaña en la que cae). Los sueltos tienen `parent_id` NULL. El `sort_order` es por
-     GRUPO: los hijos de una pestaña se ordenan entre ellos, aparte de los bloques sueltos. Cada pestaña
-     tiene nombre + descripcion opcional (campo lista `tabs`); si no hay ninguna cargada se usan las de
-     ejemplo (`tabList` / `TAB_SAMPLE`), y el `tab_index` de los hijos apunta a esa lista. Si se borra una
-     pestaña, sus hijos NO se pierden: caen en la ULTIMA (mismo criterio en el builder y en el Excel).
-     En el builder, el contenido de la pestaña se le pasa al preview por `slot` y se agrega con el boton
-     "Agregar componente acá" DENTRO de la pestaña activa (la paleta de ese boton excluye los contenedores:
-     no se anidan pestañas dentro de pestañas). Se montan TODAS las pestañas — las inactivas fuera de
-     pantalla (`.pb-tabpanel--off`) — para que el export pueda capturar tambien lo que esta en las
-     pestañas cerradas. Ver `sql/2026_page_components_tabs.sql`.
+     **CONTENEDORES y SLOTS**: un componente marcado `container: true` no tiene contenido visual propio
+     mas alla de su cabecera: su contenido son OTROS componentes. La pagina es un ARBOL de un nivel —
+     `page_components.parent_id` (FK a si misma, ON DELETE CASCADE) y `tab_index`. Los sueltos tienen
+     `parent_id` NULL. El `sort_order` es por GRUPO: los hijos de un slot se ordenan entre ellos, aparte
+     de los bloques sueltos.
+     Cada contenedor declara sus **SLOTS** (`slotsOf`), que son las ranuras donde caen los hijos, y hay
+     dos clases: **fijos**, declarados en el componente (`slots`) — las columnas de un layout — y
+     **variables**, que salen del contenido — una pestaña por cada `tabs` cargada (`tabList` /
+     `TAB_SAMPLE`). El hijo apunta al suyo con `tab_index`, que se sigue llamando asi por historia (nacio
+     con las pestañas) pero es el **indice de slot** y vale para cualquier contenedor. Si se borra una
+     pestaña, sus hijos NO se pierden: caen en el ULTIMO slot (mismo criterio en el builder y en el Excel).
+     La UNICA diferencia entre las dos clases es como se ven: en las **pestañas** se ve un slot por vez
+     (los demas se montan fuera de pantalla, `.pb-tabpanel--off`, para que el export capture tambien lo
+     que esta en las pestañas cerradas); en las **columnas** se ven todos a la vez. En el builder el
+     contenido de cada slot se le pasa al preview por `slots` (un nodo por slot, en orden) y se agrega con
+     el boton que aparece adentro. El arbol es de UN nivel: la paleta de ese boton excluye los
+     contenedores, asi que no se anidan (en el CMS si se puede, es una limitacion nuestra).
+     Contenedores de hoy: `tabs` (= `comp_tabs` + `comp_tabs_tab_item`) y los **12 `layout_columns_*`**
+     (`LAYOUT_COLUMNS`: 100 / 50 / 33 / 25 / 20 y las asimetricas 25_25_50, 25_50_25, 25_75, 33_66,
+     50_25_25, 66_33, 75_25). Cada layout declara los `widths` de sus columnas en porcentaje y el mockup
+     los dibuja como `fr` proporcionales. Ver `sql/2026_page_components_tabs.sql`.
      **CARD GRID** (`card_grid`) = el paragraph `ln_c_cardgrid` del CMS. UN solo componente del que salen
      el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
@@ -294,10 +302,34 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
      Un campo con `noneOption` (ej. "Aplica a" -> "Sin iconos" en el carrusel de marcas) NO baja al Excel
-     cuando esta en esa opcion: no hay nada que cargar (`excelSkip`).
-  Fetch tolerante + SETUP_SQL en `src/lib/pagesDb.js`. Catalogo inicial (piloto): breadcrumb, banner,
-  brand_logos, card_grid, text, text_image, big_number_grid, external_video, article_list. Los componentes
-  se renderizan dentro de un container (`.pb-page`, gutter lateral que replica el `.container` real).
+     cuando esta en esa opcion: no hay nada que cargar (`excelSkip`). Un componente sin NINGUN campo de
+     mercado (los contenedores de columnas: todo lo suyo es tecnico) no dibuja la tabla, solo una linea
+     que aclara que el contenido va en los componentes de adentro.
+  **AVANZADO y CLASSY**: no son campos de un componente, son dos bloques que Drupal le agrega a CADA
+  paragraph. Se declaran una sola vez — `advanced()` (visibilidad por especie, See more, Section ID,
+  Custom CSS) y `classy(...keys)` (los selects de estilo, sacados de `CLASSY_FIELDS`) — y cada componente
+  los engancha pidiendo los que le aplican, EN EL ORDEN en que los muestra el formulario de Drupal, que es
+  el orden de la hoja CMS. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
+  tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
+  El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
+  opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es
+  multivaluado) con destino, rel y ARIA label. Todo lo visual sale de Classy — `content_text_styles`
+  (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
+  CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
+  El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
+  Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
+  son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.
+  El viejo **`fifty_fifty`** queda `deprecated`: en el CMS nunca fue un componente, son un
+  `layout_columns_2` con un `c_text` en la primera columna y un `accordion_grid` en la segunda. Los tres
+  bloques ya armados se migraron con `sql/2026_estructura_cms.sql` (que ademas migra el bloque de Texto a
+  las keys nuevas).
+  Fetch tolerante + SETUP_SQL en `src/lib/pagesDb.js`. Al pie de `src/data/components.js` esta el
+  inventario de lo que FALTA para espejar el CMS: `CMS_PENDING_PARAGRAPHS` (los paragraphs que no tenemos)
+  y `CMS_PENDING_SUBFORMS` (los componentes nuestros a los que les falta el subform real de Drupal para
+  cerrarlos — hasta tenerlo, sus campos son una aproximacion y no se les declara Classy sin inventar).
+  Los componentes se renderizan dentro de un container (`.pb-page`, gutter lateral que replica el
+  `.container` real). La paleta va agrupada por familia (`paletteGroups`): con los 12 layouts adentro,
+  una lista plana de 30 items no se lee.
   El builder tiene toggle Editar/Vista previa: en preview oculta paleta/editor/toolbars y muestra la
   pagina a sangre con el gutter real (sin los espacios de edicion).
   El **Header** (`preview/SiteHeader.jsx`) y el **Footer** (`preview/SiteFooter.jsx`) del sitio son

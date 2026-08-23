@@ -7,8 +7,15 @@ import ComponentPreview from './preview/ComponentPreview.jsx'
 const BANNER_DEF = getComponent('banner')
 const BANNER_TYPES = (BANNER_DEF?.fields.find((f) => f.key === 'type')?.options) || []
 
-// Componentes de la galeria: el breadcrumb no se muestra (se arma solo, sin contenido).
-const GALLERY_COMPONENTS = COMPONENTS.filter((def) => def.key !== 'breadcrumb')
+// Componentes de la galeria. La galeria existe para validar CAMPOS y medidas con la
+// agencia, asi que se quedan afuera los que no tienen nada que validar:
+//   - el breadcrumb (se arma solo, sin contenido)
+//   - los CONTENEDORES (pestañas, columnas): su contenido son otros componentes, sin
+//     hijos se dibujan vacios y serian 13 cajas iguales sin informacion
+//   - los `deprecated`: ya no se pueden agregar, mostrarlos confundiria
+const GALLERY_COMPONENTS = COMPONENTS.filter(
+  (def) => def.key !== 'breadcrumb' && !def.container && !def.deprecated,
+)
 
 // Solo la seccion "Componentes reusables" lleva encabezado visible. Los demas se
 // agrupan por tipo (banners, carruseles...) para que queden ordenados, pero SIN titulo.

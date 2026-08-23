@@ -509,23 +509,41 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       }
     }
 
-    // Cabecera Campo | Contenido.
-    const thin = { style: 'thin', color: { argb: BORDER } }
-    ws.getCell(row, 2).value = 'Campo'
-    ws.getCell(row, 3).value = disabled ? 'Contenido (no editable)' : 'Contenido a cargar'
-    for (const col of [2, 3]) {
-      const c = ws.getCell(row, col)
-      c.font = { bold: true, size: 10, color: { argb: disabled ? MUTED : 'FF1F2530' } }
-      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
-      c.alignment = { vertical: 'middle' }
-      c.border = { top: thin, bottom: thin, left: thin, right: thin }
+    // Campos VISUALES (los cms:true se omiten). Un CONTENEDOR de columnas no tiene
+    // ninguno: todo lo suyo es tecnico y su contenido son los hijos, que van en sus
+    // propias secciones. En ese caso no se dibuja la tabla — una cabecera "Campo |
+    // Contenido a cargar" sin una sola fila debajo es ruido para el mercado.
+    const visible = visibleFields(def, content, { excel: true })
+
+    if (!visible.length) {
+      // Un CONTENEDOR de columnas no tiene campos propios: todo lo suyo es tecnico y
+      // su contenido son los hijos, que van en sus propias secciones. Dibujar una
+      // cabecera "Campo | Contenido a cargar" sin una sola fila debajo seria ruido.
+      ws.mergeCells(row, 2, row, 3)
+      const nc = ws.getCell(row, 2)
+      nc.value = 'Este bloque no lleva contenido propio: se carga en los componentes de adentro.'
+      nc.font = { italic: true, size: 10, color: { argb: MUTED } }
+      nc.alignment = { vertical: 'middle', indent: 1 }
+      setH(row, 18)
+      row++
+    } else {
+      // Cabecera Campo | Contenido.
+      const thin = { style: 'thin', color: { argb: BORDER } }
+      ws.getCell(row, 2).value = 'Campo'
+      ws.getCell(row, 3).value = disabled ? 'Contenido (no editable)' : 'Contenido a cargar'
+      for (const col of [2, 3]) {
+        const c = ws.getCell(row, col)
+        c.font = { bold: true, size: 10, color: { argb: disabled ? MUTED : 'FF1F2530' } }
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+        c.alignment = { vertical: 'middle' }
+        c.border = { top: thin, bottom: thin, left: thin, right: thin }
+      }
+      setH(row, 18)
+      row++
     }
-    setH(row, 18)
-    row++
 
     // Campos VISUALES (los cms:true se omiten). Las listas se abren por item,
     // con etiqueta SINGULAR (Marca 1, Producto 1, Articulo 1...).
-    const visible = visibleFields(def, content, { excel: true })
     for (const f of visible) {
       if (f.type === 'list') {
         const stored = Array.isArray(content[f.key]) ? content[f.key] : []
