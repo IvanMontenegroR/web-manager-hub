@@ -258,7 +258,30 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      no se anidan pestañas dentro de pestañas). Se montan TODAS las pestañas — las inactivas fuera de
      pantalla (`.pb-tabpanel--off`) — para que el export pueda capturar tambien lo que esta en las
      pestañas cerradas. Ver `sql/2026_page_components_tabs.sql`.
-  3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): por pagina, una seccion por componente
+     **CARD GRID** (`card_grid`) = el paragraph `ln_c_cardgrid` del CMS. UN solo componente del que salen
+     el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
+     (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
+     quedan `deprecated` (siguen renderizando lo ya armado pero salen de la paleta). Trae la estructura
+     completa del CMS: titulo/subtitulo con HTML tag, background image, subitems (titulo+tag, icono,
+     descripcion, subtitulo+tag, imagen desktop y mobile **cada una con su alt**, CTA con texto/URL/destino,
+     background color, section ID y CSS por card), el bloque **Avanzado** (See more, visibilidad Gato/Perro,
+     section ID, CSS) y los 13 selects de **Classy**. Ver `sql/2026_card_grid_migracion.sql`.
+     La **PALETA** (`PALETTE`) es una lista aparte de `COMPONENTS`: sus items pueden ser un componente o un
+     ATAJO con contenido inicial. Los modos de vista entran como atajos ("Mosaico", "Cards verticales"...)
+     para elegir por como se ve, pero lo que se guarda es siempre `card_grid` + `view_mode`.
+     Un `option` de un select puede ser un string o `{ value, label }`: se guarda el valor de maquina del
+     CMS (`grid-cards`) y se muestra/exporta la etiqueta que ve el editor en Drupal. `emptyLabelFor` dice
+     que muestra Drupal cuando el select esta vacio (`Default` en Classy, `- Ninguno -` en los HTML tag).
+     `BG_COLORS` son los 39 tokens reales y `CMS_ICONS` los ~130 iconos, los dos sacados del formulario.
+  3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): **DOS hojas espejadas**. La hoja
+     **Contenido** es para el mercado (solo lo que carga: los `cms:true` no aparecen) y la hoja **CMS** es
+     la guia del content editor: mismo orden que el formulario de Drupal, con las etiquetas EXACTAS
+     (`cmsLabel`) y TODOS los campos, incluidos los tecnicos. El contenido NO se duplica: cada celda de la
+     hoja CMS es una **formula** `IF('Contenido'!Cn="","",'Contenido'!Cn)`, asi lo que carga el mercado
+     aparece del otro lado sin copiar nada. `cellRef` registra en que fila quedo cada campo mientras se
+     arma la hoja Contenido. Esas celdas van en gris y la hoja CMS se **protege** (sin contraseña) para que
+     nadie pise una formula. Los nombres de las hojas son FIJOS porque las formulas los referencian.
+     La hoja Contenido tiene, por pagina, una seccion por componente
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
      numeradas `1`, `2`, `3`… Un bloque de pestañas suma **una banda oscura por pestaña** (`3.1 — Pestaña:
      Gato`) y debajo las secciones de sus componentes (`3.1.1`, `3.1.2`…); la imagen del contenedor muestra

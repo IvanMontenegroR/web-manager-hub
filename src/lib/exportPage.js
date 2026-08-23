@@ -6,9 +6,18 @@
 // los campos VISUALES (los tecnicos del CMS se marcan `cms:true` y se omiten).
 import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
-import { getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields, componentHasImage, excelSkip, tabList } from '../data/components'
+import {
+  getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
+  componentHasImage, excelSkip, tabList, emptyLabelFor,
+} from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks } from './richText'
+
+// Las dos hojas del archivo. El nombre es FIJO porque la hoja CMS referencia a la de
+// contenido por formula (='Contenido'!C12).
+const SHEET_CONTENT = 'Contenido'
+const SHEET_CMS = 'CMS'
+const MIRROR_BG = 'FFF7F8FA' // celdas espejadas: vienen de la otra hoja, no se editan aca
 
 const PURINA_RED = 'FFED1C24'
 const HEAD_BG = 'FF1F2530'
@@ -228,9 +237,14 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   const mainComps = useStrip ? components.filter((c) => !isBanner(c) || c === firstBanner) : components
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Web Manager Hub'
-  const ws = wb.addWorksheet(safeFileName(page.name).slice(0, 28) || 'Pagina', {
-    views: [{ showGridLines: false }],
-  })
+  // Nombre FIJO: la hoja CMS la referencia por formula, asi que no puede depender del
+  // nombre de la pagina.
+  const ws = wb.addWorksheet(SHEET_CONTENT, { views: [{ showGridLines: false }] })
+  // Donde quedo cada campo en esta hoja: `${compId}|${path}` -> fila. La hoja CMS
+  // apunta ahi con una formula, asi el editor ve lo que carga el mercado sin copiarlo.
+  const cellRef = new Map()
+  const imgByComp = new Map()   // compId -> imagen ya registrada en el workbook
+  const labelByComp = new Map() // compId -> "3.1.2. Texto" (misma numeracion en ambas hojas)
   const E_W = 70 // ancho (chars) de la columna de imagen
   const columns = [
     { width: 2 },     // A: margen
@@ -377,6 +391,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
       c2.alignment = { vertical: 'top', wrapText: true }
     }
+    if (opts.ref) cellRef.set(opts.ref, atRow)
     const thin = { style: 'thin', color: { argb: BORDER } }
     const fill = opts.fill || (disabled ? SUBHEAD_BG : null)
     for (const col of [2, 3]) {
@@ -464,6 +479,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // Banda de titulo (bloque izquierdo). En los banners, el subtipo (Banner Type)
     // va entre parentesis para saber de que banner se trata.
     const subtype = def?.key === 'banner' && content.type ? ` (${content.type})` : ''
+    labelByComp.set(comp.id, `${label}. ${def?.name || comp.component_key}${subtype}`)
     row = bandTitle(row, `${label}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
@@ -527,11 +543,13 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           // que cargar, seria una fila de ruido.
           const subFields = visibleSubFields(f, role, content, { excel: true }).filter((sf) => !excelSkip(sf, item[sf.key]))
           for (const sf of subFields) {
-            row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), { sub: true, disabled })
+            row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), {
+              sub: true, disabled, ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
+            })
           }
         })
       } else if (!excelSkip(f, content[f.key])) {
-        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled })
+        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, ref: `${comp.id}|${f.key}` })
       }
     }
 
@@ -540,6 +558,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // mas angosto para no salir tan bajos. Se ubica centrada dentro del marco.
     const dataUrl = await shotFor(comp.id, getNode(comp.id), def?.exportWidth || CAP_W)
     const img = await prepImage(dataUrl)
+    if (img) imgByComp.set(comp.id, img)
     const PAD = 12     // pt de aire arriba/abajo dentro del marco
     const CAP_GAP = 4  // aire entre la imagen y su Alt Text
     const CAP_H = 16   // fila del Alt Text (debajo de la imagen)
@@ -679,5 +698,149 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
   }
 
+  // ---- Hoja CMS: la misma pagina, pero en el orden del formulario de Drupal --------
+  // El contenido NO se copia: se referencia con formula a la hoja Contenido, asi lo que
+  // carga el mercado aparece de este lado sin que nadie tenga que pasarlo a mano.
+  await buildCmsSheet(wb, page, {
+    comps: mainComps, cellRef, imgByComp, labelByComp,
+  })
+
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
+}
+
+// ---------------------------------------------------------------------------------
+// Hoja CMS: la guia del content editor. Mismo orden que el formulario de Drupal, con
+// las etiquetas EXACTAS del CMS (`cmsLabel`), incluidos los campos tecnicos que la
+// hoja Contenido no muestra (HTML tags, tokens de color, Classy, Avanzado).
+//
+// Lo que el mercado carga NO se duplica: la celda es una formula a la hoja Contenido.
+// Si el mercado edita alla, aca se actualiza solo. Esas celdas van en gris y la hoja
+// se protege, para que nadie pise una formula sin querer.
+// ---------------------------------------------------------------------------------
+async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp }) {
+  const ws = wb.addWorksheet(SHEET_CMS, { views: [{ showGridLines: false }] })
+  const IMG_W = 70
+  ws.columns = [{ width: 2 }, { width: 34 }, { width: 52 }, { width: 2 }, { width: IMG_W }]
+  const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
+  const thin = { style: 'thin', color: { argb: BORDER } }
+
+  // Banda superior + instrucciones.
+  ws.mergeCells(1, 2, 1, 5)
+  const t = ws.getCell(1, 2)
+  t.value = `Carga en el CMS — ${page.name}`
+  t.font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } }
+  t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
+  t.alignment = { vertical: 'middle', indent: 1 }
+  setH(1, 30)
+  ws.mergeCells(2, 2, 2, 5)
+  ws.getCell(2, 2).value = 'Cada bloque está en el orden del formulario de Drupal, con el nombre exacto de cada campo. Las filas en gris son el contenido que carga el mercado: vienen enlazadas a la hoja "Contenido" y se actualizan solas, no hace falta copiarlas. Los campos vacíos quedan en "Default" o "—" según corresponda.'
+  ws.getCell(2, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
+  ws.getCell(2, 2).alignment = { wrapText: true, vertical: 'top' }
+  setH(2, 42)
+  let row = 4
+
+  // Fila de campo. `ref` = clave en cellRef; si existe, la celda es una FORMULA que
+  // trae el valor de la hoja Contenido (con IF para que un vacio no se vea como 0).
+  const line = (label, value, opts = {}) => {
+    const a = ws.getCell(row, 2)
+    a.value = label
+    a.font = { bold: !opts.sub, size: 10, color: { argb: 'FF1F2530' } }
+    a.alignment = { vertical: 'top', wrapText: true, indent: opts.sub ? 1 : 0 }
+    const b = ws.getCell(row, 3)
+    const srcRow = opts.ref != null ? cellRef.get(opts.ref) : null
+    if (srcRow) {
+      const cell = `'${SHEET_CONTENT}'!C${srcRow}`
+      b.value = { formula: `IF(${cell}="","",${cell})`, result: value == null || value === '' ? '' : value }
+      b.font = { size: 10, color: { argb: 'FF1F2530' } }
+      b.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: MIRROR_BG } }
+    } else {
+      const empty = value == null || value === ''
+      b.value = empty ? (opts.emptyAs || EMPTY) : value
+      b.font = { size: 10, italic: empty, color: { argb: empty ? MUTED : 'FF1F2530' } }
+    }
+    b.alignment = { vertical: 'top', wrapText: true }
+    for (const c of [2, 3]) ws.getCell(row, c).border = { top: thin, bottom: thin, left: thin, right: thin }
+    setH(row, estHeight(value))
+    row++
+  }
+  const band = (text, bg, size = 12) => {
+    ws.mergeCells(row, 2, row, 3)
+    const c = ws.getCell(row, 2)
+    c.value = text
+    c.font = { bold: true, size, color: { argb: 'FFFFFFFF' } }
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } }
+    c.alignment = { vertical: 'middle', indent: 1 }
+    setH(row, size > 10 ? 22 : 18)
+    row++
+  }
+  const cardBand = (text) => {
+    ws.mergeCells(row, 2, row, 3)
+    const c = ws.getCell(row, 2)
+    c.value = text
+    c.font = { bold: true, size: 10, color: { argb: 'FF7A1216' } }
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CARD_BG } }
+    c.alignment = { vertical: 'middle', indent: 1 }
+    ws.getCell(row, 2).border = { top: thin, bottom: thin, left: thin }
+    ws.getCell(row, 3).border = { top: thin, bottom: thin, right: thin }
+    setH(row, 18)
+    row++
+  }
+  // Etiqueta del CMS de un campo (cae a la nuestra si no esta declarada).
+  const cmsLabel = (f) => f.cmsLabel || f.label
+  // Un select vacio en el CMS no siempre dice lo mismo ("Default" en Classy,
+  // "- Ninguno -" en los HTML tag): se resuelve por la lista de opciones.
+  const emptyFor = (f) => emptyLabelFor(f)
+
+  for (const comp of comps) {
+    const def = getComponent(comp.component_key)
+    if (def?.matrixExclude) continue
+    const content = comp.content || {}
+    const topRow = row
+    band(`${labelByComp.get(comp.id) || def?.name || comp.component_key}`, PURINA_RED)
+    // Que paragraph hay que agregar en Drupal.
+    line('Tipo de paragraph', def?.cmsName || def?.name || comp.component_key)
+    ws.getCell(row - 1, 3).font = { size: 10, bold: true, color: { argb: 'FF1F2530' } }
+    ws.getCell(row - 1, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+    ws.getCell(row - 1, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+
+    // TODOS los campos, incluidos los tecnicos (sin { excel: true }).
+    for (const f of visibleFields(def, content)) {
+      if (f.type === 'list') {
+        const stored = Array.isArray(content[f.key]) ? content[f.key] : []
+        const arr = f.fixed
+          ? Array.from({ length: f.fixed }, (_, i) => stored[i] || {})
+          : (stored.length ? stored : [{}])
+        const one = f.itemLabel || f.label
+        arr.forEach((item, i) => {
+          const role = f.roles ? f.roles[i] : null
+          cardBand(`${cmsLabel(f)} — ${one} ${i + 1}${role ? ` (${role})` : ''}`)
+          for (const sf of visibleSubFields(f, role, content)) {
+            line(cmsLabel(sf), fieldToText(sf, item[sf.key]), {
+              sub: true, ref: `${comp.id}|${f.key}[${i}].${sf.key}`, emptyAs: emptyFor(sf),
+            })
+          }
+        })
+      } else {
+        line(cmsLabel(f), fieldToText(f, content[f.key]), {
+          ref: `${comp.id}|${f.key}`, emptyAs: emptyFor(f),
+        })
+      }
+    }
+
+    // Imagen del componente, del mismo tamaño que en la hoja Contenido.
+    const img = imgByComp.get(comp.id)
+    if (img) {
+      ws.addImage(img.id, { tl: { col: 4.1, row: topRow }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
+      // Reservar alto para que la imagen no pise el bloque siguiente.
+      let area = 0
+      for (let r = topRow + 1; r < row; r++) area += ws.getRow(r).height || 15
+      while (area < img.hpt + 20) { setH(row, 16); area += 16; row++ }
+    }
+    drawBox(ws, topRow, row - 1, 2, 5, PURINA_RED)
+    row += 1
+  }
+
+  // Hoja de solo lectura: en xlsx las celdas ya vienen bloqueadas, asi que alcanza con
+  // proteger la hoja. Sin contraseña, para que el editor pueda desbloquear si necesita.
+  await ws.protect('', { selectLockedCells: true, selectUnlockedCells: true })
 }

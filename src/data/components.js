@@ -158,6 +158,22 @@ export const LINK_TARGETS = [
 export const PET_VISIBILITY = ['Gato', 'Perro', 'Gato + Perro']
 export const HTML_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p']
 
+// Que dice Drupal cuando el select esta vacio. No es siempre lo mismo ("Default" en el
+// panel Classy, "- Ninguno -" en los HTML tag), y el editor tiene que buscar esa opcion
+// exacta en el desplegable. Se resuelve por la LISTA de opciones, asi no hay que
+// declararlo campo por campo.
+const EMPTY_LABELS = new Map([
+  [BG_COLORS, TOKEN_DEFAULT], [BG_POSITIONS, TOKEN_DEFAULT], [CARD_STYLES, TOKEN_DEFAULT],
+  [CARD_TITLE_POSITIONS, TOKEN_DEFAULT], [ARROW_POSITIONS, TOKEN_DEFAULT],
+  [CLASSY_ALIGNS, TOKEN_DEFAULT], [SPACINGS, TOKEN_DEFAULT],
+  [HTML_TAGS, '- Ninguno -'], [LINK_TARGETS, '- Ninguno -'],
+  [CMS_ICONS, '- Select an icon -'],
+  [PET_VISIBILITY, 'Vista genérica (todas)'],
+])
+export function emptyLabelFor(field) {
+  return (field?.options && EMPTY_LABELS.get(field.options)) || '—'
+}
+
 // Nombre de los grupos plegables del form (ver ContentForm).
 export const G_ADV = 'Avanzado (CMS)'
 export const G_CLASSY = 'Classy — estilos (CMS)'
