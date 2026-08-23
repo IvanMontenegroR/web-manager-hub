@@ -44,9 +44,10 @@ export const BG_TOKENS = {
 // Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
 export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
 
-// Estilo del boton. "Predefinido" = lo que decida el tema, que hoy es lo mismo que
-// "Default" (el boton rojo); "Secondary" es el negro con texto blanco.
-export const CTA_STYLES = ['Predefinido', 'Default', 'Secondary']
+// Estilo del boton: "Default" es el rojo y "Secondary" el negro con texto blanco.
+// Sin cargar vale Default, asi que un "Predefinido" aparte seria la misma opcion
+// dos veces.
+export const CTA_STYLES = ['Default', 'Secondary']
 
 // Pestañas de ejemplo del bloque "Pestañas". Un bloque recien agregado ya muestra
 // estas dos, para poder meterle contenido adentro antes de renombrarlas.
@@ -143,7 +144,7 @@ export const COMPONENTS = [
     key: 'text',
     name: 'Texto',
     category: 'Contenido',
-    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo y de texto con los mismos tokens que el Banner, y puede tener un CTA en estilo Default (rojo) o Secondary (negro con texto blanco).',
+    help: 'Bloque de texto (una o dos columnas). Se puede alinear a la izquierda, al centro o a la derecha (la alineación arrastra también al botón), lleva color de fondo y de texto con los mismos tokens que el Banner, y puede tener un CTA en estilo Default (rojo, el que vale si no elegís nada) o Secondary (negro con texto blanco).',
     fields: [
       { key: 'style', label: 'Estilo', type: 'select', cms: true, options: ['Una columna', 'Dos columnas', 'Dos columnas expansivo'] },
       { key: 'title', label: 'Titulo', type: 'text' },
@@ -160,7 +161,7 @@ export const COMPONENTS = [
       { key: 'cta_label', label: 'Botón — texto', type: 'text' },
       { key: 'cta_url', label: 'Botón — link', type: 'url' },
       { key: 'cta_style', label: 'Botón — estilo', type: 'select', cms: true, options: CTA_STYLES,
-        hint: 'Default = el botón rojo. Secondary = fondo negro con texto blanco. Predefinido lo deja a criterio del tema (hoy se ve igual que Default).' },
+        hint: 'Default = el botón rojo, y es lo que vale si no elegís nada. Secondary = fondo negro con texto blanco.' },
     ],
   },
   {
