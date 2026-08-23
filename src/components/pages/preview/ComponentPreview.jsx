@@ -1,4 +1,10 @@
-import { ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
+import {
+  ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight,
+  Heart, Handshake, Stethoscope, HeartPulse, ShoppingCart, Store, Users, User, UserPlus,
+  Home, Mail, Phone, MessageCircle, Search, Settings, Share2, Download, Star, BadgeCheck,
+  Check, Calendar, Clock, MapPin, Globe, HelpCircle, FileText, Percent, Beef, Apple,
+  Cookie, Zap, Dna, Facebook, Instagram, Linkedin, Youtube,
+} from 'lucide-react'
 import { parseLinks } from '../../../lib/richText'
 import { CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS, BG_TOKENS, tabList } from '../../../data/components'
 
@@ -96,8 +102,28 @@ function readableOn(bg, preferred) {
   return relLuminance(rgb) > 0.45 ? '#111114' : '#ffffff'
 }
 
-// Icono decorativo elegido de una lista (pata / gato / perro).
+// Equivalencias entre el set de iconos del CMS (CMS_ICONS) y los de lucide que tenemos.
+// Lo que no esta mapeado cae a la patita: el nombre exacto igual viaja al Excel, que es
+// lo que el editor necesita para elegirlo en Drupal.
+const ICON_MAP = {
+  cat: Cat, 'cat-ai': Cat, dog: Dog, 'dog-ai': Dog, paw: PawPrint, 'paw-solid': PawPrint,
+  heart: Heart, handshake: Handshake, stethoscope: Stethoscope, health_cross: HeartPulse,
+  pet_supplies: ShoppingCart, add_shopping_cart: ShoppingCart, storefront: Store,
+  groups: Users, person: User, person_add: UserPlus, family_home: Home,
+  mail: Mail, call: Phone, chat: MessageCircle, chat_bubble: MessageCircle, forum: MessageCircle,
+  search: Search, 'search-ai': Search, settings: Settings, share: Share2, download: Download,
+  star: Star, 'star-1': Star, 'star-void': Star, verified: BadgeCheck, check: Check, done_all: Check,
+  calendar_month: Calendar, calendar_add_on: Calendar, history: Clock,
+  pin_drop: MapPin, my_location: MapPin, language: Globe, help: HelpCircle,
+  play_circle: Play, article: FileText, download_2: Download, percent_discount: Percent,
+  beef: Beef, apple: Apple, cookie: Cookie, bolt: Zap, genetics: Dna,
+  facebook: Facebook, instagram: Instagram, linkedin: Linkedin, youtube: Youtube,
+}
+// Icono decorativo. Acepta tanto el nombre del CMS (cat, dog, paw...) como los viejos
+// en español (pata / gato / perro), que siguen guardados en las paginas ya armadas.
 function FeatureIcon({ name, size = 26 }) {
+  const Ico = ICON_MAP[String(name || '').toLowerCase()]
+  if (Ico) return <Ico size={size} />
   if (/gato|cat/i.test(name)) return <Cat size={size} />
   if (/perro|dog/i.test(name)) return <Dog size={size} />
   return <PawPrint size={size} />

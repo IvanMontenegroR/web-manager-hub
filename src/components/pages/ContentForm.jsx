@@ -185,20 +185,39 @@ function SpecsPanel({ specs }) {
 
 export default function ContentForm({ component, draft, onChange, brandSecondary }) {
   const set = (key) => (val) => onChange({ ...draft, [key]: val })
+  const one = (f) => (
+    <div key={f.key} className="field">
+      <label>{f.label}</label>
+      {f.type === 'list'
+        ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} content={draft} />
+        : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
+      {/* Aclaracion del catalogo (ej. que un token no se pinta en el mockup). */}
+      {f.hint && <div className="hint">{f.hint}</div>}
+    </div>
+  )
+  // Los campos con `group` (ej. "Avanzado (CMS)") se juntan en una seccion plegable al
+  // final, para que la config tecnica del CMS no tape los campos de contenido.
+  const fields = visibleFields(component, draft)
+  const plain = fields.filter((f) => !f.group)
+  const groups = []
+  for (const f of fields.filter((f) => f.group)) {
+    const g = groups.find((x) => x.name === f.group) || (groups.push({ name: f.group, fields: [] }), groups[groups.length - 1])
+    g.fields.push(f)
+  }
   return (
     <div className="cf">
       <SpecsPanel specs={getSpecs(component, draft)} />
       {/* Campos filtrados por tipo (ej. Banner Type oculta/muestra campos). */}
-      {visibleFields(component, draft).map((f) => (
-        <div key={f.key} className="field">
-          <label>{f.label}</label>
-          {f.type === 'list'
-            ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} content={draft} />
-            : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
-          {/* Aclaracion del catalogo (ej. que un token no se pinta en el mockup). */}
-          {f.hint && <div className="hint">{f.hint}</div>}
-        </div>
-      ))}
+      {plain.map(one)}
+      {groups.map((g) => {
+        const cargados = g.fields.filter((f) => draft[f.key] !== undefined && draft[f.key] !== '' && draft[f.key] !== false).length
+        return (
+          <details key={g.name} className="cf-group">
+            <summary>{g.name}{cargados > 0 && <span className="cf-group-n">{cargados}</span>}</summary>
+            {g.fields.map(one)}
+          </details>
+        )
+      })}
     </div>
   )
 }

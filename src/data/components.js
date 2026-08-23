@@ -20,17 +20,24 @@ export const CMT_WIDE_TOP = 'Cards apaisadas con título arriba'     // Slider c
 export const CMT_NUMBERS = 'Cards numeradas'                        // Cards numbers
 export const CMT_VARIANTS = [CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS]
 
-// Background Color del CMS: paleta de TOKENS (no hex). La comparten el Banner y el
-// bloque de Texto, por eso vive aca y no duplicada en cada componente.
+// Paleta de TOKENS del CMS (no hex). Es la MISMA lista para todos los selects de color
+// del panel Classy: Background Color, Card - Background Color, Text Color, Card - Title
+// Color, Card - Icon Color, etc. Sale tal cual del formulario de Drupal (39 valores).
+// Vacio = "Default" en el CMS, por eso "Default" NO esta en la lista: seria la misma
+// opcion dos veces (el select ya trae su "—").
 export const BG_COLORS = [
-  'Por defecto',
   'Brand 01', 'Brand 02', 'Brand 03', 'Brand 04',
   'Neutral 000', 'Neutral 100', 'Neutral 200', 'Neutral 300', 'Neutral 400',
   'Neutral 500', 'Neutral 600', 'Neutral 700', 'Neutral 800',
   'Primary Black', 'Primary Red', 'Primary White',
   'Reds 000', 'Reds 100', 'Reds 200', 'Reds 300', 'Reds 400', 'Reds 500', 'Reds 600',
-  'Secondary Red',
+  'Secondary 123', 'Secondary 131', 'Secondary 1665', 'Secondary 187',
+  'Secondary 2280', 'Secondary 2294', 'Secondary 2577', 'Secondary 268',
+  'Secondary 433', 'Secondary 433 8', 'Secondary 538', 'Secondary 541',
+  'Secondary 636', 'Secondary 7567', 'Secondary 7704', 'Secondary Red',
 ]
+// Etiqueta que ve el editor en Drupal cuando el campo esta vacio.
+export const TOKEN_DEFAULT = 'Default'
 
 // Hex de cada token, para poder PINTAR el fondo en el mockup. Solo estan los que
 // conocemos con certeza; el resto queda sin pintar a proposito (inventar un color de
@@ -40,6 +47,36 @@ export const BG_TOKENS = {
   'Primary Red': '#ED1C24',
   'Primary White': '#FFFFFF',
 }
+
+// Set de iconos del CMS, tal cual el select de Drupal. El VALOR es lo que identifica
+// al icono, asi que es lo que se guarda y lo que baja al Excel: el editor elige ese
+// mismo nombre en el formulario. En el mockup se dibuja el equivalente que tengamos
+// (ver FeatureIcon en ComponentPreview) y el resto cae a un icono generico.
+export const CMS_ICONS = [
+  'action_key', 'add_2', 'add_a_photo', 'add_comment', 'add_link', 'add_location_alt',
+  'add_photo_alternate', 'add_shopping_cart', 'adocao', 'ai', 'apple', 'arming_countdown',
+  'arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow_outward', 'article',
+  'aspect_ratio', 'atr', 'attachment', 'audio-ai', 'audio', 'beef', 'bolt', 'bookmark_star',
+  'bookmark_star_fill', 'border_color', 'browse', 'calculate', 'calendar_add_on',
+  'calendar_month', 'call', 'cat-ai', 'cat', 'chat', 'chat_add_on', 'chat_bubble',
+  'chat_error', 'check', 'check_box', 'check_box_outline_blank', 'chevron_backward',
+  'chevron_forward', 'close', 'content_copy', 'cookie', 'counter_4', 'crop_free',
+  'dark_mode', 'dehaze', 'delete', 'dog-ai', 'dog', 'done_all', 'download',
+  'ellipsis-vertical', 'facebook-positive', 'facebook', 'family_home', 'female',
+  'filter-1', 'filter', 'folder_open', 'format_bold', 'format_italic',
+  'format_list_bulleted', 'format_list_numbered', 'format_quote', 'format_size',
+  'format_underlined', 'forum', 'genetics', 'google', 'groups', 'handshake',
+  'health_cross', 'heart', 'help', 'history', 'hotel', 'instagram',
+  'keyboard_arrow_down', 'keyboard_arrow_up', 'language', 'light_mode', 'linked_services',
+  'linkedin', 'logout', 'mail', 'male', 'mic', 'more_horiz', 'move_item', 'my_location',
+  'newsmode', 'open_in_new', 'password_2', 'pause_circle', 'paw-solid', 'paw',
+  'percent_discount', 'person', 'person_add', 'person_edit', 'pet_supplies', 'pin_drop',
+  'pinterest', 'play_circle', 'post_add', 'search-ai', 'search', 'search_activity',
+  'settings', 'share', 'star-1', 'star-void', 'star', 'stethoscope', 'storefront',
+  'strikethrough_s', 'text_decrease', 'text_increase', 'thumb_down', 'thumb_up', 'tiktok',
+  'verified', 'video_camera_back_add', 'visibility_off', 'whatsapp', 'workspace_premium',
+  'x', 'youtube',
+]
 
 // Alineacion del bloque de texto. Arranca en Izquierda (lo que ya hacia).
 export const TEXT_ALIGNS = ['Izquierda', 'Centro', 'Derecha']
