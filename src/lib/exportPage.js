@@ -8,7 +8,7 @@ import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
-  componentHasImage, excelSkip, slotsOf, emptyLabelFor,
+  componentHasImage, excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
@@ -26,6 +26,9 @@ const SUBHEAD_BG = 'FFF1F3F5'
 const MUTED = 'FF868E99'
 const BORDER = 'FFE4E7EB'
 const EMPTY = '—'
+// Amarillo de "esto lo completa el mercado". Se pinta solo cuando el campo esta VACIO:
+// una vez cargado no hay nada pendiente que marcar.
+const TODO_BG = 'FFFFF2C2'
 
 function safeFileName(name) {
   return (name || 'Pagina').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim()
@@ -405,11 +408,13 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       c2.alignment = { vertical: 'top', wrapText: true }
     } else {
       // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
-      const font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
+      const font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || !!(empty && opts.todo) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
       // `rich` = el campo es rich text en el CMS: las marcas (**negrita**, viñetas,
       // saltos) se convierten a formato de VERDAD en la celda, no viajan como simbolos.
       // 'textarea' lleva bloques (parrafos y listas); un campo de una linea, solo inline.
-      c2.value = empty ? (opts.placeholder || EMPTY)
+      // `todo` = lo entrega el mercado y todavia no esta: en vez del guion va la
+      // consigna, y la celda se pinta (ver el fill mas abajo).
+      c2.value = empty ? (opts.placeholder || (opts.todo ? 'Completar' : EMPTY))
         : (opts.rich ? toExcelRich(value, font, { block: opts.rich === 'textarea' }) : value)
       c2.font = font
       c2.alignment = { vertical: 'top', wrapText: true }
@@ -420,6 +425,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     for (const col of [2, 3]) {
       ws.getCell(atRow, col).border = { top: thin, bottom: thin, left: thin, right: thin }
       if (fill) ws.getCell(atRow, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } }
+    }
+    // Pendiente del mercado: se pinta SOLO la celda de contenido, que es donde escriben.
+    if (opts.todo && empty && !disabled) {
+      ws.getCell(atRow, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: TODO_BG } }
     }
     // El alto se mide sobre el texto YA renderizado: las marcas no ocupan lugar y una
     // lista o un parrafo nuevo suman renglones.
@@ -489,10 +498,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   title.alignment = { vertical: 'middle', indent: 1 }
   setH(2, 26)
   ws.mergeCells(3, 2, 3, 5)
-  ws.getCell(3, 2).value = 'Completá el contenido visual de cada componente (izquierda) según la imagen de referencia (derecha): pegá los links de las imágenes/videos, títulos, textos y links. No hace falta saber del CMS. Al final de la hoja, más a la derecha, está la página entera armada para verla de un vistazo.'
+  ws.getCell(3, 2).value = 'Completá el contenido de cada bloque (izquierda) mirando la imagen de referencia (derecha). Las celdas en AMARILLO son las que faltan y las tenés que llenar vos: imágenes y sus textos alternativos. El resto ya viene cargado; si algo no coincide, corregilo. Al pie de cada lista hay una fila que explica cómo pedir un ítem más. No hace falta saber nada del CMS. Al final, más a la derecha, está la página entera armada para verla de un vistazo.'
   ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
-  setH(3, 30)
+  setH(3, 44)
   let row = 5
 
   // Referencias de la pagina: el diseño y las dos webs. Van arriba de todo porque son
@@ -521,11 +530,12 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const content = comp.content || {}
     const topRow = row
 
-    // Banda de titulo (bloque izquierdo). En los banners, el subtipo (Banner Type)
-    // va entre parentesis para saber de que banner se trata.
-    const subtype = def?.key === 'banner' && content.type ? ` (${content.type})` : ''
-    labelByComp.set(comp.id, `${label}. ${def?.name || comp.component_key}${subtype}`)
-    row = bandTitle(row, `${label}. ${def?.name || comp.component_key}${subtype}`, PURINA_RED)
+    // Banda de titulo (bloque izquierdo). El nombre es el que usamos en la app, no el
+    // del CMS: es lo que el mercado lee y por lo que con el tiempo puede pedir
+    // ("quiero unas cards con icono acá"). Ver `componentTitle`.
+    const name = `${label}. ${componentTitle(def, content) || comp.component_key}`
+    labelByComp.set(comp.id, name)
+    row = bandTitle(row, name, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
     // vez para todo el sitio. Los campos SE MUESTRAN pero DESHABILITADOS (grises) para
@@ -614,7 +624,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
           for (const sf of subFields) {
             row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), {
-              sub: true, disabled, rich: richKind(sf), ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
+              sub: true, disabled, rich: richKind(sf), todo: isMarketField(sf), ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
             })
           }
         })
@@ -627,7 +637,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
             { sub: true, italic: true, fill: SUBHEAD_BG, color: MUTED })
         }
       } else if (!excelSkip(f, content[f.key])) {
-        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, rich: richKind(f), ref: `${comp.id}|${f.key}` })
+        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, rich: richKind(f), todo: isMarketField(f), ref: `${comp.id}|${f.key}` })
       }
     }
 

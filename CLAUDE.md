@@ -342,8 +342,22 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
-     La hoja Contenido lista lo que ESTA pagina lleva, no el catalogo de todo lo que el componente podria
-     llevar: un campo VACIO no baja (`excelSkip` + `isEmptyValue`), y tampoco los que quedaron en su
+     La hoja Contenido esta escrita para el MERCADO, no es un espejo del CMS en castellano: el puente al
+     CMS son las formulas, y que la hoja CMS se llene sola es justamente lo que permite que la de Contenido
+     hable el idioma de ellos. De ahi tres reglas.
+     (a) Cada seccion se llama como el componente **en la app** (`componentTitle`), no como el paragraph:
+     el Card Grid toma el nombre del ATAJO de la paleta ("Cards con icono", "Cards numeradas"), porque si
+     no tres bloques seguidos se llamarian igual, y el Banner muestra la etiqueta de su tipo en vez del
+     valor de maquina. Es tambien lo que el mercado puede llegar a pedir por nombre.
+     (b) Un campo baja si lo entrega el MERCADO (`isMarketField`: imagenes y textos alternativos, salvo los
+     marcados "(opcional)"; se fuerza con `market: true/false`) o si tiene algo cargado. Los del mercado
+     bajan VACIOS y su celda va en AMARILLO (`TODO_BG`) con la consigna adentro: es lo unico que tienen que
+     completar. Una vez cargado deja de pintarse.
+     (c) La VARIANTE filtra los campos tambien en el Card Grid (`variantOf` lee `type` o `view_mode`):
+     `CARD_GRID_ICON_MODES` no pide imagenes y `CARD_GRID_IMAGE_MODES` no pide icono. Sin eso, unas cards
+     con icono le pedian al mercado cuatro imagenes por card que ese layout no dibuja.
+     Ademas la hoja Contenido lista lo que ESTA pagina lleva, no el catalogo de todo lo que el componente
+     podria llevar: un campo VACIO no baja (`excelSkip` + `isEmptyValue`), y tampoco los que quedaron en su
      `noneOption` (ej. "Aplica a" -> "Sin iconos" en el carrusel de marcas). Un campo que se dejo vacio al
      armar la pagina es un campo que esa pagina no usa; mostrarlo con un guion solo hace dudar al mercado.
      Un item de lista sin nada cargado tampoco dibuja su banda, y un bloque sin un solo campo cargado

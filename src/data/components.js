@@ -97,6 +97,19 @@ export const CARD_GRID_MODES = [
   { value: 'full-background-card-icons-square', label: 'Full Background Card Icons Square' },
 ]
 export const CARD_GRID_DEFAULT_MODE = 'grid-cards'
+// La card de estos modos NO lleva imagen propia: o va con icono, o es la card blanca
+// numerada. Pedirle al mercado una imagen que ese layout no dibuja es ruido.
+// OJO: los tres `full-background-card-icons*` estan aca por su NOMBRE ("card icons"),
+// no porque hayamos visto el layout — si alguno lleva imagen, se saca de la lista.
+export const CARD_GRID_ICON_MODES = [
+  'cards-icons', 'cards-numbers', 'slider-card-icons-square',
+  'full-background-card-icons', 'full-background-card-icons-box',
+  'full-background-card-icons-square',
+]
+// Y al reves: estos van con imagen, asi que no piden icono.
+export const CARD_GRID_IMAGE_MODES = [
+  'grid-cards', 'cards-simple', 'slider-default-card', 'slider-background-default-card',
+]
 
 // Un `option` de un select puede ser un string (valor = etiqueta) o { value, label }
 // cuando lo que se guarda y lo que se muestra son distintos (ej. el Modo de vista).
@@ -495,7 +508,7 @@ export const COMPONENTS = [
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
       // `field_c_link` es multivaluado en el CMS ("Añadir otro elemento"): un bloque de
       // texto puede llevar mas de un boton.
-      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'CTA', item: [
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', item: [
         { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
         { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
@@ -514,11 +527,11 @@ export const COMPONENTS = [
     category: 'Contenido',
     help: 'Texto con imagen a un costado (`c_sideimagetext`).',
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'title', label: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'body', label: 'Cuerpo', type: 'textarea' },
       { key: 'image', label: 'Imagen', type: 'image' },
-      { key: 'image_position', label: 'Posicion de la imagen', type: 'select', options: ['Izquierda', 'Derecha'] },
+      { key: 'image_position', label: 'Posición de la imagen', type: 'select', options: ['Izquierda', 'Derecha'] },
       { key: 'cta_label', label: 'Botón — texto', type: 'text' },
       { key: 'cta_url', label: 'Botón — link', type: 'url' },
       // Classy PENDIENTE: falta el subform real de `c_sideimagetext` (ver TODO al pie).
@@ -558,11 +571,11 @@ export const COMPONENTS = [
       // El Media es obligatorio en el CMS. El editor ya sabe subirlo: lo que necesita
       // del mercado son los links y los alt.
       { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
-      { key: 'image_alt', label: 'Alt de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
-        placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+      { key: 'image_alt', label: 'Texto alternativo de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
+        placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
       { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
-      { key: 'image_mobile_alt', label: 'Alt de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
-        placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+      { key: 'image_mobile_alt', label: 'Texto alternativo de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
+        placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
       // Optional fields, en el orden del formulario.
       { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
@@ -570,7 +583,7 @@ export const COMPONENTS = [
       { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text' },
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES },
-      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'CTA', item: [
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', item: [
         { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
         { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
@@ -590,14 +603,14 @@ export const COMPONENTS = [
     category: 'Carruseles',
     help: 'Bloque "Aliados y Servicios": titulo sobre una imagen de fondo + tarjetas de servicio (una destacada).',
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text' },
+      { key: 'title', label: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text' },
       { key: 'background', label: 'Imagen de fondo', type: 'image' },
       { key: 'background_mobile', label: 'Imagen de fondo mobile', type: 'image' },
       { key: 'cards', label: 'Tarjetas', type: 'list', itemLabel: 'Tarjeta', item: [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata'] },
-        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
         { key: 'url', label: 'Link', type: 'url' },
         { key: 'highlighted', label: 'Destacada (roja)', type: 'select', options: ['No', 'Si'] },
@@ -611,17 +624,17 @@ export const COMPONENTS = [
     category: 'Carruseles',
     help: 'Sección "Nuestro Blog": cabecera + carrusel de artículos (imagen con chip de categoría y título superpuestos, botón +). Card destacada más grande a la izquierda.',
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Nuestro Blog' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Nuestro Blog' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Artículos pensados para ti y tu mascota' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Artículos pensados para ti y tu mascota' },
       // En el CMS el articulo se SELECCIONA (no se cargan imagen/categoria/link):
       // por eso en el Excel de matriz solo va el titulo del articulo. El resto se
       // marca cms:true (sigue editable en el builder para el mockup, pero no exporta).
-      { key: 'cards', label: 'Articulos', type: 'list', itemLabel: 'Articulo', item: [
+      { key: 'cards', label: 'Artículos', type: 'list', itemLabel: 'Artículo', item: [
         { key: 'image', label: 'Imagen', type: 'image', cms: true },
         { key: 'category', label: 'Categoria (chip)', type: 'text', cms: true },
         { key: 'category_color', label: 'Color del chip (hex)', type: 'text', placeholder: '#582d84', cms: true },
-        { key: 'title', label: 'Titulo del articulo', type: 'text' },
+        { key: 'title', label: 'Título del artículo', type: 'text' },
         { key: 'url', label: 'Link', type: 'url', cms: true },
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Explora más artículos' },
@@ -635,7 +648,7 @@ export const COMPONENTS = [
     help: 'Banner con forma de pastilla oscura (Pet Club): logo + título + texto + botón. Los cuadros decorativos de los lados son fijos (no editables).',
     reusable: true, // reutilizable: en el Excel de una pagina va con los campos deshabilitados
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Lo mejor para tu mascota empieza aquí' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Texto', type: 'textarea' },
       { key: 'button_text', label: 'Botón — texto', type: 'text', placeholder: 'Unirme al club' },
@@ -669,9 +682,9 @@ export const COMPONENTS = [
     help: 'Selector de mascota Gato / Perro (estático, con los íconos de gato y perro). Solo se editan el título y el subtítulo.',
     reusable: true, // reutilizable: en el Excel de una pagina va con los campos deshabilitados
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Quién manda en tu casa' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Quién manda en tu casa' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Elige tu mascota para personalizar tu experiencia:' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Elige tu mascota para personalizar tu experiencia:' },
     ],
   },
   {
@@ -680,9 +693,9 @@ export const COMPONENTS = [
     category: 'Marcas',
     help: 'Sección "Marcas Purina®": cabecera + carrusel de marcas. Cada card = imagen de marca (con toggles perro/gato) + pie gris con nombre y bajada. Botón "Ver todas".',
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Marcas Purina®' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Marcas Purina®' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La variedad que buscas, con la confianza de Purina®' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'La variedad que buscas, con la confianza de Purina®' },
       { key: 'cards', label: 'Marcas', type: 'list', itemLabel: 'Marca', item: [
         { key: 'image', label: 'Imagen de marca', type: 'image' },
         { key: 'name', label: 'Nombre', type: 'text' },
@@ -713,7 +726,7 @@ export const COMPONENTS = [
       // Filtro por categoria: toggle SOLO del builder (cms, no se exporta). Si esta
       // activo, el campo de tabs SI se exporta (requires: 'show_filters'); si no, se oculta.
       { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true },
-      { key: 'filters', label: 'Tabs de filtro (separados por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks', requires: 'show_filters' },
+      { key: 'filters', label: 'Pestañas de filtro (separadas por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks', requires: 'show_filters' },
       // Pet ID: componente fijo (no editable). Checkbox solo del builder (cms) para
       // mostrar/ocultar la card; NO sale como campo en el Excel.
       { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true },
@@ -734,14 +747,14 @@ export const COMPONENTS = [
     category: 'Contenido',
     help: 'Sección "Historia": título + subtítulo centrados y una línea de tiempo horizontal (carrusel). Cada hito: año en pill roja sobre la línea, imagen, título y descripción; un punto rojo cierra el conector.',
     fields: [
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Historia Purina®' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Historia Purina®' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.' },
       { key: 'items', label: 'Hitos', type: 'list', itemLabel: 'Hito', item: [
         { key: 'year', label: 'Año', type: 'text' },
         { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'description', label: 'Descripcion', type: 'textarea' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'textarea' },
       ] },
     ],
     specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
@@ -757,9 +770,9 @@ export const COMPONENTS = [
       // `type` (y no otro nombre) porque es la key que filtra campos por variante y
       // resuelve las specs, igual que el Banner Type.
       { key: 'type', label: 'Variante', type: 'select', cms: true, options: CMT_VARIANTS },
-      { key: 'title', label: 'Titulo', type: 'text', placeholder: 'Compromiso Purina®' },
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Compromiso Purina®' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'subtitle', label: 'Subtitulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
+      { key: 'subtitle', label: 'Subtítulo', type: 'text', placeholder: 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.' },
       // FONDO DEL BLOQUE. Son dos keys para el mismo concepto, y nunca se ven juntas:
       // en la variante con iconos la banda de color es parte del diseño y HEREDA de la
       // marca (`color`, que ya existia); en el resto el fondo es opcional y por defecto
@@ -774,8 +787,8 @@ export const COMPONENTS = [
         { key: 'icon', label: 'Icono', type: 'select', options: ['pata', 'gato', 'perro'], onlyTypes: [CMT_ICON] },
         { key: 'image', label: 'Imagen', type: 'image', hideTypes: [CMT_ICON, CMT_NUMBERS] },
         { key: 'image_mobile', label: 'Imagen mobile', type: 'image', onlyTypes: [CMT_VERTICAL] },
-        { key: 'title', label: 'Titulo', type: 'text' },
-        { key: 'description', label: 'Descripcion', type: 'textarea' },
+        { key: 'title', label: 'Título', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'textarea' },
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
@@ -808,19 +821,19 @@ export const COMPONENTS = [
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
-        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS },
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS, hideTypes: CARD_GRID_IMAGE_MODES },
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea' },
         { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
         { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
-        { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
-        { key: 'image_alt', label: 'Alt de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
-          placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
-        { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
-        { key: 'image_mobile_alt', label: 'Alt de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
-          placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
-        { key: 'cta_label', label: 'CTA — texto', cmsLabel: 'Texto del enlace', type: 'text' },
-        { key: 'cta_url', label: 'CTA — link', cmsLabel: 'URL', type: 'url' },
-        { key: 'cta_target', label: 'CTA — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+        { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image', hideTypes: CARD_GRID_ICON_MODES },
+        { key: 'image_alt', label: 'Texto alternativo de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
+          hideTypes: CARD_GRID_ICON_MODES, placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+        { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image', hideTypes: CARD_GRID_ICON_MODES },
+        { key: 'image_mobile_alt', label: 'Texto alternativo de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
+          hideTypes: CARD_GRID_ICON_MODES, placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+        { key: 'cta_label', label: 'Botón — texto', cmsLabel: 'Texto del enlace', type: 'text' },
+        { key: 'cta_url', label: 'Botón — link', cmsLabel: 'URL', type: 'url' },
+        { key: 'cta_target', label: 'Botón — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
         { key: 'bg_color', label: 'Color de fondo de la card', cmsLabel: 'Background Color (item)', type: 'select', cms: true, options: BG_COLORS },
         { key: 'section_id', label: 'Section ID', cmsLabel: 'Section ID', type: 'text', cms: true },
         { key: 'css_class', label: 'Custom CSS classes', cmsLabel: 'Custom CSS classes', type: 'text', cms: true },
@@ -858,7 +871,7 @@ export const COMPONENTS = [
       { key: 'right_type', label: 'Columna derecha', type: 'select', cms: true, options: ['Desplegable', 'Texto'] },
       { key: 'right_text', label: 'Texto (derecha)', type: 'textarea' },
       { key: 'items', label: 'Desplegables', type: 'list', itemLabel: 'Item', item: [
-        { key: 'title', label: 'Titulo', type: 'text' },
+        { key: 'title', label: 'Título', type: 'text' },
         { key: 'text', label: 'Texto', type: 'textarea' },
       ] },
     ],
@@ -1063,6 +1076,28 @@ export const PALETTE = [
   CG('Card Grid (elegir modo)', '', 'El componente crudo: lo agregás y elegís cualquiera de los 11 modos de vista adentro.'),
 ]
 
+// Como se llama el componente en la MATRIZ. Es el nombre que usamos en la app, no el
+// del CMS: el mercado lo lee ahi y con el tiempo puede pedir por el ("quiero unas cards
+// con icono acá"). Dos componentes necesitan mas que su nombre a secas:
+//   - el Card Grid es UNO solo del que salen muchos layouts, asi que tres bloques
+//     seguidos se llamarian igual. Se usa el nombre del ATAJO de la paleta, que es por
+//     donde se eligen ("Mosaico", "Cards con icono"...).
+//   - el Banner guarda el valor de MAQUINA del tipo (`title-description`): se muestra la
+//     etiqueta del desplegable, que es lo que se lee en la app.
+export function componentTitle(def, content = {}) {
+  if (!def) return ''
+  if (def.key === 'card_grid') {
+    const mode = content.view_mode || CARD_GRID_DEFAULT_MODE
+    const shortcut = PALETTE.find((p) => p.component_key === 'card_grid' && p.content?.view_mode === mode)
+    if (shortcut) return shortcut.name
+    return `${def.name} — ${labelOf(CARD_GRID_MODES, mode) || mode}`
+  }
+  if (def.key === 'banner' && content.type) {
+    return `${def.name} — ${labelOf(BANNER_TYPES, content.type) || content.type}`
+  }
+  return def.name
+}
+
 // La paleta se muestra agrupada por familia: con los 12 layouts adentro, una lista
 // plana de 30 items no se puede leer. Lo que no este en el orden va al final.
 const PALETTE_ORDER = [
@@ -1155,7 +1190,7 @@ export function componentHasImage(def, content) {
 // Campos VISIBLES de un componente segun su contenido: filtra por Banner Type
 // (hideTypes/onlyTypes). Con { excel:true } ademas oculta los tecnicos (cms).
 export function visibleFields(def, content = {}, opts = {}) {
-  const type = content && content.type
+  const type = variantOf(content)
   return (def?.fields || []).filter((f) => {
     if (opts.excel && f.cms) return false
     // Campo condicional: depende de otro (ej. filtros de producto). Si el otro esta
@@ -1170,6 +1205,14 @@ export function visibleFields(def, content = {}, opts = {}) {
   })
 }
 
+// La VARIANTE del componente, que es la que decide que campos aplican. Casi todos la
+// guardan en `type` (el Banner Type); el Card Grid la guarda en `view_mode`, que es como
+// se llama en el CMS. Sin esto, un Card Grid en modo iconos le pediria al mercado las
+// cuatro imagenes de cada card, que en ese layout no se ven.
+function variantOf(content) {
+  return (content && (content.type ?? content.view_mode)) || undefined
+}
+
 // ¿Este campo se OMITE del Excel para este valor? Un campo con `noneOption` (ej.
 // "Aplica a" -> "Sin iconos") no tiene nada que cargar cuando esta en esa opcion,
 // asi que no se le pide una fila al mercado.
@@ -1181,7 +1224,25 @@ export function visibleFields(def, content = {}, opts = {}) {
 export function excelSkip(field, value) {
   if (!field) return false
   if (field.noneOption && value === field.noneOption) return true
+  // Lo que entrega el mercado baja SIEMPRE, aunque no tengamos nada cargado: es
+  // justamente lo que hay que pedirles.
+  if (isMarketField(field)) return false
   return isEmptyValue(value)
+}
+
+// ¿Este dato lo entrega el MERCADO? Es lo unico que se les pide aunque este VACIO: no
+// es contenido que podamos sacar del sitio viejo ni del Figma, lo tienen ellos. Por eso
+// baja igual y en el Excel se pinta, para que se vea que falta completarlo.
+//
+// Regla: toda imagen y todo texto alternativo, MENOS las que su propia etiqueta marca
+// como "(opcional)" — un fondo decorativo no es un pedido al mercado. Cualquier caso
+// que no entre en la regla se fuerza con `market: true` / `market: false` en el campo.
+export function isMarketField(f) {
+  if (!f) return false
+  if (typeof f.market === 'boolean') return f.market
+  if (f.cms) return false
+  if (/\(opcional\)/i.test(f.label || '')) return false
+  return f.type === 'image' || /_alt$/.test(f.key || '')
 }
 
 // Vacio = sin dato. Un booleano SI es dato (false = destildado a proposito).
@@ -1197,7 +1258,7 @@ export function isEmptyValue(value) {
 //     ej. el icono solo existe en la variante con iconos del carrusel de cards)
 //   - `cms`: los tecnicos, solo con { excel: true }
 export function visibleSubFields(field, role, content = {}, opts = {}) {
-  const type = content && content.type
+  const type = variantOf(content)
   return (field?.item || []).filter((sf) => {
     if (opts.excel && sf.cms) return false
     if (sf.roles && role && !sf.roles.includes(role)) return false
