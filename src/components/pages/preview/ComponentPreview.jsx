@@ -294,32 +294,9 @@ const RENDERERS = {
       : fullbox ? '2088×1044px'
       : '2100×1050px'
 
-    // Promotional (solo imagen). Con mas de 1 slide se vuelve un slider.
-    if (promo) {
-      const slides = list(c.slides)
-      const imgs = slides.length ? slides : (c.image ? [{ image: c.image }] : [{}])
-      if (imgs.length > 1) {
-        return (
-          <div className="cp-promoslider">
-            <div className="cp-promo-track" onScroll={syncDots}>
-              {imgs.map((s, i) => (
-                <div key={i} className="cp-promo-slide">
-                  {s.image
-                    ? <MediaEl className="cp-promo-img" src={s.image} />
-                    : <div className="cp-promo-img cp-promo-ph"><span className="cp-dim-badge">{dim}</span></div>}
-                </div>
-              ))}
-            </div>
-            <span className="cp-promo-arrow cp-promo-prev" onClick={scrollSnap(-1)}>‹</span>
-            <span className="cp-promo-arrow cp-promo-next" onClick={scrollSnap(1)}>›</span>
-            <div className="cp-promo-dots">
-              {imgs.map((_, i) => <span key={i} className={`cp-promo-dot${i === 0 ? ' on' : ''}`} onClick={goToSlide(i)} />)}
-            </div>
-          </div>
-        )
-      }
-      return <div className="cp-banner"><Img src={imgs[0]?.image} aspect="3/1" dim={dim} /></div>
-    }
+    // Promotional (solo imagen). Un banner es UNO solo: para varios rotando esta el
+    // "Carrusel de banners" (`Banner Wrapper`), que agrupa banners hijos.
+    if (promo) return <div className="cp-banner"><Img src={c.image} aspect="3/1" dim={dim} /></div>
 
     // Hero (Main / Brand / Secondary). Modela el markup real (.main-hero / .banner,
     // --banner-bg, .btn-primary; CTA mt-6). Secondary = ratio mas ancho/bajo (3:1) y
@@ -972,6 +949,21 @@ const RENDERERS = {
     )
   },
 
+  // Carrusel de banners: CONTENEDOR (`Banner Wrapper`). No dibuja nada propio — sus
+  // slides son OTROS componentes (los banners hijos), que llegan renderizados en
+  // `ctx.slots[0]`. En el sitio rotan de a uno; aca van apilados a proposito, para poder
+  // verlos y editarlos todos (y para que la captura del Excel los muestre a los dos).
+  banner_wrapper: (c, ctx) => (
+    <div className="cp-bwrap">
+      <div className="cp-bwrap-head">
+        <span className="cp-bwrap-arrow">‹</span>
+        <span>Carrusel de banners — en el sitio rotan de a uno</span>
+        <span className="cp-bwrap-arrow">›</span>
+      </div>
+      <div className="cp-bwrap-slot">{ctx?.slots?.[0]}</div>
+    </div>
+  ),
+
   // Pestañas: CONTENEDOR. Titulo/subtitulo opcionales, la barra de pestañas y, debajo,
   // la descripcion de la pestaña activa + el contenido, que NO es de este componente:
   // son OTROS componentes (los hijos), que llegan renderizados en `ctx.slot`.
@@ -1221,28 +1213,6 @@ function scrollRow(rootSel, rowSel, step) {
   }
 }
 const scrollCmt = scrollRow('.cp-cmt', '.cp-cmt-row', 431)
-
-// Slider del Promotional banner: desplaza el track una "pantalla" (100% del ancho).
-function scrollSnap(dir) {
-  return (e) => {
-    const t = e.currentTarget.closest('.cp-promoslider')?.querySelector('.cp-promo-track')
-    if (t) t.scrollBy({ left: dir * t.clientWidth, behavior: 'smooth' })
-  }
-}
-// Dot: salta al slide i.
-function goToSlide(i) {
-  return (e) => {
-    const t = e.currentTarget.closest('.cp-promoslider')?.querySelector('.cp-promo-track')
-    if (t) t.scrollTo({ left: i * t.clientWidth, behavior: 'smooth' })
-  }
-}
-// Marca el dot activo segun la posicion del scroll (sin estado de React).
-function syncDots(e) {
-  const t = e.currentTarget
-  const i = Math.round(t.scrollLeft / t.clientWidth)
-  const dots = t.parentElement?.querySelectorAll('.cp-promo-dot')
-  if (dots) dots.forEach((d, j) => d.classList.toggle('on', j === i))
-}
 
 // Scroll generico de los carruseles clasicos (marcas, blog, servicios, productos):
 // desde la flecha sube al contenedor del carrusel, encuentra su fila scrolleable y

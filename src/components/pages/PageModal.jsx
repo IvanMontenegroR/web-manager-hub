@@ -20,6 +20,7 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
     url_old: item?.url_old ?? '',
     url_new: item?.url_new ?? '',
     url_copydeck: item?.url_copydeck ?? '',
+    url_figma: item?.url_figma ?? '',
     notes: item?.notes ?? '',
   })
   const [err, setErr] = useState(null)
@@ -115,9 +116,15 @@ export default function PageModal({ item, nextSort, defaultMarket, onClose, onSa
           <input className="control" value={form.url_new} onChange={set('url_new')} placeholder="https://..." />
         </div>
       </div>
-      <div className="field">
-        <label>Copydeck <span className="lbl-muted">(opcional)</span></label>
-        <input className="control" value={form.url_copydeck} onChange={set('url_copydeck')} placeholder="https://..." />
+      <div className="row-2">
+        <div className="field">
+          <label>Figma <span className="lbl-muted">(opcional)</span></label>
+          <input className="control" value={form.url_figma} onChange={set('url_figma')} placeholder="https://figma.com/..." />
+        </div>
+        <div className="field">
+          <label>Copydeck <span className="lbl-muted">(opcional)</span></label>
+          <input className="control" value={form.url_copydeck} onChange={set('url_copydeck')} placeholder="https://..." />
+        </div>
       </div>
       <div className="field">
         <label>Notas <span className="lbl-muted">(opcional)</span></label>

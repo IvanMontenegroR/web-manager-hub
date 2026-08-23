@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState } from 'react'
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react'
-import { COMPONENTS, getComponent, sampleContent } from '../../data/components'
+import { COMPONENTS, getComponent, sampleContent, optValue, optLabel } from '../../data/components'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
 
@@ -44,8 +44,11 @@ export default function ComponentsGallery({ onBack }) {
   const [err, setErr] = useState(null)
   const setNode = (id) => (el) => { if (el) nodes.current.set(id, el); else nodes.current.delete(id) }
 
-  const bannerVariants = BANNER_TYPES.map((type) => ({
-    id: `banner__${type}`, type, content: { ...sampleContent(BANNER_DEF), type },
+  // Un banner por Banner Type. La opcion es `{ value, label }`: se GUARDA el valor de
+  // maquina del CMS y se MUESTRA la etiqueta del desplegable de Drupal.
+  const bannerVariants = BANNER_TYPES.map((o) => ({
+    id: `banner__${optValue(o)}`, label: optLabel(o),
+    content: { ...sampleContent(BANNER_DEF), type: optValue(o) },
   }))
 
   // Lista de componentes para el export (orden del catalogo; el banner se expande a
@@ -66,8 +69,10 @@ export default function ComponentsGallery({ onBack }) {
         const wrap = nodes.current.get(id)
         return wrap ? wrap.querySelector('.cp-render') : null
         // La galeria es un catalogo, no una pagina: no lleva metas (SEO) ni la imagen
-        // de "la pagina completa" (apilar los 21 componentes no representa nada).
-      }, { metas: false, fullPage: false })
+        // de "la pagina completa" (apilar los 21 componentes no representa nada). En
+        // cambio SI lleva la tira de banners: aca los banners son las VARIANTES del
+        // Banner Type, y se leen mejor una al lado de la otra.
+      }, { metas: false, fullPage: false, bannerStrip: true })
     } catch (e) { setErr(e.message) } finally { setExporting(false) }
   }
 
@@ -100,7 +105,7 @@ export default function ComponentsGallery({ onBack }) {
                   <div className="cg-bannerrow">
                     {bannerVariants.map((v) => (
                       <div key={v.id} className="cg-banneritem">
-                        <div className="cg-banner-type">{v.type}</div>
+                        <div className="cg-banner-type">{v.label}</div>
                         <div className="pb-block pb-block--banner" ref={setNode(v.id)}>
                           <ComponentPreview componentKey="banner" content={v.content} />
                         </div>

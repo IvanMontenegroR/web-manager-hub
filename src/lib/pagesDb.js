@@ -128,6 +128,7 @@ export const SETUP_SQL = `create table if not exists public.pages (
   url_old text,
   url_new text,
   url_copydeck text,
+  url_figma text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -138,6 +139,7 @@ alter table public.pages add column if not exists category text;
 alter table public.pages add column if not exists url_old text;
 alter table public.pages add column if not exists url_new text;
 alter table public.pages add column if not exists url_copydeck text;
+alter table public.pages add column if not exists url_figma text;
 
 create table if not exists public.page_components (
   id uuid primary key default gen_random_uuid(),
@@ -189,13 +191,14 @@ function pagePayload(p) {
     url_old: p.url_old?.trim() || null,
     url_new: p.url_new?.trim() || null,
     url_copydeck: p.url_copydeck?.trim() || null,
+    url_figma: p.url_figma?.trim() || null,
   }
 }
 
 // `brand`, `market`, `category` y las urls son columnas agregadas despues: si alguna
 // todavia no existe en la tabla, el insert/update falla nombrandola. En ese caso se
 // saca del payload y se reintenta (la pagina se guarda igual, sin ese dato).
-const OPTIONAL_COLS = ['brand', 'market', 'category', 'url_old', 'url_new', 'url_copydeck']
+const OPTIONAL_COLS = ['brand', 'market', 'category', 'url_old', 'url_new', 'url_copydeck', 'url_figma']
 function missingOptionalCol(error) {
   if (!error) return null
   const msg = error.message || ''

@@ -211,9 +211,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|Filling Copydeck|
      Scheduled|In progress|On hold|QA MRM|Done, ver `PAGE_STATUS_LABEL`: el valor guardado es el del
      proceso en ingles y la UI muestra la etiqueta en castellano) y orden por prioridad (reordenable,
-     persiste `sort_order`). Cada pagina lleva ademas tres enlaces de referencia opcionales —
-     `url_old` (sitio viejo), `url_new` (sitio nuevo) y `url_copydeck` — que se editan en el PageModal;
-     los dos primeros bajan precargados a la matriz de contenido exportada. Son columnas OPCIONALES:
+     persiste `sort_order`). Cada pagina lleva ademas cuatro enlaces de referencia opcionales —
+     `url_old` (sitio viejo), `url_new` (sitio nuevo), `url_copydeck` y `url_figma` — que se editan en el
+     PageModal; todos menos el copydeck bajan precargados a la matriz de contenido exportada. Son
+     columnas OPCIONALES:
      `withOptionalCols` las saca del payload si la tabla todavia no las tiene (ver
      `sql/2026_pages_urls_y_status.sql`). El boton
      "Armar" abre el builder de esa pagina. Se separa por **mercado** (pestañas, `PAGE_MARKETS`) y dentro
@@ -268,10 +269,21 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      contenido de cada slot se le pasa al preview por `slots` (un nodo por slot, en orden) y se agrega con
      el boton que aparece adentro. El arbol es de UN nivel: la paleta de ese boton excluye los
      contenedores, asi que no se anidan (en el CMS si se puede, es una limitacion nuestra).
-     Contenedores de hoy: `tabs` (= `comp_tabs` + `comp_tabs_tab_item`) y los **12 `layout_columns_*`**
+     Contenedores de hoy: `tabs` (= `comp_tabs` + `comp_tabs_tab_item`), `banner_wrapper` y los
+     **12 `layout_columns_*`**
      (`LAYOUT_COLUMNS`: 100 / 50 / 33 / 25 / 20 y las asimetricas 25_25_50, 25_50_25, 25_75, 33_66,
      50_25_25, 66_33, 75_25). Cada layout declara los `widths` de sus columnas en porcentaje y el mockup
      los dibuja como `fr` proporcionales. Ver `sql/2026_page_components_tabs.sql`.
+     El **`banner_wrapper`** ("Carrusel de banners") es el paragraph `Banner Wrapper` del CMS: NO es un
+     banner, es el envoltorio que agrupa varios `banner` hijos y los rota. Tiene **un solo slot fijo** —
+     en el CMS los banners son un campo multivaluado del wrapper, no ranuras distintas — y el
+     `sort_order` de los hijos ES el orden de los slides. En el mockup los slides van APILADOS (no de a
+     uno) con una banda arriba que lo aclara: asi se pueden ver y editar todos, y la captura del Excel
+     los muestra a los dos. No tiene campos propios: falta el subform de Drupal, asi que solo declara
+     Avanzado (lo unico que Drupal agrega a TODOS los paragraphs por igual) y no se le inventa Classy.
+     Reemplaza al viejo campo `slides` del Banner, que nunca existio en el CMS
+     (ver `sql/2026_banner_wrapper.sql`); el Banner vuelve a ser UNO solo, con su Media en todos los
+     tipos, el Promotional incluido.
      **CARD GRID** (`card_grid`) = el paragraph `ln_c_cardgrid` del CMS. UN solo componente del que salen
      el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
@@ -296,10 +308,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      arma la hoja Contenido. Esas celdas van en gris y la hoja CMS se **protege** (sin contraseña) para que
      nadie pise una formula. Los nombres de las hojas son FIJOS porque las formulas los referencian.
      Arriba de todo, debajo del logo Purina, va el bloque **Referencias**: link del Figma, contraseña del
-     Figma, web vieja y web nueva. Las dos webs se precargan desde `pages.url_old` / `pages.url_new` (si
-     no hay valor queda la pista gris "Pegá acá el link"); las dos del Figma se completan siempre en el
-     Excel — cambian por pagina y por vuelta de diseño, no vale la pena guardarlas. La galeria "Todos los
-     componentes" no lo lleva (es un catalogo, no una pagina: misma señal que `metas:false`).
+     Figma, web vieja y web nueva. Los tres links se precargan desde `pages.url_figma` / `url_old` /
+     `url_new` (si no hay valor queda la pista gris "Pegá acá el link"); la **contraseña** del Figma se
+     completa siempre en el Excel — cambia por vuelta de diseño, no vale la pena guardarla. La galeria
+     "Todos los componentes" no lo lleva (es un catalogo, no una pagina: misma señal que `metas:false`).
+     La **tira de banners** (con 2+ banners, el primero inline y los demas en bloques a la derecha) es
+     SOLO de la galeria (`bannerStrip: true`): ahi los banners son las variantes del Banner Type. En una
+     pagina de verdad dos banners son dos bloques — tipicamente los slides de un `banner_wrapper` — y
+     cada uno va en su lugar del arbol.
      La hoja Contenido tiene, por pagina, una seccion por componente
      con una imagen del componente RENDERIZADO CON SU CONTENIDO (captura del preview) + tabla campo→contenido,
      numeradas `1`, `2`, `3`… Un bloque de pestañas suma **una banda oscura por pestaña** (`3.1 — Pestaña:
@@ -338,7 +354,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   "Secondary Hero" es `title-description` y "Banner Card" es `banner-menu` (ver `BANNER_TYPES`). Su Link
   tambien es multivaluado (`ctas`) y su Classy son solo dos selects: Background Color y Banner Align
   Content. Suma el checkbox "Remover Overlay Background" y el grupo **Search AI** (mostrar el buscador,
-  fijarlo en mobile, y las sugerencias). El campo `slides` NO existe en el CMS — ver `CMS_PENDING_SUBFORMS`.
+  fijarlo en mobile, y las sugerencias). El Media va en TODOS los tipos, el Promotional incluido: ahi la
+  imagen es lo unico que hay. Para varios banners rotando esta el `banner_wrapper`.
   El **`c_image`** ("Imagen") es una imagen con texto encima: el Media lleva desktop y mobile, cada uno
   con su **alt obligatorio**, y eso es lo unico que el mercado entrega (el editor ya sabe subirlo). Suma
   Title Size / SubTitle Size y un Classy propio con Image position e Image Style. Todo lo visual sale de Classy — `content_text_styles`

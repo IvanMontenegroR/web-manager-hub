@@ -432,21 +432,15 @@ export const COMPONENTS = [
       { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Title)', type: 'select', cms: true, hideTypes: [BT_ONLY_IMAGE], options: HTML_TAGS },
       { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea', hideTypes: [BT_ONLY_IMAGE] },
       // En el CMS es UN Media (responsive image) que resuelve solo desktop y mobile;
-      // aca son dos campos porque el mercado tiene que entregar los dos archivos.
-      { key: 'image', label: 'Imagen / Video (link)', cmsLabel: 'Media', type: 'image', hideTypes: [BT_ONLY_IMAGE] },
-      { key: 'image_mobile', label: 'Imagen / Video mobile (link)', cmsLabel: 'Media (mobile)', type: 'image', hideTypes: [BT_ONLY_IMAGE] },
+      // aca son dos campos porque el mercado tiene que entregar los dos archivos. Va en
+      // TODOS los tipos, el Promotional incluido: ahi la imagen es lo unico que hay.
+      { key: 'image', label: 'Imagen / Video (link)', cmsLabel: 'Media', type: 'image' },
+      { key: 'image_mobile', label: 'Imagen / Video mobile (link)', cmsLabel: 'Media (mobile)', type: 'image' },
       // `field_c_link` es multivaluado, igual que en el bloque de Texto. A diferencia
       // de `c_text`, este widget NO trae el panel de Atributos (sin destino/rel/aria).
       { key: 'ctas', label: 'Botones', cmsLabel: 'Link', type: 'list', itemLabel: 'Link', hideTypes: [BT_ONLY_IMAGE], item: [
         { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
-      ] },
-      // Solo Promotional: varias imagenes; con mas de 1 el banner se vuelve un slider.
-      // OJO: esto NO existe en el subform del CMS. Ver CMS_PENDING_SUBFORMS.
-      { key: 'slides', label: 'Imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', onlyTypes: [BT_ONLY_IMAGE], item: [
-        { key: 'image', label: 'Imagen', type: 'image' },
-        { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
-        { key: 'link', label: 'Link', type: 'url' },
       ] },
       // Grupo "Search AI" del formulario: el buscador con IA sobre el banner.
       { key: 'show_search', label: 'Show Search', cmsLabel: 'Show Search', type: 'checkbox', cms: true, default: false, group: G_SEARCH },
@@ -470,6 +464,22 @@ export const COMPONENTS = [
       // Banner Card: medidas PENDIENTES de confirmar con desarrollo.
       'banner-menu': [],
     },
+  },
+  {
+    key: 'banner_wrapper',
+    name: 'Carrusel de banners',
+    cmsName: 'Banner Wrapper',
+    category: 'Hero',
+    help: 'El paragraph `Banner Wrapper` del CMS: NO es un banner, es el envoltorio que agrupa varios banners y los rota. Los banners van ADENTRO (se agregan desde el botón de la ranura) y cada uno se carga como cualquier otro banner. Con un solo banner adentro no rota: es lo mismo que poner el banner suelto.',
+    // Contenedor de UN solo slot fijo: en el CMS los banners son un campo multivaluado
+    // del wrapper, no ranuras distintas. Los hijos se ordenan entre ellos (sort_order) y
+    // ese orden ES el orden de los slides.
+    container: true,
+    slots: [{ label: 'Banners del carrusel', cmsLabel: 'Banners' }],
+    // Sin campos propios: falta el subform real de Drupal (ver CMS_PENDING_SUBFORMS), asi
+    // que no se le inventa ni Classy ni configuracion de autoplay. Avanzado si va: Drupal
+    // se lo agrega a TODOS los paragraphs por igual.
+    fields: [...advanced()],
   },
   {
     key: 'text',
@@ -1092,7 +1102,7 @@ export function getSpecs(component, content) {
 
 // Contenido de EJEMPLO para un componente (galeria "Todos los componentes" + su
 // export). Objetivo: validar campos y referencias de tamaño/peso con la agencia, asi
-// que todo campo de LISTA trae al menos 2 items (productos, marcas, slides...). Las
+// que todo campo de LISTA trae al menos 2 items (productos, marcas, cards...). Las
 // imagenes van vacias a proposito -> el mockup muestra el placeholder CON el tamaño.
 function sampleFieldValue(f, i = 0) {
   const n = i + 1
@@ -1101,7 +1111,9 @@ function sampleFieldValue(f, i = 0) {
     case 'checkbox': return true
     // `clearable` = vacio significa "sin color": el ejemplo tiene que quedar sin cargar.
     case 'color': return f.clearable ? '' : (f.default || '#ED1C24')
-    case 'select': return (f.options && f.options[0]) || ''
+    // La opcion puede ser `{ value, label }`: lo que se guarda es SIEMPRE el valor de
+    // maquina del CMS. Guardar el objeto rompia el preview (React no renderiza objetos).
+    case 'select': return optValue(f.options && f.options[0]) || ''
     case 'url': return `https://ejemplo.com/${f.key}-${n}`
     case 'textarea': return f.placeholder || `Texto de ejemplo ${n} para validar el campo “${f.label}”.`
     default: return f.placeholder || `${f.label} ${n}`
@@ -1216,14 +1228,14 @@ export const CMS_PENDING_PARAGRAPHS = [
   'Media Gallery', 'Media Gallery Modal', 'Media',
   'Contact Card', 'Contact Card Grid',
   'Content: Tint', 'TINT Component', 'TINT Component Item CTA',
-  'Content: Forms', 'Block', 'HTML', 'Banner Wrapper', 'Flag Anonymous Modal',
+  'Content: Forms', 'Block', 'HTML', 'Flag Anonymous Modal',
 ]
 
 // Componentes NUESTROS a los que les falta el subform real del CMS para cerrarlos.
 // Hasta tener el HTML del formulario de Drupal, sus campos son una aproximacion y no
 // se les puede declarar el panel Classy sin inventar.
 export const CMS_PENDING_SUBFORMS = {
-  banner: 'El campo `slides` (varias imagenes en el Promotional) NO existe en el subform. En el CMS el carrusel de banners probablemente se arme con el paragraph "Banner Wrapper"; confirmar y migrar.',
+  banner_wrapper: 'Falta el subform de `Banner Wrapper`: sus campos propios (¿autoplay, intervalo?) y el panel Classy. Hoy solo declara Avanzado, que Drupal agrega a todos los paragraphs por igual.',
   text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
   tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
   brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',

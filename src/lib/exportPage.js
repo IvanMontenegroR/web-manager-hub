@@ -226,12 +226,14 @@ function drawBox(ws, r1, r2, c1, c2, argb, style = 'medium') {
 export async function exportPageMatrix(page, components, getNode, opts = {}) {
   const withMetas = opts.metas !== false // por defecto se incluyen las metas (SEO)
   const withFull = opts.fullPage !== false // ...y la imagen de la pagina entera
-  // Con 2+ banners (galeria de todos los tipos): el PRIMERO (Main Hero) queda en la
-  // matriz como un componente normal, y los OTROS tipos se muestran a su DERECHA, en la
-  // misma hoja (bloques en columnas F+). Con 1 solo (pagina del builder) queda inline.
+  // Tira de banners: SOLO para la galeria "Todos los componentes" (`bannerStrip`), que
+  // muestra un banner por tipo. Ahi el PRIMERO queda en la matriz como un componente
+  // normal y los OTROS tipos van a su DERECHA (bloques en columnas F+). En una pagina de
+  // verdad NO aplica: dos banners no son dos variantes de lo mismo, son dos bloques —
+  // tipicamente los slides de un Carrusel de banners — y cada uno va en su lugar.
   const isBanner = (c) => getComponent(c.component_key)?.key === 'banner'
   const bannerComps = components.filter(isBanner)
-  const useStrip = bannerComps.length >= 2
+  const useStrip = opts.bannerStrip === true && bannerComps.length >= 2
   const firstBanner = bannerComps[0]
   const otherBanners = useStrip ? bannerComps.slice(1) : []
   const mainComps = useStrip ? components.filter((c) => !isBanner(c) || c === firstBanner) : components
@@ -468,15 +470,15 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   let row = 5
 
   // Referencias de la pagina: el diseño y las dos webs. Van arriba de todo porque son
-  // lo primero que se busca al abrir la matriz. Las dos urls salen de la ficha de la
-  // pagina si estan cargadas; el Figma se completa en el Excel (no lo guardamos: cambia
-  // por pagina y por vuelta de diseño).
+  // lo primero que se busca al abrir la matriz. Las tres urls salen de la ficha de la
+  // pagina si estan cargadas. La contraseña del Figma NO se guarda (cambia por vuelta de
+  // diseño): esa se completa siempre en el Excel.
   // La galeria de componentes es un catalogo, no una pagina: no tiene ni Figma ni webs
   // (pasa metas:false, la misma señal).
   if (withMetas) {
     const refTop = row
     row = bandTitle(row, 'Referencias', PURINA_RED)
-    row = fieldRow(row, 'Link del Figma', '', { link: '' })
+    row = fieldRow(row, 'Link del Figma', '', { link: page.url_figma || '' })
     row = fieldRow(row, 'Contraseña del Figma', '', { placeholder: 'Escribí acá la contraseña' })
     row = fieldRow(row, 'Web vieja', '', { link: page.url_old || '' })
     row = fieldRow(row, 'Web nueva', '', { link: page.url_new || '' })
