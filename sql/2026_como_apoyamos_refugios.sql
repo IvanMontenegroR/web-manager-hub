@@ -88,26 +88,32 @@ where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 -- Los pasos se quedan en `cards-numbers` — ahi el chip 1/2/3 que sale del ORDEN es lo
 -- correcto, son una secuencia — y asi ademas los dos bloques dejan de verse iguales.
 --
--- Quedan dos cosas para cargar, que el mockup marca solas: el ICONO de cada card (sin
--- elegir se dibuja la pata por defecto) y el Background Color de la banda (sin cargar
--- toma el ambar por defecto del mockup).
--- Y con las cards de icono, que no piden imagen y entran en un carrusel, las
--- adopciones se abren AÑO POR AÑO en vez de quedar apretadas en una sola card con la
--- serie escrita en la descripcion. Cada card sigue el mismo patron que las otras:
--- titulo = la cifra, descripcion = de que es.
+-- Quedan dos cosas para cargar: el ICONO de cada card (sin elegir el mockup dibuja la
+-- pata, que es la señal de que falta) y el Background Color de la banda, que por
+-- defecto NO se pinta.
 --
--- OJO: 231 + 398 + 365 = 994, o sea que la card "+994" es el TOTAL de las tres que le
--- siguen. Quedan las dos cosas — el titular y el desglose — porque asi estaba escrito
--- el contenido original; si se quiere una sola, se saca el total.
+-- Y con las cards de icono, que no piden imagen y entran en un carrusel, las
+-- adopciones se abren AÑO POR AÑO, con los datos del sitio real: el titulo de la card
+-- es el AÑO y el orden es del mas RECIENTE al mas viejo, que es como se leen.
+--
+-- Se van las dos cards de totales que estaban antes ("+1,700,000 platos de alimento
+-- donados" y "+994 adopciones responsables"): con el desglose a la vista repetian lo
+-- mismo, y ademas sus titulos no eran años, que es lo que ahora ordena el bloque.
+-- Estan en el respaldo por si hay que volver a ponerlas. Los numeros tampoco cerraban:
+-- +994 es EXACTAMENTE 231 + 398 + 365, pero los platos de los dos años que los tienen
+-- suman 2,493,686.39, no 1,700,000.
+--
+-- OJO: 2024 no trae platos donados. En el sitio esa card muestra la meta en su lugar,
+-- asi que se respeta; si el dato existe, va como los otros dos años.
 update page_components
 set content = (content - 'view_mode')
   || jsonb_build_object('view_mode', 'slider-card-icons-square')
   || jsonb_build_object('items', jsonb_build_array(
-    jsonb_build_object('title', '+1,700,000', 'description', 'platos de alimento donados'),
-    jsonb_build_object('title', '+994',       'description', 'adopciones responsables de perros y gatos sin hogar'),
-    jsonb_build_object('title', '231',        'description', 'adopciones en 2022'),
-    jsonb_build_object('title', '398',        'description', 'adopciones en 2023'),
-    jsonb_build_object('title', '365',        'description', 'adopciones en 2024'),
-    jsonb_build_object('title', '+470',       'description', 'nuestra meta de adopciones')
+    jsonb_build_object('title', '2024', 'description',
+      E'**365 adopciones**\n\n¡Nuestra meta es llegar a más de 470 adopciones!'),
+    jsonb_build_object('title', '2023', 'description',
+      E'**398 adopciones**\n\nPlatos de comida donados\n600,204.66 perros | 417,623.21 gatos'),
+    jsonb_build_object('title', '2022', 'description',
+      E'**231 adopciones**\n\nPlatos de comida donados\n1,205,707.40 perros | 270,151.12 gatos')
   ))
 where id = '28d6a366-90bf-40a9-939f-340626ea309d';
