@@ -209,8 +209,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
 - **Creacion de paginas** (`src/components/pages/`, se abre desde la seccion Modulos de Ecosystem 2.0):
   modulo para armar las paginas de la migracion. Dos capas:
   1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|Filling Copydeck|
-     Scheduled|In progress|On hold|QA MRM|Done, ver `PAGE_STATUS_LABEL`: el valor guardado es el del
-     proceso en ingles y la UI muestra la etiqueta en castellano) y orden por prioridad (reordenable,
+     Missing links|Scheduled|In progress|On hold|QA MRM|Done, ver `PAGE_STATUS_LABEL`: el valor guardado
+     es el del proceso en ingles y la UI muestra la etiqueta en castellano) y orden por prioridad (reordenable,
      persiste `sort_order`). Cada pagina lleva ademas cuatro enlaces de referencia opcionales —
      `url_old` (sitio viejo), `url_new` (sitio nuevo), `url_copydeck` y `url_figma` — que se editan en el
      PageModal; todos menos el copydeck bajan precargados a la matriz de contenido exportada. Son

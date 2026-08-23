@@ -1398,6 +1398,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pg-count b { font-weight: 800; margin-left: 2px; }
 .pg-count.ns { background: var(--surface-2); color: var(--ink-2); }
 .pg-count.fc { background: var(--copy-tint); color: var(--copy); border-color: transparent; }
+.pg-count.ml { background: var(--danger-tint); color: var(--danger); border-color: transparent; }
 .pg-count.sc { background: var(--sched-tint); color: var(--sched); border-color: transparent; }
 .pg-count.ip { background: var(--info-tint); color: var(--info); border-color: transparent; }
 .pg-count.oh { background: var(--warn-tint); color: var(--warn); border-color: transparent; }
@@ -1455,6 +1456,7 @@ textarea.control { resize: vertical; min-height: 64px; }
   border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-2); appearance: none;
 }
 .page-status.fc { background: var(--copy-tint); color: var(--copy); border-color: transparent; }
+.page-status.ml { background: var(--danger-tint); color: var(--danger); border-color: transparent; }
 .page-status.sc { background: var(--sched-tint); color: var(--sched); border-color: transparent; }
 .page-status.ip { background: var(--info-tint); color: var(--info); border-color: transparent; }
 .page-status.oh { background: var(--warn-tint); color: var(--warn); border-color: transparent; }

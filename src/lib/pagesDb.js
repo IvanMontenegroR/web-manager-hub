@@ -101,11 +101,12 @@ export const PAGE_MARKET_LABEL = Object.fromEntries(PAGE_MARKETS.map((m) => [m.c
 // Estados de una pagina (orden fijo, de menos a mas avanzado). Los valores guardados
 // son los del CMS/proceso en ingles; la UI muestra la etiqueta en castellano.
 export const PAGE_STATUSES = [
-  'Not started', 'Filling Copydeck', 'Scheduled', 'In progress', 'On hold', 'QA MRM', 'Done',
+  'Not started', 'Filling Copydeck', 'Missing links', 'Scheduled', 'In progress', 'On hold', 'QA MRM', 'Done',
 ]
 export const PAGE_STATUS_LABEL = {
   'Not started': 'No iniciada',
   'Filling Copydeck': 'Armando copydeck',
+  'Missing links': 'Faltan links',
   Scheduled: 'Agendada',
   'In progress': 'En progreso',
   'On hold': 'En pausa',
