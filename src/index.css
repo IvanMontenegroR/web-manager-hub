@@ -1526,9 +1526,15 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Alineacion del bloque de texto. Arrastra al CTA porque es inline-block. */
 .cp-al-center { text-align: center; }
 .cp-al-right { text-align: right; }
-/* Con fondo por token el bloque respira como seccion, en vez de quedar el color
-   pegado al borde. */
-.cp-text--bg { border-radius: 10px; padding: 30px; }
+/* Con fondo por token el bloque es FULL BLEED, como en el sitio: la banda de color
+   cubre todo el ancho y solo el TEXTO queda dentro del container. Por eso no lleva
+   borde redondeado (seria una card, no una seccion). */
+.cp-text--bg { padding: 30px; }
+/* En vista previa hay gutter lateral, asi que la banda tiene que salirse de el. El
+   breakout va en el .pb-block y no adentro porque el bloque tiene overflow:hidden;
+   el padding compensa el gutter para que el texto no se corra. */
+.pb-canvas.preview .pb-block--text:has(.cp-text--bg) { margin-inline: -60px; }
+.pb-canvas.preview .pb-block--text:has(.cp-text--bg) .cp-text--bg { padding-inline: 90px; }
 /* Titulo y cuerpo toman el color del bloque: el token de Text Color, o el que se
    calcula para que contraste con el fondo. */
 .cp-text--ink .cp-h2, .cp-text--ink .cp-h3, .cp-text--ink .cp-p { color: inherit; }
