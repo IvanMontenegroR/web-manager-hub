@@ -91,6 +91,23 @@ where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 -- Quedan dos cosas para cargar, que el mockup marca solas: el ICONO de cada card (sin
 -- elegir se dibuja la pata por defecto) y el Background Color de la banda (sin cargar
 -- toma el ambar por defecto del mockup).
+-- Y con las cards de icono, que no piden imagen y entran en un carrusel, las
+-- adopciones se abren AÑO POR AÑO en vez de quedar apretadas en una sola card con la
+-- serie escrita en la descripcion. Cada card sigue el mismo patron que las otras:
+-- titulo = la cifra, descripcion = de que es.
+--
+-- OJO: 231 + 398 + 365 = 994, o sea que la card "+994" es el TOTAL de las tres que le
+-- siguen. Quedan las dos cosas — el titular y el desglose — porque asi estaba escrito
+-- el contenido original; si se quiere una sola, se saca el total.
 update page_components
-set content = (content - 'view_mode') || jsonb_build_object('view_mode', 'slider-card-icons-square')
+set content = (content - 'view_mode')
+  || jsonb_build_object('view_mode', 'slider-card-icons-square')
+  || jsonb_build_object('items', jsonb_build_array(
+    jsonb_build_object('title', '+1,700,000', 'description', 'platos de alimento donados'),
+    jsonb_build_object('title', '+994',       'description', 'adopciones responsables de perros y gatos sin hogar'),
+    jsonb_build_object('title', '231',        'description', 'adopciones en 2022'),
+    jsonb_build_object('title', '398',        'description', 'adopciones en 2023'),
+    jsonb_build_object('title', '365',        'description', 'adopciones en 2024'),
+    jsonb_build_object('title', '+470',       'description', 'nuestra meta de adopciones')
+  ))
 where id = '28d6a366-90bf-40a9-939f-340626ea309d';
