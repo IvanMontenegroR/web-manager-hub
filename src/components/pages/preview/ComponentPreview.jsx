@@ -5,10 +5,12 @@ import {
   Check, Calendar, Clock, MapPin, Globe, HelpCircle, FileText, Percent, Beef, Apple,
   Cookie, Zap, Dna, Facebook, Instagram, Linkedin, Youtube,
 } from 'lucide-react'
-import { parseLinks } from '../../../lib/richText'
+import { Fragment } from 'react'
+import { parseInline, parseRich } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
   BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS,
+  BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_FULL_BOX, BT_BRAND_HERO,
 } from '../../../data/components'
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
@@ -21,12 +23,46 @@ const CG_TO_CMT = {
 }
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
+// Formato INLINE: enlaces, negritas y cursivas. Sirve para los textos de una linea
+// (subtitulos, citas, descripciones de una pestaña).
 function RT({ children }) {
-  const segs = parseLinks(children)
-  if (segs.length === 1 && !segs[0].link) return segs[0].text
-  return segs.map((s, i) => (s.link
-    ? <a key={i} className="cp-link" href={s.url || undefined}>{s.text}</a>
-    : <span key={i}>{s.text}</span>))
+  const segs = parseInline(children)
+  if (segs.length === 1 && !segs[0].link && !segs[0].bold && !segs[0].italic) return segs[0].text
+  return segs.map((s, i) => {
+    if (s.link) return <a key={i} className="cp-link" href={s.url || undefined}>{s.text}</a>
+    if (s.bold) return <strong key={i}>{s.text}</strong>
+    if (s.italic) return <em key={i}>{s.text}</em>
+    return <span key={i}>{s.text}</span>
+  })
+}
+
+// Formato de BLOQUE, para los campos de CUERPO: ademas de lo inline, respeta los
+// saltos de linea y arma listas. Devuelve un <div> propio, asi que va donde antes
+// habia un <p> — un <ul> adentro de un <p> es HTML invalido y el browser lo parte.
+function Rich({ children, className = '', style }) {
+  const blocks = parseRich(children)
+  if (!blocks.length) return null
+  return (
+    <div className={`cp-rich${className ? ` ${className}` : ''}`} style={style}>
+      {blocks.map((b, i) => {
+        if (b.type === 'p') {
+          return (
+            <p key={i}>
+              {b.lines.map((ln, j) => (
+                <Fragment key={j}>{j > 0 && <br />}<RT>{ln}</RT></Fragment>
+              ))}
+            </p>
+          )
+        }
+        const List = b.type === 'ol' ? 'ol' : 'ul'
+        return (
+          <List key={i}>
+            {b.items.map((it, j) => <li key={j}><RT>{it}</RT></li>)}
+          </List>
+        )
+      })}
+    </div>
+  )
 }
 
 // Mockups aproximados de cada componente. Se llenan con el contenido cargado, asi
@@ -88,7 +124,9 @@ const list = (v) => (Array.isArray(v) ? v : [])
 const ctaList = (c) => {
   const arr = list(c.ctas).filter((b) => b && (b.label || b.url))
   if (arr.length) return arr
-  return c.cta_label || c.cta_url ? [{ label: c.cta_label, url: c.cta_url }] : []
+  // Compatibilidad: el boton unico de antes (el banner lo llamaba link_text/link_url).
+  if (c.cta_label || c.cta_url) return [{ label: c.cta_label, url: c.cta_url }]
+  return c.link_text || c.link_url ? [{ label: c.link_text, url: c.link_url }] : []
 }
 
 // Estilo del boton (`style_button` de Classy). Vacio = Default, el rojo.
@@ -236,17 +274,21 @@ const RENDERERS = {
   },
 
   banner: (c) => {
-    const type = c.type || 'Main Hero'
-    const promo = /only image|promotional/i.test(type)
-    const secondary = /secondary hero|title-description/i.test(type)
-    const fullbox = /full image|box content/i.test(type)
+    // Valores de MAQUINA del CMS (ver BANNER_TYPES). Las paginas viejas guardaban la
+    // etiqueta, pero se migraron; igual se acepta la etiqueta por las dudas.
+    const type = c.type || BT_MAIN_HERO
+    const is = (machine, rx) => type === machine || rx.test(type)
+    const promo = is(BT_ONLY_IMAGE, /only image|promotional/i)
+    const secondary = is(BT_SECONDARY_HERO, /secondary hero/i)
+    const fullbox = is(BT_FULL_BOX, /full image|box content/i)
+    const brand = is(BT_BRAND_HERO, /brand hero/i)
     // Main Hero, Brand Hero y Secondary Hero comparten el tratamiento "hero":
     // imagen a sangre + overlay rgba(0,0,0,.3) + texto blanco centrado + CTA.
-    const heroLike = /main hero|brand hero/i.test(type) || secondary
-    const cta = c.link_text
+    const heroLike = is(BT_MAIN_HERO, /main hero/i) || brand || secondary
+    const cta = ctaList(c)[0]?.label
     const { h, v } = parseBannerAlign(c.banner_align, heroLike)
     // Dimension recomendada (desktop) segun el Banner Type, para el placeholder.
-    const dim = /brand hero/i.test(type) ? '2088×835px'
+    const dim = brand ? '2088×835px'
       : secondary ? '2100×700px'
       : promo ? '2088×696px'
       : fullbox ? '2088×1044px'
@@ -291,7 +333,7 @@ const RENDERERS = {
           <div className="cp-hero-scrim" />
           <div className={`cp-hero-content h-${h} v-${v}`}>
             <div className="cp-hero-title">{T(c.title, secondary ? 'Secondary Hero' : 'Main Hero')}</div>
-            {c.description && <p className="cp-hero-desc">{c.description}</p>}
+            {c.description && <Rich className="cp-hero-desc">{c.description}</Rich>}
             {cta && <span className="cp-hero-cta">{cta}</span>}
           </div>
         </div>
@@ -308,7 +350,7 @@ const RENDERERS = {
             : <div className="cp-fib-img cp-img cp-img-ph"><ImageIcon size={22} /><span className="cp-ph-dim">{dim}</span></div>}
           <div className="cp-fib-card">
             <div className="cp-fib-title">{T(c.title, 'Full Image + Box Content')}</div>
-            <p className="cp-fib-desc">{T(c.description, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</p>
+            <Rich className="cp-fib-desc">{T(c.description, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</Rich>
             <span className="cp-fib-cta">{T(cta, 'CTA')}</span>
           </div>
         </div>
@@ -321,7 +363,7 @@ const RENDERERS = {
         <Img src={c.image} h={300} dim={dim} />
         <div className={`cp-banner-box ${h}`}>
           <div className="cp-h1">{T(c.title, 'Titulo del banner')}</div>
-          {c.description && <p className="cp-p">{c.description}</p>}
+          {c.description && <Rich className="cp-p">{c.description}</Rich>}
           {cta && <span className="cp-cta">{cta}</span>}
         </div>
       </div>
@@ -352,7 +394,7 @@ const RENDERERS = {
         {c.title && <div className="cp-h2">{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         <div className={two ? 'cp-cols-2' : ''}>
-          <p className="cp-p"><RT>{T(c.body, 'Texto del bloque...')}</RT></p>
+          <Rich className="cp-p">{T(c.body, 'Texto del bloque...')}</Rich>
           {two && <p className="cp-p">&nbsp;</p>}
         </div>
         {/* El CTA es repetible: se dibujan todos los cargados. */}
@@ -381,7 +423,7 @@ const RENDERERS = {
               <span className="cp-acc-label">{T(it.title, 'Título')}</span>
               <ChevronDown size={18} className="cp-acc-chev" />
             </summary>
-            {it.text && <div className="cp-acc-body"><RT>{it.text}</RT></div>}
+            {it.text && <Rich className="cp-acc-body">{it.text}</Rich>}
           </details>
         ))}
       </div>
@@ -390,18 +432,24 @@ const RENDERERS = {
 
   // `c_image`: imagen a lo ancho con el texto encima. Provisorio, igual que su
   // definicion en el catalogo (falta el subform real del CMS).
-  content_image: (c) => (
-    <div className="cp-block cp-cimg">
-      <Img src={c.image} h={340} />
-      {(c.title || c.subtitle || c.cta_label) && (
-        <div className="cp-cimg-box">
-          {c.title && <div className="cp-h2">{c.title}</div>}
-          {c.subtitle && <p className="cp-p"><RT>{c.subtitle}</RT></p>}
-          {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
-        </div>
-      )}
-    </div>
-  ),
+  content_image: (c) => {
+    const ctas = ctaList(c)
+    return (
+      <div className="cp-block cp-cimg">
+        <Img src={c.image} h={340} />
+        {(c.title || c.subtitle || c.body || ctas.length) && (
+          <div className="cp-cimg-box">
+            {c.title && <div className="cp-h2">{c.title}</div>}
+            {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
+            {c.body && <Rich className="cp-p">{c.body}</Rich>}
+            {ctas.map((b, i) => (
+              <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  },
 
   text_image: (c) => {
     const right = /derecha/i.test(c.image_position)
@@ -410,7 +458,7 @@ const RENDERERS = {
         <div className="cp-ti-img"><Img src={c.image} h={220} /></div>
         <div className="cp-ti-txt">
           <div className="cp-h2">{T(c.title, 'Titulo')}</div>
-          <p className="cp-p"><RT>{T(c.body, 'Texto...')}</RT></p>
+          <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>
           {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
         </div>
       </div>
@@ -796,7 +844,7 @@ const RENDERERS = {
               )}
               <div className="cp-cmt-body">
                 <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
-                <div className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</div>
+                <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
               </div>
               {/* La flecha aparece cuando la card tiene link cargado. */}
               {it.url && <span className="cp-cmt-go" aria-hidden="true"><ArrowRight size={18} /></span>}
@@ -823,7 +871,7 @@ const RENDERERS = {
       <div className="cp-half">
         <div className="cp-half-left">
           <div className="cp-half-title">{T(c.title, 'Nutriendo mascotas. Enriqueciendo vidas.')}</div>
-          <p className="cp-half-text"><RT>{T(c.text, 'Desde hace más de 130 años creemos que las mascotas y las personas están mejor juntas. Por eso ponemos tanto cuidado en la calidad de nuestros alimentos: porque también amamos a las mascotas.')}</RT></p>
+          <Rich className="cp-half-text">{T(c.text, 'Desde hace más de 130 años creemos que las mascotas y las personas están mejor juntas. Por eso ponemos tanto cuidado en la calidad de nuestros alimentos: porque también amamos a las mascotas.')}</Rich>
         </div>
         <div className="cp-half-right">
           {drop ? (
@@ -834,12 +882,12 @@ const RENDERERS = {
                     <span className="cp-acc-label">{T(it.title, 'Título')}</span>
                     <ChevronDown size={18} className="cp-acc-chev" />
                   </summary>
-                  {it.text && <div className="cp-acc-body"><RT>{it.text}</RT></div>}
+                  {it.text && <Rich className="cp-acc-body">{it.text}</Rich>}
                 </details>
               ))}
             </div>
           ) : (
-            <p className="cp-half-rtext"><RT>{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</RT></p>
+            <Rich className="cp-half-rtext">{T(c.right_text, 'Texto de la columna derecha, con el contenido que acompaña al título de la izquierda.')}</Rich>
           )}
         </div>
       </div>
@@ -1018,7 +1066,7 @@ const RENDERERS = {
           {arr.map((b, i) => (i % 2 === 1) ? (
             <div key={i} className="cp-mosaic-box" style={{ background: acc }}>
               <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(b.title, 'Título del bloque')}</div>
-              <p className="cp-mosaic-box-d" style={boxTextStyle}>{T(b.text, 'Texto del bloque de contenido.')}</p>
+              <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(b.text, 'Texto del bloque de contenido.')}</Rich>
             </div>
           ) : (
             <div key={i} className="cp-mosaic-cell">
@@ -1061,7 +1109,7 @@ const RENDERERS = {
               </div>,
               <div key={`b${i}`} className="cp-mosaic-box" style={{ background: acc }}>
                 <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>
-                <p className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</p>
+                <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>
               </div>,
             ])}
           </div>

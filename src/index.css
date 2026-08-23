@@ -1535,6 +1535,22 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Subtitulo del bloque de texto. */
 .cp-h3 { font-size: 16px; font-weight: 600; color: var(--ink-2); margin: -4px 0 10px; }
 
+/* ===== Texto enriquecido (cuerpo de un componente) =====
+   Hereda el tamaño/color del contenedor (le llega la clase del campo, ej. cp-p), asi
+   que aca solo se resuelven los bloques: parrafos, listas y negritas. */
+.cp-rich > :first-child { margin-top: 0; }
+.cp-rich > :last-child { margin-bottom: 0; }
+.cp-rich p { margin: 0 0 0.7em; }
+.cp-rich ul, .cp-rich ol { margin: 0 0 0.7em; padding-left: 1.35em; }
+.cp-rich li { margin: 0 0 0.3em; }
+.cp-rich li::marker { color: inherit; }
+.cp-rich strong { font-weight: 700; }
+.cp-rich em { font-style: italic; }
+/* Con el bloque centrado (o a la derecha) la sangria de la lista deja las viñetas
+   sueltas en el margen: van adentro, pegadas al texto. */
+.cp-al-center .cp-rich ul, .cp-al-center .cp-rich ol,
+.cp-al-right .cp-rich ul, .cp-al-right .cp-rich ol { padding-left: 0; list-style-position: inside; }
+
 /* ===== Content: Image (c_image) ===== */
 .cp-cimg { position: relative; padding: 0; }
 .cp-cimg-box {

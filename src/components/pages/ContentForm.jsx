@@ -1,33 +1,45 @@
 import { useRef, useState } from 'react'
-import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2 } from 'lucide-react'
+import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2, Bold, Italic, List, ListOrdered } from 'lucide-react'
 import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
-import { wrapLink, hasLinks } from '../../lib/richText'
+import { wrapLink, wrapMark, toggleList, hasRich } from '../../lib/richText'
 
-// Cuerpo de texto con enlaces: seleccionas un pedazo y "Enlace" lo marca como
-// [texto](url). Esa notacion viaja tal cual al Excel, asi que el enlace queda dentro
-// de la misma celda del parrafo (ver src/lib/richText.js).
+// Cuerpo de un componente: es RICH TEXT en el CMS (negritas, saltos, listas), pero una
+// celda del Excel es texto plano, asi que el formato se marca con una notacion tipo
+// markdown y el dato viaja entero en una celda. Estos botones la insertan solos sobre
+// lo que tengas seleccionado; el mockup lo renderiza (ver src/lib/richText.js).
 function TextAreaField({ f, value, onChange }) {
   const ref = useRef(null)
-  function addLink() {
+  // Aplica una transformacion sobre la SELECCION y devuelve el foco donde corresponde,
+  // para poder seguir escribiendo sin volver a hacer click.
+  function apply(fn) {
     const el = ref.current
     if (!el) return
-    const url = prompt('Link de destino (https://...)')
-    if (!url || !url.trim()) return
-    const { value: next, selection } = wrapLink(value || '', el.selectionStart, el.selectionEnd, url.trim())
-    onChange(next)
-    // Devolver el foco con el texto del enlace seleccionado, para poder reescribirlo.
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(selection[0], selection[1]) })
+    const res = fn(value || '', el.selectionStart, el.selectionEnd)
+    if (!res) return
+    onChange(res.value)
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(res.selection[0], res.selection[1]) })
   }
+  const addLink = () => apply((v, a, b) => {
+    const url = prompt('Link de destino (https://...)')
+    return url && url.trim() ? wrapLink(v, a, b, url.trim()) : null
+  })
   return (
     <div className="cf-rt">
       <textarea ref={ref} className="control" rows={3} value={value || ''}
         onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
       <div className="cf-rt-bar">
-        <button type="button" className="btn btn-sm" onClick={addLink} title="Marcar el texto seleccionado como enlace">
-          <Link2 size={13} /> Enlace
-        </button>
-        {hasLinks(value) && <span className="cf-rt-hint">Los enlaces se marcan [texto](link)</span>}
+        <button type="button" className="ic-btn" title="Negrita (**texto**)"
+          onClick={() => apply((v, a, b) => wrapMark(v, a, b, '**'))}><Bold size={13} /></button>
+        <button type="button" className="ic-btn" title="Cursiva (_texto_)"
+          onClick={() => apply((v, a, b) => wrapMark(v, a, b, '_'))}><Italic size={13} /></button>
+        <button type="button" className="ic-btn" title="Lista con viñetas"
+          onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ul'))}><List size={13} /></button>
+        <button type="button" className="ic-btn" title="Lista numerada"
+          onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ol'))}><ListOrdered size={13} /></button>
+        <button type="button" className="ic-btn" title="Marcar el texto seleccionado como enlace"
+          onClick={addLink}><Link2 size={13} /></button>
+        {hasRich(value) && <span className="cf-rt-hint">**negrita** - _cursiva_ - [texto](link) - “- ” lista</span>}
       </div>
     </div>
   )

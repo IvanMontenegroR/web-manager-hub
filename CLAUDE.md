@@ -311,9 +311,26 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   los engancha pidiendo los que le aplican, EN EL ORDEN en que los muestra el formulario de Drupal, que es
   el orden de la hoja CMS. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
   tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
+  **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. Como una celda del Excel es texto plano,
+  el formato se marca con una notacion tipo markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`,
+  `[texto](link)`, `- ` / `1. ` para listas, un salto de linea = `<br>` y una linea en blanco = parrafo
+  nuevo — asi el dato viaja entero en una celda y el mercado lo edita sin herramientas raras. El editor
+  no obliga a escribirla: la barra del textarea tiene botones que la insertan sobre lo seleccionado (los
+  de lista y negrita son toggle: el mismo boton pone y saca). Ver `src/lib/richText.js` (`parseInline`
+  para lo inline, `parseRich` para los bloques) y, en el preview, `<Rich>` (bloques, va donde antes habia
+  un `<p>` porque un `<ul>` adentro de un `<p>` es HTML invalido) contra `<RT>` (solo inline, para los
+  textos de una linea como subtitulos o citas).
   El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
   opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es
-  multivaluado) con destino, rel y ARIA label. Todo lo visual sale de Classy — `content_text_styles`
+  multivaluado) con destino, rel y ARIA label.
+  El **Banner** guarda los valores de MAQUINA del CMS, que no siempre se parecen a la etiqueta:
+  "Secondary Hero" es `title-description` y "Banner Card" es `banner-menu` (ver `BANNER_TYPES`). Su Link
+  tambien es multivaluado (`ctas`) y su Classy son solo dos selects: Background Color y Banner Align
+  Content. Suma el checkbox "Remover Overlay Background" y el grupo **Search AI** (mostrar el buscador,
+  fijarlo en mobile, y las sugerencias). El campo `slides` NO existe en el CMS — ver `CMS_PENDING_SUBFORMS`.
+  El **`c_image`** ("Imagen") es una imagen con texto encima: el Media lleva desktop y mobile, cada uno
+  con su **alt obligatorio**, y eso es lo unico que el mercado entrega (el editor ya sabe subirlo). Suma
+  Title Size / SubTitle Size y un Classy propio con Image position e Image Style. Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en

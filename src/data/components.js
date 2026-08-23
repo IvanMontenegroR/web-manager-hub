@@ -173,6 +173,62 @@ export const BUTTON_STYLES = [
   { value: 'style_btn_text', label: 'Style Text' },
 ]
 
+// ---- Banner ---------------------------------------------------------------------
+// `field_banner_type` es OBLIGATORIO en el CMS (el select no trae opcion vacia).
+// El valor de maquina no siempre se parece a la etiqueta: "Secondary Hero" se guarda
+// como `title-description` y "Banner Card" como `banner-menu`.
+export const BT_MAIN_HERO = 'main_hero'
+export const BT_SECONDARY_HERO = 'title-description'
+export const BT_ONLY_IMAGE = 'only-image'
+export const BT_CARD = 'banner-menu'
+export const BT_FULL_BOX = 'full-image-box-content'
+export const BT_BRAND_HERO = 'brand_hero'
+export const BANNER_TYPES = [
+  { value: BT_MAIN_HERO, label: 'Main Hero' },
+  { value: BT_SECONDARY_HERO, label: 'Secondary Hero' },
+  { value: BT_ONLY_IMAGE, label: 'Promotional banner (Only image)' },
+  { value: BT_CARD, label: 'Banner Card' },
+  { value: BT_FULL_BOX, label: 'Full Image + Box Content' },
+  { value: BT_BRAND_HERO, label: 'Brand Hero' },
+]
+
+// Classy propio del Banner: donde se apoya el contenido sobre la imagen.
+export const BANNER_ALIGNS = [
+  { value: 'banner_center_bottom', label: 'Banner Center Bottom' },
+  { value: 'banner_center_center', label: 'Banner Center Center' },
+  { value: 'banner_center_top', label: 'Banner Center Top' },
+  { value: 'banner_left_bottom', label: 'Banner Left Bottom' },
+  { value: 'banner_left_bottom_mobile_center_desktop', label: 'Banner Left Bottom (Mobile)  Center (Desktop)' },
+  { value: 'banner_left_center', label: 'Banner Left Center' },
+  { value: 'banner_left_top', label: 'Banner Left Top' },
+  { value: 'banner_right_bottom', label: 'Banner Right Bottom' },
+  { value: 'banner_right_center', label: 'Banner Right Center' },
+  { value: 'banner_right_top', label: 'Banner Right Top' },
+]
+
+// ---- Content: Image -------------------------------------------------------------
+// Classy propio de `c_image` + los dos tamaños de tipografia de su subform.
+export const IMAGE_POSITIONS = [
+  { value: 'image_bottom', label: 'Image Bottom' },
+  { value: 'image_center', label: 'Image Center' },
+  { value: 'image_fixed_background', label: 'Image Fixed (Background)' },
+  { value: 'image_background_box', label: 'Image Background Box' },
+  { value: 'image_background_full', label: 'Image Background Full' },
+]
+export const IMAGE_STYLES = [
+  { value: 'bg_position_full_width', label: 'Full Width' },
+]
+export const TITLE_SIZES = [
+  { value: 'fs-headline-sm', label: 'Small' },
+  { value: 'fs-headline-md', label: 'Medium' },
+  { value: 'fs-headline-md--headline-xl', label: 'Large' },
+]
+export const SUBTITLE_SIZES = [
+  { value: 'fs-body-sm', label: 'Small' },
+  { value: 'fs-body-md', label: 'Medium' },
+  { value: 'fs-body-lg', label: 'Large' },
+]
+
 // Que dice Drupal cuando el select esta vacio. No es siempre lo mismo ("Default" en el
 // panel Classy, "- Ninguno -" en los HTML tag), y el editor tiene que buscar esa opcion
 // exacta en el desplegable. Se resuelve por la LISTA de opciones, asi no hay que
@@ -182,7 +238,9 @@ const EMPTY_LABELS = new Map([
   [CARD_TITLE_POSITIONS, TOKEN_DEFAULT], [ARROW_POSITIONS, TOKEN_DEFAULT],
   [CLASSY_ALIGNS, TOKEN_DEFAULT], [SPACINGS, TOKEN_DEFAULT],
   [CONTENT_TEXT_STYLES, TOKEN_DEFAULT], [BUTTON_STYLES, TOKEN_DEFAULT],
+  [BANNER_ALIGNS, TOKEN_DEFAULT], [IMAGE_POSITIONS, TOKEN_DEFAULT], [IMAGE_STYLES, TOKEN_DEFAULT],
   [HTML_TAGS, '- Ninguno -'], [LINK_TARGETS, '- Ninguno -'],
+  [TITLE_SIZES, '- Ninguno -'], [SUBTITLE_SIZES, '- Ninguno -'],
   [CMS_ICONS, '- Select an icon -'],
   [PET_VISIBILITY, 'Vista genérica (todas)'],
 ])
@@ -193,6 +251,8 @@ export function emptyLabelFor(field) {
 // Nombre de los grupos plegables del form (ver ContentForm).
 export const G_ADV = 'Avanzado (CMS)'
 export const G_CLASSY = 'Classy — estilos (CMS)'
+// Grupo propio del Banner: el buscador con IA que se monta encima.
+export const G_SEARCH = 'Search AI (CMS)'
 
 // ---- Los dos grupos que Drupal repite en TODOS los paragraphs -------------------
 // "Avanzado" y "Classy" no son campos de UN componente: el CMS se los agrega a cada
@@ -234,6 +294,9 @@ const CLASSY_FIELDS = {
   card_style_card: { label: 'Card - Style Card', options: CARD_STYLES },
   card_title_position: { label: 'Card - Title Position', options: CARD_TITLE_POSITIONS },
   position_arrows: { label: 'Position Arrows', options: ARROW_POSITIONS },
+  banner_align: { label: 'Banner Align Content', options: BANNER_ALIGNS },
+  image_position: { label: 'Image position', options: IMAGE_POSITIONS },
+  image_style: { label: 'Image Style', options: IMAGE_STYLES },
 }
 
 export function classy(...keys) {
@@ -357,42 +420,55 @@ export const COMPONENTS = [
   {
     key: 'banner',
     name: 'Banner',
+    cmsName: 'Banner',
     category: 'Hero',
-    help: 'Campos reales del paragraph Banner en el CMS. Segun el Banner Type cambia el layout.',
+    help: 'El paragraph `banner` del CMS. El Banner Type cambia el layout, no los campos. La Description es rich text y el Link es REPETIBLE.',
     fields: [
-      { key: 'type', label: 'Banner Type', type: 'select', cms: true, options: ['Main Hero', 'Secondary Hero', 'Promotional banner (Only image)', 'Full Image + Box Content', 'Brand Hero'] },
-      // Los campos aplican segun el Banner Type: el Promotional (Only image) NO tiene
-      // titulo/descripcion/imagen/boton -> solo las imagenes del slider; el resto de los
-      // tipos usan titulo/descripcion/imagen/boton y NO el slider. (hideTypes/onlyTypes)
-      { key: 'title', label: 'Título', type: 'text', hideTypes: ['Promotional banner (Only image)'] },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, hideTypes: ['Promotional banner (Only image)'], options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
-      { key: 'description', label: 'Descripción', type: 'textarea', hideTypes: ['Promotional banner (Only image)'] },
-      { key: 'image', label: 'Imagen / Video (link)', type: 'image', hideTypes: ['Promotional banner (Only image)'] },
-      { key: 'image_mobile', label: 'Imagen / Video mobile (link)', type: 'image', hideTypes: ['Promotional banner (Only image)'] },
-      { key: 'link_text', label: 'Botón — texto', type: 'text', hideTypes: ['Promotional banner (Only image)'] },
-      { key: 'link_url', label: 'Botón — link', type: 'url', hideTypes: ['Promotional banner (Only image)'] },
+      { key: 'type', label: 'Banner Type', cmsLabel: 'Banner Type', type: 'select', cms: true, options: BANNER_TYPES },
+      { key: 'remove_overlay', label: 'Remover Overlay Background', cmsLabel: 'Remover Overlay Background', type: 'checkbox', cms: true, default: false },
+      // El Promotional (Only image) es solo imagen: no lleva titulo, descripcion ni
+      // boton. El resto de los tipos usa todo. (hideTypes/onlyTypes)
+      { key: 'title', label: 'Título', cmsLabel: 'Title', type: 'text', hideTypes: [BT_ONLY_IMAGE] },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Title)', type: 'select', cms: true, hideTypes: [BT_ONLY_IMAGE], options: HTML_TAGS },
+      { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea', hideTypes: [BT_ONLY_IMAGE] },
+      // En el CMS es UN Media (responsive image) que resuelve solo desktop y mobile;
+      // aca son dos campos porque el mercado tiene que entregar los dos archivos.
+      { key: 'image', label: 'Imagen / Video (link)', cmsLabel: 'Media', type: 'image', hideTypes: [BT_ONLY_IMAGE] },
+      { key: 'image_mobile', label: 'Imagen / Video mobile (link)', cmsLabel: 'Media (mobile)', type: 'image', hideTypes: [BT_ONLY_IMAGE] },
+      // `field_c_link` es multivaluado, igual que en el bloque de Texto. A diferencia
+      // de `c_text`, este widget NO trae el panel de Atributos (sin destino/rel/aria).
+      { key: 'ctas', label: 'Botones', cmsLabel: 'Link', type: 'list', itemLabel: 'Link', hideTypes: [BT_ONLY_IMAGE], item: [
+        { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
+        { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
+      ] },
       // Solo Promotional: varias imagenes; con mas de 1 el banner se vuelve un slider.
-      { key: 'slides', label: 'Imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', onlyTypes: ['Promotional banner (Only image)'], item: [
+      // OJO: esto NO existe en el subform del CMS. Ver CMS_PENDING_SUBFORMS.
+      { key: 'slides', label: 'Imágenes del slider (2+ = carrusel)', type: 'list', itemLabel: 'Imagen', onlyTypes: [BT_ONLY_IMAGE], item: [
         { key: 'image', label: 'Imagen', type: 'image' },
         { key: 'image_mobile', label: 'Imagen mobile', type: 'image' },
         { key: 'link', label: 'Link', type: 'url' },
       ] },
+      // Grupo "Search AI" del formulario: el buscador con IA sobre el banner.
+      { key: 'show_search', label: 'Show Search', cmsLabel: 'Show Search', type: 'checkbox', cms: true, default: false, group: G_SEARCH },
+      { key: 'search_fixed_mobile', label: 'Position Fixed Mobile', cmsLabel: 'Position Fixed Mobile', type: 'checkbox', cms: true, default: false, group: G_SEARCH, requiresTrue: 'show_search' },
+      { key: 'search_suggestions', label: 'Search AI Suggestions', cmsLabel: 'Search AI Suggestions', type: 'list', itemLabel: 'Sugerencia', cms: true, group: G_SEARCH, requiresTrue: 'show_search', item: [
+        { key: 'text', label: 'Sugerencia', cmsLabel: 'Search AI Suggestions', type: 'text' },
+      ] },
       ...advanced(),
-      // Classy del Banner. `banner_align` es propio de este paragraph y todavia esta
-      // con las etiquetas en español: faltan los valores de maquina del CMS (pendiente
-      // de que nos pasen el subform del Banner, ver TODO al pie del archivo).
-      { key: 'banner_align', label: 'Banner Align Content', cmsLabel: 'Banner Align Content', type: 'select', cms: true, group: G_CLASSY, options: ['Por defecto', 'Banner Center Bottom', 'Banner Center Center', 'Banner Center Top', 'Banner Left Bottom', 'Banner Left Bottom (Mobile) Center (Desktop)', 'Banner Left Center', 'Banner Left Top', 'Banner Right Bottom', 'Banner Right Center', 'Banner Right Top'] },
-      ...classy('background_color'),
+      // Classy del Banner: solo estos dos (orden exacto del formulario de Drupal).
+      ...classy('background_color', 'banner_align'),
     ],
     // Los tamanos de imagen dependen del Banner Type (Design Guidelines 2026).
     specKey: 'type',
-    defaultType: 'Main Hero',
+    defaultType: BT_MAIN_HERO,
     specsByType: {
-      'Main Hero': [{ ratio: 'Desktop 2:1 · Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
-      'Secondary Hero': [{ ratio: 'Desktop 3:1 · Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
-      'Brand Hero': [{ ratio: 'Desktop 2.5:1 · Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
-      'Full Image + Box Content': [{ ratio: 'Desktop ~2:1 · Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
-      'Promotional banner (Only image)': [{ ratio: 'Desktop 3:1 · Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      [BT_MAIN_HERO]: [{ ratio: 'Desktop 2:1 - Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'title-description': [{ ratio: 'Desktop 3:1 - Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      brand_hero: [{ ratio: 'Desktop 2.5:1 - Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      'full-image-box-content': [{ ratio: 'Desktop ~2:1 - Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      [BT_ONLY_IMAGE]: [{ ratio: 'Desktop 3:1 - Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+      // Banner Card: medidas PENDIENTES de confirmar con desarrollo.
+      'banner-menu': [],
     },
   },
   {
@@ -467,25 +543,35 @@ export const COMPONENTS = [
     name: 'Imagen',
     cmsName: 'Content: Image',
     category: 'Contenido',
-    // Los campos salen de como se comporta el componente en la pagina, NO de su
-    // subform: todavia no tenemos el HTML del formulario de Drupal. Hay que
-    // confirmarlos (ver TODO al pie del archivo).
-    help: 'Imagen a lo ancho con texto superpuesto y CTA opcional (`c_image`). OJO: los campos son provisorios, faltan confirmar contra el formulario real del CMS.',
+    help: 'El paragraph `c_image`: una imagen con texto encima y CTA opcional. La imagen es un Media con sus dos archivos (desktop y mobile), cada uno con su alt OBLIGATORIO; acá se cargan como link + alt, que es lo único que el mercado tiene que entregar.',
     fields: [
+      // El Media es obligatorio en el CMS. El editor ya sabe subirlo: lo que necesita
+      // del mercado son los links y los alt.
       { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
       { key: 'image_alt', label: 'Alt de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
         placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
       { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
       { key: 'image_mobile_alt', label: 'Alt de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
         placeholder: 'Obligatorio en el CMS, máx 125 caracteres' },
+      // Optional fields, en el orden del formulario.
       { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'textarea' },
+      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text' },
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'cta_label', label: 'Botón — texto', cmsLabel: 'Texto del enlace', type: 'text' },
-      { key: 'cta_url', label: 'Botón — link', cmsLabel: 'URL', type: 'url' },
-      { key: 'cta_target', label: 'Botón — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES },
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'CTA', item: [
+        { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
+        { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
+        { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
+        { key: 'rel', label: 'Rel (follow / nofollow)', cmsLabel: 'Rel (follow/nofollow tags). Default is blank', type: 'text', cms: true },
+        { key: 'aria_label', label: 'ARIA Label', cmsLabel: 'ARIA Label', type: 'text', cms: true },
+      ] },
+      { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea' },
       ...advanced(),
+      // Orden exacto del panel Classy de `c_image` en Drupal.
+      ...classy('background_color', 'background_position', 'image_position', 'image_style',
+        'spacing', 'style_button', 'text_align', 'text_color'),
     ],
   },
   {
@@ -1137,10 +1223,9 @@ export const CMS_PENDING_PARAGRAPHS = [
 // Hasta tener el HTML del formulario de Drupal, sus campos son una aproximacion y no
 // se les puede declarar el panel Classy sin inventar.
 export const CMS_PENDING_SUBFORMS = {
-  banner: 'Faltan los valores de maquina del Banner Type (sabemos title-description, only-image y full-image-box-content) y el panel Classy completo.',
+  banner: 'El campo `slides` (varias imagenes en el Promotional) NO existe en el subform. En el CMS el carrusel de banners probablemente se arme con el paragraph "Banner Wrapper"; confirmar y migrar.',
   text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
   tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
-  content_image: 'Falta el subform de `c_image` entero: los campos de hoy se dedujeron de la pagina, no del formulario.',
   brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',
   articles_carousel: 'Idem: confirmar si es un View/bloque y no un paragraph.',
 }
