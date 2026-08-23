@@ -11,7 +11,7 @@ import {
   componentHasImage, excelSkip, slotsOf, emptyLabelFor,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
-import { stripLinks, extractLinks } from './richText'
+import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
 
 // Las dos hojas del archivo. El nombre es FIJO porque la hoja CMS referencia a la de
 // contenido por formula (='Contenido'!C12).
@@ -191,6 +191,14 @@ async function stackImages(dataUrls, bg = '#ffffff') {
 }
 
 // Alto estimado (pt) de una celda de contenido segun cuanto texto wrapea.
+// Que tanto formato admite un campo, igual que el mockup: el CUERPO (`textarea`) es
+// rich text con bloques — parrafos y listas, como <Rich> —; un campo de una linea
+// (titulos, subtitulos, textos de boton) admite solo lo inline, como <RT>. El resto
+// (selects, urls, checkboxes) no lleva formato.
+function richKind(f) {
+  return f?.type === 'textarea' ? 'textarea' : f?.type === 'text' ? 'text' : null
+}
+
 function estHeight(text, charsPerLine = 48) {
   const s = String(text == null ? '' : text)
   const lines = s.split('\n').reduce((acc, ln) => acc + Math.max(1, Math.ceil((ln.length || 1) / charsPerLine)), 0)
@@ -389,8 +397,13 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       c2.alignment = { vertical: 'top', wrapText: true }
     } else {
       // Si esta vacio y hay placeholder (ej. "SEO Agency"), se muestra como pista gris.
-      c2.value = empty ? (opts.placeholder || EMPTY) : value
-      c2.font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
+      const font = { size: 10, italic: !!opts.italic || (empty && !!opts.placeholder) || disabled, color: { argb: (empty || disabled) ? MUTED : 'FF1F2530' } }
+      // `rich` = el campo es rich text en el CMS: las marcas (**negrita**, viñetas,
+      // saltos) se convierten a formato de VERDAD en la celda, no viajan como simbolos.
+      // 'textarea' lleva bloques (parrafos y listas); un campo de una linea, solo inline.
+      c2.value = empty ? (opts.placeholder || EMPTY)
+        : (opts.rich ? toExcelRich(value, font, { block: opts.rich === 'textarea' }) : value)
+      c2.font = font
       c2.alignment = { vertical: 'top', wrapText: true }
     }
     if (opts.ref) cellRef.set(opts.ref, atRow)
@@ -400,18 +413,23 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       ws.getCell(atRow, col).border = { top: thin, bottom: thin, left: thin, right: thin }
       if (fill) ws.getCell(atRow, col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } }
     }
-    setH(atRow, estHeight(value))
+    // El alto se mide sobre el texto YA renderizado: las marcas no ocupan lugar y una
+    // lista o un parrafo nuevo suman renglones.
+    setH(atRow, estHeight(opts.rich ? richToPlain(value, { block: opts.rich === 'textarea' }) : value))
     return atRow + 1
   }
 
-  // Campo de texto + sus enlaces. El texto va SIN las marcas (se lee natural) y cada
-  // enlace baja a su propia fila, con el hipervinculo real: en xlsx el link es por
-  // celda, asi que un parrafo con varios enlaces no puede tenerlos todos adentro.
+  // Campo de texto + sus enlaces. El texto va con su FORMATO (negritas, viñetas, saltos)
+  // y sin las marcas, y cada enlace baja ademas a su propia fila con el hipervinculo
+  // real: en xlsx el link es por celda, asi que un parrafo con varios enlaces no puede
+  // tenerlos todos adentro.
   function textRows(atRow, label, value, opts = {}) {
     const links = extractLinks(value)
-    let r = fieldRow(atRow, label, stripLinks(value), opts)
+    // Sin formato (un select, una URL): igual se sacan las marcas de enlace, para que
+    // no aparezca un "[texto](url)" crudo en la celda.
+    let r = fieldRow(atRow, label, opts.rich ? value : stripLinks(value), opts)
     for (const l of links) {
-      r = fieldRow(r, `Link - ${l.text}`, '', { ...opts, sub: true, link: l.url })
+      r = fieldRow(r, `Link - ${l.text}`, '', { ...opts, sub: true, rich: null, link: l.url })
     }
     return r
   }
@@ -581,12 +599,12 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           const subFields = visibleSubFields(f, role, content, { excel: true }).filter((sf) => !excelSkip(sf, item[sf.key]))
           for (const sf of subFields) {
             row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), {
-              sub: true, disabled, ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
+              sub: true, disabled, rich: richKind(sf), ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
             })
           }
         })
       } else if (!excelSkip(f, content[f.key])) {
-        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, ref: `${comp.id}|${f.key}` })
+        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, rich: richKind(f), ref: `${comp.id}|${f.key}` })
       }
     }
 

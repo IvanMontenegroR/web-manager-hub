@@ -1203,7 +1203,7 @@ export function fieldToText(field, value) {
         const parts = field.item
           .map((sf) => (item[sf.key] ? `${sf.label}: ${item[sf.key]}` : null))
           .filter(Boolean)
-        return `${i + 1}) ${parts.join(' · ')}`
+        return `${i + 1}) ${parts.join(' - ')}`
       })
       .join('\n')
   }

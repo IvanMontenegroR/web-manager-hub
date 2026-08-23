@@ -463,7 +463,7 @@ const RENDERERS = {
           <div className="cp-svc-headrow">
             <div className="cp-svc-head">
               <div className="cp-svc-title">{T(c.title, 'Aliados y Servicios')}</div>
-              <div className="cp-svc-sub">{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</div>
+              <div className="cp-svc-sub"><RT>{T(c.subtitle, 'Información, consultas y herramientas para tu día a día con Purina®')}</RT></div>
             </div>
             <div className="cp-svc-arrows">
               <span className="cp-svc-nav" onClick={scrollCarousel(-1)}>‹</span><span className="cp-svc-nav" onClick={scrollCarousel(1)}>›</span>
@@ -477,7 +477,7 @@ const RENDERERS = {
                   {/* Icono elegido de una lista (por ahora solo "pata" -> huella). */}
                   {!hl && <span className="cp-svc-ico"><PawPrint size={22} /></span>}
                   <div className="cp-svc-card-t">{T(card.title, 'Servicio')}</div>
-                  {card.text && <div className="cp-svc-card-s">{card.text}</div>}
+                  {card.text && <Rich className="cp-svc-card-s">{card.text}</Rich>}
                   <span className="cp-svc-arrow">→</span>
                 </div>
               )
@@ -527,7 +527,7 @@ const RENDERERS = {
                 </div>
                 <div className="cp-brandc-body">
                   <div className="cp-brandc-name">{T(card.name, 'Marca Purina®')}</div>
-                  {card.description && <div className="cp-brandc-desc">{card.description}</div>}
+                  {card.description && <Rich className="cp-brandc-desc">{card.description}</Rich>}
                 </div>
               </div>
             )
@@ -587,7 +587,7 @@ const RENDERERS = {
             <span className="cp-fb-logo-club">Pet club</span>
           </div>
           <div className="cp-fb-title">{T(c.title, 'Lo mejor para tu mascota empieza aquí')}</div>
-          <p className="cp-fb-desc">{T(c.subtitle, 'Forma parte de Purina® Pet Club y descubre beneficios, recomendaciones y contenido pensado especialmente para ustedes.')}</p>
+          <Rich className="cp-fb-desc">{T(c.subtitle, 'Forma parte de Purina® Pet Club y descubre beneficios, recomendaciones y contenido pensado especialmente para ustedes.')}</Rich>
           <span className="cp-fb-btn">{T(c.button_text, 'Unirme al club')}</span>
         </div>
       </div>
@@ -613,7 +613,7 @@ const RENDERERS = {
             <div className="cp-testi-eyebrow">{T(c.eyebrow, 'Historias que inspiran')}</div>
             <div className="cp-plist-arrows"><span className="cp-plist-arrow disabled">‹</span><span className="cp-plist-arrow">›</span></div>
           </div>
-          <div className="cp-testi-quote">“{T(it.quote, 'Testimonio de la persona sobre su experiencia con su mascota.')}”</div>
+          <div className="cp-testi-quote">“<RT>{T(it.quote, 'Testimonio de la persona sobre su experiencia con su mascota.')}</RT>”</div>
           {it.author && <div className="cp-testi-author">{it.author}</div>}
           <span className="cp-testi-btn">{T(c.button_text, 'Compartir mi historia')}</span>
         </div>
@@ -725,7 +725,7 @@ const RENDERERS = {
                 ? <MediaEl className="cp-tl-img" src={it.image} />
                 : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">670×502px</span></div>}
               <div className="cp-tl-name">{T(it.title, 'Título del hito')}</div>
-              <p className="cp-tl-desc">{T(it.description, 'Descripción del hito.')}</p>
+              <Rich className="cp-tl-desc">{T(it.description, 'Descripción del hito.')}</Rich>
               <span className="cp-tl-dot" />
             </div>
           ))}
@@ -902,7 +902,7 @@ const RENDERERS = {
             <div key={i} className="cp-gcard">
               <span className="cp-gcard-ico"><FeatureIcon name={card.icon} /></span>
               <div className="cp-gcard-t">{T(card.title, 'Título')}</div>
-              <p className="cp-gcard-d">{T(card.text, 'Texto de la tarjeta.')}</p>
+              <Rich className="cp-gcard-d">{T(card.text, 'Texto de la tarjeta.')}</Rich>
             </div>
           ))}
         </div>
@@ -915,7 +915,7 @@ const RENDERERS = {
     <div className="cp-twi">
       <div className="cp-twi-title">{T(c.title, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>
       <Img src={c.image} aspect="21/8" dim="2100×760px" className="cp-twi-img" />
-      <p className="cp-twi-body">{T(c.body, 'Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus.')}</p>
+      <Rich className="cp-twi-body">{T(c.body, 'Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus.')}</Rich>
     </div>
   ),
 
@@ -941,7 +941,7 @@ const RENDERERS = {
             <div key={i} className="cp-imgfeat-item">
               <span className="cp-imgfeat-ico"><FeatureIcon name={f.icon} /></span>
               <div className="cp-imgfeat-t">{T(f.title, 'Título del destacado')}</div>
-              <p className="cp-imgfeat-d">{T(f.text, 'Texto del destacado.')}</p>
+              <Rich className="cp-imgfeat-d">{T(f.text, 'Texto del destacado.')}</Rich>
             </div>
           ))}
         </div>
@@ -1052,7 +1052,7 @@ const RENDERERS = {
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">
           <div className="cp-mosaic-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
-          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-mosaic-sub">{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
+          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-mosaic-sub"><RT>{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</RT></div>}
         </div>
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
@@ -1091,7 +1091,7 @@ const RENDERERS = {
           {(OPT(c.title, null) || OPT(c.subtitle, null)) && (
             <div className="cp-mosaic-head">
               {OPT(c.title, null) && <div className="cp-mosaic-title">{c.title}</div>}
-              {OPT(c.subtitle, null) && <div className="cp-mosaic-sub">{c.subtitle}</div>}
+              {OPT(c.subtitle, null) && <div className="cp-mosaic-sub"><RT>{c.subtitle}</RT></div>}
             </div>
           )}
           <div className="cp-mosaic-grid">
@@ -1166,7 +1166,7 @@ const RENDERERS = {
       <div className="cp-lcards">
         <div className="cp-lcards-head">
           <div className="cp-lcards-title">{T(c.title, 'Respaldo experto para quienes cuidan su salud')}</div>
-          <p className="cp-lcards-sub">{T(c.subtitle, 'Purina® Pro Plan® acompaña a médicos veterinarios con herramientas, conocimiento y servicios diseñados para apoyar su práctica clínica y fortalecer cada decisión nutricional.')}</p>
+          <Rich className="cp-lcards-sub">{T(c.subtitle, 'Purina® Pro Plan® acompaña a médicos veterinarios con herramientas, conocimiento y servicios diseñados para apoyar su práctica clínica y fortalecer cada decisión nutricional.')}</Rich>
         </div>
         <div className="cp-lcards-row">
           {arr.map((card, i) => {

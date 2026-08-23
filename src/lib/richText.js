@@ -120,6 +120,76 @@ export function hasRich(value) {
   return INLINE_RE.test(s) || /(^|\n)\s*([-*•]\s+|\d+[.)]\s+)/.test(s) || /\n/.test(s)
 }
 
+// ---- Rich text -> celda de Excel -------------------------------------------------
+// Una celda de xlsx SI soporta formato: `{ richText: [{ text, font }] }` pinta cada
+// pedazo con su propia fuente. Asi el mercado no ve las marcas (`**negrita**`) sino la
+// negrita de verdad, y los saltos y las viñetas quedan dibujados. La celda tiene que
+// ir con `wrapText` para que los `\n` se vean.
+//
+// `base` = la fuente del resto de la celda (tamaño y color): en un richText, ExcelJS
+// IGNORA la fuente de la celda, asi que cada pedazo la lleva puesta.
+//
+// Devuelve un STRING cuando no hay ninguna marca (una celda comun se edita mejor) y
+// `{ richText }` cuando si la hay.
+
+// Los pedazos de una linea, con la fuente ya resuelta. Un enlace va como texto plano:
+// el hipervinculo de verdad baja en su propia fila (en xlsx el link es por celda).
+function inlineRuns(text, base) {
+  return parseInline(text).map((s) => ({
+    text: s.text,
+    font: { ...base, ...(s.bold ? { bold: true } : null), ...(s.italic ? { italic: true } : null) },
+  }))
+}
+
+// El mismo texto SIN marcas: para calcular el alto de la fila y para saber si hace
+// falta el richText.
+export function richToPlain(value, { block = true } = {}) {
+  if (!block) return parseInline(value).map((s) => s.text).join('')
+  const blocks = parseRich(value)
+  return blocks.map((b, i) => {
+    const sep = i === 0 ? '' : (blocks[i - 1].type === 'p' && b.type !== 'p' ? '\n' : '\n\n')
+    const body = b.type === 'p'
+      ? b.lines.map((l) => parseInline(l).map((s) => s.text).join('')).join('\n')
+      : b.items.map((it, j) => `${b.type === 'ul' ? '•' : `${j + 1}.`}  ${parseInline(it).map((s) => s.text).join('')}`).join('\n')
+    return sep + body
+  }).join('')
+}
+
+export function toExcelRich(value, base = {}, { block = true } = {}) {
+  const s = String(value == null ? '' : value)
+  if (!s) return ''
+  const plain = richToPlain(s, { block })
+  // Sin marcas de formato no hace falta el richText: el texto plano ya alcanza (y una
+  // celda comun se edita mejor que una con pedazos).
+  if (plain === s) return s
+
+  // Un solo renglon (subtitulos, citas): solo formato inline, igual que <RT>.
+  if (!block) {
+    const runs = inlineRuns(s, base)
+    return runs.length ? { richText: runs } : plain
+  }
+
+  const runs = []
+  const push = (t, font) => { if (t) runs.push({ text: t, font: font || base }) }
+  const blocks = parseRich(s)
+  blocks.forEach((b, bi) => {
+    // Linea en blanco entre bloques, como el parrafo del mockup. La excepcion es la
+    // lista que viene DESPUES de un parrafo: es la continuacion de esa linea ("Y una
+    // lista:"), separarla con un renglon vacio la deja huerfana.
+    if (bi) push(blocks[bi - 1].type === 'p' && b.type !== 'p' ? '\n' : '\n\n')
+    if (b.type === 'p') {
+      b.lines.forEach((l, i) => { if (i) push('\n'); runs.push(...inlineRuns(l, base)) })
+    } else {
+      b.items.forEach((it, i) => {
+        if (i) push('\n')
+        push(`${b.type === 'ul' ? '•' : `${i + 1}.`}  `)
+        runs.push(...inlineRuns(it, base))
+      })
+    }
+  })
+  return runs.length ? { richText: runs.filter((r) => r.text !== '') } : plain
+}
+
 // ---- Insertar marcas desde el editor ---------------------------------------------
 
 // Envuelve [from, to) con `mark` a los dos lados (**negrita**, _cursiva_). Si ya

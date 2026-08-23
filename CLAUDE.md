@@ -338,15 +338,23 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   los engancha pidiendo los que le aplican, EN EL ORDEN en que los muestra el formulario de Drupal, que es
   el orden de la hoja CMS. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
   tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
-  **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. Como una celda del Excel es texto plano,
-  el formato se marca con una notacion tipo markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`,
-  `[texto](link)`, `- ` / `1. ` para listas, un salto de linea = `<br>` y una linea en blanco = parrafo
-  nuevo — asi el dato viaja entero en una celda y el mercado lo edita sin herramientas raras. El editor
-  no obliga a escribirla: la barra del textarea tiene botones que la insertan sobre lo seleccionado (los
-  de lista y negrita son toggle: el mismo boton pone y saca). Ver `src/lib/richText.js` (`parseInline`
-  para lo inline, `parseRich` para los bloques) y, en el preview, `<Rich>` (bloques, va donde antes habia
-  un `<p>` porque un `<ul>` adentro de un `<p>` es HTML invalido) contra `<RT>` (solo inline, para los
-  textos de una linea como subtitulos o citas).
+  **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. El formato se ESCRIBE con una notacion tipo
+  markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,
+  un salto de linea = `<br>` y una linea en blanco = parrafo nuevo — asi el dato viaja entero en un solo
+  campo y el mercado lo edita sin herramientas raras. El editor no obliga a escribirla: la barra del
+  textarea tiene botones que la insertan sobre lo seleccionado (los de lista y negrita son toggle: el
+  mismo boton pone y saca). Ver `src/lib/richText.js` (`parseInline` para lo inline, `parseRich` para los
+  bloques) y, en el preview, `<Rich>` (bloques, va donde antes habia un `<p>` porque un `<ul>` adentro de
+  un `<p>` es HTML invalido) contra `<RT>` (solo inline, para los textos de una linea como subtitulos o
+  citas). Que campo lleva cual sale del TIPO: `textarea` = cuerpo = bloques; `text` = una linea = inline.
+  Las marcas NO se ven en ningun lado: son la forma de ESCRIBIR el formato, no de leerlo. En el Excel se
+  convierten a formato de VERDAD — una celda xlsx acepta `{ richText: [{ text, font }] }`, asi que la
+  negrita es negrita, las listas salen con viñeta o numero y los saltos se ven (`toExcelRich`, con
+  `wrapText`). En un `richText` ExcelJS IGNORA la fuente de la celda, por eso cada pedazo se lleva puesta
+  la fuente base. Un texto sin ninguna marca vuelve como string pelado: una celda comun se edita mejor.
+  Los ENLACES siguen bajando ademas a su propia fila con el hipervinculo real (en xlsx el link es por
+  CELDA, no por pedazo de texto). La hoja CMS no repite el formato: sus celdas son formulas a la hoja
+  Contenido, y una formula devuelve texto.
   El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
   opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es
   multivaluado) con destino, rel y ARIA label.
