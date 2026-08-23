@@ -9,6 +9,11 @@ import { wrapLink, wrapMark, toggleList } from '../../lib/richText'
 // entero en un solo campo, pero esa notacion NO se muestra: estos botones la insertan
 // solos sobre lo que tengas seleccionado, el mockup lo renderiza y el Excel baja con el
 // formato de verdad (ver src/lib/richText.js).
+//
+// La tecla de los atajos: ⌘ en Mac, Ctrl en el resto. Solo para MOSTRARLA en los
+// tooltips — al escuchar el teclado se aceptan las dos.
+const MOD = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.platform || navigator.userAgent || '') ? '⌘' : 'Ctrl+'
+
 function TextAreaField({ f, value, onChange }) {
   const ref = useRef(null)
   // Aplica una transformacion sobre la SELECCION y devuelve el foco donde corresponde,
@@ -25,20 +30,42 @@ function TextAreaField({ f, value, onChange }) {
     const url = prompt('Link de destino (https://...)')
     return url && url.trim() ? wrapLink(v, a, b, url.trim()) : null
   })
+  const bold = () => apply((v, a, b) => wrapMark(v, a, b, '**'))
+  const italic = () => apply((v, a, b) => wrapMark(v, a, b, '_'))
+  const bullets = () => apply((v, a, b) => toggleList(v, a, b, 'ul'))
+  const numbers = () => apply((v, a, b) => toggleList(v, a, b, 'ol'))
+
+  // Los atajos de siempre (los mismos que Word y Google Docs), para no tener que
+  // soltar el teclado: negrita, cursiva, enlace y las dos listas.
+  function onKeyDown(e) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+    const k = e.key.toLowerCase()
+    const fn = k === 'b' ? bold
+      : k === 'i' ? italic
+      : k === 'k' ? addLink
+      // Las listas van con Shift, igual que en Word: Ctrl+Shift+8 y Ctrl+Shift+7.
+      : (e.shiftKey && (k === '8' || k === '*')) ? bullets
+      : (e.shiftKey && (k === '7' || k === '&')) ? numbers
+      : null
+    if (!fn) return
+    e.preventDefault()
+    fn()
+  }
+
   return (
     <div className="cf-rt">
       <textarea ref={ref} className="control" rows={3} value={value || ''}
-        onChange={(e) => onChange(e.target.value)} placeholder={f.placeholder} />
+        onChange={(e) => onChange(e.target.value)} onKeyDown={onKeyDown} placeholder={f.placeholder} />
       <div className="cf-rt-bar">
-        <button type="button" className="ic-btn" title="Negrita"
-          onClick={() => apply((v, a, b) => wrapMark(v, a, b, '**'))}><Bold size={13} /></button>
-        <button type="button" className="ic-btn" title="Cursiva"
-          onClick={() => apply((v, a, b) => wrapMark(v, a, b, '_'))}><Italic size={13} /></button>
-        <button type="button" className="ic-btn" title="Lista con viñetas"
-          onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ul'))}><List size={13} /></button>
-        <button type="button" className="ic-btn" title="Lista numerada"
-          onClick={() => apply((v, a, b) => toggleList(v, a, b, 'ol'))}><ListOrdered size={13} /></button>
-        <button type="button" className="ic-btn" title="Marcar el texto seleccionado como enlace"
+        <button type="button" className="ic-btn" title={`Negrita (${MOD}B)`}
+          onClick={bold}><Bold size={13} /></button>
+        <button type="button" className="ic-btn" title={`Cursiva (${MOD}I)`}
+          onClick={italic}><Italic size={13} /></button>
+        <button type="button" className="ic-btn" title={`Lista con viñetas (${MOD}⇧8)`}
+          onClick={bullets}><List size={13} /></button>
+        <button type="button" className="ic-btn" title={`Lista numerada (${MOD}⇧7)`}
+          onClick={numbers}><ListOrdered size={13} /></button>
+        <button type="button" className="ic-btn" title={`Marcar el texto seleccionado como enlace (${MOD}K)`}
           onClick={addLink}><Link2 size={13} /></button>
       </div>
     </div>

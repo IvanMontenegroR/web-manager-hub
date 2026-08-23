@@ -342,8 +342,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,
   un salto de linea = `<br>` y una linea en blanco = parrafo nuevo — asi el dato viaja entero en un solo
   campo y el mercado lo edita sin herramientas raras. El editor no obliga a escribirla: la barra del
-  textarea tiene botones que la insertan sobre lo seleccionado (los de lista y negrita son toggle: el
-  mismo boton pone y saca). Ver `src/lib/richText.js` (`parseInline` para lo inline, `parseRich` para los
+  textarea tiene botones que la insertan sobre lo seleccionado, con los ATAJOS de siempre (los mismos que
+  Word y Docs: Ctrl/⌘ + B negrita, I cursiva, K enlace, ⇧8 viñetas, ⇧7 numerada). Todo es toggle: el
+  mismo boton (o el mismo atajo) pone y saca. Ver `src/lib/richText.js` (`parseInline` para lo inline, `parseRich` para los
   bloques) y, en el preview, `<Rich>` (bloques, va donde antes habia un `<p>` porque un `<ul>` adentro de
   un `<p>` es HTML invalido) contra `<RT>` (solo inline, para los textos de una linea como subtitulos o
   citas). Que campo lleva cual sale del TIPO: `textarea` = cuerpo = bloques; `text` = una linea = inline.
