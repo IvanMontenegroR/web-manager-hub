@@ -52,12 +52,25 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
   const suggestions = allTags.filter((t) => !form.tags.some((x) => x.toLowerCase() === t.toLowerCase()))
 
   async function save() {
-    if (!form.topic.trim() && !form.notes.trim()) return setErr('Ponele al menos un tema o una nota.')
+    // Sub-tarea (o tag) tipeada y sin confirmar: se guarda igual. Antes, si no tocabas
+    // el "+" o Enter, se perdia en silencio al guardar la tarjeta.
+    const pendingItem = newItem.trim()
+    const pendingTag = newTag.trim()
+    const payload = {
+      ...form,
+      checklist: pendingItem
+        ? [...form.checklist, { text: pendingItem, done: false, deadline: newDate || null }]
+        : form.checklist,
+      tags: pendingTag && !form.tags.some((x) => x.toLowerCase() === pendingTag.toLowerCase())
+        ? [...form.tags, pendingTag]
+        : form.tags,
+    }
+    if (!payload.topic.trim() && !payload.notes.trim()) return setErr('Ponele al menos un tema o una nota.')
     setSaving(true)
     setErr(null)
     try {
-      if (editing) await updateEcoTask(task.id, form)
-      else await createEcoTask(form, nextSort ?? 0)
+      if (editing) await updateEcoTask(task.id, payload)
+      else await createEcoTask(payload, nextSort ?? 0)
       await onSaved()
       onClose()
     } catch (e) {
@@ -202,6 +215,7 @@ export default function EcoTaskModal({ task, topics = ECO_TOPICS, owners, allTag
             <button type="button" className="btn btn-icon" onClick={addItem}><Plus size={15} /></button>
           </div>
         </div>
+        <div className="hint">Lo que escribas acá se guarda con la tarjeta aunque no toques el +.</div>
       </div>
     </Modal>
   )

@@ -148,6 +148,9 @@ function cardTone(t, today) {
   return dateTone(effectiveDeadline(t), today) || (isFollowUp(t, today) ? 'soon' : null)
 }
 
+// Cuantas sub-tareas se listan en la tarjeta antes de cortar con "+N mas".
+const CARD_CHECK_MAX = 4
+
 const COLUMN_HINT = {
   Open: 'Por hacer',
   'In Progress': 'En curso',
@@ -427,6 +430,22 @@ export default function Tareas() {
                             </div>
                             {t.topic && <div className="eco-card-topic">{t.topic}</div>}
                             {t.notes && <div className="eco-card-issue">{t.notes}</div>}
+                            {/* Sub-tareas en la propia tarjeta (las primeras 4): se ven de
+                                un vistazo sin abrir el modal. Solo lectura — se tildan
+                                adentro de la tarjeta, que es donde se editan. */}
+                            {total > 0 && (
+                              <ul className="eco-card-check">
+                                {t.checklist.slice(0, CARD_CHECK_MAX).map((c, i) => (
+                                  <li key={i} className={c.done ? 'done' : ''}>
+                                    <span className="eco-card-check-box">{c.done && <Check size={9} />}</span>
+                                    <span>{c.text}</span>
+                                  </li>
+                                ))}
+                                {total > CARD_CHECK_MAX && (
+                                  <li className="more">+{total - CARD_CHECK_MAX} mas</li>
+                                )}
+                              </ul>
+                            )}
                             {cardTags.length > 0 && (
                               <div className="eco-card-tags">
                                 {cardTags.map((tg) => (
