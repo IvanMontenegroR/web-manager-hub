@@ -265,7 +265,11 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // apunta ahi con una formula, asi el editor ve lo que carga el mercado sin copiarlo.
   const cellRef = new Map()
   const imgByComp = new Map()   // compId -> imagen ya registrada en el workbook
-  const labelByComp = new Map() // compId -> "3.1.2. Texto" (misma numeracion en ambas hojas)
+  // Cada hoja nombra la seccion en SU idioma, y el NUMERO es el mismo en las dos: es lo
+  // que permite cruzarlas ("2. Cards con icono" de un lado, "2. Content: Card Grid" del
+  // otro). El mercado lee el nombre de la app; el editor, el del paragraph de Drupal.
+  const labelByComp = new Map()    // compId -> "3.1.2. Cards con icono"  (hoja Contenido)
+  const cmsLabelByComp = new Map() // compId -> "3.1.2. Content: Card Grid" (hoja CMS)
   const E_W = 70 // ancho (chars) de la columna de imagen
   const columns = [
     { width: 2 },     // A: margen
@@ -530,6 +534,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // ("quiero unas cards con icono acá"). Ver `componentTitle`.
     const name = `${label}. ${componentTitle(def, content) || comp.component_key}`
     labelByComp.set(comp.id, name)
+    cmsLabelByComp.set(comp.id, `${label}. ${def?.cmsName || def?.name || comp.component_key}`)
     row = bandTitle(row, name, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
@@ -790,7 +795,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // El contenido NO se copia: se referencia con formula a la hoja Contenido, asi lo que
   // carga el mercado aparece de este lado sin que nadie tenga que pasarlo a mano.
   await buildCmsSheet(wb, page, {
-    comps: mainComps, cellRef, imgByComp, labelByComp,
+    comps: mainComps, cellRef, imgByComp, labelByComp: cmsLabelByComp,
   })
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
@@ -890,12 +895,8 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
     if (def?.matrixExclude) continue
     const content = comp.content || {}
     const topRow = row
-    band(`${labelByComp.get(comp.id) || def?.name || comp.component_key}`, PURINA_RED)
-    // Que paragraph hay que agregar en Drupal.
-    line('Tipo de paragraph', def?.cmsName || def?.name || comp.component_key)
-    ws.getCell(row - 1, 3).font = { size: 10, bold: true, color: { argb: 'FF1F2530' } }
-    ws.getCell(row - 1, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
-    ws.getCell(row - 1, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SUBHEAD_BG } }
+    // La banda ES el paragraph que hay que agregar en Drupal, con su nombre exacto.
+    band(`${labelByComp.get(comp.id) || def?.cmsName || def?.name || comp.component_key}`, PURINA_RED)
 
     // TODOS los campos, incluidos los tecnicos (sin { excel: true }).
     for (const f of visibleFields(def, content)) {

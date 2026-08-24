@@ -345,7 +345,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      La hoja Contenido esta escrita para el MERCADO, no es un espejo del CMS en castellano: el puente al
      CMS son las formulas, y que la hoja CMS se llene sola es justamente lo que permite que la de Contenido
      hable el idioma de ellos. De ahi tres reglas.
-     (a) Cada seccion se llama como el componente **en la app** (`componentTitle`), no como el paragraph:
+     (a) Cada hoja nombra la seccion en SU idioma y el NUMERO es el mismo en las dos, que es lo que permite
+     cruzarlas: "2. Cards con icono" en Contenido, "2. Content: Card Grid" en CMS (el `cmsName`, o sea el
+     paragraph que hay que agregar en Drupal). En Contenido se llama como el componente **en la app**
+     (`componentTitle`), no como el paragraph:
      el Card Grid toma el nombre del ATAJO de la paleta ("Cards con icono", "Cards numeradas"), porque si
      no tres bloques seguidos se llamarian igual, y el Banner muestra la etiqueta de su tipo en vez del
      valor de maquina. Es tambien lo que el mercado puede llegar a pedir por nombre.
