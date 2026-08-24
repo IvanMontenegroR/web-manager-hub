@@ -571,11 +571,9 @@ export const COMPONENTS = [
       // El Media es obligatorio en el CMS. El editor ya sabe subirlo: lo que necesita
       // del mercado son los links y los alt.
       { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
-      { key: 'image_alt', label: 'Texto alternativo de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
-        placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+      { key: 'image_alt', label: 'Alt text (desktop)', cmsLabel: 'Texto alternativo (Desktop)', type: 'text', cms: true },
       { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
-      { key: 'image_mobile_alt', label: 'Texto alternativo de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
-        placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+      { key: 'image_mobile_alt', label: 'Alt text (mobile)', cmsLabel: 'Texto alternativo (Mobile)', type: 'text', cms: true },
       // Optional fields, en el orden del formulario.
       { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
       { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
@@ -826,11 +824,11 @@ export const COMPONENTS = [
         { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
         { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
         { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image', hideTypes: CARD_GRID_ICON_MODES },
-        { key: 'image_alt', label: 'Texto alternativo de la imagen desktop', cmsLabel: 'Texto alternativo (Desktop)', type: 'text',
-          hideTypes: CARD_GRID_ICON_MODES, placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+        { key: 'image_alt', label: 'Alt text (desktop)', cmsLabel: 'Texto alternativo (Desktop)', type: 'text', cms: true,
+          hideTypes: CARD_GRID_ICON_MODES },
         { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image', hideTypes: CARD_GRID_ICON_MODES },
-        { key: 'image_mobile_alt', label: 'Texto alternativo de la imagen mobile', cmsLabel: 'Texto alternativo (Mobile)', type: 'text',
-          hideTypes: CARD_GRID_ICON_MODES, placeholder: 'Describí la imagen en pocas palabras (máx. 125 caracteres)' },
+        { key: 'image_mobile_alt', label: 'Alt text (mobile)', cmsLabel: 'Texto alternativo (Mobile)', type: 'text', cms: true,
+          hideTypes: CARD_GRID_ICON_MODES },
         { key: 'cta_label', label: 'Botón — texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'cta_url', label: 'Botón — link', cmsLabel: 'URL', type: 'url' },
         { key: 'cta_target', label: 'Botón — destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
@@ -1234,15 +1232,16 @@ export function excelSkip(field, value) {
 // es contenido que podamos sacar del sitio viejo ni del Figma, lo tienen ellos. Por eso
 // baja igual y en el Excel se pinta, para que se vea que falta completarlo.
 //
-// Regla: toda imagen y todo texto alternativo, MENOS las que su propia etiqueta marca
-// como "(opcional)" — un fondo decorativo no es un pedido al mercado. Cualquier caso
-// que no entre en la regla se fuerza con `market: true` / `market: false` en el campo.
+// Regla: toda IMAGEN, menos las que su propia etiqueta marca como "(opcional)" — un
+// fondo decorativo no es un pedido al mercado. El alt text NO entra: es tecnico
+// (`cms: true`) y lo carga SEO en la hoja CMS, igual que las metas. Cualquier caso que
+// no entre en la regla se fuerza con `market: true` / `market: false` en el campo.
 export function isMarketField(f) {
   if (!f) return false
   if (typeof f.market === 'boolean') return f.market
   if (f.cms) return false
   if (/\(opcional\)/i.test(f.label || '')) return false
-  return f.type === 'image' || /_alt$/.test(f.key || '')
+  return f.type === 'image'
 }
 
 // Vacio = sin dato. Un booleano SI es dato (false = destildado a proposito).

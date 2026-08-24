@@ -826,7 +826,7 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
   t.alignment = { vertical: 'middle', indent: 1 }
   setH(1, 30)
   ws.mergeCells(2, 2, 2, 5)
-  ws.getCell(2, 2).value = 'Cada bloque está en el orden del formulario de Drupal, con el nombre exacto de cada campo. Las filas en gris son el contenido que carga el mercado: vienen enlazadas a la hoja "Contenido" y se actualizan solas, no hace falta copiarlas. Los campos vacíos quedan en "Default" o "—" según corresponda.'
+  ws.getCell(2, 2).value = 'Cada bloque está en el orden del formulario de Drupal, con el nombre exacto de cada campo. Las filas en GRIS son el contenido que carga el mercado: vienen enlazadas a la hoja "Contenido" y se actualizan solas, no hace falta copiarlas ni se pueden editar. El resto de las celdas sí se puede escribir acá — entre ellas el Alt text de cada imagen, que carga SEO. Los campos vacíos quedan en "Default" o "—" según corresponda.'
   ws.getCell(2, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(2, 2).alignment = { wrapText: true, vertical: 'top' }
   setH(2, 42)
@@ -850,6 +850,10 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
       const empty = value == null || value === ''
       b.value = empty ? (opts.emptyAs || EMPTY) : value
       b.font = { size: 10, italic: empty, color: { argb: empty ? MUTED : 'FF1F2530' } }
+      // Esta celda NO viene de la otra hoja: es algo que se completa ACA (el alt text
+      // que carga SEO, un campo tecnico). Se desbloquea para que se pueda escribir con
+      // la hoja protegida — lo que se protege son las FORMULAS, no el trabajo de nadie.
+      b.protection = { locked: false }
     }
     b.alignment = { vertical: 'top', wrapText: true }
     for (const c of [2, 3]) ws.getCell(row, c).border = { top: thin, bottom: thin, left: thin, right: thin }
@@ -881,8 +885,10 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
   // Etiqueta del CMS de un campo (cae a la nuestra si no esta declarada).
   const cmsLabel = (f) => f.cmsLabel || f.label
   // Un select vacio en el CMS no siempre dice lo mismo ("Default" en Classy,
-  // "- Ninguno -" en los HTML tag): se resuelve por la lista de opciones.
-  const emptyFor = (f) => emptyLabelFor(f)
+  // "- Ninguno -" en los HTML tag): se resuelve por la lista de opciones. El alt text
+  // no lo carga ni el mercado ni el editor: lo escribe SEO, igual que las metas, asi
+  // que vacio lo dice en vez de mostrar un guion.
+  const emptyFor = (f) => (/_alt$/.test(f.key || '') ? 'SEO Agency' : emptyLabelFor(f))
 
   for (const comp of comps) {
     const def = getComponent(comp.component_key)

@@ -349,10 +349,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      el Card Grid toma el nombre del ATAJO de la paleta ("Cards con icono", "Cards numeradas"), porque si
      no tres bloques seguidos se llamarian igual, y el Banner muestra la etiqueta de su tipo en vez del
      valor de maquina. Es tambien lo que el mercado puede llegar a pedir por nombre.
-     (b) Un campo baja si lo entrega el MERCADO (`isMarketField`: imagenes y textos alternativos, salvo los
-     marcados "(opcional)"; se fuerza con `market: true/false`) o si tiene algo cargado. Los del mercado
-     bajan VACIOS y su celda va en AMARILLO (`TODO_BG`) con la consigna adentro: es lo unico que tienen que
-     completar. Una vez cargado deja de pintarse.
+     (b) Un campo baja si lo entrega el MERCADO (`isMarketField`: las imagenes, salvo las marcadas
+     "(opcional)"; se fuerza con `market: true/false`) o si tiene algo cargado. Los del mercado bajan
+     VACIOS y su celda va en AMARILLO (`TODO_BG`) con la consigna adentro: es lo unico que tienen que
+     completar. Una vez cargado deja de pintarse. El **alt text** NO se les pide: es `cms: true`, no
+     aparece en Contenido y lo carga SEO del lado de la hoja CMS, donde sale con el placeholder
+     "SEO Agency" igual que las metas. Para que se pueda escribir ahi con la hoja protegida, las celdas que
+     NO son formula se exportan desbloqueadas: lo que se protege son las formulas, no el trabajo de nadie.
      (c) La VARIANTE filtra los campos tambien en el Card Grid (`variantOf` lee `type` o `view_mode`):
      `CARD_GRID_ICON_MODES` no pide imagenes y `CARD_GRID_IMAGE_MODES` no pide icono. Sin eso, unas cards
      con icono le pedian al mercado cuatro imagenes por card que ese layout no dibuja.
@@ -403,7 +406,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   fijarlo en mobile, y las sugerencias). El Media va en TODOS los tipos, el Promotional incluido: ahi la
   imagen es lo unico que hay. Para varios banners rotando esta el `banner_wrapper`.
   El **`c_image`** ("Imagen") es una imagen con texto encima: el Media lleva desktop y mobile, cada uno
-  con su **alt obligatorio**, y eso es lo unico que el mercado entrega (el editor ya sabe subirlo). Suma
+  con su **alt text**, y del mercado lo unico que se pide es la imagen (el alt lo carga SEO en la hoja CMS
+  y el editor ya sabe subir el archivo). Suma
   Title Size / SubTitle Size y un Classy propio con Image position e Image Style. Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
