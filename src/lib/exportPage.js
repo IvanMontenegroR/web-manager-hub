@@ -750,34 +750,11 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     }
   }
 
-  // Metas de la pagina (SEO) al final de la matriz. Las carga la agencia SEO, por eso
-  // el placeholder "SEO Agency". Se omiten cuando el export no es de una pagina real
-  // (ej. la galeria "Todos los componentes" pasa metas:false).
-  if (withMetas) {
-    const metaTop = row
-    row = bandTitle(row, 'Metas de la página (SEO)', PURINA_RED, true)
-    for (const label of ['Meta title', 'Meta description']) {
-      ws.getCell(row, 2).value = label
-      ws.getCell(row, 2).font = { bold: true, size: 10, color: { argb: 'FF1F2530' } }
-      ws.getCell(row, 2).alignment = { vertical: 'top', wrapText: true }
-      ws.mergeCells(row, 3, row, 5)
-      const c = ws.getCell(row, 3)
-      c.value = 'SEO Agency'
-      c.font = { italic: true, size: 10, color: { argb: MUTED } }
-      c.alignment = { vertical: 'top', wrapText: true }
-      const thin = { style: 'thin', color: { argb: BORDER } }
-      for (const col of [2, 3, 4, 5]) ws.getCell(row, col).border = { top: thin, bottom: thin, left: thin, right: thin }
-      setH(row, label === 'Meta description' ? 34 : 22)
-      row++
-    }
-    boxBorder(metaTop, row - 1, 2, 5, PURINA_RED)
-  }
-
   // ---- Hoja CMS: la misma pagina, pero en el orden del formulario de Drupal --------
   // El contenido NO se copia: se referencia con formula a la hoja Contenido, asi lo que
   // carga el mercado aparece de este lado sin que nadie tenga que pasarlo a mano.
   await buildCmsSheet(wb, page, {
-    comps: mainComps, cellRef, imgByComp, labelByComp: cmsLabelByComp,
+    comps: mainComps, cellRef, imgByComp, labelByComp: cmsLabelByComp, withMetas,
   })
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
@@ -792,7 +769,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
 // Si el mercado edita alla, aca se actualiza solo. Esas celdas van en gris y la hoja
 // se protege, para que nadie pise una formula sin querer.
 // ---------------------------------------------------------------------------------
-async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp }) {
+async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp, withMetas }) {
   const ws = wb.addWorksheet(SHEET_CMS, { views: [{ showGridLines: false }] })
   const IMG_W = 70
   ws.columns = [{ width: 2 }, { width: 34 }, { width: 52 }, { width: 2 }, { width: IMG_W }]
@@ -919,6 +896,18 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
     }
     drawBox(ws, topRow, row - 1, 2, 5, PURINA_RED)
     row += 1
+  }
+
+  // Metas de la pagina. Van de este lado y no en la hoja del mercado porque las carga
+  // SEO, igual que el alt text: mismo amarillo, misma celda desbloqueada. Se omiten
+  // cuando el export no es de una pagina real (la galeria pasa metas:false).
+  if (withMetas) {
+    const metaTop = row
+    band('Metas de la página (SEO)', PURINA_RED)
+    line('Meta title', '', { seo: true, emptyAs: 'SEO Agency' })
+    line('Meta description', '', { seo: true, emptyAs: 'SEO Agency' })
+    setH(metaTop + 2, 34)
+    drawBox(ws, metaTop, row - 1, 2, 3, PURINA_RED)
   }
 
   // Hoja de solo lectura: en xlsx las celdas ya vienen bloqueadas, asi que alcanza con

@@ -357,7 +357,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      completar. Una vez cargado deja de pintarse. El **alt text** NO se les pide: es `cms: true`, no
      aparece en Contenido y lo carga SEO del lado de la hoja CMS, donde sale con el placeholder
      "SEO Agency" y su celda tambien va en AMARILLO — mismo codigo en las dos hojas: amarillo = alguien
-     tiene que completar esto. Para que se pueda escribir ahi con la hoja protegida, las celdas que NO son
+     tiene que completar esto. Las **metas de la pagina** (Meta title y Meta description) van al pie de la
+     hoja CMS por lo mismo: las carga SEO, no el mercado. Para que se pueda escribir ahi con la hoja protegida, las celdas que NO son
      formula se exportan desbloqueadas: lo que se protege son las formulas, no el trabajo de nadie.
      (c) La VARIANTE filtra los campos tambien en el Card Grid (`variantOf` lee `type` o `view_mode`):
      `CARD_GRID_ICON_MODES` no pide imagenes y `CARD_GRID_IMAGE_MODES` no pide icono. Sin eso, unas cards
