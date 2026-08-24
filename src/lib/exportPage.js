@@ -489,7 +489,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // Aspect real del logo oficial (1526x330 ~= 4.62); se respeta para no deformarlo.
   ws.addImage(logoId, { tl: { col: 1.12, row: 0.2 }, ext: { width: 148, height: 32 } })
 
-  // Titulo de la pagina + instrucciones para el mercado.
+  // Titulo de la pagina.
   ws.mergeCells(2, 2, 2, 5)
   const title = ws.getCell(2, 2)
   title.value = `${page.name}${page.path ? '  -  ' + page.path : ''}`
@@ -497,12 +497,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEAD_BG } }
   title.alignment = { vertical: 'middle', indent: 1 }
   setH(2, 26)
-  ws.mergeCells(3, 2, 3, 5)
-  ws.getCell(3, 2).value = 'Completá el contenido de cada bloque (izquierda) mirando la imagen de referencia (derecha). Las celdas en AMARILLO son las que faltan y las tenés que llenar vos: imágenes y sus textos alternativos. El resto ya viene cargado; si algo no coincide, corregilo. Al pie de cada lista hay una fila que explica cómo pedir un ítem más. No hace falta saber nada del CMS. Al final, más a la derecha, está la página entera armada para verla de un vistazo.'
-  ws.getCell(3, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
-  ws.getCell(3, 2).alignment = { wrapText: true, vertical: 'top' }
-  setH(3, 44)
-  let row = 5
+  let row = 4
 
   // Referencias de la pagina: el diseño y las dos webs. Van arriba de todo porque son
   // lo primero que se busca al abrir la matriz. Las tres urls salen de la ficha de la
