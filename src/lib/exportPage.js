@@ -8,7 +8,7 @@ import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
-  componentHasImage, excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle,
+  excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
@@ -647,14 +647,10 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const dataUrl = await shotFor(comp.id, getNode(comp.id), def?.exportWidth || CAP_W)
     const img = await prepImage(dataUrl)
     if (img) imgByComp.set(comp.id, img)
-    const PAD = 12     // pt de aire arriba/abajo dentro del marco
-    const CAP_GAP = 4  // aire entre la imagen y su Alt Text
-    const CAP_H = 16   // fila del Alt Text (debajo de la imagen)
-    // El grupo imagen + Alt Text se centra vertical dentro del area del componente.
-    const groupHpt = img ? img.hpt + CAP_GAP + CAP_H : 0
+    const PAD = 12 // pt de aire arriba/abajo dentro del marco
+    const groupHpt = img ? img.hpt : 0
 
-    // Reservar filas (debajo de la banda) hasta que quepa el grupo + padding.
-    // El +40 da aire para el centrado y el redondeo de filas del Alt Text.
+    // Reservar filas (debajo de la banda) hasta que quepa la imagen + padding.
     const areaPt = () => { let a = 0; for (let r = topRow + 1; r < row; r++) a += ws.getRow(r).height || 15; return a }
     while (areaPt() < groupHpt + 40) { setH(row, 16); row++ }
     const lastRow = row - 1
@@ -666,20 +662,6 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       let a = 0, rr = topRow + 1
       while (rr < lastRow) { const hh = ws.getRow(rr).height || 15; if (a + hh > targetTop) break; a += hh; rr++ }
       ws.addImage(img.id, { tl: { col: IMG_COL, row: rr - 1 }, ext: { width: img.w, height: img.h }, editAs: 'oneCell' })
-      // Alt Text (placeholder "SEO Agency") SOLO en componentes que tienen imagen(es).
-      // La primera fila cuyo TOPE queda por debajo del pie de la imagen, asi no la pisa.
-      if (componentHasImage(def, content)) {
-        const capTop = a + img.hpt + CAP_GAP
-        let b = a, cr = rr
-        while (cr < lastRow && b < capTop) { b += ws.getRow(cr).height || 15; cr++ }
-        const cap = ws.getCell(cr, IMG_COL + 1)
-        cap.value = { richText: [
-          { text: 'Alt Text: ', font: { bold: true, size: 9, color: { argb: 'FF1F2530' } } },
-          { text: 'SEO Agency', font: { italic: true, size: 9, color: { argb: MUTED } } },
-        ] }
-        cap.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-        setH(cr, CAP_H)
-      }
     }
 
     // Marco alrededor de todo el componente (campos + imagen) para que se entienda
@@ -854,6 +836,9 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
       // que carga SEO, un campo tecnico). Se desbloquea para que se pueda escribir con
       // la hoja protegida — lo que se protege son las FORMULAS, no el trabajo de nadie.
       b.protection = { locked: false }
+      // Pendiente de SEO: se pinta igual que el amarillo del mercado en la otra hoja,
+      // asi se ve de un saque que falta completarlo.
+      if (opts.seo && empty) b.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: TODO_BG } }
     }
     b.alignment = { vertical: 'top', wrapText: true }
     for (const c of [2, 3]) ws.getCell(row, c).border = { top: thin, bottom: thin, left: thin, right: thin }
@@ -888,7 +873,8 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
   // "- Ninguno -" en los HTML tag): se resuelve por la lista de opciones. El alt text
   // no lo carga ni el mercado ni el editor: lo escribe SEO, igual que las metas, asi
   // que vacio lo dice en vez de mostrar un guion.
-  const emptyFor = (f) => (/_alt$/.test(f.key || '') ? 'SEO Agency' : emptyLabelFor(f))
+  const isSeo = (f) => /_alt$/.test(f?.key || '')
+  const emptyFor = (f) => (isSeo(f) ? 'SEO Agency' : emptyLabelFor(f))
 
   for (const comp of comps) {
     const def = getComponent(comp.component_key)
@@ -911,13 +897,13 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp 
           cardBand(`${cmsLabel(f)} — ${one} ${i + 1}${role ? ` (${role})` : ''}`)
           for (const sf of visibleSubFields(f, role, content)) {
             line(cmsLabel(sf), fieldToText(sf, item[sf.key]), {
-              sub: true, ref: `${comp.id}|${f.key}[${i}].${sf.key}`, emptyAs: emptyFor(sf),
+              sub: true, ref: `${comp.id}|${f.key}[${i}].${sf.key}`, emptyAs: emptyFor(sf), seo: isSeo(sf),
             })
           }
         })
       } else {
         line(cmsLabel(f), fieldToText(f, content[f.key]), {
-          ref: `${comp.id}|${f.key}`, emptyAs: emptyFor(f),
+          ref: `${comp.id}|${f.key}`, emptyAs: emptyFor(f), seo: isSeo(f),
         })
       }
     }

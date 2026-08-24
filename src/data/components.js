@@ -1175,15 +1175,6 @@ export function sampleContent(def) {
   return c
 }
 
-// ¿El componente tiene algun campo de imagen (propio o dentro de una lista)? Se usa
-// para poner el "Alt Text" en el Excel solo en los componentes que tienen imagenes.
-// Con `content` se mira solo la VARIANTE cargada: las que no llevan imagen (cards con
-// icono, cards numeradas) no tienen que pedir Alt Text.
-export function componentHasImage(def, content) {
-  const fields = content ? visibleFields(def, content) : (def?.fields || [])
-  return fields.some((f) => f.type === 'image'
-    || (f.type === 'list' && (content ? visibleSubFields(f, null, content) : (f.item || [])).some((sf) => sf.type === 'image')))
-}
 
 // Campos VISIBLES de un componente segun su contenido: filtra por Banner Type
 // (hideTypes/onlyTypes). Con { excel:true } ademas oculta los tecnicos (cms).

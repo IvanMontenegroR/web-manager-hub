@@ -240,8 +240,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      los subcampos de una lista, que ademas filtra por `roles`), y las medidas de imagen con
      `specKey`/`specsByType` + `defaultType` (la variante que vale cuando `type` no esta cargado; sin el,
      un componente recien agregado se quedaria sin medidas). La variante por DEFECTO tiene que ser la que
-     ya existia, asi las paginas armadas antes no cambian. El "Alt Text" del Excel se pide por VARIANTE
-     (`componentHasImage(def, content)`): las que no llevan imagen no lo muestran.
+     ya existia, asi las paginas armadas antes no cambian.
      El **Background Color** del CMS es una lista de TOKENS (`BG_COLORS`, compartida por el Banner y el
      bloque de Texto), no un hex. Para poder pintarlo en el mockup hay un mapa `BG_TOKENS` token -> hex
      con SOLO los que conocemos con certeza (Primary Red, Primary White); el resto queda sin pintar a
@@ -357,8 +356,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      VACIOS y su celda va en AMARILLO (`TODO_BG`) con la consigna adentro: es lo unico que tienen que
      completar. Una vez cargado deja de pintarse. El **alt text** NO se les pide: es `cms: true`, no
      aparece en Contenido y lo carga SEO del lado de la hoja CMS, donde sale con el placeholder
-     "SEO Agency" igual que las metas. Para que se pueda escribir ahi con la hoja protegida, las celdas que
-     NO son formula se exportan desbloqueadas: lo que se protege son las formulas, no el trabajo de nadie.
+     "SEO Agency" y su celda tambien va en AMARILLO — mismo codigo en las dos hojas: amarillo = alguien
+     tiene que completar esto. Para que se pueda escribir ahi con la hoja protegida, las celdas que NO son
+     formula se exportan desbloqueadas: lo que se protege son las formulas, no el trabajo de nadie.
      (c) La VARIANTE filtra los campos tambien en el Card Grid (`variantOf` lee `type` o `view_mode`):
      `CARD_GRID_ICON_MODES` no pide imagenes y `CARD_GRID_IMAGE_MODES` no pide icono. Sin eso, unas cards
      con icono le pedian al mercado cuatro imagenes por card que ese layout no dibuja.
