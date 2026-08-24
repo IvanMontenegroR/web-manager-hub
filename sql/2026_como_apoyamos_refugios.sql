@@ -48,7 +48,12 @@ set component_key = 'card_grid',
       ))
 where id = 'aa1cc4ad-5d06-4901-99d1-6e4ebe32c5b5';
 
--- 1b) Los refugios aliados -> Card Grid de cards verticales.
+-- 1b) Los refugios aliados -> Card Grid de cards verticales, con los DIEZ del sitio.
+-- El texto va en rich text: los " - " que separaban ubicacion, contacto y redes eran un
+-- parche de cuando el campo no tenia saltos de linea.
+-- OJO: "Fundación Más por México" tiene SOLO Facebook, no Instagram — asi esta en el
+-- sitio. Los telefonos van tal cual estan publicados, con el formato disparejo incluido
+-- (Rescate Pitbull sin espacios, Corazón Animal con la lada entre parentesis).
 update page_components
 set component_key = 'card_grid',
     content = jsonb_build_object(
@@ -61,7 +66,21 @@ set component_key = 'card_grid',
         jsonb_build_object('title', 'Funkytown',
           'description', E'**Ubicación:** Puebla\n**Contacto:** 55 5953 7777\nFacebook | Instagram'),
         jsonb_build_object('title', 'Tierra de animales',
-          'description', E'**Ubicación:** Quintana Roo\n**Contacto:** 998 1570 772\nFacebook | Instagram')
+          'description', E'**Ubicación:** Quintana Roo\n**Contacto:** 998 1570 772\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Adopta un amigo para siempre',
+          'description', E'**Ubicación:** Estado de México\n**Contacto:** 55 6149 1850\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Fundación Más por México',
+          'description', E'**Ubicación:** Estado de México\n**Contacto:** 55 4983 0142\nFacebook'),
+        jsonb_build_object('title', 'Asociación Pocas Pulgas',
+          'description', E'**Ubicación:** Metepec\n**Contacto:** 722 2534 473\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Rescate Pitbull',
+          'description', E'**Ubicación:** Ciudad de México\n**Contacto:** 5555009125\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Fundación Santuario Corazón Animal',
+          'description', E'**Ubicación:** Guanajuato\n**Contacto:** (473) 141 6880\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Refugio Franciscano A.C.',
+          'description', E'**Ubicación:** Ciudad de México\n**Contacto:** 55 3986 5475\nFacebook | Instagram'),
+        jsonb_build_object('title', 'CRESCA',
+          'description', E'**Ubicación:** Baja California Sur\n**Contacto:** 615 155 8614\nFacebook | Instagram')
       ))
 where id = 'b2b49483-72bb-43d3-8313-edd7378f9551';
 
