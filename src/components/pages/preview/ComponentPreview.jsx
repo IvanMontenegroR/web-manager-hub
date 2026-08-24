@@ -36,6 +36,12 @@ function RT({ children }) {
   })
 }
 
+// "Background Position" del CMS: `Boxed` deja el fondo dentro del container (ancho de
+// contenido, con las esquinas redondeadas como cualquier otro bloque) y `Full Width` lo
+// lleva a sangre. Vacio = full width, que es el default del CMS.
+const BOXED = 'bg_position_boxed'
+const isBoxed = (c) => c?.background_position === BOXED
+
 // Formato de BLOQUE, para los campos de CUERPO: ademas de lo inline, respeta los
 // saltos de linea y arma listas. Devuelve un <div> propio, asi que va donde antes
 // habia un <p> — un <ul> adentro de un <p> es HTML invalido y el browser lo parte.
@@ -364,7 +370,7 @@ const RENDERERS = {
     if (ink) style.color = ink
     return (
       <div
-        className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg cp-bleed' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
+        className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg' : ''}${bg && !isBoxed(c) ? ' cp-bleed' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         {c.title && <div className="cp-h2">{c.title}</div>}
@@ -793,13 +799,16 @@ const RENDERERS = {
     // Lo que el bloque pinta de verdad: la banda en la variante con iconos, el fondo en
     // las demas. Es lo que decide si es una seccion (a sangre) o no.
     const painted = icon ? band : bg
+    // Boxed = el fondo se queda dentro del container; sin eso (o en Full Width) va a
+    // sangre. La key viaja desde el Card Grid en `background_position`.
+    const bleed = painted && !isBoxed(c)
     if (nums) style['--acc'] = acc
     if (txt) style['--txt'] = txt
     return (
       <div
         // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
         // sangre (ver la regla generica en el CSS). Sin fondo no se toca.
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${painted ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
@@ -1127,6 +1136,7 @@ const RENDERERS = {
       color: tok(c.background_color),
       background_color: tok(c.background_color),
       text_color: tok(c.text_color),
+      background_position: c.background_position,
       card_color: tok(c.background_card_color),
       accent: tok(c.title_card_color),
       items: items.map((it) => ({

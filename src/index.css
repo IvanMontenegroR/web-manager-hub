@@ -1526,7 +1526,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Alineacion del bloque de texto. Arrastra al CTA porque es inline-block. */
 .cp-al-center { text-align: center; }
 .cp-al-right { text-align: right; }
-.cp-text--bg { padding: 30px; }
+/* Con fondo BOXED el bloque se queda dentro del container y se lee como una card, asi
+   que lleva el redondeo de siempre. En Full Width gana `.cp-bleed`, que lo saca. */
+.cp-text--bg { padding: 30px; border-radius: 14px; }
 /* Titulo y cuerpo toman el color del bloque: el token de Text Color, o el que se
    calcula para que contraste con el fondo. */
 .cp-text--ink .cp-h2, .cp-text--ink .cp-h3, .cp-text--ink .cp-p { color: inherit; }
@@ -2023,7 +2025,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-render .cp-cmt--hastxt .cp-brands-sub { color: var(--txt); opacity: .82; }
 .cp-render .cp-cmt--hastxt .cp-plist-arrow { color: var(--txt); border-color: var(--txt); }
 /* Con fondo cargado el bloque se lee como seccion: mismo aire que la banda de iconos. */
-.cp-cmt--hasbg { padding: 26px 26px 32px; }
+.cp-cmt--hasbg { padding: 26px 26px 32px; border-radius: 14px; }
 .cp-cmt-row { display: flex; flex-wrap: nowrap; gap: 20px; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; margin-right: -60px; padding-bottom: 4px; }
 .cp-cmt-row::-webkit-scrollbar { height: 8px; }
 .cp-cmt-row::-webkit-scrollbar-thumb { background: #d8d8d8; border-radius: 4px; }
@@ -2064,7 +2066,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* --- Variante con ICONO sobre banda de color (Card icon square) --- */
 /* La banda de color es OPCIONAL: sin color cargado el bloque no tiene fondo y se
    comporta como cualquier otro. Solo con banda (`--band`) se pinta y se vuelve seccion. */
-.cp-cmt--band { background: var(--band); padding: 26px 26px 32px; }
+.cp-cmt--band { background: var(--band); padding: 26px 26px 32px; border-radius: 14px; }
 .cp-cmt--icon .cp-brands-title, .cp-cmt--icon .cp-brands-sub { color: #111114; }
 .cp-cmt--icon .cp-plist-arrow { border-color: rgba(0, 0, 0, .45); color: #111114; }
 .cp-cmt--icon .cp-cmt-card {

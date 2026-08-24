@@ -100,7 +100,9 @@ set component_key = 'text',
       'background_color', 'Primary Red',
       'text_color',       'Primary White',
       'text_align',       'text_align_center',
-      'style_button',     'style_btn_secondary'
+      'style_button',     'style_btn_secondary',
+      -- Mismo Spacing que los tres de Purina Adopta: es una seccion, no un bloque suelto.
+      'spacing',          'space_section_md'
     )
 where id = '5af56523-0dfa-46d3-8281-434ee23dd449';
 

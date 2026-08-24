@@ -260,7 +260,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      todo el ancho y solo el contenido queda dentro del container, sin borde redondeado, y si es el ULTIMO
      bloque de la pagina va PEGADO al footer (una franja que corta antes del pie deja un blanco que en el
      sitio no existe). El criterio es el FONDO, no el componente ni la posicion: un bloque sin fondo no
-     tiene nada que se vea cortarse y no se toca. Lo marca el preview con la clase `.cp-bleed` cuando
+     tiene nada que se vea cortarse y no se toca. Lo unico que lo apaga es el **Background Position** del
+     CMS: `Boxed` deja el fondo dentro del container con el redondeo de siempre; `Full Width` y vacio van a
+     sangre (vacio = full width, que es el default del CMS). Lo marca el preview con la clase `.cp-bleed` cuando
      efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
      variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
      todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
