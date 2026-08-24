@@ -784,10 +784,12 @@ const RENDERERS = {
       ])
     const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
     const style = {}
-    if (icon && band) {
-      style['--band'] = band
-      style['--card'] = readableOn(band, '#fff') === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)'
-    } else if (!icon && bg) style.background = bg
+    if (icon) {
+      // El relleno de la card sale del "Card - Background Color" del CMS, cuyo default
+      // es BLANCO. No se deduce de la banda: son dos campos distintos.
+      style['--card'] = T(c.card_color, '#FFFFFF')
+      if (band) style['--band'] = band
+    } else if (bg) style.background = bg
     // Lo que el bloque pinta de verdad: la banda en la variante con iconos, el fondo en
     // las demas. Es lo que decide si es una seccion (a sangre) o no.
     const painted = icon ? band : bg
@@ -1125,6 +1127,7 @@ const RENDERERS = {
       color: tok(c.background_color),
       background_color: tok(c.background_color),
       text_color: tok(c.text_color),
+      card_color: tok(c.background_card_color),
       accent: tok(c.title_card_color),
       items: items.map((it) => ({
         icon: it.icon, image: it.image, image_mobile: it.image_mobile,

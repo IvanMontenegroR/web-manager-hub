@@ -2068,8 +2068,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt--icon .cp-brands-title, .cp-cmt--icon .cp-brands-sub { color: #111114; }
 .cp-cmt--icon .cp-plist-arrow { border-color: rgba(0, 0, 0, .45); color: #111114; }
 .cp-cmt--icon .cp-cmt-card {
-  /* Sin banda, la card necesita su propio relleno: sobre blanco no se veria. */
-  flex: 0 0 300px; height: 300px; background: var(--card, #f1f3f5); border-radius: 14px;
+  /* El relleno sale del "Card - Background Color" del CMS; su default es blanco. Sobre
+     fondo blanco la card se distingue por el borde. */
+  flex: 0 0 300px; height: 300px; background: var(--card, #FFFFFF); border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
   display: flex; flex-direction: column; justify-content: space-between; padding: 26px 24px;
 }
 .cp-cmt--icon .cp-cmt-icon { color: var(--acc, #ED1C24); display: block; }

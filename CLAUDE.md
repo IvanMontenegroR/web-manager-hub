@@ -246,6 +246,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      con SOLO los que conocemos con certeza (Primary Red, Primary White); el resto queda sin pintar a
      proposito — inventar el color de un design system seria peor que no mostrarlo. Cuando desarrollo pase
      la paleta, se agrega la entrada y el mockup la toma sola.
+     En la variante **Card Icon Square**, el relleno de cada card sale del "Card - Background Color" del
+     CMS (`background_card_color`), cuyo default es **blanco** — no se deduce de la banda: son dos campos
+     distintos.
      El Carrusel de cards ademas configura por pagina el **fondo del bloque** y el **color del header**
      (titulo, subtitulo y flechas — NO el texto de las cards, `--txt` + la clase `cp-cmt--hastxt`). El
      fondo son dos keys que nunca conviven: `color` en la variante con iconos (la banda) y
