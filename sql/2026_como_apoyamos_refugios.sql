@@ -48,7 +48,7 @@ set component_key = 'card_grid',
       ))
 where id = 'aa1cc4ad-5d06-4901-99d1-6e4ebe32c5b5';
 
--- 1b) Los refugios aliados -> Card Grid de cards verticales, con los DIEZ del sitio.
+-- 1b) Los refugios aliados -> Card Grid de cards verticales, con los TRECE del sitio.
 -- El texto va en rich text: los " - " que separaban ubicacion, contacto y redes eran un
 -- parche de cuando el campo no tenia saltos de linea.
 -- OJO: "Fundación Más por México" tiene SOLO Facebook, no Instagram — asi esta en el
@@ -61,6 +61,12 @@ set component_key = 'card_grid',
       'title',     'Conoce a los refugios aliados',
       'title_tag', 'h2',
       'items', jsonb_build_array(
+        jsonb_build_object('title', 'CIPAM',
+          'description', E'**Ubicación:** Chihuahua\n**Contacto:** 998 8206 798\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Tu alma es mi lucha',
+          'description', E'**Ubicación:** Ciudad de México\n**Contacto:** 55 3452 8339\nFacebook | Instagram'),
+        jsonb_build_object('title', 'Cuenta Conmigo',
+          'description', E'**Ubicación:** Puebla\n**Contacto:** 222 505 6453\nFacebook | Instagram'),
         jsonb_build_object('title', 'Patitas Callejeras',
           'description', E'**Ubicación:** Monterrey\n**Contacto:** 81 2572 8347\nFacebook | Instagram'),
         jsonb_build_object('title', 'Funkytown',
