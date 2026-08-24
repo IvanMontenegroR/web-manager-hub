@@ -382,7 +382,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   paragraph. Se declaran una sola vez — `advanced()` (visibilidad por especie, See more, Section ID,
   Custom CSS) y `classy(...keys)` (los selects de estilo, sacados de `CLASSY_FIELDS`) — y cada componente
   los engancha pidiendo los que le aplican, EN EL ORDEN en que los muestra el formulario de Drupal, que es
-  el orden de la hoja CMS. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
+  el orden de la hoja CMS. Un item de `classy()` puede ser `{ key, ...overrides }` para que un componente
+  le agregue algo suyo sin tocar la definicion compartida: asi el Card Grid declara `defaultByType` en el
+  Card - Style Card, porque en las cards apaisadas ese estilo no se elige, lo pide el layout
+  ("Card Grid Default Square"). `effectiveValue(f, content)` resuelve eso y es lo que baja a la hoja CMS,
+  para que el editor lea el valor que hay que poner y no un "Default" que no corresponde. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
   tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
   **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. El formato se ESCRIBE con una notacion tipo
   markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,

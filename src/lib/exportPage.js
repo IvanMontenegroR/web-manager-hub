@@ -8,7 +8,7 @@ import ExcelJS from 'exceljs'
 import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
-  excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle,
+  excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle, effectiveValue,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
@@ -879,7 +879,7 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
           }
         })
       } else {
-        line(cmsLabel(f), fieldToText(f, content[f.key]), {
+        line(cmsLabel(f), fieldToText(f, effectiveValue(f, content)), {
           ref: `${comp.id}|${f.key}`, emptyAs: emptyFor(f), seo: isSeo(f),
         })
       }

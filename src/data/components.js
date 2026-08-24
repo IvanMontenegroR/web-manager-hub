@@ -312,13 +312,17 @@ const CLASSY_FIELDS = {
   image_style: { label: 'Image Style', options: IMAGE_STYLES },
 }
 
+// Los selects de Classy que le aplican a un componente, en el orden del formulario.
+// Un item puede ser la key a secas o `{ key, ...overrides }`, para que un componente le
+// agregue algo suyo (ej. un `defaultByType`) sin tocar la definicion compartida.
 export function classy(...keys) {
   return keys.map((k) => {
-    const f = CLASSY_FIELDS[k]
-    if (!f) throw new Error(`Classy: no existe el campo "${k}"`)
+    const { key, ...extra } = typeof k === 'string' ? { key: k } : k
+    const f = CLASSY_FIELDS[key]
+    if (!f) throw new Error(`Classy: no existe el campo "${key}"`)
     return {
-      key: k, label: f.label, cmsLabel: f.cmsLabel || f.label,
-      type: 'select', cms: true, options: f.options, group: G_CLASSY,
+      key, label: f.label, cmsLabel: f.cmsLabel || f.label,
+      type: 'select', cms: true, options: f.options, group: G_CLASSY, ...extra,
     }
   })
 }
@@ -840,7 +844,11 @@ export const COMPONENTS = [
       // Orden exacto del panel Classy de `ln_c_cardgrid` en Drupal.
       ...classy('background_color', 'background_card_color', 'background_degrade_color',
         'text_color', 'title_card_color', 'text_card_color', 'icon_card_color',
-        'background_position', 'card_style_card', 'card_title_position', 'position_arrows',
+        'background_position',
+        // El estilo de card no es libre: lo pide el layout. Las apaisadas van en
+        // "Card Grid Default Square".
+        { key: 'card_style_card', defaultByType: { 'slider-background-default-card': 'card_grid_default_square' } },
+        'card_title_position', 'position_arrows',
         'text_align', 'spacing'),
     ],
     specKey: 'view_mode',
@@ -1233,6 +1241,17 @@ export function isMarketField(f) {
   if (f.cms) return false
   if (/\(opcional\)/i.test(f.label || '')) return false
   return f.type === 'image'
+}
+
+// El valor que REALMENTE va en el CMS. Casi siempre es lo cargado; con `defaultByType`
+// el campo tiene un valor que lo pide la variante y no se elige (ej. el Card - Style
+// Card de las cards apaisadas, que va si o si en "Card Grid Default Square"). Asi el
+// editor lo lee en la hoja CMS en vez de un "Default" que no es lo que hay que poner.
+export function effectiveValue(f, content = {}) {
+  const v = content?.[f?.key]
+  if (!isEmptyValue(v)) return v
+  const byType = f?.defaultByType?.[variantOf(content)]
+  return byType == null ? v : byType
 }
 
 // Vacio = sin dato. Un booleano SI es dato (false = destildado a proposito).
