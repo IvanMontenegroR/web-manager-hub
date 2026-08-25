@@ -18,7 +18,9 @@ import {
 const CG_TO_CMT = {
   'slider-default-card': CMT_VERTICAL,
   'slider-card-icons-square': CMT_ICON,
-  'slider-background-default-card': CMT_WIDE_BOTTOM,
+  // Titulo ARRIBA y descripcion ABAJO, sobre la imagen de fondo de la card. La otra
+  // apaisada (CMT_WIDE_BOTTOM) apila las dos abajo y no la usa ningun modo del CMS.
+  'slider-background-default-card': CMT_WIDE_TOP,
   'cards-numbers': CMT_NUMBERS,
 }
 
