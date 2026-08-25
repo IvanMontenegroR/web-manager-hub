@@ -414,25 +414,37 @@ const RENDERERS = {
     )
   },
 
-  // `c_image`: imagen a lo ancho con el texto encima. Provisorio, igual que su
-  // definicion en el catalogo (falta el subform real del CMS).
+  // `c_image`: imagen con texto. El LAYOUT sale del Classy `image_position`:
+  //   - `image_bottom` -> el texto va ARRIBA, suelto sobre la pagina, y la imagen
+  //     debajo (asi se ve en el sitio; es el unico valor que tenemos confirmado).
+  //   - el resto (vacio incluido) -> la caja de texto va ENCIMA de la imagen, que es
+  //     como venia. Los otros cuatro valores (`image_center`, `image_fixed_background`,
+  //     `image_background_box`, `image_background_full`) todavia no estan dibujados:
+  //     sin saber como se ven, mentir el mockup seria peor que dejar el generico.
+  // `text_align` alinea el texto, igual que en el bloque de Texto.
   content_image: (c) => {
     const ctas = ctaList(c)
+    const bottom = c.image_position === 'image_bottom'
+    const al = /center/.test(c.text_align || '') ? 'center'
+      : /right/.test(c.text_align || '') ? 'right' : 'left'
+    /* `> 0` y no `ctas.length` a secas: sin CTAs la cadena vale 0 y React dibuja
+       el cero como texto debajo de la imagen. */
+    const hasText = c.title || c.subtitle || c.body || ctas.length > 0
+    const txt = hasText && (
+      <div className={bottom ? 'cp-cimg-txt' : 'cp-cimg-box'}>
+        {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
+        {c.body && <Rich className="cp-p">{c.body}</Rich>}
+        {ctas.map((b, i) => (
+          <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
+        ))}
+      </div>
+    )
     return (
-      <div className="cp-block cp-cimg">
+      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}`}>
+        {bottom && txt}
         <Img src={c.image} h={340} />
-        {/* `> 0` y no `ctas.length` a secas: sin CTAs la cadena vale 0 y React dibuja
-            el cero como texto debajo de la imagen. */}
-        {(c.title || c.subtitle || c.body || ctas.length > 0) && (
-          <div className="cp-cimg-box">
-            {c.title && <div className="cp-h2">{c.title}</div>}
-            {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
-            {c.body && <Rich className="cp-p">{c.body}</Rich>}
-            {ctas.map((b, i) => (
-              <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
-            ))}
-          </div>
-        )}
+        {!bottom && txt}
       </div>
     )
   },
