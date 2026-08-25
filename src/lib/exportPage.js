@@ -270,6 +270,12 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // otro). El mercado lee el nombre de la app; el editor, el del paragraph de Drupal.
   const labelByComp = new Map()    // compId -> "3.1.2. Cards con icono"  (hoja Contenido)
   const cmsLabelByComp = new Map() // compId -> "3.1.2. Content: Card Grid" (hoja CMS)
+  // Orden en que salieron las secciones en la hoja Contenido. La hoja CMS va EN ESE MISMO
+  // orden: si se recorriera la lista plana de componentes, los hijos de un contenedor se
+  // mezclarian con los bloques sueltos (su `sort_order` es por GRUPO, no global) y el
+  // "6.1.1" caeria entre el 1 y el 2. Se llena en `emitComponent`, que es justo lo que la
+  // hoja Contenido dibuja: asi las dos hojas no se pueden desincronizar.
+  const cmsOrder = []
   const E_W = 70 // ancho (chars) de la columna de imagen
   const columns = [
     { width: 2 },     // A: margen
@@ -535,6 +541,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const name = `${label}. ${componentTitle(def, content) || comp.component_key}`
     labelByComp.set(comp.id, name)
     cmsLabelByComp.set(comp.id, `${label}. ${def?.cmsName || def?.name || comp.component_key}`)
+    cmsOrder.push(comp)
     row = bandTitle(row, name, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
@@ -754,7 +761,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // El contenido NO se copia: se referencia con formula a la hoja Contenido, asi lo que
   // carga el mercado aparece de este lado sin que nadie tenga que pasarlo a mano.
   await buildCmsSheet(wb, page, {
-    comps: mainComps, cellRef, imgByComp, labelByComp: cmsLabelByComp, withMetas,
+    comps: cmsOrder, cellRef, imgByComp, labelByComp: cmsLabelByComp, withMetas,
   })
 
   await download(wb, `${safeFileName(page.name)} — Matriz de contenido.xlsx`)
