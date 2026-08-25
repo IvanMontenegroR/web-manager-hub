@@ -2195,6 +2195,10 @@ textarea.control { resize: vertical; min-height: 64px; }
   width: 260px; max-height: 320px; overflow: auto; margin-top: 6px; padding: 8px;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-md);
 }
+/* El picker es un popover que se sale del bloque, y el contenedor tiene overflow:hidden
+   para recortar sus esquinas: sin esto la lista de componentes queda invisible. Mientras
+   esta abierto, el bloque deja pasar lo que sobresale. */
+.pb-block:has(.pb-picker) { overflow: visible; }
 .pb-canvas.preview .pb-addhere { display: none; }
 .pb-canvas.preview .pb-block--kid { border: none; }
 /* Durante el export a Excel: los componentes anidados se capturan sin el chrome
