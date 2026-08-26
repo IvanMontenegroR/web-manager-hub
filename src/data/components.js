@@ -822,7 +822,10 @@ export const COMPONENTS = [
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
-        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
+        // El titulo de una CARD siempre cuelga del titulo del bloque, asi que su tag por
+        // defecto es h3 y no "- Ninguno -": es lo que hay que poner en el CMS salvo que
+        // se elija otra cosa a proposito.
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
         { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS, hideTypes: CARD_GRID_IMAGE_MODES },
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea' },
         { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
@@ -1243,15 +1246,23 @@ export function isMarketField(f) {
   return f.type === 'image'
 }
 
-// El valor que REALMENTE va en el CMS. Casi siempre es lo cargado; con `defaultByType`
-// el campo tiene un valor que lo pide la variante y no se elige (ej. el Card - Style
-// Card de las cards apaisadas, que va si o si en "Card Grid Default Square"). Asi el
-// editor lo lee en la hoja CMS en vez de un "Default" que no es lo que hay que poner.
+// El valor que REALMENTE va en el CMS. Casi siempre es lo cargado; si no hay nada
+// cargado hay dos formas de que igual haya un valor:
+//   - `defaultByType`: lo pide la VARIANTE y no se elige (ej. el Card - Style Card de
+//     las cards apaisadas, que va si o si en "Card Grid Default Square").
+//   - `default`: el valor que damos por sentado cuando no se eligio otro (ej. el HTML
+//     tag del titulo de una card, que es h3).
+// En los dos casos el editor lee en la hoja CMS lo que hay que poner, y no un "Default"
+// o un "- Ninguno -" que no es lo que corresponde.
 export function effectiveValue(f, content = {}) {
   const v = content?.[f?.key]
   if (!isEmptyValue(v)) return v
   const byType = f?.defaultByType?.[variantOf(content)]
-  return byType == null ? v : byType
+  if (byType != null) return byType
+  // Los `default` BOOLEANOS son otra cosa: dicen como se dibuja un checkbox que nadie
+  // toco (ver ContentForm), no un valor a cargar. No entran aca.
+  if (f?.default == null || typeof f.default === 'boolean') return v
+  return f.default
 }
 
 // Vacio = sin dato. Un booleano SI es dato (false = destildado a proposito).

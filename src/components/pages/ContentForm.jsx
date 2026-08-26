@@ -123,9 +123,12 @@ function Field({ f, value, onChange, brandSecondary }) {
   if (f.type === 'select') {
     // Las opciones pueden ser strings o { value, label } (se guarda el valor de maquina
     // del CMS y se muestra la etiqueta del desplegable de Drupal).
+    // Con `default` (un string), vacio NO es "sin elegir": es ese valor. Se muestra
+    // seleccionado y no se ofrece la opcion vacia, porque no habria a que volver.
+    const def = typeof f.default === 'string' ? f.default : null
     return (
-      <select className="control" value={value || ''} onChange={(e) => onChange(e.target.value)}>
-        <option value="">—</option>
+      <select className="control" value={value || def || ''} onChange={(e) => onChange(e.target.value)}>
+        {!def && <option value="">—</option>}
         {f.options.map((o) => <option key={optValue(o)} value={optValue(o)}>{optLabel(o)}</option>)}
       </select>
     )

@@ -880,7 +880,10 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
           const role = f.roles ? f.roles[i] : null
           cardBand(`${cmsLabel(f)} — ${one} ${i + 1}${role ? ` (${role})` : ''}`)
           for (const sf of visibleSubFields(f, role, content)) {
-            line(cmsLabel(sf), fieldToText(sf, item[sf.key]), {
+            // `effectiveValue` y no `item[sf.key]` a secas: un subcampo con `default`
+            // (el HTML tag del titulo de una card) tiene que bajar con ESE valor, que
+            // es el que el editor tiene que poner, y no con un "- Ninguno -".
+            line(cmsLabel(sf), fieldToText(sf, effectiveValue(sf, item)), {
               sub: true, ref: `${comp.id}|${f.key}[${i}].${sf.key}`, emptyAs: emptyFor(sf), seo: isSeo(sf),
             })
           }
