@@ -536,15 +536,25 @@ export const COMPONENTS = [
     name: 'Texto + Imagen',
     cmsName: 'Content: Text + Image',
     category: 'Contenido',
-    help: 'Texto con imagen a un costado (`c_sideimagetext`).',
+    help: 'Texto con imagen a un costado (`c_sideimagetext`). El Media va primero (desktop y mobile, cada uno con su alt) y el título con su cuerpo viven en el desplegable "Optional fields" del formulario.',
     fields: [
-      { key: 'title', label: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'body', label: 'Cuerpo', type: 'textarea' },
-      { key: 'image', label: 'Imagen', type: 'image' },
+      // El Media va PRIMERO en el formulario, igual que en `c_image`: dos archivos,
+      // cada uno con su alt. Del mercado se pide la imagen; el alt lo carga SEO.
+      { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image' },
+      { key: 'image_alt', label: 'Alt text (desktop)', cmsLabel: 'Texto alternativo (Desktop)', type: 'text', cms: true },
+      { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
+      { key: 'image_mobile_alt', label: 'Alt text (mobile)', cmsLabel: 'Texto alternativo (Mobile)', type: 'text', cms: true },
+      // Optional fields: el desplegable de Drupal donde viven el titulo y el cuerpo.
+      // El cuerpo se llama "Description" en el CMS, no "Body".
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea', cmsGroup: G_OPTIONAL },
+      { key: 'cta_label', label: 'Botón — texto', cmsLabel: 'Texto del enlace', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'cta_url', label: 'Botón — link', cmsLabel: 'URL', type: 'url', cmsGroup: G_OPTIONAL },
+      // Fuera del grupo y ULTIMO a proposito: la posicion de la imagen es un campo
+      // NUESTRO (el subform real de `c_sideimagetext` todavia no lo tenemos), asi que
+      // no puede quedar en el medio del desplegable y cortarlo en dos.
       { key: 'image_position', label: 'Posición de la imagen', type: 'select', options: ['Izquierda', 'Derecha'] },
-      { key: 'cta_label', label: 'Botón — texto', type: 'text' },
-      { key: 'cta_url', label: 'Botón — link', type: 'url' },
       // Classy PENDIENTE: falta el subform real de `c_sideimagetext` (ver TODO al pie).
       ...advanced(),
     ],
@@ -585,21 +595,22 @@ export const COMPONENTS = [
       { key: 'image_alt', label: 'Alt text (desktop)', cmsLabel: 'Texto alternativo (Desktop)', type: 'text', cms: true },
       { key: 'image_mobile', label: 'Imagen mobile', cmsLabel: 'Image Mobile', type: 'image' },
       { key: 'image_mobile_alt', label: 'Alt text (mobile)', cmsLabel: 'Texto alternativo (Mobile)', type: 'text', cms: true },
-      // Optional fields, en el orden del formulario.
-      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES },
-      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text' },
-      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES },
-      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', item: [
+      // Optional fields: el desplegable de Drupal, en el orden del formulario. Todo lo
+      // que sigue hasta el bloque Avanzado vive adentro.
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', cmsGroup: G_OPTIONAL, item: [
         { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
         { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
         { key: 'rel', label: 'Rel (follow / nofollow)', cmsLabel: 'Rel (follow/nofollow tags). Default is blank', type: 'text', cms: true },
         { key: 'aria_label', label: 'ARIA Label', cmsLabel: 'ARIA Label', type: 'text', cms: true },
       ] },
-      { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea' },
+      { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea', cmsGroup: G_OPTIONAL },
       ...advanced(),
       // Orden exacto del panel Classy de `c_image` en Drupal.
       ...classy('background_color', 'background_position', 'image_position', 'image_style',
