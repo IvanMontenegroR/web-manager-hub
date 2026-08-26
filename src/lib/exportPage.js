@@ -22,6 +22,7 @@ const MIRROR_BG = 'FFF7F8FA' // celdas espejadas: vienen de la otra hoja, no se 
 const PURINA_RED = 'FFED1C24'
 const HEAD_BG = 'FF1F2530'
 const CARD_BG = 'FFFCE9EA'   // franja de card (rosa muy claro)
+const GROUP_BG = 'FFEDEFF2'  // franja de desplegable del CMS (gris muy claro)
 const SUBHEAD_BG = 'FFF1F3F5'
 const MUTED = 'FF868E99'
 const BORDER = 'FFE4E7EB'
@@ -851,6 +852,21 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
     setH(row, 18)
     row++
   }
+  // Desplegable de Drupal (`cmsGroup`): los campos de abajo no estan a la vista en el
+  // formulario, hay que ABRIRLO para llegar a ellos. Sin esta banda, un editor que no
+  // ve el "Título" en pantalla asume que el paragraph no lo tiene.
+  const groupBand = (text) => {
+    ws.mergeCells(row, 2, row, 3)
+    const c = ws.getCell(row, 2)
+    c.value = `▸ ${text}  (desplegable — hay que abrirlo)`
+    c.font = { bold: true, size: 10, color: { argb: 'FF3C444B' } }
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GROUP_BG } }
+    c.alignment = { vertical: 'middle', indent: 1 }
+    ws.getCell(row, 2).border = { top: thin, bottom: thin, left: thin }
+    ws.getCell(row, 3).border = { top: thin, bottom: thin, right: thin }
+    setH(row, 18)
+    row++
+  }
   // Etiqueta del CMS de un campo (cae a la nuestra si no esta declarada).
   const cmsLabel = (f) => f.cmsLabel || f.label
   // Un select vacio en el CMS no siempre dice lo mismo ("Default" en Classy,
@@ -869,7 +885,15 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
     band(`${labelByComp.get(comp.id) || def?.cmsName || def?.name || comp.component_key}`, PURINA_RED)
 
     // TODOS los campos, incluidos los tecnicos (sin { excel: true }).
+    // `cmsGroup` marca los que en Drupal viven adentro de un desplegable: se abre una
+    // banda al entrar y se cierra sola al salir. Si el grupo quedo sin campos visibles
+    // (los filtro la variante), la banda no se dibuja: se emite recien con el primero.
+    let openGroup = null
     for (const f of visibleFields(def, content)) {
+      if ((f.cmsGroup || null) !== openGroup) {
+        openGroup = f.cmsGroup || null
+        if (openGroup) groupBand(openGroup)
+      }
       if (f.type === 'list') {
         const stored = Array.isArray(content[f.key]) ? content[f.key] : []
         const arr = f.fixed

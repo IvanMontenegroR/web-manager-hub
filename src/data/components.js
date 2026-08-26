@@ -267,6 +267,13 @@ export const G_CLASSY = 'Classy — estilos (CMS)'
 // Grupo propio del Banner: el buscador con IA que se monta encima.
 export const G_SEARCH = 'Search AI (CMS)'
 
+// `cmsGroup` es OTRA cosa que `group`: no es como agrupamos NOSOTROS el form, es el
+// desplegable de Drupal adentro del cual vive el campo. Va solo en la hoja CMS (el
+// editor tiene que abrirlo para encontrarlo) y por eso lleva el nombre EXACTO del CMS.
+// Un campo puede estar en un `cmsGroup` y no tener `group`: en nuestro form el titulo
+// del bloque es lo primero que se carga, esconderlo en un plegable seria peor.
+export const G_OPTIONAL = 'Optional fields'
+
 // ---- Los dos grupos que Drupal repite en TODOS los paragraphs -------------------
 // "Avanzado" y "Classy" no son campos de UN componente: el CMS se los agrega a cada
 // paragraph. Antes estaban copiados a mano adentro de card_grid, asi que cada
@@ -815,10 +822,12 @@ export const COMPONENTS = [
     fields: [
       { key: 'view_mode', label: 'Modo de vista', cmsLabel: 'Modo de vista', type: 'select', cms: true, options: CARD_GRID_MODES,
         hint: 'Es el campo obligatorio del CMS. Cambia el layout de todo el bloque.' },
-      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea' },
-      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS },
+      // Titulo y subtitulo del BLOQUE (no los de cada card) viven en el desplegable
+      // "Optional fields" de Drupal: si el editor no lo abre, no los encuentra.
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea', cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
