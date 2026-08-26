@@ -490,6 +490,29 @@ Nunca se hardcodean; el `.env` local esta en `.gitignore`.
 Local: copiar `.env.example` a `.env`. CI: cargadas como **Repo Variables** en
 Settings -> Secrets and variables -> Actions -> Variables.
 
+## Seguridad / RLS
+
+Que la publishable key sea publica esta bien: es de cliente, y el modelo de Supabase es
+que la proteccion la pone RLS. El problema es que **hoy RLS no protege nada**: las 12
+tablas tienen una sola politica `dummy_all` = `FOR ALL TO anon, authenticated USING (true)
+WITH CHECK (true)`. O sea la key da CRUD completo sobre todo. Con el sitio publico, eso es
+una base abierta a internet. Es una deuda ASUMIDA de la fase dummy, no un descuido, pero
+hay que cerrarla: **necesita Supabase Auth**, porque sin login no hay a quien darle permiso
+distinto que a `anon`. Mientras tanto conviene tener presente que la app corre sin red.
+
+El linter de Supabase NO marca esto: para el, RLS "esta habilitada". Solo marca RLS
+apagada. Que el proyecto figure en verde no significa que este cerrado.
+
+**Tablas de respaldo:** van SIEMPRE en el esquema `backups`, nunca en `public`.
+```sql
+create table backups.page_components_backup_<lo_que_sea> as select ...
+```
+Un `create table as` no hereda NADA de la tabla original: nace con RLS apagada. En
+`public` eso significa que PostgREST la publica entera (fue el `rls_disabled_in_public`
+que aparecio con nueve tablas de respaldo). PostgREST solo expone `public` y
+`graphql_public`, asi que en `backups` no existe para la API; desde el service role (SQL
+editor, MCP) se leen igual. Ver `sql/2026_backups_fuera_de_public.sql`.
+
 ## Correr en local
 
 ```bash
@@ -506,7 +529,11 @@ Push a `main` dispara `.github/workflows/deploy.yml`: build con las Repo Variabl
 Pages. `base` de Vite = `/web-manager-hub/` (repo project page). Live:
 `https://ivanmontenegror.github.io/web-manager-hub/`.
 
-Repo privado: GitHub Pages en repos privados requiere plan Pro/Team.
+**El repo es PUBLICO** (verificado contra la API de GitHub) y el sitio de Pages tambien.
+Decia "repo privado" y no es asi. Importa porque encadena: repo publico -> sitio publico ->
+la `VITE_SUPABASE_KEY` viaja dentro del bundle (Vite inlinea las `VITE_*` en build) ->
+y como las politicas de RLS son `dummy_all` (`ALL to anon using true`), hoy cualquiera con
+la URL puede leer, editar y borrar TODAS las tablas. Ver "Seguridad / RLS" abajo.
 
 ## Fases futuras (NO construidas)
 
