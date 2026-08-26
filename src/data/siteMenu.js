@@ -1,98 +1,108 @@
 // Menu principal del sitio (purina:header-main) con sus megamenus.
 //
-// Es config GLOBAL, no contenido por pagina: el mismo menu esta en todas. Por eso vive
-// aca y no en `page_components`. Esta escrito como DATO (no como JSX) para que sea lo
-// que despues guarde la tabla `site_menu` sin cambiar de forma.
+// Es config GLOBAL por MERCADO, no contenido por pagina: el mismo menu esta en todas
+// las paginas de ese mercado. Por eso no vive en `page_components` sino en su propia
+// tabla (`site_menu`, ver src/lib/menuDb.js) y se edita en su propia pantalla.
+//
+// Lo de aca es la FORMA (que campos tiene) y el contenido con el que se siembra un
+// mercado nuevo. Lo que se guarda es exactamente esta estructura.
 //
 // Los megamenus tienen DOS layouts, que salen de como se ven en el sitio:
 //   - `boxes` : cajas con borde, cada una con titulo + icono y su lista de links
 //               (Alimento, Marcas). Alimento ademas lleva el buscador arriba.
 //   - `links` : lista plana de links con icono, en dos columnas
 //               (Red Purina, Servicios, Conoce Purina).
-// A la derecha, los dos PROMOS son los mismos en los cinco menus: se declaran una vez.
+// A la derecha van los PROMOS, que son los mismos en todos los menus del mercado. Son
+// 0, 1 o 2: si no hay ninguno, el menu ocupa todo el ancho.
 
 import {
-  PawPrint, Bone, Cat, Dog, BookOpen, MessagesSquare, MessageCircle,
-  Store, Stethoscope, House, Users, Newspaper, CircleHelp, Mail, Handshake, BadgeCheck,
+  PawPrint, Bone, Cat, Dog, Newspaper, MessagesSquare, MessageCircle,
+  Store, Stethoscope, House, Users, CircleHelp, Mail, Handshake, BadgeCheck,
+  HeartHandshake, Dna, Search, Star, Heart, Phone, MapPin, ShoppingCart, Circle,
 } from 'lucide-react'
 
-// Los iconos del sitio son del set de Purina; aca se aproximan con lucide para el
-// mockup. La clave es la que se guarda, el componente es como se dibuja.
-export const MENU_ICONS = {
-  life: PawPrint, food: Bone, cat: Cat, dog: Dog, read: BookOpen,
-  community: MessagesSquare, adopt: Handshake, breeders: House, stores: Store,
-  vet: Stethoscope, lodging: House, whatsapp: MessageCircle, history: Users,
-  allies: Handshake, pros: Stethoscope, club: BadgeCheck, press: Newspaper,
-  faq: CircleHelp, contact: Mail,
-}
-
-const L = (label, url = '') => ({ label, url })
-
-// Las dos tarjetas de la derecha, iguales en los cinco megamenus.
-// OJO: en el sitio real la primera dice "Tittle banner" con doble T y su bajada es
-// texto de relleno ("Elementum lectus purus..."). Se deja tal cual: el mockup muestra
-// lo que hay, no lo que deberia decir.
-export const MENU_PROMOS = [
-  { title: 'Tittle banner', text: 'Elementum lectus purus at suspendisse habitasse adouoa kolaq.', image: '' },
-  { title: 'Newsletter Purina®', text: 'Suscríbete para recibir el mejor contenido para ti y para tu mascota.', image: '' },
+export const MENU_LAYOUTS = [
+  { value: 'boxes', label: 'Cajas con título (Alimento, Marcas)' },
+  { value: 'links', label: 'Lista de links con icono (Servicios, Conoce Purina)' },
 ]
 
-export const SITE_MENU = [
+// Los iconos del sitio son el set del CMS (`CMS_ICONS`): lo que se GUARDA es esa clave.
+// Aca se dibujan aproximados con lucide, y solo los que sabemos a que corresponden —
+// mismo criterio que `BG_TOKENS` con los colores: los que no estan mapeados caen a un
+// generico en vez de mostrar un icono inventado.
+const ICON_BY_CMS_KEY = {
+  paw: PawPrint, 'paw-solid': PawPrint, pet_supplies: Bone, beef: Bone,
+  cat: Cat, 'cat-ai': Cat, dog: Dog, 'dog-ai': Dog,
+  newsmode: Newspaper, article: Newspaper, forum: MessagesSquare, chat: MessagesSquare,
+  groups: Users, adocao: HeartHandshake, handshake: Handshake, genetics: Dna,
+  storefront: Store, health_cross: Stethoscope, stethoscope: Stethoscope,
+  hotel: House, family_home: House, whatsapp: MessageCircle, call: Phone,
+  history: Users, help: CircleHelp, mail: Mail, verified: BadgeCheck,
+  workspace_premium: BadgeCheck, search: Search, star: Star, heart: Heart,
+  pin_drop: MapPin, my_location: MapPin, add_shopping_cart: ShoppingCart,
+}
+
+// Componente del icono para una clave del CMS. Sin mapeo, un punto neutro: se ve que
+// hay un icono ahi sin afirmar cual.
+export function menuIconFor(key) {
+  return ICON_BY_CMS_KEY[key] || Circle
+}
+
+const L = (label, icon) => (icon ? { label, url: '', icon } : { label, url: '' })
+
+// Contenido inicial de un mercado nuevo: el menu real de Mexico.
+// OJO: en el sitio real el primer promo dice "Tittle banner" con doble T y su bajada es
+// texto de relleno ("Elementum lectus purus..."). Se siembra tal cual: el mockup muestra
+// lo que hay, no lo que deberia decir.
+export const DEFAULT_PROMOS = [
+  { title: 'Tittle banner', text: 'Elementum lectus purus at suspendisse habitasse adouoa kolaq.', image: '', url: '' },
+  { title: 'Newsletter Purina®', text: 'Suscríbete para recibir el mejor contenido para ti y para tu mascota.', image: '', url: '' },
+]
+
+export const DEFAULT_MENU = [
   {
-    key: 'alimento',
     label: 'Alimento',
     layout: 'boxes',
     search: { label: 'Buscar alimento', placeholder: 'Escribe tus dudas aquí...' },
     groups: [
-      { title: 'Etapa de vida', icon: 'life', links: [L('Cachorros'), L('Gatitos'), L('Adultos'), L('Senior')] },
-      { title: 'Tipo de alimento', icon: 'food', links: [L('Seco'), L('Húmedo'), L('Snacks'), L('Suplementos')] },
+      { title: 'Etapa de vida', icon: 'paw', links: [L('Cachorros'), L('Gatitos'), L('Adultos'), L('Senior')] },
+      { title: 'Tipo de alimento', icon: 'pet_supplies', links: [L('Seco'), L('Húmedo'), L('Snacks'), L('Suplementos')] },
     ],
-    more: L('Conocer productos'),
+    more: { label: 'Conocer productos', url: '' },
   },
   {
-    key: 'marcas',
     label: 'Marcas',
     layout: 'boxes',
     groups: [
       { title: 'Gatos', icon: 'cat', links: [L('Pro Plan®'), L('Felix®'), L('Cat Chow®'), L('Fancy Feast®')] },
       { title: 'Perros', icon: 'dog', links: [L('Pro Plan®'), L('Dog Chow®'), L('Beneful®'), L('Purina One®')] },
     ],
-    more: L('Ver todas'),
+    more: { label: 'Ver todas', url: '' },
   },
   {
-    key: 'red-purina',
     label: 'Red Purina®',
     layout: 'links',
-    links: [
-      { ...L('Lo más leído'), icon: 'read' },
-      { ...L('Comunidad Purina®'), icon: 'community' },
-    ],
+    links: [L('Lo más leído', 'newsmode'), L('Comunidad Purina®', 'forum')],
   },
   {
-    key: 'servicios',
     label: 'Servicios',
     layout: 'links',
+    // El orden es el de LECTURA (por filas): el sitio los pone en dos columnas, asi que
+    // 1 y 2 son la primera fila, 3 y 4 la segunda, etc.
     links: [
-      { ...L('Yo adopto'), icon: 'adopt' },
-      { ...L('Vetline'), icon: 'vet' },
-      { ...L('Breeders'), icon: 'breeders' },
-      { ...L('Hospedaje'), icon: 'lodging' },
-      { ...L('Tiendas'), icon: 'stores' },
-      { ...L('WhatsApp'), icon: 'whatsapp' },
+      L('Yo adopto', 'adocao'), L('Vetline', 'health_cross'),
+      L('Breeders', 'genetics'), L('Hospedaje', 'hotel'),
+      L('Tiendas', 'storefront'), L('WhatsApp', 'whatsapp'),
     ],
   },
   {
-    key: 'conoce-purina',
     label: 'Conoce Purina®',
     layout: 'links',
     links: [
-      { ...L('Nuestra historia'), icon: 'history' },
-      { ...L('Prensa'), icon: 'press' },
-      { ...L('Aliados'), icon: 'allies' },
-      { ...L('Preguntas frecuentes'), icon: 'faq' },
-      { ...L('Profesionales'), icon: 'pros' },
-      { ...L('Contacto'), icon: 'contact' },
-      { ...L('Club Purina®'), icon: 'club' },
+      L('Nuestra historia', 'history'), L('Prensa', 'newsmode'),
+      L('Aliados', 'handshake'), L('Preguntas frecuentes', 'help'),
+      L('Profesionales', 'stethoscope'), L('Contacto', 'mail'),
+      L('Club Purina®', 'workspace_premium'),
     ],
   },
 ]

@@ -2436,3 +2436,23 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-footer-nestle { font-size: 20px; letter-spacing: 1px; color: #fff; font-weight: 500; }
 .cp-footer-legal { list-style: none; display: flex; flex-wrap: wrap; gap: 18px; margin: 0; padding: 0; }
 .cp-footer-legal li { font-size: 12px; color: #c2c2c2; }
+
+/* ===== Editor del menu del sitio ===== */
+/* En el editor el header no scrollea: el megamenu tiene que poder salirse para
+   probar el hover mientras se edita abajo. */
+.mn-preview { overflow: visible; margin-bottom: 14px; }
+.mn-list { display: grid; gap: 14px; }
+.mn-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px 14px; }
+.mn-item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.mn-n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: var(--purina); color: #fff; font-size: 12px; font-weight: 700; flex: none; }
+.mn-label { max-width: 260px; font-weight: 600; }
+.mn-layout { max-width: 320px; }
+.mn-group { border-left: 2px solid var(--border); margin: 8px 0 8px 10px; padding: 8px 0 8px 12px; display: grid; gap: 6px; justify-items: start; }
+.mn-group-head { display: flex; align-items: center; gap: 8px; width: 100%; }
+.mn-link { display: flex; align-items: center; gap: 8px; width: 100%; }
+.mn-link .control { flex: 1; min-width: 0; }
+.mn-icon { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.mn-icon .control { width: 170px; }
+.mn-icon-pv { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; color: var(--purina); flex: none; }
+.mn-tools { display: inline-flex; gap: 2px; flex: none; }
+.mn-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; margin-bottom: 6px; }

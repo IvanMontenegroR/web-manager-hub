@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, ChevronRight, Pencil, Copy, Check, Layers, FolderOpen,
+  ArrowLeft, Plus, Database, FileStack, ChevronUp, ChevronDown, ChevronRight, Pencil, Copy, Check, Layers, FolderOpen, Menu,
 } from 'lucide-react'
 import {
   fetchPages, seedPages, setPageStatus, persistPageOrder, clonePage, pageSubcategory,
   PAGE_STATUSES, PAGE_STATUS_LABEL, PAGE_MARKETS, PAGE_MARKET_LABEL, SETUP_SQL,
 } from '../../lib/pagesDb'
 import PageModal from './PageModal.jsx'
+import MenuEditor from './MenuEditor.jsx'
 
 // Grupos plegados del tracker (categorias y subcategorias), persistidos.
 const COLLAPSE_KEY = 'wmh_pages_collapsed'
@@ -46,6 +47,7 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
   const [errMsg, setErrMsg] = useState(null)
   const [modal, setModal] = useState(null)
   const [busyId, setBusyId] = useState(null) // pagina clonandose
+  const [menuOpen, setMenuOpen] = useState(false) // editor del menu del sitio
   // Mercado activo (pestaña). Se recuerda entre sesiones.
   const [market, setMarket] = useState(() => localStorage.getItem('wmh_pages_market') || PAGE_MARKETS[0].code)
   useEffect(() => { localStorage.setItem('wmh_pages_market', market) }, [market])
@@ -134,6 +136,7 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
     finally { setBusyId(null) }
   }
 
+  if (menuOpen) return <MenuEditor market={market} onBack={() => setMenuOpen(false)} />
   if (state === 'loading') return <div className="content"><div className="center-state"><div className="spinner" /><div>Cargando...</div></div></div>
   if (state === 'missing') return <div className="content"><TrackerHead onBack={onBack} /><SetupBlock /></div>
   if (state === 'error') return <div className="content"><TrackerHead onBack={onBack} /><div className="center-state"><div style={{ color: 'var(--danger)', fontWeight: 600 }}>No se pudo cargar</div><div style={{ fontSize: 13 }}>{errMsg}</div><button className="btn" onClick={load}>Reintentar</button></div></div>
@@ -147,7 +150,12 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
             <span key={s} className={`pg-count ${STATUS_CLASS[s]}`}>{PAGE_STATUS_LABEL[s]} <b>{counts[s]}</b></span>
           ))}
         </div>
-        <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setModal({})}>
+        {/* El menu del sitio no es una pagina: es config global del mercado, por eso
+            se edita en su propia pantalla y no adentro de un builder. */}
+        <button className="btn btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setMenuOpen(true)}>
+          <Menu size={15} /> Menú del sitio
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={() => setModal({})}>
           <Plus size={15} /> Nueva pagina
         </button>
       </div>
