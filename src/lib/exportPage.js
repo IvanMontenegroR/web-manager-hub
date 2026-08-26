@@ -457,7 +457,11 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     // no aparezca un "[texto](url)" crudo en la celda.
     let r = fieldRow(atRow, label, opts.rich ? value : stripLinks(value), opts)
     for (const l of links) {
-      r = fieldRow(r, `Link - ${l.text}`, '', { ...opts, sub: true, rich: null, link: l.url })
+      // `ref: null` a proposito: el ref es del campo, y `fieldRow` lo REGISTRA en la
+      // fila que dibuja. Si las filas de enlace lo heredaran, la ultima se quedaria con
+      // el ref y la hoja CMS traeria por formula el "Pegá acá el link" de ese enlace en
+      // vez del cuerpo del componente.
+      r = fieldRow(r, `Link - ${l.text}`, '', { ...opts, ref: null, sub: true, rich: null, link: l.url })
     }
     return r
   }
@@ -542,7 +546,9 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     const name = `${label}. ${componentTitle(def, content) || comp.component_key}`
     labelByComp.set(comp.id, name)
     cmsLabelByComp.set(comp.id, `${label}. ${def?.cmsName || def?.name || comp.component_key}`)
-    cmsOrder.push(comp)
+    // `nested` = este bloque vive DENTRO de un contenedor. La hoja CMS lo dibuja
+    // indentado y debajo de la banda de su slot, para que se lea como lo que es.
+    cmsOrder.push({ comp, nested: !!comp.parent_id })
     row = bandTitle(row, name, PURINA_RED)
 
     // Componente REUTILIZABLE (Selector de especie, Banner CTA): se configura una sola
@@ -715,6 +721,14 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
       // Banda oscura: no es un componente, es el slot que agrupa a los de abajo.
       row = bandTitle(row, `${slotNo} — ${kind}${slots[ti]?.label || `Slot ${ti + 1}`}`, HEAD_BG)
       const kids = kidsOf(comp.id, ti, ti === slots.length - 1).filter((k) => !getComponent(k.component_key)?.matrixExclude)
+      // La hoja CMS lleva la MISMA banda, pero con el nombre del slot en el CMS
+      // ("First column"), que es lo que el editor ve en Drupal.
+      cmsOrder.push({
+        slot: true,
+        text: `${slotNo} — ${kind}${slots[ti]?.cmsLabel || slots[ti]?.label || `Slot ${ti + 1}`}`,
+        empty: !kids.length,
+        emptyNote: def.slots ? 'Esta columna no lleva componentes.' : 'Esta pestaña no lleva componentes.',
+      })
       if (!kids.length) {
         ws.mergeCells(row, 2, row, 3)
         const nc = ws.getCell(row, 2)
@@ -830,14 +844,28 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
     setH(row, estHeight(value))
     row++
   }
-  const band = (text, bg, size = 12) => {
+  const band = (text, bg, size = 12, indent = 1) => {
     ws.mergeCells(row, 2, row, 3)
     const c = ws.getCell(row, 2)
     c.value = text
     c.font = { bold: true, size, color: { argb: 'FFFFFFFF' } }
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } }
-    c.alignment = { vertical: 'middle', indent: 1 }
+    c.alignment = { vertical: 'middle', indent }
     setH(row, size > 10 ? 22 : 18)
+    row++
+  }
+  // Banda del SLOT de un contenedor (una columna del layout, una pestaña). No es un
+  // componente: es la ranura, y lo que viene abajo va ADENTRO de ella. Sin esto, en
+  // Drupal no se entiende que el "Content: Image" hay que agregarlo dentro de la
+  // primera columna del Layout Columns y no suelto en la pagina.
+  const slotBand = (text) => band(text, HEAD_BG, 11)
+  const slotEmpty = (text) => {
+    ws.mergeCells(row, 2, row, 3)
+    const c = ws.getCell(row, 2)
+    c.value = text
+    c.font = { italic: true, size: 10, color: { argb: MUTED } }
+    c.alignment = { vertical: 'middle', indent: 2 }
+    setH(row, 18)
     row++
   }
   const cardBand = (text) => {
@@ -876,13 +904,23 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
   const isSeo = (f) => /_alt$/.test(f?.key || '')
   const emptyFor = (f) => (isSeo(f) ? 'SEO Agency' : emptyLabelFor(f))
 
-  for (const comp of comps) {
+  for (const entry of comps) {
+    // Marca de SLOT: no es un componente, es la ranura del contenedor de arriba.
+    if (entry.slot) {
+      slotBand(entry.text)
+      if (entry.empty) slotEmpty(entry.emptyNote)
+      continue
+    }
+    const comp = entry.comp
     const def = getComponent(comp.component_key)
     if (def?.matrixExclude) continue
     const content = comp.content || {}
     const topRow = row
     // La banda ES el paragraph que hay que agregar en Drupal, con su nombre exacto.
-    band(`${labelByComp.get(comp.id) || def?.cmsName || def?.name || comp.component_key}`, PURINA_RED)
+    // Un bloque anidado se indenta y lleva la flecha: se agrega DENTRO del slot de
+    // arriba, no suelto en la pagina.
+    band(`${entry.nested ? '↳ ' : ''}${labelByComp.get(comp.id) || def?.cmsName || def?.name || comp.component_key}`,
+      PURINA_RED, 12, entry.nested ? 3 : 1)
 
     // TODOS los campos, incluidos los tecnicos (sin { excel: true }).
     // `cmsGroup` marca los que en Drupal viven adentro de un desplegable: se abre una
