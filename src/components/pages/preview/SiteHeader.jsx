@@ -92,18 +92,21 @@ function MegaMenu({ item, promos }) {
   )
 }
 
-export default function SiteHeader({ items, promos }) {
+// `forceOpen` = indice del megamenu que se dibuja ABIERTO sin hover. Lo usa el rig de
+// captura del export: html2canvas no puede pasar el mouse por arriba.
+export default function SiteHeader({ items, promos, forceOpen = null }) {
   const nav = items && items.length ? items : DEFAULT_MENU
   const cards = Array.isArray(promos) ? promos : DEFAULT_PROMOS
   const [petErr, setPetErr] = useState(false)
   // Cual megamenu esta abierto. Como en el sitio: se abre al pasar el mouse y se
   // mantiene mientras el mouse siga adentro del panel (por eso el onMouseLeave vive
   // en el header entero y no en cada item).
-  const [open, setOpen] = useState(null)
+  const [hover, setHover] = useState(null)
+  const open = forceOpen != null ? forceOpen : hover
   const openItem = open == null ? null : nav[open]
 
   return (
-    <header className={`cp-header${openItem ? ' cp-header--open' : ''}`} onMouseLeave={() => setOpen(null)}>
+    <header className={`cp-header${openItem ? ' cp-header--open' : ''}`} onMouseLeave={() => setHover(null)}>
       <div className="cp-header-inner">
         <img className="cp-header-logo-img" src={LOGO} alt="Purina" />
         <nav className="cp-header-nav">
@@ -111,7 +114,7 @@ export default function SiteHeader({ items, promos }) {
             <span
               key={i}
               className={`cp-header-navitem${open === i ? ' on' : ''}`}
-              onMouseEnter={() => setOpen(i)}
+              onMouseEnter={() => setHover(i)}
             >
               {n.label}
               <ChevronDown size={14} strokeWidth={2.5} className="cp-header-chev" />

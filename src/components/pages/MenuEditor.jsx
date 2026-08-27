@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown, Save, Database, Copy, Check,
   FileSpreadsheet, RotateCw,
@@ -75,6 +75,10 @@ export default function MenuEditor({ market: market0, onBack }) {
   const [saving, setSaving] = useState(false)
   const [errMsg, setErrMsg] = useState('')
   const [copied, setCopied] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  // Nodos del rig de captura: 'bar' = la barra sola (para el indice) y un
+  // indice por menu = ese megamenu abierto.
+  const rigs = useRef(new Map())
 
   const load = async (m) => {
     setLoading(true); setErrMsg('')
@@ -98,6 +102,13 @@ export default function MenuEditor({ market: market0, onBack }) {
     catch (e) { setErrMsg(e.message) } finally { setSaving(false) }
   }
 
+  async function runExport() {
+    setExporting(true); setErrMsg('')
+    try {
+      await exportSiteMenu(market, marketLabel, items, promos, (k) => rigs.current.get(k) || null)
+    } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
+  }
+
   const copySql = async () => {
     try { await navigator.clipboard.writeText(SETUP_SQL); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch {}
   }
@@ -117,9 +128,8 @@ export default function MenuEditor({ market: market0, onBack }) {
         <button className="btn btn-sm" style={{ marginLeft: 'auto' }} onClick={() => load(market)}>
           <RotateCw size={14} /> Recargar
         </button>
-        <button className="btn btn-sm" disabled={!items.length}
-          onClick={() => exportSiteMenu(market, marketLabel, items, promos)}>
-          <FileSpreadsheet size={14} /> Exportar a Excel
+        <button className="btn btn-sm" disabled={!items.length || exporting} onClick={runExport}>
+          <FileSpreadsheet size={14} /> {exporting ? 'Generando...' : 'Exportar a Excel'}
         </button>
         <button className="btn btn-primary btn-sm" disabled={!dirty || saving} onClick={save}>
           <Save size={14} /> {saving ? 'Guardando...' : dirty ? 'Guardar' : 'Guardado'}
@@ -156,6 +166,21 @@ export default function MenuEditor({ market: market0, onBack }) {
       {/* El header de verdad: se edita abajo y se prueba el hover acá arriba. */}
       <div className="pb-globaltag">Vista previa — pasá el mouse por un menú</div>
       <div className="pb-header-host mn-preview"><SiteHeader items={preview.items} promos={preview.promos} /></div>
+
+      {/* Rig de captura: el header con CADA megamenu abierto, uno por menu, montado
+          fuera de pantalla a ancho desktop. html2canvas no puede pasar el mouse por
+          arriba, asi que la unica forma de capturar un megamenu abierto es dibujarlo
+          abierto. `aria-hidden` porque no es contenido, es material para el Excel. */}
+      <div className="mn-rig" aria-hidden>
+        <div ref={(el) => { rigs.current.set('bar', el) }}>
+          <SiteHeader items={preview.items} promos={preview.promos} />
+        </div>
+        {items.map((_, i) => (
+          <div key={i} ref={(el) => { rigs.current.set(i, el) }}>
+            <SiteHeader items={preview.items} promos={preview.promos} forceOpen={i} />
+          </div>
+        ))}
+      </div>
 
       {loading ? (
         <div className="center-state"><div className="spinner" /></div>

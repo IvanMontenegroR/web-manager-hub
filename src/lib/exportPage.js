@@ -99,7 +99,10 @@ function imgPlaceholder(doc, url) {
 }
 
 // Captura un nodo del DOM a PNG (dataURL). Devuelve null si falla.
-async function snapshot(node, forceWidth) {
+// Se exporta porque el export del MENU necesita exactamente lo mismo (capturar el
+// megamenu abierto a ancho desktop) y duplicar toda la resolucion de imagenes seria
+// mantener dos veces el mismo problema.
+export async function snapshot(node, forceWidth) {
   if (!node) return null
   const w = forceWidth || node.offsetWidth || 800
   const prevWidth = node.style.width

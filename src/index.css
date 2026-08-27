@@ -2456,3 +2456,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 .mn-icon-pv { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; color: var(--purina); flex: none; }
 .mn-tools { display: inline-flex; gap: 2px; flex: none; }
 .mn-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; margin-bottom: 6px; }
+
+/* Rig de captura del menu: el header con cada megamenu abierto, montado fuera de
+   pantalla a ancho desktop para que html2canvas lo capture como se ve de verdad.
+   El megamenu pasa a estar EN FLUJO (no absolute) para que el nodo que se captura
+   tenga el alto de la barra + el panel; si no, se capturarian solo los 68px. */
+.mn-rig { position: fixed; left: -20000px; top: 0; width: 1180px; pointer-events: none; }
+.mn-rig .cp-header { display: block; height: auto; }
+.mn-rig .cp-header-inner { height: 68px; }
+.mn-rig .cp-mm { position: static; box-shadow: none; }

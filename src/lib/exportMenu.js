@@ -9,6 +9,7 @@
 // igual que en la lista.
 import ExcelJS from 'exceljs'
 import { PURINA_LOGO_B64 } from './purinaLogo'
+import { snapshot } from './exportPage'
 
 const SHEET = 'Menú'
 const PURINA_RED = 'FFED1C24'
@@ -47,10 +48,60 @@ function countLinks(item) {
   return (item.links || []).length
 }
 
-export async function exportSiteMenu(market, marketLabel, items, promos) {
+// Tamaño natural de un dataURL, para encajar la imagen sin deformarla.
+function loadSize(dataUrl) {
+  return new Promise((res) => {
+    const im = new Image()
+    im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight })
+    im.onerror = () => res(null)
+    im.src = dataUrl
+  })
+}
+
+// Ancho con el que se captura el header (desktop) y ancho al que entra en la hoja.
+const CAP_W = 1180
+const IMG_W = 660
+
+// `getNode(k)` devuelve el nodo del rig de captura: 'bar' = la barra sola, y un indice
+// por menu = ese megamenu ABIERTO. Sin `getNode` el Excel sale sin imagenes, que es lo
+// que pasaba antes: el mercado leia "1.1 — Grupo: Etapa de vida" sin saber que parte
+// del menu es.
+export async function exportSiteMenu(market, marketLabel, items, promos, getNode) {
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet(SHEET, { views: [{ showGridLines: false, state: 'frozen', ySplit: 3 }] })
-  ws.columns = [{ width: 2 }, { width: 6 }, { width: 34 }, { width: 46 }, { width: 22 }]
+  ws.columns = [
+    { width: 2 }, { width: 6 }, { width: 34 }, { width: 46 }, { width: 22 },
+    { width: 2 },   // F: separador
+    { width: 92 },  // G: la imagen del menu
+  ]
+
+  // Capturas: primero la barra (para el indice) y despues un megamenu por seccion.
+  const shot = async (k) => (getNode ? snapshot(getNode(k), CAP_W) : null)
+  const barShot = await shot('bar')
+  const shots = []
+  for (let i = 0; i < items.length; i++) shots.push(await shot(i))
+
+  // Ancla una captura a la derecha de la fila `atRow` y devuelve su alto en puntos,
+  // para poder reservar las filas que ocupa.
+  const place = async (dataUrl, atRow) => {
+    if (!dataUrl) return 0
+    const nat = (await loadSize(dataUrl)) || { w: CAP_W, h: 400 }
+    const w = IMG_W
+    const h = Math.round(nat.h * (w / nat.w))
+    const id = wb.addImage({ base64: dataUrl, extension: 'png' })
+    ws.addImage(id, { tl: { col: 6.15, row: atRow - 1 }, ext: { width: w, height: h }, editAs: 'oneCell' })
+    return h * 0.75
+  }
+  // Reserva filas vacias hasta que la seccion sea al menos tan alta como su imagen,
+  // asi la captura de una seccion no se monta sobre la de la siguiente.
+  const padTo = (from, to, hpt) => {
+    if (!hpt) return to
+    let area = 0
+    for (let r = from; r < to; r++) area += ws.getRow(r).height || 15
+    let r = to
+    while (area < hpt + 12) { ws.getRow(r).height = 16; area += 16; r++ }
+    return r
+  }
   const thin = { style: 'thin', color: { argb: BORDER } }
   const box = { top: thin, bottom: thin, left: thin, right: thin }
   const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
@@ -131,6 +182,8 @@ export async function exportSiteMenu(market, marketLabel, items, promos) {
   }
 
   // --- 1) La lista de menus principales (el indice) ---
+  // Al lado va la BARRA del header cerrada: el indice es la barra, y asi se ve.
+  const idxTop = row
   band('Menús principales', PURINA_RED)
   heads(['#', 'Nombre del menú', 'Cómo se ve', 'Submenús'])
   items.forEach((it, i) => {
@@ -141,10 +194,14 @@ export async function exportSiteMenu(market, marketLabel, items, promos) {
     setH(row, 18)
     row++
   })
+  row = padTo(idxTop, row, await place(barShot, idxTop))
   row++
 
   // --- 2) Una seccion por menu principal, con sus submenus ---
-  items.forEach((it, i) => {
+  // Cada una lleva a la derecha su megamenu ABIERTO: sin la imagen, "1.1 — Grupo:
+  // Etapa de vida" no le dice nada al mercado.
+  for (const [i, it] of items.entries()) {
+    const secTop = row
     band(`${i + 1}. ${it.label || 'Menú sin nombre'}`, PURINA_RED)
 
     if (it.search) {
@@ -217,8 +274,9 @@ export async function exportSiteMenu(market, marketLabel, items, promos) {
       row++
     }
 
+    row = padTo(secTop, row, await place(shots[i], secTop))
     row++
-  })
+  }
 
   // --- 3) Las tarjetas de la derecha (las mismas en todos los menus) ---
   band('Tarjetas de la derecha', PURINA_RED)
