@@ -4,7 +4,7 @@ import {
   FileSpreadsheet, RotateCw,
 } from 'lucide-react'
 import { CMS_ICONS } from '../../data/components'
-import { DEFAULT_MENU, DEFAULT_PROMOS, MENU_LAYOUTS, menuIconFor } from '../../data/siteMenu'
+import { DEFAULT_MENU, MENU_LAYOUTS, menuIconFor } from '../../data/siteMenu'
 import { fetchSiteMenu, saveSiteMenu, SETUP_SQL } from '../../lib/menuDb'
 import { PAGE_MARKETS, PAGE_MARKET_LABEL } from '../../lib/pagesDb'
 import SiteHeader from './preview/SiteHeader.jsx'
@@ -68,7 +68,6 @@ function LinkRow({ link, i, n, withIcon, onChange, onTool }) {
 export default function MenuEditor({ market: market0, onBack }) {
   const [market, setMarket] = useState(market0 || PAGE_MARKETS[0].code)
   const [items, setItems] = useState([])
-  const [promos, setPromos] = useState([])
   const [missing, setMissing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [dirty, setDirty] = useState(false)
@@ -86,7 +85,6 @@ export default function MenuEditor({ market: market0, onBack }) {
       const d = await fetchSiteMenu(m)
       setMissing(!!d.missing)
       setItems(d.items || [])
-      setPromos(d.promos || [])
       setDirty(false)
     } catch (e) { setErrMsg(e.message) } finally { setLoading(false) }
   }
@@ -94,18 +92,17 @@ export default function MenuEditor({ market: market0, onBack }) {
 
   const set = (fn) => { fn(); setDirty(true) }
   const setI = (next) => set(() => setItems(next))
-  const setP = (next) => set(() => setPromos(next))
 
   async function save() {
     setSaving(true); setErrMsg('')
-    try { await saveSiteMenu(market, { items, promos }); setDirty(false) }
+    try { await saveSiteMenu(market, { items }); setDirty(false) }
     catch (e) { setErrMsg(e.message) } finally { setSaving(false) }
   }
 
   async function runExport() {
     setExporting(true); setErrMsg('')
     try {
-      await exportSiteMenu(market, marketLabel, items, promos, (k) => rigs.current.get(k) || null)
+      await exportSiteMenu(market, marketLabel, items, (k) => rigs.current.get(k) || null)
     } catch (e) { setErrMsg(e.message) } finally { setExporting(false) }
   }
 
@@ -115,7 +112,7 @@ export default function MenuEditor({ market: market0, onBack }) {
 
   const empty = !loading && !items.length
   const marketLabel = PAGE_MARKET_LABEL[market] || market
-  const preview = useMemo(() => ({ items, promos }), [items, promos])
+  const preview = useMemo(() => ({ items }), [items])
 
   return (
     <div className="content">
@@ -165,7 +162,7 @@ export default function MenuEditor({ market: market0, onBack }) {
 
       {/* El header de verdad: se edita abajo y se prueba el hover acá arriba. */}
       <div className="pb-globaltag">Vista previa — pasá el mouse por un menú</div>
-      <div className="pb-header-host mn-preview"><SiteHeader items={preview.items} promos={preview.promos} /></div>
+      <div className="pb-header-host mn-preview"><SiteHeader items={preview.items} /></div>
 
       {/* Rig de captura: el header con CADA megamenu abierto, uno por menu, montado
           fuera de pantalla a ancho desktop. html2canvas no puede pasar el mouse por
@@ -173,11 +170,11 @@ export default function MenuEditor({ market: market0, onBack }) {
           abierto. `aria-hidden` porque no es contenido, es material para el Excel. */}
       <div className="mn-rig" aria-hidden>
         <div ref={(el) => { rigs.current.set('bar', el) }}>
-          <SiteHeader items={preview.items} promos={preview.promos} />
+          <SiteHeader items={preview.items} />
         </div>
         {items.map((_, i) => (
           <div key={i} ref={(el) => { rigs.current.set(i, el) }}>
-            <SiteHeader items={preview.items} promos={preview.promos} forceOpen={i} />
+            <SiteHeader items={preview.items} forceOpen={i} />
           </div>
         ))}
       </div>
@@ -189,7 +186,7 @@ export default function MenuEditor({ market: market0, onBack }) {
           <div className="dir-empty-t">Sin menú cargado en {marketLabel}</div>
           <p>Cargá el menú de referencia (el real de México) y editalo, o armalo desde cero.</p>
           <div className="dir-empty-actions">
-            <button className="btn btn-primary" onClick={() => { setI(DEFAULT_MENU); setP(DEFAULT_PROMOS) }}>
+            <button className="btn btn-primary" onClick={() => setI(DEFAULT_MENU)}>
               <Database size={15} /> Cargar menú de referencia
             </button>
             <button className="btn" onClick={() => setI([{ label: 'Nuevo menú', layout: 'links', links: [] }])}>
@@ -283,45 +280,56 @@ export default function MenuEditor({ market: market0, onBack }) {
                   <input className="control" placeholder="URL del pie" value={it.more?.url || ''}
                     onChange={(e) => upd({ more: { ...(it.more || {}), url: e.target.value } })} />
                 </div>
+
+                {/* Las tarjetas son de ESTE menú: cambiarlas acá no toca las de los
+                    otros. Pueden ser 0, 1 o 2; sin ninguna, el menú ocupa todo el ancho. */}
+                {(() => {
+                  const cards = it.promos || []
+                  const updC = (next) => upd({ promos: next })
+                  return (
+                    <div className="mn-cards">
+                      <div className="mn-cards-t">
+                        Tarjetas de la derecha
+                        <span className="hint" style={{ marginLeft: 8 }}>
+                          Solo de este menú. Podés dejar una sola o ninguna.
+                        </span>
+                      </div>
+                      {cards.map((p, ci) => (
+                        <div key={ci} className="mn-group">
+                          <div className="mn-group-head">
+                            <input className="control" placeholder="Título" value={p.title || ''}
+                              onChange={(e) => updC(put(cards, ci, { ...p, title: e.target.value }))} />
+                            <RowTools i={ci} n={cards.length}
+                              on={(a) => updC(a === 'del' ? cut(cards, ci) : move(cards, ci, a === 'up' ? -1 : 1))} />
+                          </div>
+                          <div className="mn-link">
+                            <input className="control" placeholder="Bajada" value={p.text || ''}
+                              onChange={(e) => updC(put(cards, ci, { ...p, text: e.target.value }))} />
+                            <input className="control" placeholder="URL" value={p.url || ''}
+                              onChange={(e) => updC(put(cards, ci, { ...p, url: e.target.value }))} />
+                          </div>
+                          <div className="mn-link">
+                            <input className="control" placeholder="Link de la imagen (la entrega el mercado)"
+                              value={p.image || ''}
+                              onChange={(e) => updC(put(cards, ci, { ...p, image: e.target.value }))} />
+                          </div>
+                        </div>
+                      ))}
+                      {cards.length < 2 && (
+                        <button className="btn btn-sm" onClick={() => updC([...cards, { title: '', text: '', image: '', url: '' }])}>
+                          <Plus size={13} /> Tarjeta
+                        </button>
+                      )}
+                    </div>
+                  )
+                })()}
               </section>
             )
           })}
 
-          <button className="btn" onClick={() => setI([...items, { label: 'Nuevo menú', layout: 'links', links: [] }])}>
+          <button className="btn" onClick={() => setI([...items, { label: 'Nuevo menú', layout: 'links', links: [], promos: [] }])}>
             <Plus size={14} /> Menú principal
           </button>
-
-          {/* Los promos son los mismos en TODOS los menus del mercado: se editan una vez.
-              Pueden ser 0, 1 o 2; sin ninguno, el menu ocupa todo el ancho. */}
-          <section className="mn-item">
-            <header className="mn-item-head">
-              <b>Tarjetas de la derecha</b>
-              <span className="hint" style={{ marginLeft: 8 }}>
-                Las mismas en todos los menús. Podés dejar una sola o ninguna.
-              </span>
-            </header>
-            {promos.map((p, i) => (
-              <div key={i} className="mn-group">
-                <div className="mn-group-head">
-                  <input className="control" placeholder="Título" value={p.title || ''}
-                    onChange={(e) => setP(put(promos, i, { ...p, title: e.target.value }))} />
-                  <RowTools i={i} n={promos.length}
-                    on={(a) => setP(a === 'del' ? cut(promos, i) : move(promos, i, a === 'up' ? -1 : 1))} />
-                </div>
-                <div className="mn-link">
-                  <input className="control" placeholder="Bajada" value={p.text || ''}
-                    onChange={(e) => setP(put(promos, i, { ...p, text: e.target.value }))} />
-                  <input className="control" placeholder="URL" value={p.url || ''}
-                    onChange={(e) => setP(put(promos, i, { ...p, url: e.target.value }))} />
-                </div>
-              </div>
-            ))}
-            {promos.length < 2 && (
-              <button className="btn btn-sm" onClick={() => setP([...promos, { title: '', text: '', image: '', url: '' }])}>
-                <Plus size={13} /> Tarjeta
-              </button>
-            )}
-          </section>
         </div>
       )}
     </div>

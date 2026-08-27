@@ -444,6 +444,25 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
   bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+- **Menu del sitio** (`site_menu`, `src/lib/menuDb.js`, `src/components/pages/MenuEditor.jsx`):
+  el header (`purina:header-main`) es config GLOBAL **por mercado**, no contenido de una pagina,
+  asi que se edita en su propia pantalla (boton "Menú del sitio" en el tracker de paginas) y no
+  adentro del builder. Una fila por mercado con todo el arbol en el jsonb `items`; normalizarlo
+  serian tres tablas y ninguna consulta que las aproveche. Cada menu principal tiene un `layout`
+  que sale de como se ve en el sitio — `boxes` (cajas con titulo + icono y su lista de links:
+  Alimento, que ademas lleva buscador, y Marcas) o `links` (lista plana con icono en dos
+  columnas, por FILAS: el 1 y el 2 son la primera fila) — y sus propias **tarjetas** (`promos`,
+  0/1/2; sin ninguna el menu ocupa todo el ancho). Las tarjetas son de CADA menu, no del header:
+  la columna `promos` de la tabla es legado y ya no se escribe, pero `withPromos` la baja a cada
+  item al leer, asi una fila sin migrar sigue funcionando. Los iconos son claves de `CMS_ICONS`;
+  el mockup las dibuja aproximadas con lucide mapeando SOLO las que sabemos (`menuIconFor`), igual
+  que `BG_TOKENS` con los colores. El export va en su PROPIO Excel (`src/lib/exportMenu.js`): el
+  menu es uno por mercado, metido en la matriz de cada pagina el mismo bloque se repetiria en
+  todos los archivos. Lleva el indice de menus principales y una seccion por cada uno con sus
+  submenus y sus tarjetas, y **al lado de cada seccion la imagen de ese megamenu abierto**: se
+  capturan de un rig fuera de pantalla (`.mn-rig`) donde el header se repite con `forceOpen`,
+  porque html2canvas no puede pasar el mouse por arriba, y ahi el panel va EN FLUJO (si no el
+  nodo mediria los 68px de la barra). Ver `sql/2026_site_menu.sql`.
 - **Control del dia** (`src/lib/analysis.js` -> `buildDailyControl`, panel `ControlPanel`): reemplaza al
   viejo panel de solapamientos (la deteccion de conflictos sigue viva para pintar el Gantt en rojo).
   Clasifica las tareas activas relativo a HOY en dias habiles usando SOLO fechas reales/comprometidas:

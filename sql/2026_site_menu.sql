@@ -26,3 +26,26 @@ create policy dummy_all_site_menu on public.site_menu
 
 -- El menu real de Mexico se sembro desde la app con "Cargar menu de referencia"
 -- (el contenido esta en src/data/siteMenu.js -> DEFAULT_MENU / DEFAULT_PROMOS).
+
+-- ---------------------------------------------------------------------------------
+-- Las TARJETAS pasan de ser del header a ser de CADA menu. Ya aplicado.
+-- Respaldo previo: backups.site_menu_backup_promos.
+--
+-- Nacieron como una lista global porque en las capturas los cinco megamenus de Mexico
+-- muestran las mismas dos. En el CMS cuelgan de cada menu: dos menus pueden mostrar
+-- tarjetas distintas. Se copian adentro de cada item; la columna `promos` queda como
+-- respaldo y la app ya no la escribe (ver `withPromos` en src/lib/menuDb.js, que hace
+-- la misma migracion en la LECTURA para una fila que no haya pasado por aca).
+create table if not exists backups.site_menu_backup_promos as
+select id, market, items, promos, now() as backed_up_at from public.site_menu;
+alter table backups.site_menu_backup_promos enable row level security;
+
+update public.site_menu m
+set items = (
+  select jsonb_agg(
+    case when it ? 'promos' then it else it || jsonb_build_object('promos', coalesce(m.promos, '[]'::jsonb)) end
+    order by ord)
+  from jsonb_array_elements(m.items) with ordinality as t(it, ord)
+),
+updated_at = now()
+where jsonb_array_length(coalesce(items, '[]'::jsonb)) > 0;

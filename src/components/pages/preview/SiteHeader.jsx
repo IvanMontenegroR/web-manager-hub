@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Search, ArrowRight } from 'lucide-react'
-import { DEFAULT_MENU, DEFAULT_PROMOS, menuIconFor } from '../../../data/siteMenu.js'
+import { DEFAULT_MENU, menuIconFor } from '../../../data/siteMenu.js'
 
 // Logo real de Purina (public/purina-logo.png). Su marco rojo se funde con la barra.
 const LOGO = (import.meta.env.BASE_URL || '/') + 'purina-logo.png'
@@ -11,14 +11,15 @@ const PETCLUB = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 // paginas del mercado. Es config global por mercado, no contenido por pagina: se edita
 // en su propia pantalla (MenuEditor) y aca solo se dibuja.
 //
-// `items` / `promos` vienen de `site_menu`. Sin nada cargado cae al menu de referencia,
-// asi el builder nunca se queda sin header.
+// `items` viene de `site_menu`, y cada menu trae adentro sus submenus y sus tarjetas.
+// Sin nada cargado cae al menu de referencia, asi el builder nunca se queda sin header.
 
 function Icon({ name, size = 17 }) {
   const C = menuIconFor(name)
   return <C size={size} strokeWidth={2} />
 }
 
+// Las tarjetas son de CADA menu: se dibujan las del menu abierto, no unas del header.
 function Promos({ promos }) {
   if (!promos.length) return null
   return (
@@ -40,7 +41,7 @@ function Promos({ promos }) {
 }
 
 // El panel que se abre debajo de la barra. Dos layouts, segun como se ve en el sitio.
-function MegaMenu({ item, promos }) {
+function MegaMenu({ item }) {
   const groups = item.groups || []
   const links = item.links || []
   return (
@@ -86,7 +87,7 @@ function MegaMenu({ item, promos }) {
             <span className="cp-mm-more">{item.more.label} <ArrowRight size={15} /></span>
           )}
         </div>
-        <Promos promos={promos} />
+        <Promos promos={item.promos || []} />
       </div>
     </div>
   )
@@ -94,9 +95,8 @@ function MegaMenu({ item, promos }) {
 
 // `forceOpen` = indice del megamenu que se dibuja ABIERTO sin hover. Lo usa el rig de
 // captura del export: html2canvas no puede pasar el mouse por arriba.
-export default function SiteHeader({ items, promos, forceOpen = null }) {
+export default function SiteHeader({ items, forceOpen = null }) {
   const nav = items && items.length ? items : DEFAULT_MENU
-  const cards = Array.isArray(promos) ? promos : DEFAULT_PROMOS
   const [petErr, setPetErr] = useState(false)
   // Cual megamenu esta abierto. Como en el sitio: se abre al pasar el mouse y se
   // mantiene mientras el mouse siga adentro del panel (por eso el onMouseLeave vive
@@ -131,7 +131,7 @@ export default function SiteHeader({ items, promos, forceOpen = null }) {
           </span>
         </div>
       </div>
-      {openItem && <MegaMenu item={openItem} promos={cards} />}
+      {openItem && <MegaMenu item={openItem} />}
     </header>
   )
 }

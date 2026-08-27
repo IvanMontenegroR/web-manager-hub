@@ -5,8 +5,9 @@
 // repetiria en todos los archivos y nadie sabria cual es el que hay que completar.
 //
 // Estructura: arriba la LISTA de los menus principales (el indice, para ver de una que
-// hay que llenar) y despues UNA SECCION por menu principal con sus submenus, numeradas
-// igual que en la lista.
+// hay que llenar) y despues UNA SECCION por menu principal con sus submenus y sus
+// tarjetas, numeradas igual que en la lista. Cada seccion lleva al lado la imagen de ESE
+// megamenu abierto, que es lo que hace entendible lo que se esta llenando.
 import ExcelJS from 'exceljs'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { snapshot } from './exportPage'
@@ -66,7 +67,7 @@ const IMG_W = 660
 // por menu = ese megamenu ABIERTO. Sin `getNode` el Excel sale sin imagenes, que es lo
 // que pasaba antes: el mercado leia "1.1 — Grupo: Etapa de vida" sin saber que parte
 // del menu es.
-export async function exportSiteMenu(market, marketLabel, items, promos, getNode) {
+export async function exportSiteMenu(market, marketLabel, items, getNode) {
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet(SHEET, { views: [{ showGridLines: false, state: 'frozen', ySplit: 3 }] })
   ws.columns = [
@@ -274,31 +275,35 @@ export async function exportSiteMenu(market, marketLabel, items, promos, getNode
       row++
     }
 
+    // Las tarjetas de la derecha de ESTE menu. Son suyas: dos menus pueden mostrar
+    // tarjetas distintas, por eso van adentro de la seccion y no en un bloque aparte.
+    const cards = it.promos || []
+    groupBand('Tarjetas de la derecha')
+    if (!cards.length) {
+      cell(2, '', { noTodo: true })
+      cell(3, 'Este menú no muestra tarjetas.', { noTodo: true })
+      cell(4, '', { noTodo: true }); cell(5, '', { noTodo: true })
+      row++
+    } else {
+      heads(['#', 'Título', 'Bajada', 'URL'])
+      cards.forEach((p, ci) => {
+        cell(2, `${i + 1}.T${ci + 1}`, { noTodo: true })
+        cell(3, p.title)
+        cell(4, p.text)
+        cell(5, p.url)
+        setH(row, 20)
+        row++
+        // La imagen la entrega el MERCADO: fila propia y en amarillo hasta que llegue.
+        cell(2, '', { noTodo: true })
+        cell(3, 'Imagen de la tarjeta', { noTodo: true, bold: true })
+        cell(4, p.image, { emptyAs: 'Pegá acá el link de la imagen' })
+        cell(5, '', { noTodo: true })
+        row++
+      })
+    }
+
     row = padTo(secTop, row, await place(shots[i], secTop))
     row++
-  }
-
-  // --- 3) Las tarjetas de la derecha (las mismas en todos los menus) ---
-  band('Tarjetas de la derecha', PURINA_RED)
-  ws.mergeCells(row, 2, row, 5)
-  const note = ws.getCell(row, 2)
-  note.value = promos.length
-    ? 'Son las mismas en todos los menús: se cargan una sola vez.'
-    : 'Este mercado no muestra tarjetas: el menú ocupa todo el ancho.'
-  note.font = { italic: true, size: 10, color: { argb: MUTED } }
-  note.alignment = { vertical: 'middle', indent: 1 }
-  setH(row, 18)
-  row++
-  if (promos.length) {
-    heads(['#', 'Título', 'Bajada', 'URL'])
-    promos.forEach((p, i) => {
-      cell(2, i + 1, { noTodo: true, bold: true })
-      cell(3, p.title)
-      cell(4, p.text)
-      cell(5, p.url)
-      setH(row, 20)
-      row++
-    })
   }
 
   await download(wb, `Menú del sitio - ${safeFileName(marketLabel || market)}.xlsx`)

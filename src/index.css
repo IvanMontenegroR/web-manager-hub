@@ -2465,3 +2465,6 @@ textarea.control { resize: vertical; min-height: 64px; }
 .mn-rig .cp-header { display: block; height: auto; }
 .mn-rig .cp-header-inner { height: 68px; }
 .mn-rig .cp-mm { position: static; box-shadow: none; }
+/* Tarjetas de la derecha, adentro de cada menu (son suyas, no del header). */
+.mn-cards { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
+.mn-cards-t { font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }

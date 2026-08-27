@@ -27,11 +27,11 @@ export default function PageBuilder({ page, onBack }) {
   const [activeTab, setActiveTab] = useState({}) // { [id del bloque de pestañas]: pestaña abierta }
   // Menu del sitio del MERCADO de esta pagina. Es config global (se edita aparte), aca
   // solo se lee para que el header del canvas y la captura del Excel sean los de verdad.
-  const [menu, setMenu] = useState({ items: null, promos: null })
+  const [menu, setMenu] = useState({ items: null })
   useEffect(() => {
     let alive = true
     fetchSiteMenu(page.market || 'MX')
-      .then((d) => { if (alive) setMenu({ items: d.items, promos: d.promos }) })
+      .then((d) => { if (alive) setMenu({ items: d.items }) })
       .catch(() => { /* sin menu cargado, el header cae al de referencia */ })
     return () => { alive = false }
   }, [page.market])
@@ -299,7 +299,7 @@ export default function PageBuilder({ page, onBack }) {
         <div className={`pb-canvas${editMode ? '' : ' preview'}`}>
           {/* Header global — presente en todas las paginas (no editable, va en el export). */}
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
-          <div ref={headerRef} className="pb-header-host"><SiteHeader items={menu.items} promos={menu.promos} /></div>
+          <div ref={headerRef} className="pb-header-host"><SiteHeader items={menu.items} /></div>
 
           {/* Container: replica el gutter lateral de la pagina real. El fondo sale del
               color PRIMARIO de la marca (Pro Plan negro, Fancy Feast blanco). */}

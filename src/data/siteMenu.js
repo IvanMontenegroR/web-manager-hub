@@ -12,8 +12,9 @@
 //               (Alimento, Marcas). Alimento ademas lleva el buscador arriba.
 //   - `links` : lista plana de links con icono, en dos columnas
 //               (Red Purina, Servicios, Conoce Purina).
-// A la derecha van los PROMOS, que son los mismos en todos los menus del mercado. Son
-// 0, 1 o 2: si no hay ninguno, el menu ocupa todo el ancho.
+// A la derecha de CADA menu van sus PROMOS (las tarjetas). Son de cada menu, no del
+// header: dos menus pueden mostrar tarjetas distintas. Son 0, 1 o 2 — si un menu no
+// tiene ninguna, ese menu ocupa todo el ancho.
 
 import {
   PawPrint, Bone, Cat, Dog, Newspaper, MessagesSquare, MessageCircle,
@@ -50,14 +51,20 @@ export function menuIconFor(key) {
 
 const L = (label, icon) => (icon ? { label, url: '', icon } : { label, url: '' })
 
-// Contenido inicial de un mercado nuevo: el menu real de Mexico.
-// OJO: en el sitio real el primer promo dice "Tittle banner" con doble T y su bajada es
+// Tarjetas con las que arranca un menu nuevo. Hoy los cinco de Mexico muestran las
+// mismas dos, pero cada uno tiene las suyas: cambiarlas en Alimento no toca Marcas.
+// OJO: en el sitio real la primera dice "Tittle banner" con doble T y su bajada es
 // texto de relleno ("Elementum lectus purus..."). Se siembra tal cual: el mockup muestra
 // lo que hay, no lo que deberia decir.
 export const DEFAULT_PROMOS = [
   { title: 'Tittle banner', text: 'Elementum lectus purus at suspendisse habitasse adouoa kolaq.', image: '', url: '' },
   { title: 'Newsletter Purina®', text: 'Suscríbete para recibir el mejor contenido para ti y para tu mascota.', image: '', url: '' },
 ]
+
+// `promos` va DENTRO de cada menu. Se clona con `map` y no se comparte la referencia:
+// si los cinco apuntaran al mismo array, editar las tarjetas de Alimento cambiaria las
+// de Marcas, que es justo lo que este modelo evita.
+const P = () => DEFAULT_PROMOS.map((x) => ({ ...x }))
 
 export const DEFAULT_MENU = [
   {
@@ -69,6 +76,7 @@ export const DEFAULT_MENU = [
       { title: 'Tipo de alimento', icon: 'pet_supplies', links: [L('Seco'), L('Húmedo'), L('Snacks'), L('Suplementos')] },
     ],
     more: { label: 'Conocer productos', url: '' },
+    promos: P(),
   },
   {
     label: 'Marcas',
@@ -78,11 +86,13 @@ export const DEFAULT_MENU = [
       { title: 'Perros', icon: 'dog', links: [L('Pro Plan®'), L('Dog Chow®'), L('Beneful®'), L('Purina One®')] },
     ],
     more: { label: 'Ver todas', url: '' },
+    promos: P(),
   },
   {
     label: 'Red Purina®',
     layout: 'links',
     links: [L('Lo más leído', 'newsmode'), L('Comunidad Purina®', 'forum')],
+    promos: P(),
   },
   {
     label: 'Servicios',
@@ -94,6 +104,7 @@ export const DEFAULT_MENU = [
       L('Breeders', 'genetics'), L('Hospedaje', 'hotel'),
       L('Tiendas', 'storefront'), L('WhatsApp', 'whatsapp'),
     ],
+    promos: P(),
   },
   {
     label: 'Conoce Purina®',
@@ -104,5 +115,6 @@ export const DEFAULT_MENU = [
       L('Profesionales', 'stethoscope'), L('Contacto', 'mail'),
       L('Club Purina®', 'workspace_premium'),
     ],
+    promos: P(),
   },
 ]
