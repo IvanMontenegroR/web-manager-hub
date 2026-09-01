@@ -40,14 +40,24 @@ select '45cad0b0-1a03-4058-a23f-1535ccc5de71'::uuid, x.k, null, null, x.so, x.c 
  ('tabs', 2, jsonb_build_object('tabs', jsonb_build_array(
     jsonb_build_object('label','Preparación'),
     jsonb_build_object('label','Cuidados')))),
- -- El cierre azul va FUERA de las pestañas: se ve igual en las dos.
- ('banner', 3, jsonb_build_object(
-    'type','title-description',
+ -- El cierre va FUERA de las pestañas: se ve igual en las dos. Es el mismo bloque de
+ -- TEXTO con fondo que cierra Purina Adopta y "Cómo apoyamos a refugios" (nacio como
+ -- `banner`, ver el update de abajo).
+ ('text', 3, jsonb_build_object(
     'title','Descubre a nuestros adoptables para encontrar a tu alma gemela y tomar su correa roja',
     'title_tag','h2',
     'ctas', jsonb_build_array(
       jsonb_build_object('label','Perros'),
-      jsonb_build_object('label','Gatos'))))
+      jsonb_build_object('label','Gatos')),
+    -- OJO: en el sitio esta banda es AZUL, no roja. No se pudo mapear ese azul a un
+    -- token de `BG_COLORS` (son Pantones: Secondary 541, 2294, 268...) y inventarlo
+    -- seria peor que no ponerlo, asi que va con el mismo Primary Red que los otros
+    -- cierres hasta saber cual es. Cambiar el token es una linea.
+    'background_color', 'Primary Red',
+    'text_color',       'Primary White',
+    'text_align',       'text_align_center',
+    'style_button',     'style_btn_secondary',
+    'spacing',          'space_section_md'))
 ) as x(k, so, c);
 
 -- Los hijos de las pestañas cuelgan del `tabs` (id ccd20a89-...), con tab_index 0
