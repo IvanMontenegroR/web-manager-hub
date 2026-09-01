@@ -2263,6 +2263,12 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-exporting .pb-block--kid { border-color: transparent; }
 .pb-exporting .pb-block--kid > .pb-block-bar,
 .pb-exporting .pb-addhere { display: none; }
+/* El acordeon usa <details>: el navegador esconde el cuerpo de los CERRADOS por su
+   cuenta, sin un `display:none` en el CSS. html2canvas no implementa esa semantica y
+   los dibujaba TODOS, uno encima del otro — la captura salia con los nueve cuerpos
+   pisandose. Aca se lo decimos explicito, y la imagen queda como se ve en pantalla:
+   el primero abierto y el resto cerrados. */
+.pb-exporting .cp-acc-item:not([open]) .cp-acc-body { display: none !important; }
 
 /* ===== Contenedores de COLUMNAS (layout_columns_*) =====
    Mismo mecanismo que las pestañas, pero los slots se ven todos a la vez. Los anchos

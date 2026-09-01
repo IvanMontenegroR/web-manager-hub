@@ -305,7 +305,12 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
   // a ese ancho MENOS un margen, para que SIEMPRE quede dentro del marco (no se sale).
   const E_PX = Math.round(E_W * 7 + 5)
   const IMG_MAX_W = E_PX - 34
-  const IMG_MAX_H = 320
+  // Tope de ALTO holgado a proposito: lo que manda es el ancho de la columna. Con 320
+  // un bloque alto (un contenedor de pestañas, los nueve acordeones) entraba por el
+  // alto y se dibujaba al 20% del tamaño real — ilegible. Ahora esos casos entran por
+  // el ANCHO, o sea lo mas grandes que la columna permite, y se reservan las filas que
+  // necesiten. El tope solo evita que algo patologico haga una imagen infinita.
+  const IMG_MAX_H = 900
 
   const setH = (r, h) => { ws.getRow(r).height = Math.max(ws.getRow(r).height || 0, h) }
 
