@@ -90,3 +90,43 @@ select '45cad0b0-1a03-4058-a23f-1535ccc5de71'::uuid, x.k, null, null, x.so, x.c 
 -- OJO con el conteo de las cards: el carrusel muestra 3 por vista y la ULTIMA vista se
 -- corre para atras para llenarse, asi que en las capturas hay tarjetas repetidas entre
 -- la anteultima y la ultima. Perros son 6 (2 vistas) y Gatos 7 (3 vistas), no 6 y 9.
+
+-- ---------------------------------------------------------------------------------
+-- SE CAEN LAS PESTAÑAS: la pagina pasa a ser una sola columna, con Preparación arriba
+-- y Cuidados abajo. Ya aplicado. Respaldo: backups.page_components_backup_tenencia.
+--
+-- OJO con el ORDEN de las tres sentencias: `page_components.parent_id` es
+-- ON DELETE CASCADE, asi que borrar el contenedor primero se llevaria puesto todo su
+-- contenido. Primero se sacan los hijos, y recien despues se borra el `tabs` ya vacio.
+create table if not exists backups.page_components_backup_tenencia as
+select id, page_id, component_key, content, parent_id, tab_index, sort_order, now() as backed_up_at
+from public.page_components where page_id = '45cad0b0-1a03-4058-a23f-1535ccc5de71';
+alter table backups.page_components_backup_tenencia enable row level security;
+
+-- Preparación (tab 0) ocupa los sort_order 2..5 y Cuidados (tab 1) los 6..8, cada uno
+-- conservando su orden interno.
+update public.page_components c
+set parent_id = null,
+    tab_index = null,
+    sort_order = 2 + (c.tab_index * 4) + (c.sort_order - 1)
+where c.parent_id = 'ccd20a89-fd06-415c-9aba-6d45af4e069f';
+
+update public.page_components set sort_order = 9
+where id = '3c5c1a92-e44a-42df-a8a7-53dac32c2479';
+
+delete from public.page_components where id = 'ccd20a89-fd06-415c-9aba-6d45af4e069f';
+
+-- Estructura final, toda suelta:
+--   0 breadcrumb
+--   1 banner          ¿Estás pensando en adoptar?
+--   2 text            ¿Qué considerar antes de adoptar?
+--   3 card_grid       Paso 1 (3 cards apaisadas)
+--   4 text            Paso 2: Checklist de preparación
+--   5 accordion_grid  los 9 items del checklist
+--   6 text            Aprende sobre los cuidados de perros y gatos
+--   7 card_grid       Perros (6 cards apaisadas)
+--   8 card_grid       Gatos  (7 cards apaisadas)
+--   9 text            cierre con fondo
+--
+-- Los nombres de las pestañas ("Preparación" / "Cuidados") desaparecen: cada seccion
+-- ya se presenta con su propio titulo, asi que no hacen falta como encabezado.
