@@ -72,13 +72,20 @@ select '45cad0b0-1a03-4058-a23f-1535ccc5de71'::uuid, x.k, null, null, x.so, x.c 
 --   2 card_grid       "Paso 1: ¡Prepara todo...", slider-background-default-card, 3 cards
 --   3 text            "Paso 2: Checklist de preparación" + su bajada
 --   4 accordion_grid  los 9 items del checklist, en rich text (negritas y viñetas)
---   5 articles_carousel "Conoce más en nuestro blog", 4 articulos
 --
 -- Pestaña 1 (Cuidados):
 --   1 text            "Aprende sobre los cuidados de perros y gatos" + su bajada
---   2 card_grid       "Perros", slider-default-card, 6 cards
---   3 card_grid       "Gatos",  slider-default-card, 7 cards
---   4 articles_carousel "Conoce más en nuestro blog", 4 articulos
+--   2 card_grid       "Perros", slider-background-default-card, 6 cards
+--   3 card_grid       "Gatos",  slider-background-default-card, 7 cards
+--
+-- Los dos carruseles de Cuidados van APAISADOS, no verticales: en el CMS eso es el
+-- `view_mode`, no otro componente. `slider-default-card` son las cards verticales;
+-- `slider-background-default-card` son las apaisadas, con el titulo arriba y la
+-- descripcion abajo sobre la imagen (ver CG_TO_CMT en ComponentPreview).
+--
+-- El carrusel del blog ("Conoce más en nuestro blog") se saco de las dos pestañas:
+-- muestra articulos distintos en cada una, o sea que es un View automatico del CMS y
+-- no contenido que el mercado cargue.
 --
 -- OJO con el conteo de las cards: el carrusel muestra 3 por vista y la ULTIMA vista se
 -- corre para atras para llenarse, asi que en las capturas hay tarjetas repetidas entre
