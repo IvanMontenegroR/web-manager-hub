@@ -877,9 +877,11 @@ export const COMPONENTS = [
     specKey: 'view_mode',
     defaultType: CARD_GRID_DEFAULT_MODE,
     specsByType: {
-      // Medidas PENDIENTES de confirmar por modo de vista; la unica que tenemos
-      // documentada es la de las cards verticales (Brand cards del Design Guidelines).
+      // Medidas por modo de vista. Las que faltan siguen PENDIENTES de confirmar.
       'slider-default-card': [{ ratio: 'Desktop 1:1.5 - Mobile 1:1.5', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
+      // Apaisadas. Sin `ratio`: desktop y mobile NO comparten proporcion (1.73 contra
+      // 1.20), asi que poner una sola seria mentir. Van las medidas y listo.
+      'slider-background-default-card': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
     },
   },

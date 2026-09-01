@@ -802,7 +802,9 @@ const RENDERERS = {
         { title: 'Innovación', description: 'Impulsar innovaciones que ayuden a las mascotas a prosperar.' },
         { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
       ])
-    const dim = v === CMT_VERTICAL ? '822×1230px' : '3:2'
+    // Medida que muestra el placeholder de imagen. La vertical y la apaisada tienen
+    // las suyas; las de icono y las numeradas no llevan imagen, asi que da igual.
+    const dim = v === CMT_VERTICAL ? '822×1230px' : '485×280px'
     const style = {}
     if (icon) {
       // El relleno de la card sale del "Card - Background Color" del CMS, cuyo default
