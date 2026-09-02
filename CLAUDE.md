@@ -409,6 +409,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Card del Card Grid NO es uno de esos: ahi el estilo se ELIGE, es lo que decide si las cards salen
   verticales o apaisadas. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
   tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
+  El form replica los desplegables de Drupal y son de DOS clases: los de `group` (Avanzado, Classy) son
+  config tecnica y van CERRADOS; el de `cmsGroup` (`G_OPTIONAL` = "Optional fields", donde viven titulo,
+  subtitulo, sus HTML tag, sus Title/SubTitle Size y el CTA) va ABIERTO — es contenido que se carga todo
+  el tiempo y la seccion esta para mostrar DONDE buscarlo en el CMS, no para esconderlo. Los dos se
+  dibujan en el LUGAR de su primer campo, porque hay componentes (el Card Grid) con campos sueltos
+  despues del desplegable.
   **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. El formato se ESCRIBE con una notacion tipo
   markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,
   un salto de linea = `<br>` y una linea en blanco = parrafo nuevo — asi el dato viaja entero en un solo

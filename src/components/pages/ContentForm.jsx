@@ -247,26 +247,37 @@ export default function ContentForm({ component, draft, onChange, brandSecondary
       {f.hint && <div className="hint">{f.hint}</div>}
     </div>
   )
-  // Los campos con `group` (ej. "Avanzado (CMS)") se juntan en una seccion plegable al
-  // final, para que la config tecnica del CMS no tape los campos de contenido.
+  // El form replica los DESPLEGABLES del formulario de Drupal, que son de dos clases:
+  //   - `group` ("Avanzado (CMS)", "Classy"): config tecnica, va CERRADA para que no
+  //     tape los campos de contenido.
+  //   - `cmsGroup` ("Optional fields"): ahi adentro estan el titulo, el subtitulo, sus
+  //     HTML tag y sus Title/SubTitle Size, y el CTA. Va ABIERTA: son campos de
+  //     contenido que se cargan todo el tiempo, la seccion esta para que se vea DONDE
+  //     hay que buscarlos en el CMS, no para esconderlos.
+  // Los grupos se dibujan EN EL LUGAR de su primer campo, no al final: hay componentes
+  // (el Card Grid) que tienen campos sueltos despues del desplegable.
   const fields = visibleFields(component, draft)
-  const plain = fields.filter((f) => !f.group)
-  const groups = []
-  for (const f of fields.filter((f) => f.group)) {
-    const g = groups.find((x) => x.name === f.group) || (groups.push({ name: f.group, fields: [] }), groups[groups.length - 1])
-    g.fields.push(f)
+  const nameOf = (f) => f.group || f.cmsGroup || null
+  const blocks = []
+  const seen = new Set()
+  for (const f of fields) {
+    const g = nameOf(f)
+    if (!g) { blocks.push({ field: f }); continue }
+    if (seen.has(g)) continue
+    seen.add(g)
+    blocks.push({ name: g, open: !f.group, fields: fields.filter((x) => nameOf(x) === g) })
   }
   return (
     <div className="cf">
       <SpecsPanel specs={getSpecs(component, draft)} />
       {/* Campos filtrados por tipo (ej. Banner Type oculta/muestra campos). */}
-      {plain.map(one)}
-      {groups.map((g) => {
-        const cargados = g.fields.filter((f) => draft[f.key] !== undefined && draft[f.key] !== '' && draft[f.key] !== false).length
+      {blocks.map((b) => {
+        if (b.field) return one(b.field)
+        const cargados = b.fields.filter((f) => draft[f.key] !== undefined && draft[f.key] !== '' && draft[f.key] !== false).length
         return (
-          <details key={g.name} className="cf-group">
-            <summary>{g.name}{cargados > 0 && <span className="cf-group-n">{cargados}</span>}</summary>
-            {g.fields.map(one)}
+          <details key={b.name} className="cf-group" open={b.open}>
+            <summary>{b.name}{cargados > 0 && <span className="cf-group-n">{cargados}</span>}</summary>
+            {b.fields.map(one)}
           </details>
         )
       })}
