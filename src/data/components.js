@@ -125,8 +125,12 @@ export const BG_POSITIONS = [
   { value: 'bg_position_boxed', label: 'Boxed' },
   { value: 'bg_position_full_width', label: 'Full Width' },
 ]
+// El "Card - Style Card" es lo que decide la FORMA de la card. No sale del modo de
+// vista: `slider-default-card` dibuja verticales por defecto y APAISADAS cuando este
+// estilo es Square.
+export const CARD_SQUARE = 'card_grid_default_square'
 export const CARD_STYLES = [
-  { value: 'card_grid_default_square', label: 'Card Grid Default Square' },
+  { value: CARD_SQUARE, label: 'Card Grid Default Square' },
   { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },
 ]
 export const CARD_TITLE_POSITIONS = [
@@ -871,20 +875,26 @@ export const COMPONENTS = [
       ...classy('background_color', 'background_card_color', 'background_degrade_color',
         'text_color', 'title_card_color', 'text_card_color', 'icon_card_color',
         'background_position',
-        // El estilo de card no es libre: lo pide el layout. Las apaisadas van en
-        // "Card Grid Default Square".
-        { key: 'card_style_card', defaultByType: { 'slider-background-default-card': 'card_grid_default_square' } },
+        // El estilo de card se ELIGE: es lo que define si las cards salen verticales o
+        // apaisadas. No tiene un default por modo de vista.
+        'card_style_card',
         'card_title_position', 'position_arrows',
         'text_align', 'spacing'),
     ],
     specKey: 'view_mode',
     defaultType: CARD_GRID_DEFAULT_MODE,
+    // La medida no sale solo del modo de vista: `slider-default-card` con el Card -
+    // Style Card en Square son APAISADAS y llevan otra imagen que las verticales. Por
+    // eso la variante se resuelve con los DOS campos.
+    specVariant: (c) => (c?.view_mode === 'slider-default-card' && c?.card_style_card === CARD_SQUARE
+      ? 'slider-default-card-square'
+      : c?.view_mode),
     specsByType: {
-      // Medidas por modo de vista. Las que faltan siguen PENDIENTES de confirmar.
+      // Medidas por variante. Las que faltan siguen PENDIENTES de confirmar.
       'slider-default-card': [{ ratio: 'Desktop 1:1.5 - Mobile 1:1.5', desktop: '822×1230px', mobile: '670×1004px', max: '500kb', format: 'JPG / PNG' }],
       // Apaisadas. Sin `ratio`: desktop y mobile NO comparten proporcion (1.73 contra
       // 1.20), asi que poner una sola seria mentir. Van las medidas y listo.
-      'slider-background-default-card': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
+      'slider-default-card-square': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
     },
   },
@@ -1093,8 +1103,11 @@ export function getComponent(key) {
 // como atajos, asi se elige por como se ve y no por el nombre tecnico del modo — pero
 // lo que se guarda es siempre un `card_grid` con su `view_mode`, o sea exactamente lo
 // que existe en el CMS.
-const CG = (name, view_mode, help) => ({
-  key: `card_grid:${view_mode}`, name, help, component_key: 'card_grid', content: { view_mode },
+// `extra` es para los atajos que ademas fijan otro campo: la FORMA de las cards no sale
+// solo del modo de vista, tambien del Card - Style Card.
+const CG = (name, view_mode, help, extra = {}) => ({
+  key: `card_grid:${view_mode}${extra.card_style_card ? `:${extra.card_style_card}` : ''}`,
+  name, help, component_key: 'card_grid', content: { view_mode, ...extra },
   category: 'Carruseles',
 })
 export const PALETTE = [
@@ -1103,10 +1116,11 @@ export const PALETTE = [
     container: c.container, category: c.category || 'Otros',
   })),
   CG('Mosaico', 'grid-cards', 'Card Grid en modo Grid Cards: la grilla que alterna imagen y caja de contenido. Máximo 3 cards.'),
-  CG('Cards verticales', 'slider-default-card', 'Card Grid en modo Slider Cards Default: cards altas con la imagen a sangre, título arriba y texto abajo (la de Compromiso Purina®).'),
+  CG('Cards verticales', 'slider-default-card', 'Card Grid en modo Slider Cards Default con el Card - Style Card en Vertical: cards altas con la imagen a sangre, título y texto abajo (la de Compromiso Purina®).'),
   CG('Cards numeradas', 'cards-numbers', 'Card Grid en modo Cards Numbers: cards blancas sin imagen, con el número en un chip arriba. El número sale del orden de las cards.'),
   CG('Cards con icono', 'slider-card-icons-square', 'Card Grid en modo Card Icon Square: cards cuadradas con icono sobre una banda de color.'),
-  CG('Cards apaisadas', 'slider-background-default-card', 'Card Grid en modo Slider Background Cards Default: cards apaisadas con la imagen de fondo y el texto agrupado abajo. Máximo 3 cards.'),
+  CG('Cards apaisadas', 'slider-default-card', 'El MISMO modo que las verticales (Slider Cards Default) pero con el Card - Style Card en "Card Grid Default Square": la card es apaisada, con la imagen arriba y el título y el texto abajo. La forma la decide el estilo de card, no el modo de vista.', { card_style_card: CARD_SQUARE }),
+  CG('Cards con imagen de fondo', 'slider-background-default-card', 'Card Grid en modo Slider Background Cards Default: el texto va SOBRE la imagen, que hace de fondo de la card. Máximo 3 cards.'),
   CG('Card Grid (elegir modo)', '', 'El componente crudo: lo agregás y elegís cualquiera de los 11 modos de vista adentro.'),
 ]
 
@@ -1122,7 +1136,13 @@ export function componentTitle(def, content = {}) {
   if (!def) return ''
   if (def.key === 'card_grid') {
     const mode = content.view_mode || CARD_GRID_DEFAULT_MODE
-    const shortcut = PALETTE.find((p) => p.component_key === 'card_grid' && p.content?.view_mode === mode)
+    // Gana el atajo MAS ESPECIFICO: dos atajos comparten `slider-default-card` y solo
+    // se diferencian por el Card - Style Card, asi que el que ademas lo fija tiene que
+    // ganarle al que mira nada mas el modo de vista.
+    const shortcut = PALETTE
+      .filter((p) => p.component_key === 'card_grid' && p.content?.view_mode === mode
+        && (!p.content.card_style_card || p.content.card_style_card === content.card_style_card))
+      .sort((a, b) => Object.keys(b.content).length - Object.keys(a.content).length)[0]
     if (shortcut) return shortcut.name
     return `${def.name} — ${labelOf(CARD_GRID_MODES, mode) || mode}`
   }
@@ -1161,7 +1181,10 @@ export function getSpecs(component, content) {
   if (component.specsByType) {
     // Sin variante cargada vale la variante POR DEFECTO (la que renderiza el preview),
     // no "ninguna": si no, un componente recien agregado se quedaria sin medidas.
-    const key = content?.[component.specKey || 'type'] || component.defaultType
+    // `specVariant` gana cuando la medida depende de MAS de un campo (ej. el Card Grid,
+    // donde la forma sale del modo de vista Y del estilo de card).
+    const key = (component.specVariant ? component.specVariant(content) : content?.[component.specKey || 'type'])
+      || component.defaultType
     return component.specsByType[key] || []
   }
   // Una spec puede ser condicional (ej. la imagen izquierda opcional del carrusel de

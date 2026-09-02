@@ -9,7 +9,7 @@ import { Fragment } from 'react'
 import { parseInline, parseRich } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
-  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS,
+  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
   BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_FULL_BOX, BT_BRAND_HERO,
 } from '../../../data/components'
 
@@ -802,9 +802,10 @@ const RENDERERS = {
         { title: 'Innovación', description: 'Impulsar innovaciones que ayuden a las mascotas a prosperar.' },
         { title: 'Sostenibilidad', description: 'Contribuir al cuidado del planeta.' },
       ])
-    // Medida que muestra el placeholder de imagen. La vertical y la apaisada tienen
-    // las suyas; las de icono y las numeradas no llevan imagen, asi que da igual.
-    const dim = v === CMT_VERTICAL ? '822×1230px' : '485×280px'
+    // Medida del placeholder. Viene de arriba cuando la sabe quien llama (el Card Grid
+    // la resuelve con `getSpecs`, que mira el modo de vista Y el estilo de card); si no,
+    // la de las verticales, que es el unico caso que este render conoce por si solo.
+    const dim = c.dim || '822×1230px'
     const style = {}
     if (icon) {
       // El relleno de la card sale del "Card - Background Color" del CMS, cuyo default
@@ -1145,8 +1146,16 @@ const RENDERERS = {
     // El resto de los modos son variantes del carrusel de cards: se adapta el contenido
     // a la forma que ese render ya sabe dibujar. Los modos que todavia no tienen mockup
     // propio caen a las cards verticales, que es el layout mas neutro.
+    //
+    // OJO: `slider-default-card` NO define la forma por si solo. Con el Card - Style
+    // Card en Square las cards son APAISADAS: misma estructura (imagen arriba, titulo y
+    // texto abajo) pero con otra proporcion y otra medida de imagen.
+    // PENDIENTE: la square y la vertical se dibujan igual (imagen arriba, titulo y
+    // texto abajo). Lo que cambia es la PROPORCION de la card, que el mockup todavia no
+    // distingue; la medida de la imagen si sale bien, por `getSpecs`.
     return RENDERERS.commitment_carousel({
       type: CG_TO_CMT[mode] || CMT_VERTICAL,
+      dim: getSpecs(getComponent('card_grid'), c)[0]?.desktop,
       title: c.title,
       subtitle: c.subtitle,
       color: tok(c.background_color),
