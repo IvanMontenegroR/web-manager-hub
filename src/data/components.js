@@ -510,16 +510,19 @@ export const COMPONENTS = [
     name: 'Texto',
     cmsName: 'Content: Text',
     category: 'Contenido',
-    help: 'El paragraph `c_text` del CMS. El cuerpo es el único campo propio; título y subtítulo (cada uno con su HTML tag) son opcionales. El CTA es REPETIBLE: se pueden cargar varios botones, cada uno con su destino, rel y ARIA label. La alineación, los colores, el estilo del botón y el layout de columnas salen del panel Classy.',
+    help: 'El paragraph `c_text` del CMS. El cuerpo (Description) es el único campo suelto del formulario; el título, el subtítulo (cada uno con su HTML tag) y el CTA viven dentro del desplegable "Optional fields". El CTA es REPETIBLE: se pueden cargar varios botones, cada uno con su destino, rel y ARIA label. La alineación, los colores, el estilo del botón y el layout de columnas salen del panel Classy.',
     fields: [
+      // El cuerpo (`field_c_text`) es el UNICO campo suelto del formulario, y va primero.
       { key: 'body', label: 'Cuerpo', cmsLabel: 'Description', type: 'textarea' },
-      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
-      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS },
-      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text' },
-      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
+      // Todo lo de abajo vive dentro del desplegable "Optional fields" de Drupal: el
+      // titulo, el subtitulo (cada uno con su HTML tag) y el CTA.
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtítulo', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
       // `field_c_link` es multivaluado en el CMS ("Añadir otro elemento"): un bloque de
       // texto puede llevar mas de un boton.
-      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', item: [
+      { key: 'ctas', label: 'Botones', cmsLabel: 'CTA', type: 'list', itemLabel: 'Botón', cmsGroup: G_OPTIONAL, item: [
         { key: 'label', label: 'Texto', cmsLabel: 'Texto del enlace', type: 'text' },
         { key: 'url', label: 'Link', cmsLabel: 'URL', type: 'url' },
         { key: 'target', label: 'Destino', cmsLabel: 'Destino', type: 'select', cms: true, options: LINK_TARGETS },
