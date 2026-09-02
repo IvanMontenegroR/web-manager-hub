@@ -2415,6 +2415,18 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cg-name { font-weight: 700; font-size: 15px; color: #1b252e; }
 .cg-cat { font-size: 10.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: #fff; background: var(--purina, #ED1C24); padding: 2px 9px; border-radius: 9999px; }
 .cg-key { font-size: 12px; color: var(--muted, #868e99); font-family: ui-monospace, monospace; margin-left: auto; }
+/* Medidas de imagen en la galeria: las mismas que bajan al Excel. Van entre la cabecera
+   del componente y su mockup. El `margin-top` compensa el -24px de `.cg-head`, que esta
+   para pegar la cabecera al bloque de abajo. */
+.cg-specs { display: flex; flex-direction: column; gap: 5px; margin: 28px 0 -22px; }
+.cg-spec { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cg-spec-label { font-size: 11px; font-weight: 700; color: #1b252e; }
+.cg-spec-ratio { font-size: 11px; font-style: italic; color: var(--purina, #ED1C24); }
+.cg-chip { font-size: 11px; color: #1b252e; background: #f1f3f5; border: 1px solid var(--border, #e4e7eb); border-radius: 9999px; padding: 2px 9px; white-space: nowrap; }
+.cg-chip b { font-weight: 700; color: var(--muted, #868e99); }
+/* En la fila de banners cada tipo lleva su medida debajo de su etiqueta, sin el tironeo
+   de la cabecera. */
+.cg-banneritem .cg-specs { margin: 0 0 10px; }
 .cf-check { width: 18px; height: 18px; accent-color: var(--purina, #ED1C24); cursor: pointer; }
 /* Banner en la galeria: todos los tipos en fila (Main Hero primero, resto a la derecha). */
 .cg-bannerrow { display: flex; flex-wrap: nowrap; gap: 26px; overflow-x: auto; padding-bottom: 10px; align-items: flex-start; }

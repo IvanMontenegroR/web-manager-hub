@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState } from 'react'
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react'
-import { COMPONENTS, getComponent, sampleContent, optValue, optLabel } from '../../data/components'
+import { COMPONENTS, getComponent, sampleContent, optValue, optLabel, getSpecs } from '../../data/components'
 import { exportPageMatrix } from '../../lib/exportPage'
 import ComponentPreview from './preview/ComponentPreview.jsx'
 
@@ -32,6 +32,34 @@ const CATEGORIES = (() => {
   }
   return order.map((category) => ({ category, defs: map.get(category) }))
 })()
+
+// Medidas de imagen del componente, las MISMAS que bajan al Excel (`getSpecs`): ratio,
+// desktop, mobile, peso maximo y formato. Se muestran en pantalla porque la galeria es
+// justamente lo que se valida con la agencia y con el mercado, y hasta ahora habia que
+// exportar el Excel para verlas.
+//
+// Salen del CONTENIDO de ejemplo, igual que en el export: un componente que resuelve su
+// medida por variante (el Card Grid por modo de vista, la Imagen por Image position)
+// muestra la de la variante que se esta dibujando. Sin medida declarada no se dibuja
+// nada: hay componentes sin imagen y otros cuya medida todavia no conocemos.
+function Specs({ def, content }) {
+  const specs = getSpecs(def, content)
+  if (!specs.length) return null
+  return (
+    <div className="cg-specs">
+      {specs.map((s, i) => (
+        <div key={i} className="cg-spec">
+          {s.label && <span className="cg-spec-label">{s.label}</span>}
+          {s.ratio && <span className="cg-spec-ratio">{s.ratio}</span>}
+          {s.desktop && <span className="cg-chip"><b>Desktop</b> {s.desktop}</span>}
+          {s.mobile && <span className="cg-chip"><b>Mobile</b> {s.mobile}</span>}
+          {s.max && <span className="cg-chip"><b>Max</b> {s.max}</span>}
+          {s.format && <span className="cg-chip"><b>Formato</b> {s.format}</span>}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // "Todos los componentes": galeria que renderiza CADA componente del catalogo con
 // CONTENIDO DE EJEMPLO (al menos 2 items en las listas). Se puede EXPORTAR a Excel
@@ -94,7 +122,7 @@ export default function ComponentsGallery({ onBack }) {
           {CATEGORIES.map(({ category, defs }) => (
             <Fragment key={category}>
               {category === LABELED_CATEGORY && <div className="cg-section">{category}</div>}
-              {defs.map((def) => def.key === 'banner' ? (
+              {defs.map((def) => { const content = def.key === 'banner' ? null : sampleContent(def); return def.key === 'banner' ? (
                 <Fragment key="banner">
                   <div className="cg-head">
                     <span className="cg-name">{def.name}</span>
@@ -106,6 +134,8 @@ export default function ComponentsGallery({ onBack }) {
                     {bannerVariants.map((v) => (
                       <div key={v.id} className="cg-banneritem">
                         <div className="cg-banner-type">{v.label}</div>
+                        {/* Cada Banner Type tiene su propia medida. */}
+                        <Specs def={def} content={v.content} />
                         <div className="pb-block pb-block--banner" ref={setNode(v.id)}>
                           <ComponentPreview componentKey="banner" content={v.content} />
                         </div>
@@ -120,11 +150,12 @@ export default function ComponentsGallery({ onBack }) {
                     <span className="cg-cat">{def.category}</span>
                     <code className="cg-key">{def.key}</code>
                   </div>
+                  <Specs def={def} content={content} />
                   <div className={`pb-block pb-block--${def.key}`} ref={setNode(def.key)}>
-                    <ComponentPreview componentKey={def.key} content={sampleContent(def)} />
+                    <ComponentPreview componentKey={def.key} content={content} />
                   </div>
                 </Fragment>
-              ))}
+              ) })}
             </Fragment>
           ))}
         </div>

@@ -665,7 +665,7 @@ export const COMPONENTS = [
         { key: 'highlighted', label: 'Destacada (roja)', type: 'select', options: ['No', 'Si'] },
       ] },
     ],
-    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9 · Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 16:9 - Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'articles_carousel',
@@ -758,7 +758,7 @@ export const COMPONENTS = [
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todas' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
     ],
-    specs: [{ label: 'Imagen de marca', ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Imagen de marca', ratio: 'Desktop 4:3 - Mobile 4:3', desktop: '822×616px', mobile: '822×616px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'product_list',
@@ -806,7 +806,7 @@ export const COMPONENTS = [
         { key: 'description', label: 'Descripción', type: 'textarea' },
       ] },
     ],
-    specs: [{ ratio: 'Desktop 4:3 · Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ ratio: 'Desktop 4:3 - Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'commitment_carousel',
@@ -970,7 +970,7 @@ export const COMPONENTS = [
         { key: 'url', label: 'Link', type: 'url' },
       ] },
     ],
-    specs: [{ label: 'Fondo', ratio: 'Desktop 1:1 · Mobile ~9:16 (aprox., para adecuar a la cantidad de texto de la descripción)', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Fondo', ratio: 'Desktop 1:1 - Mobile ~9:16 (aprox., para adecuar a la cantidad de texto de la descripción)', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
   },
   {
     key: 'text_wide_image',
@@ -1115,7 +1115,7 @@ export const COMPONENTS = [
         { key: 'cta_url', label: 'Botón — link', type: 'url' },
       ] },
     ],
-    specs: [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.38:1 · Mobile ~2:3', desktop: '768×557px', mobile: '702×1048px', max: '500kb', format: 'JPG / PNG' }],
+    specs: [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.38:1 - Mobile ~2:3', desktop: '768×557px', mobile: '702×1048px', max: '500kb', format: 'JPG / PNG' }],
   },
 ]
 
