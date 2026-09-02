@@ -293,6 +293,19 @@ export const G_SEARCH = 'Search AI (CMS)'
 // del bloque es lo primero que se carga, esconderlo en un plegable seria peor.
 export const G_OPTIONAL = 'Optional fields'
 
+// Como se llama cada desplegable en el FORMULARIO de Drupal. Los de `group` llevan
+// "(CMS)" en la app para que se note que son config del CMS y no contenido; en la hoja
+// CMS va el nombre pelado, que es el que el editor ve en pantalla.
+const CMS_GROUP_NAME = { [G_ADV]: 'Avanzado', [G_CLASSY]: 'Classy', [G_SEARCH]: 'Search AI' }
+// El desplegable donde vive un campo, para la hoja CMS. `cmsGroup` y `group` son lo
+// mismo desde el lado del editor — los dos son secciones plegables del formulario —, y
+// la hoja tiene que marcar los DOS: sin la banda de "Avanzado", lo que viene despues de
+// "Optional fields" parece seguir adentro de ese desplegable.
+export function cmsGroupOf(field) {
+  const g = field?.cmsGroup || field?.group
+  return g ? (CMS_GROUP_NAME[g] || g) : null
+}
+
 // ---- Los dos grupos que Drupal repite en TODOS los paragraphs -------------------
 // "Avanzado" y "Classy" no son campos de UN componente: el CMS se los agrega a cada
 // paragraph. Antes estaban copiados a mano adentro de card_grid, asi que cada

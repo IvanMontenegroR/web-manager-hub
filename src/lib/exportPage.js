@@ -9,7 +9,7 @@ import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
   excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle, effectiveValue,
-  maxLengthOf,
+  maxLengthOf, cmsGroupOf,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
@@ -950,13 +950,13 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
       PURINA_RED, 12, entry.nested ? 3 : 1)
 
     // TODOS los campos, incluidos los tecnicos (sin { excel: true }).
-    // `cmsGroup` marca los que en Drupal viven adentro de un desplegable: se abre una
-    // banda al entrar y se cierra sola al salir. Si el grupo quedo sin campos visibles
-    // (los filtro la variante), la banda no se dibuja: se emite recien con el primero.
+    // Los desplegables de Drupal (`cmsGroup` y `group`, ver `cmsGroupOf`) abren una banda
+    // al entrar y se cierran solos al salir. Si el grupo quedo sin campos visibles (los
+    // filtro la variante), la banda no se dibuja: se emite recien con el primero.
     let openGroup = null
     for (const f of visibleFields(def, content)) {
-      if ((f.cmsGroup || null) !== openGroup) {
-        openGroup = f.cmsGroup || null
+      if (cmsGroupOf(f) !== openGroup) {
+        openGroup = cmsGroupOf(f)
         if (openGroup) groupBand(openGroup)
       }
       if (f.type === 'list') {

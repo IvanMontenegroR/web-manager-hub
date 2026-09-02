@@ -414,7 +414,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   subtitulo, sus HTML tag, sus Title/SubTitle Size y el CTA) va ABIERTO — es contenido que se carga todo
   el tiempo y la seccion esta para mostrar DONDE buscarlo en el CMS, no para esconderlo. Los dos se
   dibujan en el LUGAR de su primer campo, porque hay componentes (el Card Grid) con campos sueltos
-  despues del desplegable.
+  despues del desplegable. En la **hoja CMS** los tres se dibujan como banda (`cmsGroupOf`, con el nombre
+  pelado que ve el editor: "Avanzado", "Classy"): marcar solo el de `cmsGroup` hacia que todo lo que venia
+  despues de "Optional fields" pareciera seguir adentro de ese desplegable.
   **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. El formato se ESCRIBE con una notacion tipo
   markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,
   un salto de linea = `<br>` y una linea en blanco = parrafo nuevo — asi el dato viaja entero en un solo
