@@ -8,9 +8,11 @@
 -- es `slider-default-card` con el Card - Style Card en "Card Grid Default Square": la
 -- FORMA de la card la decide el estilo, no el modo de vista.
 --
--- El texto: la card apaisada tiene alto fijo y el sitio corta la descripcion a los 111
--- caracteres (asi se ve hoy en produccion, cortada en "...tales como sus dimension"). Se
--- reescribio para que entre entera. Ver CARD_SQUARE_DESC_MAX en src/data/components.js.
+-- El texto: la card apaisada tiene alto fijo y la descripcion de 133 caracteres se ve
+-- cortada en produccion ("...tales como sus dimension"). Se reescribio mas corta, sin
+-- perder ninguna idea. OJO: el limite NO es de 111 — la card de al lado tiene 128 y se
+-- ve entera. Lo que corta es el ALTO, no la cantidad de caracteres.
+-- Ver CARD_SQUARE_DESC_MAX en src/data/components.js.
 
 create table if not exists backups.page_components_backup_paso1_apaisadas as
 select id, page_id, component_key, content, parent_id, tab_index, sort_order, now() as backed_up_at
@@ -23,11 +25,12 @@ set content = jsonb_set(
       '{card_style_card}', '"card_grid_default_square"'::jsonb)
 where id = 'd9ce2259-7a46-4bf6-8510-9cd51dcdccba';
 
--- Card 1 "Espacio en el hogar": 133 -> 111 caracteres, sin perder ninguna idea.
+-- Card 1 "Espacio en el hogar": 133 -> 121 caracteres. Se cambia "dependiente de" por
+-- "segun" y "tales como" por "como"; el resto del texto del mercado queda igual.
 update public.page_components
 set content = jsonb_set(content, '{items,0,description}',
-      to_jsonb('Cada mascota necesita un lugar y tamaño distintos según sus características, como sus dimensiones o su energía.'::text))
+      to_jsonb('Cada mascota necesita un lugar y tamaño diferentes según sus características, como sus dimensiones o su nivel de energía.'::text))
 where id = 'd9ce2259-7a46-4bf6-8510-9cd51dcdccba';
 
--- PENDIENTE: la card 2 ("Tiempo disponible") tiene 128 caracteres y tambien se corta.
--- No se toca sin confirmar el texto — es copy del mercado, no una config.
+-- Las otras dos cards del bloque quedan como estan: 128 y 109 caracteres, las dos se ven
+-- enteras en el sitio.

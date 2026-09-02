@@ -130,10 +130,17 @@ export const BG_POSITIONS = [
 // estilo es Square.
 export const CARD_SQUARE = 'card_grid_default_square'
 // La card apaisada tiene ALTO FIJO y el texto va debajo del titulo, en un espacio que no
-// crece: pasado cierto largo la descripcion se corta o desborda. El limite sale de medir
-// la card mas larga que el sitio real muestra entera, no de una regla del CMS (Drupal no
-// valida largos aca), asi que se avisa y no se recorta a la fuerza lo ya cargado.
-export const CARD_SQUARE_DESC_MAX = 111
+// crece: pasado cierto largo la descripcion se corta.
+//
+// El numero es la descripcion MAS LARGA que vimos renderizar ENTERA en el sitio real
+// ("Tiempo disponible" en Tenencia Responsable). No es una regla del CMS — Drupal no
+// valida largos aca — ni un limite exacto: lo que corta de verdad es el ALTO, y cuantos
+// caracteres entran en esas lineas depende de como caigan las palabras. La prueba es que
+// una descripcion de 133 se ve cortada a los 111 y esta de 128 se ve completa. O sea que
+// es una GUIA: un texto de palabras largas puede cortarse antes.
+//
+// Por eso se avisa y no se recorta lo ya cargado.
+export const CARD_SQUARE_DESC_MAX = 128
 export const CARD_STYLES = [
   { value: CARD_SQUARE, label: 'Card Grid Default Square' },
   { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },

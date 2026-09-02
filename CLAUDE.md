@@ -314,8 +314,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
      campos (`specVariant`), y por eso las apaisadas tienen **limite de caracteres** en la descripcion
-     (`CARD_SQUARE_DESC_MAX` = 111): esa card tiene alto fijo y el sitio corta el texto ahi — el numero
-     sale de medir donde corta produccion, no de una validacion de Drupal. El limite se declara como
+     (`CARD_SQUARE_DESC_MAX` = 128): esa card tiene alto fijo y el sitio corta el texto que no entra. El
+     numero es la descripcion mas larga que vimos renderizar ENTERA en produccion, no una validacion de
+     Drupal ni un limite exacto: lo que corta es el ALTO, y cuantos caracteres entran depende de como
+     caigan las palabras (una de 133 se ve cortada a los 111 y esta de 128 se ve completa). Es una GUIA.
+     El limite se declara como
      `maxLength` del campo (numero o funcion del contenido del COMPONENTE, resuelto con `maxLengthOf`),
      se muestra como contador en el form (`.cf-count`, rojo si se paso, sin recortar: un texto que ya
      estaba largo tiene que poder verse entero para acortarlo) y baja a la hoja **Contenido** pegado a
