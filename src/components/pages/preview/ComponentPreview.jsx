@@ -119,11 +119,15 @@ function videoPreview(url) {
 }
 
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
-// Texto OPCIONAL de una seccion (titulo/subtitulo que la pagina real puede no tener):
-//   sin cargar (undefined/null) -> se muestra el texto de ejemplo, para que el mockup
-//     de un componente recien agregado no quede vacio;
-//   cargado vacio ('') -> NO se renderiza, porque se vacio a proposito.
-const OPT = (v, fallback) => (v === '' ? null : T(v, fallback))
+// Texto OPCIONAL de una seccion (titulo/subtitulo que la pagina real puede no tener).
+// Sin cargar NO se renderiza — nunca se inventa una frase de ejemplo.
+//
+// Antes caia a un texto de muestra para que un componente recien agregado no quedara
+// vacio, y era un error: esas frases estaban escritas como copy de Purina de verdad
+// ("La nutrición de las mascotas es clave...") y se colaban en la imagen del Excel. El
+// mercado no tiene como saber que ese texto no es parte de la pagina. Un campo que
+// nadie cargo tiene que VERSE vacio.
+const OPT = (v) => (v && String(v).trim() ? v : null)
 const list = (v) => (Array.isArray(v) ? v : [])
 
 // CTAs de un bloque de texto. En el CMS el link es multivaluado (`ctas`); las paginas
@@ -525,7 +529,7 @@ const RENDERERS = {
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title">{T(c.title, 'Marcas Purina®')}</div>
-            {OPT(c.subtitle, 'La variedad que buscas, con la confianza de Purina®') && <div className="cp-brands-sub">{OPT(c.subtitle, 'La variedad que buscas, con la confianza de Purina®')}</div>}
+            {OPT(c.subtitle) && <div className="cp-brands-sub">{OPT(c.subtitle)}</div>}
           </div>
           <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
@@ -574,7 +578,7 @@ const RENDERERS = {
         <div className="cp-brands-head">
           <div>
             <div className="cp-brands-title"><span className="cp-spark">✦</span> {T(c.title, 'Nuestro Blog')}</div>
-            {OPT(c.subtitle, 'Artículos pensados para ti y tu mascota') && <div className="cp-brands-sub">{OPT(c.subtitle, 'Artículos pensados para ti y tu mascota')}</div>}
+            {OPT(c.subtitle) && <div className="cp-brands-sub">{OPT(c.subtitle)}</div>}
           </div>
           <div className="cp-plist-arrows"><span className="cp-plist-arrow" onClick={scrollCarousel(-1)}>‹</span><span className="cp-plist-arrow" onClick={scrollCarousel(1)}>›</span></div>
         </div>
@@ -735,8 +739,8 @@ const RENDERERS = {
     return (
       <div className="cp-tl">
         <div className="cp-tl-head">
-          {OPT(c.title, 'Historia Purina®') && <div className="cp-tl-h1">{OPT(c.title, 'Historia Purina®')}</div>}
-          {OPT(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.') && <div className="cp-tl-sub">{OPT(c.subtitle, 'Ayudamos a los dueños de mascotas a asegurar que sus adorables perros y gatos disfruten de una vida más larga, saludable y feliz.')}</div>}
+          {OPT(c.title) && <div className="cp-tl-h1">{OPT(c.title)}</div>}
+          {OPT(c.subtitle) && <div className="cp-tl-sub">{OPT(c.subtitle)}</div>}
         </div>
         <div className="cp-tl-track">
           {arr.map((it, i) => (
@@ -830,8 +834,8 @@ const RENDERERS = {
       >
         <div className="cp-brands-head">
           <div>
-            <div className="cp-brands-title">{T(c.title, 'Compromiso Purina®')}</div>
-            {OPT(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.') && <div className="cp-brands-sub">{OPT(c.subtitle, 'La nutrición de las mascotas es clave, pero hacemos más por ellas, sus dueños y el planeta. Este es nuestro Compromiso Purina®.')}</div>}
+            {OPT(c.title) && <div className="cp-brands-title">{c.title}</div>}
+            {OPT(c.subtitle) && <div className="cp-brands-sub">{OPT(c.subtitle)}</div>}
           </div>
           <div className="cp-plist-arrows">
             <span className="cp-plist-arrow" onClick={scrollCmt(-1)}>‹</span>
@@ -930,7 +934,7 @@ const RENDERERS = {
         </div>
         <div className="cp-gcards-head">
           <div className="cp-gcards-title">{T(c.title, 'Dorem ipsum dolor sit')}</div>
-          {OPT(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-gcards-sub">{OPT(c.subtitle, 'Corem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
+          {OPT(c.subtitle) && <div className="cp-gcards-sub">{OPT(c.subtitle)}</div>}
         </div>
         <div className="cp-gcards-row">
           {arr.map((card, i) => (
@@ -968,7 +972,7 @@ const RENDERERS = {
       <div className="cp-imgfeat" style={{ '--acc': acc }}>
         <div className="cp-imgfeat-head">
           <div className="cp-imgfeat-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
-          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-imgfeat-sub">{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</div>}
+          {OPT(c.subtitle) && <div className="cp-imgfeat-sub">{OPT(c.subtitle)}</div>}
         </div>
         <Img src={c.image} aspect="16/9" dim="2160×1080px" className="cp-imgfeat-img" />
         <div className="cp-imgfeat-row">
@@ -1007,8 +1011,8 @@ const RENDERERS = {
     const active = Math.min(Math.max(0, ctx?.activeTab || 0), items.length - 1)
     const cur = items[active] || {}
     const acc = ctx?.brandAccent || ACCENT
-    const title = OPT(c.title, null)
-    const subtitle = OPT(c.subtitle, null)
+    const title = OPT(c.title)
+    const subtitle = OPT(c.subtitle)
     return (
       <div className="cp-tabs" style={{ '--tab-acc': acc }}>
         {(title || subtitle) && (
@@ -1041,13 +1045,13 @@ const RENDERERS = {
   external_video: (c) => (
     <div className="cp-vid">
       {/* Cabecera opcional: si no hay ni titulo ni subtitulo no ocupa lugar. */}
-      {(OPT(c.title, 'External Video') || OPT(c.subtitle, 'Un texto corto que acompaña al video.')) && (
+      {(OPT(c.title) || OPT(c.subtitle)) && (
         <div className="cp-vid-head">
-          {OPT(c.title, 'External Video') && (
-            <div className="cp-vid-title">{OPT(c.title, 'External Video')}</div>
+          {OPT(c.title) && (
+            <div className="cp-vid-title">{OPT(c.title)}</div>
           )}
-          {OPT(c.subtitle, 'Un texto corto que acompaña al video.') && (
-            <p className="cp-vid-sub"><RT>{OPT(c.subtitle, 'Un texto corto que acompaña al video.')}</RT></p>
+          {OPT(c.subtitle) && (
+            <p className="cp-vid-sub"><RT>{OPT(c.subtitle)}</RT></p>
           )}
         </div>
       )}
@@ -1087,7 +1091,7 @@ const RENDERERS = {
       <div className="cp-mosaic" style={{ '--acc': acc }}>
         <div className="cp-mosaic-head">
           <div className="cp-mosaic-title">{T(c.title, 'Worem ipsum dolor sit amet, consectetur adipiscing elit')}</div>
-          {OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.') && <div className="cp-mosaic-sub"><RT>{OPT(c.subtitle, 'Vorem ipsum dolor sit amet, consectetur adipiscing elit.')}</RT></div>}
+          {OPT(c.subtitle) && <div className="cp-mosaic-sub"><RT>{OPT(c.subtitle)}</RT></div>}
         </div>
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
@@ -1123,10 +1127,10 @@ const RENDERERS = {
       const boxTextStyle = ctx?.brandPrimary ? { color: readableOn(acc, ctx.brandPrimary) } : undefined
       return (
         <div className="cp-mosaic" style={{ '--acc': acc }}>
-          {(OPT(c.title, null) || OPT(c.subtitle, null)) && (
+          {(OPT(c.title) || OPT(c.subtitle)) && (
             <div className="cp-mosaic-head">
-              {OPT(c.title, null) && <div className="cp-mosaic-title">{c.title}</div>}
-              {OPT(c.subtitle, null) && <div className="cp-mosaic-sub"><RT>{c.subtitle}</RT></div>}
+              {OPT(c.title) && <div className="cp-mosaic-title">{c.title}</div>}
+              {OPT(c.subtitle) && <div className="cp-mosaic-sub"><RT>{c.subtitle}</RT></div>}
             </div>
           )}
           <div className="cp-mosaic-grid">
@@ -1184,7 +1188,7 @@ const RENDERERS = {
     ]
     return (
       <div className="cp-stats" style={{ '--acc': acc }}>
-        {OPT(c.title, 'Forem ipsum dolor sit amet.') && <div className="cp-stats-title">{OPT(c.title, 'Forem ipsum dolor sit amet.')}</div>}
+        {OPT(c.title) && <div className="cp-stats-title">{OPT(c.title)}</div>}
         <div className="cp-stats-row">
           {arr.map((s, i) => (
             <div key={i} className="cp-stat">
