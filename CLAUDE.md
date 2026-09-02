@@ -310,6 +310,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      descripcion, subtitulo+tag, imagen desktop y mobile **cada una con su alt**, CTA con texto/URL/destino,
      background color, section ID y CSS por card), el bloque **Avanzado** (See more, visibilidad Gato/Perro,
      section ID, CSS) y los 13 selects de **Classy**. Ver `sql/2026_card_grid_migracion.sql`.
+     La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
+     `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
+     `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
+     campos (`specVariant`), y por eso las apaisadas tienen **limite de caracteres** en la descripcion
+     (`CARD_SQUARE_DESC_MAX` = 111): esa card tiene alto fijo y el sitio corta el texto ahi — el numero
+     sale de medir donde corta produccion, no de una validacion de Drupal. El limite se declara como
+     `maxLength` del campo (numero o funcion del contenido del COMPONENTE, resuelto con `maxLengthOf`),
+     se muestra como contador en el form (`.cf-count`, rojo si se paso, sin recortar: un texto que ya
+     estaba largo tiene que poder verse entero para acortarlo) y baja a la hoja **Contenido** pegado a
+     la etiqueta ("Descripción (máx. 111 caracteres)"), que es la unica forma de que el mercado se
+     entere. La hoja CMS no lo lleva: ahi las etiquetas son las de Drupal, textuales.
      La **PALETA** (`PALETTE`) es una lista aparte de `COMPONENTS`: sus items pueden ser un componente o un
      ATAJO con contenido inicial. Los modos de vista entran como atajos ("Mosaico", "Cards verticales"...)
      para elegir por como se ve, pero lo que se guarda es siempre `card_grid` + `view_mode`.
@@ -385,10 +396,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Custom CSS) y `classy(...keys)` (los selects de estilo, sacados de `CLASSY_FIELDS`) — y cada componente
   los engancha pidiendo los que le aplican, EN EL ORDEN en que los muestra el formulario de Drupal, que es
   el orden de la hoja CMS. Un item de `classy()` puede ser `{ key, ...overrides }` para que un componente
-  le agregue algo suyo sin tocar la definicion compartida: asi el Card Grid declara `defaultByType` en el
-  Card - Style Card, porque en las cards apaisadas ese estilo no se elige, lo pide el layout
-  ("Card Grid Default Square"). `effectiveValue(f, content)` resuelve eso y es lo que baja a la hoja CMS,
-  para que el editor lea el valor que hay que poner y no un "Default" que no corresponde. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
+  le agregue algo suyo sin tocar la definicion compartida (ej. un `defaultByType` para un valor que la
+  variante pide y no se elige). `effectiveValue(f, content)` resuelve eso y es lo que baja a la hoja CMS,
+  para que el editor lea el valor que hay que poner y no un "Default" que no corresponde. El Card - Style
+  Card del Card Grid NO es uno de esos: ahi el estilo se ELIGE, es lo que decide si las cards salen
+  verticales o apaisadas. Antes estaban copiados a mano adentro de `card_grid` y cada componente nuevo
   tenia que repetir veinte campos. Los dos caen en grupos plegables del form (`G_ADV` / `G_CLASSY`).
   **RICH TEXT**: todo campo de CUERPO es rich text en el CMS. El formato se ESCRIBE con una notacion tipo
   markdown DENTRO del mismo texto — `**negrita**`, `_cursiva_`, `[texto](link)`, `- ` / `1. ` para listas,

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2, Bold, Italic, List, ListOrdered } from 'lucide-react'
-import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel } from '../../data/components'
+import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel, maxLengthOf } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
 import { wrapLink, wrapMark, toggleList } from '../../lib/richText'
 
@@ -14,7 +14,7 @@ import { wrapLink, wrapMark, toggleList } from '../../lib/richText'
 // tooltips — al escuchar el teclado se aceptan las dos.
 const MOD = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.platform || navigator.userAgent || '') ? '⌘' : 'Ctrl+'
 
-function TextAreaField({ f, value, onChange }) {
+function TextAreaField({ f, value, onChange, max }) {
   const ref = useRef(null)
   // Aplica una transformacion sobre la SELECCION y devuelve el foco donde corresponde,
   // para poder seguir escribiendo sin volver a hacer click.
@@ -67,6 +67,12 @@ function TextAreaField({ f, value, onChange }) {
           onClick={numbers}><ListOrdered size={13} /></button>
         <button type="button" className="ic-btn" title={`Marcar el texto seleccionado como enlace (${MOD}K)`}
           onClick={addLink}><Link2 size={13} /></button>
+        {/* Campo con largo acotado por el DISEÑO (ej. la descripcion de una card
+            apaisada). Se avisa, no se recorta: un texto ya cargado que se pasa se tiene
+            que poder ver entero para acortarlo a mano. */}
+        {max && <span className={`cf-count${(value || '').length > max ? ' over' : ''}`}>
+          {(value || '').length} / {max}
+        </span>}
       </div>
     </div>
   )
@@ -116,9 +122,9 @@ function ImageField({ value, onChange }) {
 
 // Formulario de contenido de un componente: renderiza un input por campo del
 // catalogo (incluye campos 'list' repetibles). Es controlado: draft + onChange(key,val).
-function Field({ f, value, onChange, brandSecondary }) {
+function Field({ f, value, onChange, brandSecondary, max }) {
   if (f.type === 'textarea') {
-    return <TextAreaField f={f} value={value} onChange={onChange} />
+    return <TextAreaField f={f} value={value} onChange={onChange} max={max} />
   }
   if (f.type === 'select') {
     // Las opciones pueden ser strings o { value, label } (se guarda el valor de maquina
@@ -192,7 +198,8 @@ function ListField({ f, value, onChange, content }) {
             {subs.map((sf) => (
               <div key={sf.key} className="field cf-sub">
                 <label>{sf.label}</label>
-                <Field f={sf} value={it[sf.key]} onChange={(v) => setItem(i, sf.key, v)} />
+                <Field f={sf} value={it[sf.key]} onChange={(v) => setItem(i, sf.key, v)}
+                  max={maxLengthOf(sf, content)} />
               </div>
             ))}
           </div>
@@ -234,7 +241,8 @@ export default function ContentForm({ component, draft, onChange, brandSecondary
       <label>{f.label}</label>
       {f.type === 'list'
         ? <ListField f={f} value={draft[f.key]} onChange={set(f.key)} content={draft} />
-        : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary} />}
+        : <Field f={f} value={draft[f.key]} onChange={set(f.key)} brandSecondary={brandSecondary}
+            max={maxLengthOf(f, draft)} />}
       {/* Aclaracion del catalogo (ej. que un token no se pinta en el mockup). */}
       {f.hint && <div className="hint">{f.hint}</div>}
     </div>

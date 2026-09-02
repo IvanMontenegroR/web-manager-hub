@@ -129,6 +129,11 @@ export const BG_POSITIONS = [
 // vista: `slider-default-card` dibuja verticales por defecto y APAISADAS cuando este
 // estilo es Square.
 export const CARD_SQUARE = 'card_grid_default_square'
+// La card apaisada tiene ALTO FIJO y el texto va debajo del titulo, en un espacio que no
+// crece: pasado cierto largo la descripcion se corta o desborda. El limite sale de medir
+// la card mas larga que el sitio real muestra entera, no de una regla del CMS (Drupal no
+// valida largos aca), asi que se avisa y no se recorta a la fuerza lo ya cargado.
+export const CARD_SQUARE_DESC_MAX = 111
 export const CARD_STYLES = [
   { value: CARD_SQUARE, label: 'Card Grid Default Square' },
   { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },
@@ -854,7 +859,10 @@ export const COMPONENTS = [
         // se elija otra cosa a proposito.
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
         { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS, hideTypes: CARD_GRID_IMAGE_MODES },
-        { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea' },
+        // Solo las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX): las
+        // verticales son altas y el texto tiene lugar de sobra.
+        { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
+          maxLength: (c) => (c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
         { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
         { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
         { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image', hideTypes: CARD_GRID_ICON_MODES },
@@ -1334,6 +1342,14 @@ export function visibleSubFields(field, role, content = {}, opts = {}) {
     if (sf.onlyTypes && !sf.onlyTypes.includes(type)) return false
     return true
   })
+}
+
+// Largo maximo de un campo, si tiene. Puede ser un numero fijo o una funcion del
+// contenido del COMPONENTE (no del item): la descripcion de una card solo esta acotada
+// cuando el Card - Style Card la dibuja apaisada. Devuelve null cuando no aplica.
+export function maxLengthOf(field, content = {}) {
+  const m = typeof field?.maxLength === 'function' ? field.maxLength(content) : field?.maxLength
+  return typeof m === 'number' && m > 0 ? m : null
 }
 
 // Valor legible de un campo para el export/preview (list -> texto multilinea).

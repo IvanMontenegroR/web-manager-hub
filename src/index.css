@@ -2390,6 +2390,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* Cuerpo de texto con enlaces: barra bajo el textarea. */
 .cf-rt-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+/* Contador de un campo con largo acotado. Rojo = se paso, pero se sigue pudiendo
+   escribir: el limite es del diseño, no una validacion del CMS. */
+.cf-count { margin-left: auto; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--muted, #868e99); }
+.cf-count.over { color: var(--purina, #ED1C24); font-weight: 700; }
 
 /* Campo de color (swatch + hex) del builder. */
 .cf-color { display: flex; align-items: center; gap: 8px; }

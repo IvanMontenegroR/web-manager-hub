@@ -9,6 +9,7 @@ import html2canvas from 'html2canvas'
 import {
   getComponent, fieldToText, getSpecs, visibleFields, visibleSubFields,
   excelSkip, slotsOf, emptyLabelFor, isMarketField, componentTitle, effectiveValue,
+  maxLengthOf,
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
@@ -212,6 +213,15 @@ function listItems(f, content) {
 // (selects, urls, checkboxes) no lleva formato.
 function richKind(f) {
   return f?.type === 'textarea' ? 'textarea' : f?.type === 'text' ? 'text' : null
+}
+
+// Etiqueta del campo en la hoja Contenido. Un campo con largo acotado por el diseño (la
+// descripcion de una card apaisada) lo aclara ACA: es la unica forma de que el mercado se
+// entere, porque en el Excel no hay contador que se lo diga mientras escribe. La hoja CMS
+// no lo lleva: ahi las etiquetas son las de Drupal, textuales.
+function marketLabel(f, content) {
+  const max = maxLengthOf(f, content)
+  return max ? `${f.label} (máx. ${max} caracteres)` : f.label
 }
 
 function estHeight(text, charsPerLine = 48) {
@@ -645,7 +655,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
           shown++
           row = cardBand(row, `${one} ${i + 1}${role ? ` — ${role}` : ''}`, { disabled })
           for (const sf of subFields) {
-            row = textRows(row, sf.label, fieldToText(sf, item[sf.key]), {
+            row = textRows(row, marketLabel(sf, content), fieldToText(sf, item[sf.key]), {
               sub: true, disabled, rich: richKind(sf), todo: isMarketField(sf), ref: `${comp.id}|${f.key}[${i}].${sf.key}`,
             })
           }
@@ -659,7 +669,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
             { sub: true, italic: true, fill: SUBHEAD_BG, color: MUTED })
         }
       } else if (!excelSkip(f, content[f.key])) {
-        row = textRows(row, f.label, fieldToText(f, content[f.key]), { disabled, rich: richKind(f), todo: isMarketField(f), ref: `${comp.id}|${f.key}` })
+        row = textRows(row, marketLabel(f, content), fieldToText(f, content[f.key]), { disabled, rich: richKind(f), todo: isMarketField(f), ref: `${comp.id}|${f.key}` })
       }
     }
 
