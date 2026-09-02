@@ -856,8 +856,10 @@ export const COMPONENTS = [
       // "Optional fields" de Drupal: si el editor no lo abre, no los encuentra.
       { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
       { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES, cmsGroup: G_OPTIONAL },
       { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea', cmsGroup: G_OPTIONAL },
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },

@@ -306,7 +306,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
      quedan `deprecated` (siguen renderizando lo ya armado pero salen de la paleta). Trae la estructura
-     completa del CMS: titulo/subtitulo con HTML tag, background image, subitems (titulo+tag, icono,
+     completa del CMS: titulo/subtitulo con HTML tag y Title/SubTitle Size (los cuatro adentro del
+     desplegable "Optional fields"), background image, subitems (titulo+tag, icono,
      descripcion, subtitulo+tag, imagen desktop y mobile **cada una con su alt**, CTA con texto/URL/destino,
      background color, section ID y CSS por card), el bloque **Avanzado** (See more, visibilidad Gato/Perro,
      section ID, CSS) y los 13 selects de **Classy**. Ver `sql/2026_card_grid_migracion.sql`.
@@ -330,6 +331,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Un `option` de un select puede ser un string o `{ value, label }`: se guarda el valor de maquina del
      CMS (`grid-cards`) y se muestra/exporta la etiqueta que ve el editor en Drupal. `emptyLabelFor` dice
      que muestra Drupal cuando el select esta vacio (`Default` en Classy, `- Ninguno -` en los HTML tag).
+     Ese "vacio" NO es una celda en blanco: es la opcion que el editor tiene que dejar elegida, porque el
+     formulario puede venir con otra puesta. Por eso en la hoja CMS baja en NEGRO como cualquier valor
+     (`emptyIsOption`), y el gris italico queda para lo que si esta vacio (un texto sin cargar, `—`).
      `BG_COLORS` son los 39 tokens reales y `CMS_ICONS` los ~130 iconos, los dos sacados del formulario.
   3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): **DOS hojas espejadas**. La hoja
      **Contenido** es para el mercado (solo lo que carga: los `cms:true` no aparecen) y la hoja **CMS** es

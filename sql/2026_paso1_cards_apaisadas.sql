@@ -34,3 +34,9 @@ where id = 'd9ce2259-7a46-4bf6-8510-9cd51dcdccba';
 
 -- Las otras dos cards del bloque quedan como estan: 128 y 109 caracteres, las dos se ven
 -- enteras en el sitio.
+
+-- El bloque tenia cargado un subtitulo que NO es de esta pagina ("La nutricion de las
+-- mascotas es clave... Este es nuestro Compromiso Purina®"): quedo de copiar otro bloque.
+-- Se saca, no se reemplaza — en el sitio el Paso 1 no tiene subtitulo.
+update public.page_components set content = content - 'subtitle'
+where id = 'd9ce2259-7a46-4bf6-8510-9cd51dcdccba';

@@ -825,7 +825,7 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
   t.alignment = { vertical: 'middle', indent: 1 }
   setH(1, 30)
   ws.mergeCells(2, 2, 2, 5)
-  ws.getCell(2, 2).value = 'Cada bloque está en el orden del formulario de Drupal, con el nombre exacto de cada campo. Las filas en GRIS son el contenido que carga el mercado: vienen enlazadas a la hoja "Contenido" y se actualizan solas, no hace falta copiarlas ni se pueden editar. El resto de las celdas sí se puede escribir acá — entre ellas el Alt text de cada imagen, que carga SEO. Los campos vacíos quedan en "Default" o "—" según corresponda.'
+  ws.getCell(2, 2).value = 'Cada bloque está en el orden del formulario de Drupal, con el nombre exacto de cada campo. Las filas en GRIS son el contenido que carga el mercado: vienen enlazadas a la hoja "Contenido" y se actualizan solas, no hace falta copiarlas ni se pueden editar. El resto de las celdas sí se puede escribir acá — entre ellas el Alt text de cada imagen, que carga SEO. En los desplegables, el valor que aparece ("Default", "- Ninguno -") es la opción que hay que dejar elegida en Drupal, no una celda en blanco: si el formulario viene con otra puesta, cambiala. Un "—" sí es un campo sin cargar.'
   ws.getCell(2, 2).font = { italic: true, size: 10, color: { argb: MUTED } }
   ws.getCell(2, 2).alignment = { wrapText: true, vertical: 'top' }
   setH(2, 42)
@@ -848,7 +848,13 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
     } else {
       const empty = value == null || value === ''
       b.value = empty ? (opts.emptyAs || EMPTY) : value
-      b.font = { size: 10, italic: empty, color: { argb: empty ? MUTED : 'FF1F2530' } }
+      // Un DESPLEGABLE sin nada cargado no es una celda en blanco: "- Ninguno -" y
+      // "Default" son opciones de verdad del formulario, y el editor las tiene que dejar
+      // elegidas (Drupal puede venir con otra puesta). Por eso van en negro, como
+      // cualquier valor. El gris italico queda para lo que si esta vacio: un texto sin
+      // cargar ("—") o un placeholder.
+      const option = empty && opts.emptyIsOption
+      b.font = { size: 10, italic: empty && !option, color: { argb: (empty && !option) ? MUTED : 'FF1F2530' } }
       // Esta celda NO viene de la otra hoja: es algo que se completa ACA (el alt text
       // que carga SEO, un campo tecnico). Se desbloquea para que se pueda escribir con
       // la hoja protegida — lo que se protege son las FORMULAS, no el trabajo de nadie.
@@ -921,6 +927,9 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
   // que vacio lo dice en vez de mostrar un guion.
   const isSeo = (f) => /_alt$/.test(f?.key || '')
   const emptyFor = (f) => (isSeo(f) ? 'SEO Agency' : emptyLabelFor(f))
+  // ¿Ese "vacio" es en realidad una OPCION del desplegable que hay que dejar elegida?
+  // Solo si el campo tiene lista de opciones y esa lista declara su etiqueta de vacio.
+  const emptyIsOption = (f) => !isSeo(f) && !!f?.options && emptyLabelFor(f) !== '—'
 
   for (const entry of comps) {
     // Marca de SLOT: no es un componente, es la ranura del contenedor de arriba.
@@ -965,12 +974,14 @@ async function buildCmsSheet(wb, page, { comps, cellRef, imgByComp, labelByComp,
             // es el que el editor tiene que poner, y no con un "- Ninguno -".
             line(cmsLabel(sf), fieldToText(sf, effectiveValue(sf, item)), {
               sub: true, ref: `${comp.id}|${f.key}[${i}].${sf.key}`, emptyAs: emptyFor(sf), seo: isSeo(sf),
+              emptyIsOption: emptyIsOption(sf),
             })
           }
         })
       } else {
         line(cmsLabel(f), fieldToText(f, effectiveValue(f, content)), {
           ref: `${comp.id}|${f.key}`, emptyAs: emptyFor(f), seo: isSeo(f),
+          emptyIsOption: emptyIsOption(f),
         })
       }
     }
