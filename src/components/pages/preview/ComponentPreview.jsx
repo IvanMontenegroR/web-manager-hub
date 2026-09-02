@@ -10,7 +10,7 @@ import { parseInline, parseRich } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
   BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
-  BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_FULL_BOX, BT_BRAND_HERO,
+  BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_BRAND_HERO,
 } from '../../../data/components'
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
@@ -291,7 +291,6 @@ const RENDERERS = {
     const is = (machine, rx) => type === machine || rx.test(type)
     const promo = is(BT_ONLY_IMAGE, /only image|promotional/i)
     const secondary = is(BT_SECONDARY_HERO, /secondary hero/i)
-    const fullbox = is(BT_FULL_BOX, /full image|box content/i)
     const brand = is(BT_BRAND_HERO, /brand hero/i)
     // Main Hero, Brand Hero y Secondary Hero comparten el tratamiento "hero":
     // imagen a sangre + overlay rgba(0,0,0,.3) + texto blanco centrado + CTA.
@@ -302,7 +301,6 @@ const RENDERERS = {
     const dim = brand ? '2088×835px'
       : secondary ? '2100×700px'
       : promo ? '2088×696px'
-      : fullbox ? '2088×1044px'
       : '2100×1050px'
 
     // Promotional (solo imagen). Un banner es UNO solo: para varios rotando esta el
@@ -328,22 +326,9 @@ const RENDERERS = {
       )
     }
 
-    // Full Image + Box Content: imagen a sangre (radius 1rem) con una card frosted
-    // (rgba blanco .25 + blur) abajo a la izquierda: h2 blanco + texto + CTA pill claro.
-    if (fullbox) {
-      return (
-        <div className="cp-fib">
-          {c.image
-            ? <MediaEl className="cp-fib-img cp-img" src={c.image} />
-            : <div className="cp-fib-img cp-img cp-img-ph"><ImageIcon size={22} /><span className="cp-ph-dim">{dim}</span></div>}
-          <div className="cp-fib-card">
-            <div className="cp-fib-title">{T(c.title, 'Full Image + Box Content')}</div>
-            <Rich className="cp-fib-desc">{T(c.description, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')}</Rich>
-            <span className="cp-fib-cta">{T(cta, 'CTA')}</span>
-          </div>
-        </div>
-      )
-    }
+    // El viejo "Full Image + Box Content" ya no es un Banner Type: ese layout se arma con
+    // el componente Imagen (`content_image`) y el Image position en "Image Background
+    // Box". El mockup se mudo alla.
 
     // Banner Card: caja blanca sobre la imagen.
     return (
@@ -419,21 +404,40 @@ const RENDERERS = {
   },
 
   // `c_image`: imagen con texto. El LAYOUT sale del Classy `image_position`:
-  //   - `image_bottom` -> el texto va ARRIBA, suelto sobre la pagina, y la imagen
-  //     debajo (asi se ve en el sitio; es el unico valor que tenemos confirmado).
+  //   - `image_bottom` -> el texto va ARRIBA, suelto sobre la pagina, y la imagen debajo.
+  //   - `image_background_box` -> imagen a sangre (radius 1rem) con una card frosted
+  //     (blanco .25 + blur) apoyada abajo a la izquierda. Es el layout que antes se
+  //     pedia con el Banner Type "Full Image + Box Content", que ya no existe: el mismo
+  //     componente Imagen lo resuelve con este Image position.
   //   - el resto (vacio incluido) -> la caja de texto va ENCIMA de la imagen, que es
-  //     como venia. Los otros cuatro valores (`image_center`, `image_fixed_background`,
-  //     `image_background_box`, `image_background_full`) todavia no estan dibujados:
-  //     sin saber como se ven, mentir el mockup seria peor que dejar el generico.
+  //     como venia. Los otros tres valores (`image_center`, `image_fixed_background`,
+  //     `image_background_full`) todavia no estan dibujados: sin saber como se ven,
+  //     mentir el mockup seria peor que dejar el generico.
   // `text_align` alinea el texto, igual que en el bloque de Texto.
   content_image: (c) => {
     const ctas = ctaList(c)
     const bottom = c.image_position === 'image_bottom'
+    const bgBox = c.image_position === 'image_background_box'
     const al = /center/.test(c.text_align || '') ? 'center'
       : /right/.test(c.text_align || '') ? 'right' : 'left'
     /* `> 0` y no `ctas.length` a secas: sin CTAs la cadena vale 0 y React dibuja
        el cero como texto debajo de la imagen. */
     const hasText = c.title || c.subtitle || c.body || ctas.length > 0
+    if (bgBox) {
+      return (
+        <div className="cp-block cp-fib">
+          <Img src={c.image} h={420} dim="2088×1044px" className="cp-fib-img" />
+          {hasText && (
+            <div className="cp-fib-card">
+              {c.title && <div className="cp-fib-title">{c.title}</div>}
+              {c.subtitle && <div className="cp-fib-sub">{c.subtitle}</div>}
+              {c.body && <Rich className="cp-fib-desc">{c.body}</Rich>}
+              {ctas.map((b, i) => <span key={i} className="cp-fib-cta">{b.label}</span>)}
+            </div>
+          )}
+        </div>
+      )
+    }
     const txt = hasText && (
       <div className={bottom ? 'cp-cimg-txt' : 'cp-cimg-box'}>
         {c.title && <div className="cp-h2">{c.title}</div>}

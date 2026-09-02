@@ -1738,10 +1738,14 @@ textarea.control { resize: vertical; min-height: 64px; }
 
 /* ===== Banner Full Image + Box Content (card frosted) ===== */
 .cp-fib { position: relative; }
-.cp-fib-img.cp-img { border-radius: 16px; object-fit: cover; aspect-ratio: 1680 / 820; }
+/* El alto va FIJO (lo pone `Img` inline) y no por aspect-ratio: html2canvas lo resuelve
+   mal y la captura del Excel sale con la imagen aplastada. */
+.cp-fib-img.cp-img { border-radius: 16px; object-fit: cover; width: 100%; }
 .cp-fib-card { position: absolute; left: 40px; bottom: 40px; max-width: 42%; background: rgba(255,255,255,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 14px; padding: 26px 28px; color: #fff; }
 .cp-fib-title { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+.cp-fib-sub { font-size: 15px; font-weight: 600; margin-top: 4px; opacity: .95; }
 .cp-fib-desc { font-size: 14px; line-height: 1.5; margin-top: 8px; opacity: .95; }
+.cp-fib-cta + .cp-fib-cta { margin-left: 10px; }
 .cp-fib-cta { display: inline-block; margin-top: 20px; background: #fff; color: #1b252e; font-size: 13px; font-weight: 700; padding: 11px 26px; border-radius: 9999px; }
 
 /* ===== Carrusel de testimonios (Historias que inspiran) ===== */

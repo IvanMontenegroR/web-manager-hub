@@ -437,10 +437,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Content. Suma el checkbox "Remover Overlay Background" y el grupo **Search AI** (mostrar el buscador,
   fijarlo en mobile, y las sugerencias). El Media va en TODOS los tipos, el Promotional incluido: ahi la
   imagen es lo unico que hay. Para varios banners rotando esta el `banner_wrapper`.
+  El Banner Type **"Full Image + Box Content" YA NO existe**: ese layout (imagen a sangre con la card
+  frosted encima) se arma con el `c_image` y el Image position en **"Image Background Box"**. Salio de
+  `BANNER_TYPES`, y su medida y su mockup (`.cp-fib`) se mudaron al Imagen. Ver
+  `sql/2026_box_content_a_c_image.sql`.
   El **`c_image`** ("Imagen") es una imagen con texto encima: el Media lleva desktop y mobile, cada uno
   con su **alt text**, y del mercado lo unico que se pide es la imagen (el alt lo carga SEO en la hoja CMS
   y el editor ya sabe subir el archivo). Suma
-  Title Size / SubTitle Size y un Classy propio con Image position e Image Style. Todo lo visual sale de Classy — `content_text_styles`
+  Title Size / SubTitle Size y un Classy propio con Image position e Image Style. El **Image position** es
+  el que decide el LAYOUT y la medida de la imagen (`specKey`): hoy estan dibujados `image_bottom` (texto
+  arriba, imagen abajo) e `image_background_box` (la card frosted sobre la imagen); los otros tres caen al
+  generico y no muestran medida, porque no sabemos como se ven. Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en

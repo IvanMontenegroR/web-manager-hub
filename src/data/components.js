@@ -210,16 +210,19 @@ export const BT_MAIN_HERO = 'main_hero'
 export const BT_SECONDARY_HERO = 'title-description'
 export const BT_ONLY_IMAGE = 'only-image'
 export const BT_CARD = 'banner-menu'
-export const BT_FULL_BOX = 'full-image-box-content'
 export const BT_BRAND_HERO = 'brand_hero'
 export const BANNER_TYPES = [
   { value: BT_MAIN_HERO, label: 'Main Hero' },
   { value: BT_SECONDARY_HERO, label: 'Secondary Hero' },
   { value: BT_ONLY_IMAGE, label: 'Promotional banner (Only image)' },
   { value: BT_CARD, label: 'Banner Card' },
-  { value: BT_FULL_BOX, label: 'Full Image + Box Content' },
   { value: BT_BRAND_HERO, label: 'Brand Hero' },
 ]
+// El viejo "Full Image + Box Content" (la imagen a sangre con la caja de contenido
+// encima) YA NO es un Banner Type: el mismo layout se arma con el componente **Imagen**
+// (`content_image`, el paragraph `c_image`) y el Image position en "Image Background
+// Box". Se saco de la lista para que no se elija algo que en el CMS ya no existe; su
+// medida y su mockup se mudaron al Imagen. Ver `sql/2026_box_content_a_c_image.sql`.
 
 // Classy propio del Banner: donde se apoya el contenido sobre la imagen.
 export const BANNER_ALIGNS = [
@@ -499,7 +502,6 @@ export const COMPONENTS = [
       [BT_MAIN_HERO]: [{ ratio: 'Desktop 2:1 - Mobile 9:16', desktop: '2100×1050px', mobile: '526×936px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
       'title-description': [{ ratio: 'Desktop 3:1 - Mobile 1:1', desktop: '2100×700px', mobile: '526×526px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
       brand_hero: [{ ratio: 'Desktop 2.5:1 - Mobile 2:3', desktop: '2088×835px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
-      'full-image-box-content': [{ ratio: 'Desktop ~2:1 - Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
       [BT_ONLY_IMAGE]: [{ ratio: 'Desktop 3:1 - Mobile 2:3', desktop: '2088×696px', mobile: '465×675px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
       // Banner Card: medidas PENDIENTES de confirmar con desarrollo.
       'banner-menu': [],
@@ -635,6 +637,14 @@ export const COMPONENTS = [
       ...classy('background_color', 'background_position', 'image_position', 'image_style',
         'spacing', 'style_button', 'text_align', 'text_color'),
     ],
+    // La medida depende del LAYOUT, que sale del Image position. Hoy solo esta confirmada
+    // la del "Image Background Box" (la que era del Banner "Full Image + Box Content",
+    // antes de que ese layout se mudara aca). Los otros valores no muestran medida:
+    // inventarla seria peor que no ponerla.
+    specKey: 'image_position',
+    specsByType: {
+      image_background_box: [{ ratio: 'Desktop ~2:1 - Mobile ~2:3', desktop: '2088×1044px', mobile: '526×789px', max: '500kb / 2-4MB', format: 'JPG / PNG / MP4 / YouTube' }],
+    },
   },
   {
     key: 'services_carousel',
