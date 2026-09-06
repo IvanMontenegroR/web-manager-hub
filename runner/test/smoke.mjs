@@ -224,6 +224,17 @@ try {
   check(/Con el prefijo "edit-esto-no-existe-" hay: NADA/.test(evidencia),
     'cuando no aparece el subform, el error dice que hay en esa lista')
 
+  // Un campo que se lleno bien y despues se vacio (Drupal re-dibuja el formulario en
+  // cada alta) NO puede pasar en silencio: la pagina saldria armada y sin contenido.
+  let vaciado = ''
+  try {
+    const m2 = mapping(site)
+    m2.nodeAdd = '/node/add/page?vaciar=1'
+    await buildPage({ page, mapping: m2, manifest, save: false, onStep: () => {}, esperaSubform: 4000 })
+  } catch (e) { vaciado = e.message }
+  check(/quedaron VACIOS: c_text.field_c_advanced_title/.test(vaciado),
+    'frena si un campo ya escrito quedo vacio al final')
+
   // Una ranura con tope (la pestaña) no acepta un segundo componente.
   let tope = false
   try {

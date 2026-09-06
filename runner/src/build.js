@@ -71,13 +71,27 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep, esperaSubform, consola }
+  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
   let n = 0
   for (const block of manifest.blocks) {
     n += 1
     await addBlock(ctx, block, `${n}`, root)
   }
+
+  // Repaso final. Agregar un bloque hace que Drupal re-dibuje el formulario, asi que un
+  // campo que quedo bien al escribirlo puede haberse vaciado despues. Mejor enterarse
+  // aca que descubrir la pagina vacia en el CMS.
+  const vacios = []
+  for (const w of ctx.escritos) {
+    if (!w || esVacio(w.valor)) continue
+    if (esVacio(await leerCampo(page, w.f, w.selector))) vacios.push(w.ref)
+  }
+  if (vacios.length) {
+    throw new Error(`Se llenaron los campos pero al final quedaron VACIOS: ${vacios.join(', ')}. `
+      + 'Suele pasar cuando el formulario se vuelve a dibujar despues de escribir.')
+  }
+  onStep(`Campos escritos y verificados: ${ctx.escritos.filter(Boolean).length}`)
 
   if (!save) {
     onStep('Listo (sin guardar). Revisa el formulario y guarda vos.')
@@ -156,7 +170,7 @@ async function addBlock(ctx, block, num, holder) {
     const f = def.fields?.[key]
     if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
     if (IMAGE_KINDS.has(f.kind)) { onStep(`     (imagen "${key}": se sube a mano)`); continue }
-    await fillField(page, f, vars, value, `${block.type}.${key}`)
+    ctx.escritos.push(await fillField(page, f, vars, value, `${block.type}.${key}`))
   }
 
   // Contenedores: sus hijos van adentro del slot que les toca, no en la lista del nodo.
@@ -348,20 +362,32 @@ async function tildar(loc, valor) {
 
 async function fillField(page, f, vars, value, ref) {
   const selector = resolveSelector(f.sel, vars)
-  const el = page.locator(selector).first()
-  if (!(await el.count())) throw new Error(`No encontre el campo ${ref} (${selector})`)
-  await revelar(el)
+  const total = await page.locator(selector).count()
+  if (!total) throw new Error(`No encontre el campo ${ref} (${selector})`)
+
+  // Un mismo `name` puede estar repetido en la pagina (el formulario deja plantillas
+  // escondidas), asi que se busca el que SE VE — despues de abrir los paneles que lo
+  // tapen. La excepcion es un cuerpo con CKEditor: ahi el textarea esta oculto a
+  // proposito y lo que se ve es el editor, asi que se toma el primero.
+  let el = page.locator(selector).first()
+  if (f.kind !== 'richtext') {
+    for (let i = 0; i < total; i++) {
+      const cand = page.locator(selector).nth(i)
+      await revelar(cand)
+      if (await cand.isVisible().catch(() => false)) { el = cand; break }
+    }
+  } else {
+    await revelar(el)
+  }
 
   if (f.kind === 'select') {
     // Se intenta por VALOR de maquina, que es lo que guarda nuestro catalogo; si esa
     // opcion no existe se prueba por etiqueta antes de darse por vencido.
     try { await el.selectOption(String(value)) }
     catch { await el.selectOption({ label: String(value) }) }
-    return
-  }
-  if (f.kind === 'checkbox') { await el.setChecked(!!value); return }
-
-  if (f.kind === 'richtext') {
+  } else if (f.kind === 'checkbox') {
+    await el.setChecked(!!value)
+  } else if (f.kind === 'richtext') {
     // El formato de texto va PRIMERO: el CMS arranca en uno que no admite HTML, y
     // cambiarlo con contenido ya cargado dispara el aviso de Drupal de que se pierde.
     if (f.format) {
@@ -372,17 +398,61 @@ async function fillField(page, f, vars, value, ref) {
     }
     // Con CKEditor el textarea queda oculto y lo que se escribe es un contenteditable.
     // Si no hay editor montado (campo de texto plano), se llena el textarea y listo.
-    const editable = page.locator(selector).locator('xpath=ancestor::*[contains(@class,"js-form-item") or contains(@class,"form-item")][1]')
-      .locator('.ck-editor__editable[contenteditable="true"]').first()
+    const editable = editorDe(page, selector)
     if (await editable.count()) {
       await editable.click()
       await editable.evaluate((node) => { node.innerHTML = '' })
       await page.keyboard.insertText(String(value))
-      return
+    } else {
+      await el.fill(String(value))
     }
+  } else {
     await el.fill(String(value))
-    return
   }
 
-  await el.fill(String(value))
+  // VERIFICAR. Un campo que se llena y queda vacio es peor que un error: la pagina sale
+  // armada pero sin contenido y nadie se entera hasta que la mira. Si no quedo, se frena.
+  const puesto = await loQueQuedo(page, f, selector, el)
+  if (esVacio(puesto) && !esVacio(value)) {
+    throw new Error(`Escribi ${ref} pero el campo quedo vacio (${selector}). `
+      + `Se esperaba "${String(value).slice(0, 60)}" y hay ${JSON.stringify(puesto)}. `
+      + `Elementos con ese selector: ${total}.`)
+  }
+  return { selector, f, ref, valor: value }
 }
+
+// Lee un campo eligiendo el mismo elemento que se lleno: el que se ve, salvo el cuerpo
+// con CKEditor, que por diseño esta oculto.
+async function leerCampo(page, f, selector) {
+  const n = await page.locator(selector).count()
+  if (!n) return null
+  let el = page.locator(selector).first()
+  if (f.kind !== 'richtext') {
+    for (let i = 0; i < n; i++) {
+      const c = page.locator(selector).nth(i)
+      if (await c.isVisible().catch(() => false)) { el = c; break }
+    }
+  }
+  return loQueQuedo(page, f, selector, el)
+}
+
+// Que hay AHORA en el campo, en la forma que corresponda a su tipo.
+async function loQueQuedo(page, f, selector, el) {
+  try {
+    if (f.kind === 'checkbox') return await el.isChecked()
+    if (f.kind === 'richtext') {
+      const editable = editorDe(page, selector)
+      if (await editable.count()) return (await editable.first().innerText()).trim()
+    }
+    return await el.inputValue()
+  } catch { return null }
+}
+
+// El contenteditable de CKEditor que corresponde a ese textarea, si lo hay.
+const editorDe = (page, selector) => page.locator(selector)
+  .locator('xpath=ancestor::*[contains(@class,"js-form-item") or contains(@class,"form-item")][1]')
+  .locator('.ck-editor__editable[contenteditable="true"]')
+
+// "Vacio" para el CMS incluye el valor con el que arrancan los selects de Drupal.
+const esVacio = (v) => v === null || v === undefined || v === '' || v === '_none'
+

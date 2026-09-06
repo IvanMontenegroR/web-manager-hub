@@ -205,7 +205,16 @@ sel.addEventListener('change', () => {
 // Aca se reproduce fallando la PRIMERA vez que se agrega un card grid, para que la prueba
 // pase por el reintento.
 let yaFallo = false
+// Con ?vaciar=1 el formulario BORRA un campo ya escrito cuando se agrega otro bloque.
+// Drupal re-dibuja el formulario en cada alta, asi que esto puede pasar de verdad: la
+// pagina sale armada y vacia, sin un solo error. El repaso final tiene que agarrarlo.
+const sabotear = new URLSearchParams(location.search).has('vaciar')
+
 document.querySelector('input[name="field_components_add_more"]').addEventListener('click', () => {
+  if (sabotear && rows.children.length >= 2) {
+    const v = document.querySelector('input[name="field_components[0][subform][field_c_advanced_title][0][value]"]')
+    if (v) v.value = ''
+  }
   if (!yaFallo && sel.value === 'ln_c_cardgrid') {
     yaFallo = true
     fetch('/boom').catch(() => {})
@@ -235,7 +244,7 @@ export function startFakeDrupal() {
   const server = createServer((req, res) => {
     const url = req.url.split('?')[0]
     if (url === '/user') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Ivan</h1>') }
-    if (url === '/node/add/page') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }
+    if (url === '/node/add/page' || url.startsWith('/node/add/page')) { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }
     if (url === '/node/123') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Guardado</h1>') }
     if (url === '/boom') { res.writeHead(504); return res.end('gateway timeout') }
     res.writeHead(404); res.end('no')
