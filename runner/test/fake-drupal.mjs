@@ -44,6 +44,7 @@ details{margin:8px 0;padding:6px;border:1px solid #ccc} details:not([open]) .js-
     <option value="layout_columns_2">Layout: 2 columnas</option>
   </select>
   <input type="submit" name="field_components_add_more" value="Add another Component">
+  <input type="button" name="field_components_edit_all" value="Edit all">
   <hr>
   <input type="submit" name="op" value="Guardar" id="edit-submit--xY9">
 </form>
@@ -133,6 +134,7 @@ function slotHtml(label, base, dsel, npath, field, modo) {
       data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
       data-npath="\${npath}_subform_\${field}">
     <legend>\${label}</legend><div class="slotrows"></div>
+    <input type="button" name="\${npath}_subform_\${field}_edit_all" value="Edit all">
     <div class="enmedio">\${enMedio}</div>
     \${modo === 'entre' ? \`<div class="dialogo-plantilla" style="display:none">\${btns}</div>\` : ''}
     \${modo === 'modal' || modo === 'entre' ? \`<div\${escondida}><input type="submit" name="button_add_modal"
@@ -144,11 +146,44 @@ function slotHtml(label, base, dsel, npath, field, modo) {
       \${btns}</div></fieldset>\`
 }
 
+// Paragraphs CIERRA las filas ya agregadas cada vez que se agrega otra: el subform
+// desaparece y queda un resumen con un boton para volver a abrir. Los valores no se
+// pierden (Drupal los guarda del lado del servidor), asi que aca se guardan aparte y se
+// reponen al abrir. Es la razon por la que el runner tiene que reabrir antes de llenar.
+function plegar(row) {
+  if (!row.dataset.npath || row.dataset.plegada) return
+  // El subform sale del DOM pero NO se destruye: se guarda aparte con sus valores y sus
+  // filas anidadas, igual que Drupal, que lo tiene del lado del servidor. Lo que importa
+  // para la prueba es que mientras esta plegado los campos NO existen en la pagina.
+  const caja = document.createElement('div')
+  while (row.firstChild) caja.appendChild(row.firstChild)
+  row.guardado = caja
+  row.dataset.plegada = '1'
+  const b = document.createElement('button')
+  b.type = 'button'
+  b.name = row.dataset.npath + '_edit'
+  b.textContent = 'Editar'
+  b.addEventListener('click', () => desplegar(row))
+  row.append(row.dataset.tipo + ' (plegado) ', b)
+}
+
+function desplegar(row) {
+  if (!row.dataset.plegada) return
+  row.textContent = ''
+  const caja = row.guardado
+  while (caja.firstChild) row.appendChild(caja.firstChild)
+  row.guardado = null
+  delete row.dataset.plegada
+}
+
 // El "AJAX" de mentira: el subform aparece un rato despues de pedirlo, como en Drupal.
 function addTo(container, base, dsel, npath, type) {
+  // Al agregar una fila, las anteriores de ESA lista se pliegan.
+  ;[...container.children].forEach(plegar)
   const el = document.createElement('div')
   el.className = 'row'
   el.setAttribute('data-drupal-selector', dsel)
+  Object.assign(el.dataset, { tipo: type, base, dsel, npath })
   setTimeout(() => {
     el.innerHTML = subform(type, base, dsel, npath)
     container.appendChild(el)
@@ -156,11 +191,16 @@ function addTo(container, base, dsel, npath, type) {
   }, 250)
 }
 
+// "Abrir todas" de una lista: es lo que usa el runner antes de llenar.
+function abrirTodas(container) { [...container.children].forEach(desplegar) }
+
 function wire(scope) {
   scope.querySelectorAll('.slot').forEach((s) => {
     if (s.dataset.wired) return
     s.dataset.wired = '1'
     const list = s.querySelector('.slotrows')
+    s.querySelector('input[name$="_edit_all"]')
+      ?.addEventListener('click', () => abrirTodas(list))
     const box = s.querySelector('.modal, .drop')
     const opener = s.querySelector('input[name="button_add_modal"]')
     if (opener) opener.addEventListener('click', () => box.classList.add('on'))
@@ -242,6 +282,9 @@ document.querySelector('input[name="field_components_add_more"]').addEventListen
 document.querySelector('input[name="path[0][pathauto]"]').addEventListener('change', (e) => {
   document.querySelector('input[name="path[0][alias]"]').disabled = e.target.checked
 })
+
+document.querySelector('input[name="field_components_edit_all"]')
+  .addEventListener('click', () => abrirTodas(rows))
 
 document.querySelector('input[name="op"]').addEventListener('click', () => { location.href = '/node/123' })
 </script></body></html>`

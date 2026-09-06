@@ -100,6 +100,10 @@ export const namePath = (dsel) => dsel.replace(/^edit-/, '').replaceAll('-', '_'
 // busqueda de los botones "agregar en el medio" a ESA lista y no a una de adentro.
 //   edit-…-field-c-subitems-{delta}  ->  edit-…-field-c-subitems-wrapper
 export const fieldWrapper = (dselTpl) => String(dselTpl).replace(/-\{delta\}$/, '-wrapper')
+// El nombre base de la LISTA, para los botones que valen para todas sus filas
+// (abrir/cerrar todas):
+//   edit-field-ln-n-components-{delta}  ->  field_ln_n_components
+export const listPath = (dselTpl) => namePath(String(dselTpl).replace(/-\{delta\}$/, ''))
 
 // Los tipos de paragraph que el mapping conoce. Un manifiesto que pida uno que no
 // esta se frena antes de tocar el navegador, con la lista de lo que falta.

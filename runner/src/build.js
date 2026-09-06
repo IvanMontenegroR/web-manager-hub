@@ -8,7 +8,7 @@
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
 //   - Las IMAGENES no se tocan (ver README): el editor las sube a mano.
-import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper } from './mapping.js'
+import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath } from './mapping.js'
 
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
@@ -71,7 +71,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [], pendientes: [] }
+  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [], pendientes: [], listas: new Set() }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
 
   onStep('Armando la estructura…')
@@ -79,6 +79,20 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   for (const block of manifest.blocks) {
     n += 1
     await addBlock(ctx, block, `${n}`, root)
+  }
+
+  // Paragraphs CIERRA las filas ya agregadas cada vez que se agrega otra: en vez del
+  // subform queda un resumen y los campos directamente NO existen en el DOM. Antes de
+  // llenar hay que volver a abrirlas. Cada lista trae un boton que las abre todas de
+  // una; van de afuera hacia adentro, porque la lista de un contenedor no existe hasta
+  // que su fila esta abierta.
+  for (const tpl of ctx.listas) {
+    const n = listPath(tpl)
+    const b = page.locator(`input[name="${n}_edit_all"], button[name="${n}_edit_all"]`).first()
+    if (await b.count() && await b.isVisible().catch(() => false)) {
+      await b.click()
+      await esperarAjax(page)
+    }
   }
 
   onStep('Llenando los campos…')
@@ -166,6 +180,7 @@ async function addBlock(ctx, block, num, holder) {
   // termina armada y vacia. Asi que primero se arma TODA la estructura y despues se
   // llena de una, cuando ya no queda ningun AJAX por delante.
   ctx.pendientes.push({ block, def, vars, num })
+  ctx.listas.add(holder.dsel)
 
   // Contenedores: sus hijos van adentro del slot que les toca, no en la lista del nodo.
   if (block.children?.length) {
@@ -208,9 +223,20 @@ async function addBlock(ctx, block, num, holder) {
 // formulario (Optional fields, Avanzado, Classy, Atributos), porque un campo que vive
 // adentro no se puede tocar con el panel cerrado.
 async function llenarBloque(ctx, { block, def, vars, num }) {
-  const { mapping, page, onStep } = ctx
+  const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
   if (!campos.length) return
+
+  // Por las dudas: si "abrir todas" no alcanzo, esta fila trae su propio boton.
+  const subform = page.locator(`[data-drupal-selector="${vars.dsel}-subform"]`)
+  if (!(await subform.count())) {
+    const editar = page.locator(`input[name="${vars.npath}_edit"], button[name="${vars.npath}_edit"]`).first()
+    if (await editar.count()) {
+      await editar.click()
+      await esperarAjax(page)
+      await subform.first().waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {})
+    }
+  }
 
   for (const tpl of [...(mapping.paragraphs.open || []), ...(def.open || [])]) {
     const d = page.locator(resolveSelector(tpl, vars)).first()
