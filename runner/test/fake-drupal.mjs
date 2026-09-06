@@ -289,9 +289,47 @@ document.querySelector('input[name="field_components_edit_all"]')
 document.querySelector('input[name="op"]').addEventListener('click', () => { location.href = '/node/123' })
 </script></body></html>`
 
+// La MEDIA LIBRARY de mentira: un formulario de alta y un listado que filtra por nombre.
+// Alcanza para probar que el subidor no duplique, que es lo unico que importa ahi.
+const MEDIA_FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear medio</title></head><body>
+<h1>Crear medio</h1>
+<form id="f" onsubmit="return false">
+  <input type="file" name="files[field_media_image_0]" id="ar">
+  <div id="tras" style="display:none">
+    <label>Alt <input type="text" name="field_media_image[0][alt]"></label>
+    <label>Nombre <input type="text" name="name[0][value]"></label>
+  </div>
+  <input type="submit" name="op" value="Guardar">
+</form>
+<script>
+// Drupal sube el archivo por AJAX y RECIEN AHI muestra el alt y el nombre.
+document.getElementById('ar').addEventListener('change', (e) => {
+  const f = e.target.files[0]
+  setTimeout(() => {
+    document.getElementById('tras').style.display = 'block'
+    document.querySelector('input[name="name[0][value]"]').value = f ? f.name : ''
+  }, 200)
+})
+document.querySelector('input[name="op"]').addEventListener('click', () => {
+  const n = document.querySelector('input[name="name[0][value]"]').value
+  location.href = '/media/guardar?name=' + encodeURIComponent(n)
+})
+</script></body></html>`
+
 export function startFakeDrupal() {
+  const medios = new Set()
   const server = createServer((req, res) => {
     const url = req.url.split('?')[0]
+    const q = new URLSearchParams(req.url.split('?')[1] || '')
+    const html = (h) => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(h) }
+
+    if (url === '/media/add/image') return html(MEDIA_FORM)
+    if (url === '/media/guardar') { medios.add(q.get('name')); return html('<h1>Medio creado</h1>') }
+    if (url === '/admin/content/media') {
+      const n = q.get('name') || ''
+      const filas = [...medios].filter((m) => m.includes(n)).map((m) => `<tr><td>${m}</td></tr>`).join('')
+      return html(`<table>${filas}</table>`)
+    }
     if (url === '/user') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Ivan</h1>') }
     if (url === '/node/add/page' || url.startsWith('/node/add/page')) { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }
     if (url === '/node/123') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Guardado</h1>') }

@@ -12,8 +12,10 @@
     "login": "node src/cli.js login",
     "inspect": "node src/cli.js inspect",
     "build": "node src/cli.js build",
-    "test": "node test/smoke.mjs && node test/ui.mjs",
-    "verify": "node test/verify-mapping.mjs"
+    "test": "node test/smoke.mjs && node test/ui.mjs && node test/media.mjs",
+    "verify": "node test/verify-mapping.mjs",
+    "placeholders": "node tools/placeholders.mjs",
+    "subir-placeholders": "node tools/subir-placeholders.mjs"
   },
   "dependencies": {
     "playwright-core": "1.49.1"

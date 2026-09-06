@@ -127,8 +127,23 @@ volver a subir la que cambio — el INDICE dice cual.
 
 ### Como subirlas
 
-Al subir cada archivo, **dejar el nombre del media igual al nombre del archivo, sin el
-`.png`**. Por ejemplo, `placeholder-banner-main-hero-desktop-2100x1050.png` se sube como
+Hay un script que las sube solo, con la misma sesion que usa el runner:
+
+```bash
+npm run subir-placeholders
+```
+
+Es **idempotente**: antes de cada una busca si ya hay un media con ese nombre y la
+saltea. Se puede cortar y volver a correr las veces que haga falta sin duplicar nada.
+Opciones: `--carpeta <dir>`, `--solo <texto>` (sube solo las que contengan ese texto),
+`--mapping <f>`.
+
+Si el formulario de medios de este sitio no es el estandar (`/media/add/image`), se
+corrige en el mapping bajo `"media"` — ver `src/media.js` para las claves. No hace falta
+tocar codigo.
+
+A mano tambien se puede, y en ese caso la regla es la misma: **dejar el nombre del media
+igual al nombre del archivo, sin el `.png`**. Por ejemplo, `placeholder-banner-main-hero-desktop-2100x1050.png` se sube como
 un media llamado:
 
 ```
