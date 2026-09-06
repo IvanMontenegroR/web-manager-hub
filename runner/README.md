@@ -292,6 +292,19 @@ arrancan en un **formato de texto que no admite HTML**, asi que el formato se ca
 ANTES de escribir; y el **alias de URL** esta deshabilitado mientras Pathauto lo genere
 solo, asi que se destilda antes de poder escribirlo.
 
+### Los campos de cuerpo (CKEditor)
+
+Un campo de cuerpo no es un textarea: es un textarea **escondido** con un CKEditor 5
+encima. Cambiar el formato de texto no manda ninguna peticion a Drupal — **destruye el
+editor y monta otro**, ahi mismo en el navegador. Como no hay peticion, esperar el AJAX de
+Drupal no sirve; hay que esperar al editor, y escribir en el medio del cambio es
+escribirle a uno que se esta muriendo: el texto se ve un instante y despues no esta.
+
+Por eso el runner escribe por la **API del editor** (`setData`), nunca tocandole el DOM
+por abajo, y llama a `updateSourceElement` para dejar el valor tambien en el textarea, que
+es lo que se envia al guardar y lo que se puede volver a leer para verificar. Ver
+`src/richtext.js`.
+
 ## Tests
 
 ```bash
@@ -310,6 +323,20 @@ texto, llenar texto / rich text / selects / checkboxes, anidar hijos en el slot 
 toca — incluido un contenedor adentro de otro, que es la forma del Tabs —, dejar la pagina
 despublicada, escribir el alias, leer el node id y **frenar** ante un campo, un slot que no
 existe o una ranura pasada de su tope.
+
+El CKEditor de ahi es de mentira, y para lo que se rompio de verdad no alcanzaba: que el
+editor se destruya y se monte otro solo pasa con el CKEditor de verdad. Para eso hay una
+prueba aparte, que arma un rig con el **CKEditor 5 real** y el mismo andamiaje que le pone
+Drupal (`Drupal.CKEditor5Instances`, el `data-ckeditor5-id`, el cambio de formato que
+destruye y remonta):
+
+```bash
+npm i --no-save --prefix /tmp/ckrig ckeditor5   # una vez
+npm run test:ckeditor
+```
+
+No entra en `npm test` porque hay que bajar el paquete, y si no lo encuentra se saltea
+avisando: nadie tiene que bajarse 20MB para trabajar en el runner.
 
 Eso prueba el MOTOR. Para probar el MAPPING sin tocar el CMS esta el otro:
 

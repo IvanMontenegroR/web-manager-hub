@@ -250,13 +250,17 @@ let yaFallo = false
 // nada: la pagina sale armada y vacia, sin un solo error. El repaso final tiene que
 // agarrarlo aunque el borrado ocurra despues de escribir.
 const sabotear = new URLSearchParams(location.search).has('vaciar')
-if (sabotear) {
+// Con ?cambiar=1 no lo borra: lo deja con OTRO valor. Es lo que hace un select que se
+// resetea a su opcion por defecto — no queda vacio, queda mal, y mirando solo si esta
+// vacio no se ve.
+const cambiar = new URLSearchParams(location.search).has('cambiar')
+if (sabotear || cambiar) {
   document.addEventListener('input', (e) => {
-    // Cuando se llena un campo del TERCER bloque, se borra uno del primero: un valor que
-    // ya estaba puesto desaparece solo, mas adelante en la corrida.
+    // Cuando se llena un campo del TERCER bloque, se toca uno del primero: un valor que
+    // ya estaba puesto se va solo, mas adelante en la corrida.
     if (!String(e.target.name || '').startsWith('field_components[2]')) return
     const v = document.querySelector('input[name="field_components[0][subform][field_c_advanced_title][0][value]"]')
-    if (v) v.value = ''
+    if (v) v.value = cambiar ? 'otra cosa' : ''
   }, true)
 }
 

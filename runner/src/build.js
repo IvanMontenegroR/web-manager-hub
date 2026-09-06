@@ -10,6 +10,7 @@
 //   - Las IMAGENES no se tocan (ver README): el editor las sube a mano.
 import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath } from './mapping.js'
 import { esperarAjax, esperarVisible } from './esperas.js'
+import { esperarEditor, escribirRich, leerRich } from './richtext.js'
 
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
@@ -102,14 +103,21 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // Repaso final. Agregar un bloque hace que Drupal re-dibuje el formulario, asi que un
   // campo que quedo bien al escribirlo puede haberse vaciado despues. Mejor enterarse
   // aca que descubrir la pagina vacia en el CMS.
-  const vacios = []
+  // Se compara contra lo que quedo AL ESCRIBIRLO, no contra lo que pedia el manifiesto:
+  // asi tambien se caza un campo que despues cambio a otra cosa, no solo el que se vacio.
+  // Un select que se resetea a "- Ninguno -" y uno que queda con otra opcion son el mismo
+  // problema, y antes solo se veia el primero.
+  const problemas = []
   for (const w of ctx.escritos) {
     if (!w || esVacio(w.valor)) continue
-    if (esVacio(await leerCampo(page, w.f, w.selector))) vacios.push(w.ref)
+    const hay = await leerCampo(page, w.f, w.selector)
+    if (esVacio(hay)) problemas.push(`${w.ref} quedo VACIO`)
+    else if (!igual(hay, w.puesto)) problemas.push(`${w.ref} decia ${cita(w.puesto)} y ahora dice ${cita(hay)}`)
   }
-  if (vacios.length) {
-    throw new Error(`Se llenaron los campos pero al final quedaron VACIOS: ${vacios.join(', ')}. `
-      + 'Suele pasar cuando el formulario se vuelve a dibujar despues de escribir.')
+  if (problemas.length) {
+    throw new Error(`Se llenaron los campos pero al final no quedaron como se escribieron: `
+      + `${problemas.join('; ')}. Suele pasar cuando el formulario se vuelve a dibujar `
+      + 'despues de escribir.')
   }
   onStep(`Campos escritos y verificados: ${ctx.escritos.filter(Boolean).length}`)
 
@@ -251,7 +259,9 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     const f = def.fields?.[key]
     if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
     if (IMAGE_KINDS.has(f.kind)) { onStep(`     (imagen "${key}": se sube a mano)`); continue }
-    ctx.escritos.push(await fillField(page, f, vars, value, `${block.type}.${key}`))
+    // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
+    // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
+    ctx.escritos.push(await fillField(page, f, vars, value, `${num}. ${block.type}.${key}`))
   }
 }
 
@@ -411,16 +421,11 @@ async function fillField(page, f, vars, value, ref) {
         try { await fmt.selectOption(f.format.value) } catch { /* ese formato no esta: se deja el que haya */ }
       }
     }
-    // Con CKEditor el textarea queda oculto y lo que se escribe es un contenteditable.
-    // Si no hay editor montado (campo de texto plano), se llena el textarea y listo.
-    const editable = editorDe(page, selector)
-    if (await editable.count()) {
-      await editable.click()
-      await editable.evaluate((node) => { node.innerHTML = '' })
-      await page.keyboard.insertText(String(value))
-    } else {
-      await el.fill(String(value))
-    }
+    // Cambiar el formato DESTRUYE el editor y monta otro, y eso no es una peticion de
+    // Drupal: `esperarAjax` no lo ve. Escribir en el medio del cambio es escribirle al
+    // editor que se esta muriendo — el texto se ve un instante y despues no esta.
+    await esperarEditor(page, el)
+    await escribirRich(page, el, String(value))
   } else {
     await el.fill(String(value))
   }
@@ -433,8 +438,14 @@ async function fillField(page, f, vars, value, ref) {
       + `Se esperaba "${String(value).slice(0, 60)}" y hay ${JSON.stringify(puesto)}. `
       + `Elementos con ese selector: ${total}.`)
   }
-  return { selector, f, ref, valor: value }
+  return { selector, f, ref, valor: value, puesto }
 }
+
+// Dos lecturas del mismo campo son "la misma" si dicen lo mismo: los espacios de un
+// cuerpo con formato no cuentan.
+const igual = (a, b) => norma(a) === norma(b)
+const norma = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : v)
+const cita = (v) => (typeof v === 'string' ? `"${v.slice(0, 60)}"` : JSON.stringify(v))
 
 // Lee un campo eligiendo el mismo elemento que se lleno: el que se ve, salvo el cuerpo
 // con CKEditor, que por diseño esta oculto.
@@ -455,18 +466,10 @@ async function leerCampo(page, f, selector) {
 async function loQueQuedo(page, f, selector, el) {
   try {
     if (f.kind === 'checkbox') return await el.isChecked()
-    if (f.kind === 'richtext') {
-      const editable = editorDe(page, selector)
-      if (await editable.count()) return (await editable.first().innerText()).trim()
-    }
+    if (f.kind === 'richtext') return await leerRich(page, el)
     return await el.inputValue()
   } catch { return null }
 }
-
-// El contenteditable de CKEditor que corresponde a ese textarea, si lo hay.
-const editorDe = (page, selector) => page.locator(selector)
-  .locator('xpath=ancestor::*[contains(@class,"js-form-item") or contains(@class,"form-item")][1]')
-  .locator('.ck-editor__editable[contenteditable="true"]')
 
 // "Vacio" para el CMS incluye el valor con el que arrancan los selects de Drupal.
 const esVacio = (v) => v === null || v === undefined || v === '' || v === '_none'

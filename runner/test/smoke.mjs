@@ -232,8 +232,19 @@ try {
     m2.nodeAdd = '/node/add/page?vaciar=1'
     await buildPage({ page, mapping: m2, manifest, save: false, onStep: () => {}, esperaSubform: 4000 })
   } catch (e) { vaciado = e.message }
-  check(/quedaron VACIOS: c_text.field_c_advanced_title/.test(vaciado),
-    'frena si un campo ya escrito quedo vacio al final')
+  check(/1\. c_text\.field_c_advanced_title quedo VACIO/.test(vaciado),
+    `frena si un campo ya escrito quedo vacio al final, y dice de que bloque (${vaciado.slice(0, 90)})`)
+
+  // Y el caso que antes se escapaba: el campo no queda vacio, queda con OTRA cosa. Es lo
+  // que hace un select que se resetea a su opcion por defecto.
+  let cambiado = ''
+  try {
+    const m3 = mapping(site)
+    m3.nodeAdd = '/node/add/page?cambiar=1'
+    await buildPage({ page, mapping: m3, manifest, save: false, onStep: () => {}, esperaSubform: 4000 })
+  } catch (e) { cambiado = e.message }
+  check(/1\. c_text\.field_c_advanced_title decia .* y ahora dice "otra cosa"/.test(cambiado),
+    `y tambien si quedo con otro valor, no solo si quedo vacio (${cambiado.slice(0, 120)})`)
 
   // Una ranura con tope (la pestaña) no acepta un segundo componente.
   let tope = false
