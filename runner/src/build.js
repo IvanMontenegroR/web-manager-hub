@@ -10,7 +10,7 @@
 //   - Las IMAGENES no se tocan (ver README): el editor las sube a mano.
 import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath } from './mapping.js'
 import { esperarAjax, esperarVisible } from './esperas.js'
-import { esperarEditor, escribirRich, leerRich } from './richtext.js'
+import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
 
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
@@ -44,6 +44,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   const url = new URL(mapping.nodeAdd, site + '/').href
 
   onStep(`Abriendo ${url}`)
+  await prepararPagina(page)
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   if (/\/user\/login/.test(page.url())) {
@@ -111,8 +112,15 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   for (const w of ctx.escritos) {
     if (!w || esVacio(w.valor)) continue
     const hay = await leerCampo(page, w.f, w.selector)
-    if (esVacio(hay)) problemas.push(`${w.ref} quedo VACIO`)
-    else if (!igual(hay, w.puesto)) problemas.push(`${w.ref} decia ${cita(w.puesto)} y ahora dice ${cita(hay)}`)
+    // Un cuerpo que se vacia solo no dice nada por si mismo: lo que hace falta saber es
+    // si el editor estaba, por donde se escribio y quien se quedo con el texto.
+    const detalle = w.f.kind === 'richtext'
+      ? ` [se escribio por "${w.rutaRich}"; ${await diagnosticoRich(page, page.locator(w.selector).first())}]`
+      : ''
+    if (esVacio(hay)) problemas.push(`${w.ref} quedo VACIO${detalle}`)
+    else if (!igual(hay, w.puesto)) {
+      problemas.push(`${w.ref} decia ${cita(w.puesto)} y ahora dice ${cita(hay)}${detalle}`)
+    }
   }
   if (problemas.length) {
     throw new Error(`Se llenaron los campos pero al final no quedaron como se escribieron: `
@@ -389,6 +397,7 @@ async function fillField(page, f, vars, value, ref) {
   const selector = resolveSelector(f.sel, vars)
   const total = await page.locator(selector).count()
   if (!total) throw new Error(`No encontre el campo ${ref} (${selector})`)
+  let rutaRich = null
 
   // Un mismo `name` puede estar repetido en la pagina (el formulario deja plantillas
   // escondidas), asi que se busca el que SE VE — despues de abrir los paneles que lo
@@ -417,7 +426,9 @@ async function fillField(page, f, vars, value, ref) {
     // cambiarlo con contenido ya cargado dispara el aviso de Drupal de que se pierde.
     if (f.format) {
       const fmt = page.locator(resolveSelector(f.format.sel, vars)).first()
-      if (await fmt.count()) {
+      // Solo se toca si hace falta: cada cambio destruye el editor y monta otro, y un
+      // remonte de gusto es una ventana mas para que algo salga mal.
+      if (await fmt.count() && (await fmt.inputValue().catch(() => null)) !== f.format.value) {
         try { await fmt.selectOption(f.format.value) } catch { /* ese formato no esta: se deja el que haya */ }
       }
     }
@@ -425,7 +436,12 @@ async function fillField(page, f, vars, value, ref) {
     // Drupal: `esperarAjax` no lo ve. Escribir en el medio del cambio es escribirle al
     // editor que se esta muriendo — el texto se ve un instante y despues no esta.
     await esperarEditor(page, el)
-    await escribirRich(page, el, String(value))
+    const r = await escribirRich(page, el, String(value))
+    rutaRich = r.via
+    if (!r.via) {
+      throw new Error(`No pude escribir ${ref}: ${r.intentos.join('; ')}. `
+        + `Estado del campo: ${await diagnosticoRich(page, el)}`)
+    }
   } else {
     await el.fill(String(value))
   }
@@ -438,7 +454,7 @@ async function fillField(page, f, vars, value, ref) {
       + `Se esperaba "${String(value).slice(0, 60)}" y hay ${JSON.stringify(puesto)}. `
       + `Elementos con ese selector: ${total}.`)
   }
-  return { selector, f, ref, valor: value, puesto }
+  return { selector, f, ref, valor: value, puesto, rutaRich }
 }
 
 // Dos lecturas del mismo campo son "la misma" si dicen lo mismo: los espacios de un

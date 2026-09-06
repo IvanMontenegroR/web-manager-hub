@@ -13,11 +13,14 @@
 //   3. El textarea NO tiene el valor hasta que alguien lo sincroniza. Leerlo para
 //      verificar da vacio aunque el texto este a la vista.
 //
-// Por eso todo pasa por la API del editor: `setData` para escribir, `getData` para leer y
-// `updateSourceElement` para dejar el valor tambien en el textarea. Si no hay editor
-// montado (un formato de texto plano), se escribe el textarea y listo.
+// Como se llega al editor: por el `ckeditorInstance` que CKEditor deja en el elemento
+// editable. Esa es la unica via que no depende de como el sitio registre sus editores —
+// `Drupal.CKEditor5Instances` es de Drupal y puede no estar, o estar y no coincidir.
+// Se prueba igual como segunda opcion, pero el editable manda.
 
-// Espera a que el campo se ASIENTE: o se monta un editor, o el textarea queda a la vista
+const RUTAS = ['editor', 'tecleado', 'textarea']
+
+// Espera a que el campo se ASIENTE: o hay un editor VIVO, o el textarea quedo a la vista
 // (que es lo que pasa con un formato sin editor). Cualquiera de las dos sirve.
 export async function esperarEditor(page, ta, ms = 10000) {
   return ta.evaluate((el, tope) => new Promise((listo) => {
@@ -25,10 +28,9 @@ export async function esperarEditor(page, ta, ms = 10000) {
     const QUIETO = 900
     let visibleDesde = null
     const mirar = () => {
-      const M = window.Drupal && window.Drupal.CKEditor5Instances
-      if (M && typeof M.values === 'function') {
-        for (const c of M.values()) if (c && c.sourceElement === el) return listo('editor')
-      }
+      const cont = el.closest('.js-form-item, .form-item') || el.parentElement
+      const ed = cont && cont.querySelector('.ck-editor__editable')
+      if (ed && ed.ckeditorInstance) return listo('editor')
       // OJO con este "esta a la vista": al DESTRUIR el editor, CKEditor devuelve el
       // textarea a la pantalla por un instante, justo antes de que monte el siguiente.
       // Creerle a ese instante es escribir en el hueco entre un editor y el otro, que es
@@ -47,56 +49,63 @@ export async function esperarEditor(page, ta, ms = 10000) {
   }), ms).catch(() => null)
 }
 
-// Escribe el valor. Devuelve POR DONDE lo escribio, que es lo que hace falta saber cuando
-// algo sale mal: no es lo mismo que haya fallado la API del editor que el textarea.
+// Escribe el valor y COMPRUEBA que haya quedado, ruta por ruta. Si la primera no pega, se
+// prueba la siguiente en vez de dar el campo por escrito: un cuerpo vacio no se nota
+// hasta que alguien abre la pagina en el sitio.
+// Devuelve { via, intentos } — `via` null significa que ninguna funciono.
 export async function escribirRich(page, ta, valor) {
-  const html = aHtml(valor)
+  const intentos = []
+  for (const via of RUTAS) {
+    const pudo = await porRuta(page, ta, String(valor), via)
+    if (!pudo) { intentos.push(`${via}: no disponible`); continue }
+    const leido = await leerRich(page, ta)
+    if (leido) return { via, intentos }
+    intentos.push(`${via}: escribio y quedo vacio`)
+  }
+  return { via: null, intentos }
+}
 
-  const porApi = await ta.evaluate((el, h) => {
-    // Drupal guarda las instancias en un Map global y le pone al textarea un
-    // `data-ckeditor5-id`, pero lo que no miente es el `sourceElement` del propio editor.
-    const M = window.Drupal && window.Drupal.CKEditor5Instances
-    let ed = null
-    if (M && typeof M.values === 'function') {
-      for (const c of M.values()) if (c && c.sourceElement === el) { ed = c; break }
-      const id = ed ? null : el.getAttribute('data-ckeditor5-id')
-      if (id != null) ed = M.get(id) || M.get(Number(id)) || null
-    }
-    if (!ed) return null
-    try {
-      ed.setData(h)
-      // Deja el valor tambien en el textarea. Drupal lo hace al enviar el formulario,
-      // pero el runner necesita poder LEERLO antes para verificar.
-      if (typeof ed.updateSourceElement === 'function') ed.updateSourceElement()
-      return 'editor'
-    } catch { return null }
-  }, html).catch(() => null)
-  if (porApi) return porApi
-
-  // Sin API: se TECLEA en el contenteditable. Nunca se le toca el innerHTML — eso es lo
-  // que rompia el editor.
-  const editable = editableDe(ta)
-  if (await editable.count()) {
-    await editable.first().click()
-    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A')
-    await page.keyboard.insertText(String(valor))
-    return 'tecleado'
+async function porRuta(page, ta, valor, via) {
+  if (via === 'editor') {
+    return ta.evaluate((el, h) => {
+      const ed = window.__runnerCk(el)
+      if (!ed) return false
+      try {
+        ed.setData(h)
+        // Deja el valor tambien en el textarea. Drupal lo hace al enviar el formulario,
+        // pero el runner necesita poder LEERLO antes para verificar.
+        if (typeof ed.updateSourceElement === 'function') ed.updateSourceElement()
+        return true
+      } catch { return false }
+    }, aHtml(valor)).catch(() => false)
   }
 
-  await ta.fill(String(valor))
-  return 'textarea'
+  if (via === 'tecleado') {
+    // Se TECLEA en el contenteditable. Nunca se le toca el innerHTML — eso es lo que le
+    // rompe a CKEditor el mapa entre su modelo y el DOM.
+    const editable = editableDe(ta)
+    if (!(await editable.count())) return false
+    try {
+      await editable.first().click({ timeout: 3000 })
+      await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A')
+      await page.keyboard.insertText(valor)
+      return true
+    } catch { return false }
+  }
+
+  // El textarea, aunque este escondido: `fill` exige que se vea y aca eso no sirve.
+  return ta.evaluate((el, v) => {
+    el.value = v
+    el.dispatchEvent(new Event('input', { bubbles: true }))
+    el.dispatchEvent(new Event('change', { bubbles: true }))
+    return true
+  }, valor).catch(() => false)
 }
 
 // Lo que hay AHORA en el campo, como texto plano.
 export async function leerRich(page, ta) {
   const porApi = await ta.evaluate((el) => {
-    const M = window.Drupal && window.Drupal.CKEditor5Instances
-    let ed = null
-    if (M && typeof M.values === 'function') {
-      for (const c of M.values()) if (c && c.sourceElement === el) { ed = c; break }
-      const id = ed ? null : el.getAttribute('data-ckeditor5-id')
-      if (id != null) ed = M.get(id) || M.get(Number(id)) || null
-    }
+    const ed = window.__runnerCk(el)
     if (!ed) return null
     try { return ed.getData() } catch { return null }
   }).catch(() => null)
@@ -107,10 +116,59 @@ export async function leerRich(page, ta) {
   return textoPlano(await ta.inputValue().catch(() => ''))
 }
 
+// Todo lo que se sabe del campo, para cuando algo falla. Sin esto, un "quedo vacio" no
+// dice si el problema fue encontrar el editor, escribirle, o que se lo comio despues.
+export async function diagnosticoRich(page, ta) {
+  const d = await ta.evaluate((el) => {
+    const cont = el.closest('.js-form-item, .form-item') || el.parentElement
+    const editable = cont && cont.querySelector('.ck-editor__editable')
+    const M = window.Drupal && window.Drupal.CKEditor5Instances
+    const ed = window.__runnerCk(el)
+    let enEditor = null
+    if (ed) { try { enEditor = ed.getData() } catch (e) { enEditor = 'ERROR: ' + e.message } }
+    return {
+      editable: !editable ? 'no hay' : (editable.ckeditorInstance ? 'con instancia' : 'SIN instancia'),
+      mapDrupal: M ? `${M.size} instancia(s)` : 'no existe',
+      textarea: el.offsetParent === null ? 'escondido' : 'a la vista',
+      enEditor,
+      enEditable: editable ? editable.innerText : null,
+      enTextarea: el.value,
+    }
+  }).catch((e) => ({ error: e.message }))
+  const corto = (v) => (v == null ? '—' : String(v).replace(/\s+/g, ' ').trim().slice(0, 40))
+  return `editable ${d.editable}, Map de Drupal ${d.mapDrupal}, textarea ${d.textarea}, `
+    + `editor dice "${corto(d.enEditor)}", editable dice "${corto(d.enEditable)}", `
+    + `textarea dice "${corto(d.enTextarea)}"`
+}
+
 // El contenteditable que CKEditor pone al lado del textarea, si lo hay.
 const editableDe = (ta) => ta
   .locator('xpath=ancestor::*[contains(@class,"js-form-item") or contains(@class,"form-item")][1]')
   .locator('.ck-editor__editable[contenteditable="true"]')
+
+// La busqueda del editor se instala UNA vez por pagina para no repetirla en cada
+// `evaluate`. Va como init script: corre antes que el JS del sitio, en cada navegacion.
+export async function prepararPagina(page) {
+  const buscador = () => {
+    window.__runnerCk = (el) => {
+      // 1. El propio CKEditor deja la instancia colgada del elemento editable.
+      const cont = el.closest('.js-form-item, .form-item') || el.parentElement
+      const editable = cont && cont.querySelector('.ck-editor__editable')
+      if (editable && editable.ckeditorInstance) return editable.ckeditorInstance
+      // 2. El registro de Drupal, por si el editable todavia no esta.
+      const M = window.Drupal && window.Drupal.CKEditor5Instances
+      if (M && typeof M.values === 'function') {
+        for (const c of M.values()) if (c && c.sourceElement === el) return c
+        const id = el.getAttribute('data-ckeditor5-id')
+        if (id != null) return M.get(id) || M.get(Number(id)) || null
+      }
+      return null
+    }
+  }
+  await page.addInitScript(buscador)
+  // La pagina puede estar ya cargada (el navegador queda abierto entre corridas).
+  await page.evaluate(buscador).catch(() => {})
+}
 
 export const aHtml = (texto) => String(texto)
   .split(/\n{2,}/)

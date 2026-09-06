@@ -20,7 +20,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openBrowser } from '../src/browser.js'
-import { esperarEditor, escribirRich, leerRich } from '../src/richtext.js'
+import { esperarEditor, escribirRich, leerRich, prepararPagina } from '../src/richtext.js'
 
 const CANDIDATOS = [
   process.env.RUNNER_CKEDITOR,
@@ -110,17 +110,17 @@ page.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) })
 const TEXTO = 'Adoptar es una decisión para toda la vida del animal.'
 
 try {
+  // Igual que el motor: la busqueda del editor se instala antes de navegar.
+  await prepararPagina(page)
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => window.__listo === true)
   const ta = page.locator('textarea[name="field_c_text[0][value]"]').first()
 
   // Lo que hace el runner: cambia el formato y escribe. El cambio destruye el editor.
   await page.locator('#formato').selectOption('rich_text')
-  const via = await (async () => {
-    await esperarEditor(page, ta)
-    return escribirRich(page, ta, TEXTO)
-  })()
-  check(via === 'editor', `escribe por la API del editor (${via})`)
+  await esperarEditor(page, ta)
+  const r = await escribirRich(page, ta, TEXTO)
+  check(r.via === 'editor', `escribe por la API del editor (${r.via}; ${r.intentos.join(', ') || 'sin tropiezos'})`)
 
   // Lo importante: que siga ahi cuando se termina de armar todo, no un instante despues.
   await page.waitForTimeout(1200)
