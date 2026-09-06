@@ -71,13 +71,18 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [] }
+  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [], pendientes: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
+
+  onStep('Armando la estructura…')
   let n = 0
   for (const block of manifest.blocks) {
     n += 1
     await addBlock(ctx, block, `${n}`, root)
   }
+
+  onStep('Llenando los campos…')
+  for (const p of ctx.pendientes) await llenarBloque(ctx, p)
 
   // Repaso final. Agregar un bloque hace que Drupal re-dibuje el formulario, asi que un
   // campo que quedo bien al escribirlo puede haberse vaciado despues. Mejor enterarse
@@ -156,22 +161,11 @@ async function addBlock(ctx, block, num, holder) {
         + 'servidor (5xx), o sea que tardo demasiado. Volve a probar en un rato.' : ''))
   }
 
-  // Desplegables del formulario (Optional fields, Avanzado, Classy, Atributos): si el
-  // campo vive adentro, hay que abrirlos antes de escribir. Los selectores ya traen el
-  // delta, asi que apuntan a UNO solo; el que no exista en este tipo se saltea.
-  for (const tpl of [...(mapping.paragraphs.open || []), ...(def.open || [])]) {
-    const d = page.locator(resolveSelector(tpl, vars)).first()
-    if (!(await d.count())) continue
-    if (await d.evaluate((el) => el.tagName === 'DETAILS' && el.open)) continue
-    await d.locator('> summary').first().click()
-  }
-
-  for (const [key, value] of Object.entries(block.fields || {})) {
-    const f = def.fields?.[key]
-    if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
-    if (IMAGE_KINDS.has(f.kind)) { onStep(`     (imagen "${key}": se sube a mano)`); continue }
-    ctx.escritos.push(await fillField(page, f, vars, value, `${block.type}.${key}`))
-  }
+  // Los campos NO se llenan aca. Cada alta hace que Drupal re-dibuje el formulario, y
+  // eso borra lo que se haya escrito antes: si se llena sobre la marcha, la pagina
+  // termina armada y vacia. Asi que primero se arma TODA la estructura y despues se
+  // llena de una, cuando ya no queda ningun AJAX por delante.
+  ctx.pendientes.push({ block, def, vars, num })
 
   // Contenedores: sus hijos van adentro del slot que les toca, no en la lista del nodo.
   if (block.children?.length) {
@@ -207,6 +201,30 @@ async function addBlock(ctx, block, num, holder) {
         },
       })
     }
+  }
+}
+
+// Llena los campos de un paragraph ya agregado. Antes abre los desplegables del
+// formulario (Optional fields, Avanzado, Classy, Atributos), porque un campo que vive
+// adentro no se puede tocar con el panel cerrado.
+async function llenarBloque(ctx, { block, def, vars, num }) {
+  const { mapping, page, onStep } = ctx
+  const campos = Object.entries(block.fields || {})
+  if (!campos.length) return
+
+  for (const tpl of [...(mapping.paragraphs.open || []), ...(def.open || [])]) {
+    const d = page.locator(resolveSelector(tpl, vars)).first()
+    if (!(await d.count())) continue
+    if (await d.evaluate((el) => el.tagName === 'DETAILS' && el.open)) continue
+    await d.locator('> summary').first().click()
+  }
+
+  onStep(`  ${num}. ${def.label || block.type}: ${campos.length} campo(s)`)
+  for (const [key, value] of campos) {
+    const f = def.fields?.[key]
+    if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
+    if (IMAGE_KINDS.has(f.kind)) { onStep(`     (imagen "${key}": se sube a mano)`); continue }
+    ctx.escritos.push(await fillField(page, f, vars, value, `${block.type}.${key}`))
   }
 }
 
