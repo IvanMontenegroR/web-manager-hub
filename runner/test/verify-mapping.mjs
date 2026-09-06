@@ -111,17 +111,21 @@ for (const { bundle, v } of positions()) {
     if (!exists(res(tpl, v))) ausentes.push(`${bundle}: ${/"([^"]+)"/.exec(res(tpl, v))?.[1]}`)
   }
   for (const s of def.children?.slots || []) {
-    // Una ranura con tope LLENA no dibuja el widget de alta: Drupal lo esconde cuando la
-    // cardinalidad esta cubierta. Ahi sus selectores no se pueden verificar con ESTE
-    // volcado — no es que falten, es que no hay nada que mirar.
-    if (s.max != null && hasDsel(res(s.dsel, { ...v, delta: s.max - 1 }))) {
+    // El boton de alta se prueba con el bundle que el volcado tenga en ese slot.
+    const kid = bundleAt(res(s.dsel, { ...v, delta: 0 }))
+    const pruebas = [
+      s.add.open && [res(s.add.open, v), 'abrir el desplegable de tipos'],
+      kid && [res(s.add.button, { ...v, bundle: kid }), `agregar ${kid}`],
+    ].filter(Boolean)
+    // Una ranura con tope LLENA puede no traer el widget de alta: Drupal lo esconde
+    // cuando la cardinalidad esta cubierta. Si no esta, no es que falte — es que en este
+    // volcado no hay nada que mirar. Si esta (una pestaña vacia), se verifica igual.
+    const lleno = s.max != null && hasDsel(res(s.dsel, { ...v, delta: s.max - 1 }))
+    if (lleno && !pruebas.some(([sel]) => exists(sel))) {
       sinWidget.push(`${bundle}.${s.label}`)
       continue
     }
-    if (s.add.open) chk(res(s.add.open, v), `${bundle}.${s.label}: abrir el modal`)
-    // El boton de alta se prueba con el bundle que el volcado tenga en ese slot.
-    const kid = bundleAt(res(s.dsel, { ...v, delta: 0 }))
-    if (kid) chk(res(s.add.button, { ...v, bundle: kid }), `${bundle}.${s.label}: agregar ${kid}`)
+    for (const [sel, ref] of pruebas) chk(sel, `${bundle}.${s.label}: ${ref}`)
   }
 }
 

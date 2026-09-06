@@ -167,10 +167,14 @@ Drupal ni siquiera dibuja el boton de agregar. Por eso la ranura declara `"max":
 motor frena antes de tocar el navegador si el manifiesto le pone dos. El hub hace lo
 mismo del otro lado: con la pestaña llena no ofrece el boton de agregar.
 
-Las dos ranuras se agregan distinto, y el mapping lo dice: la lista de pestañas acepta un
-solo bundle, asi que el boton "Añadir Tab" esta suelto; el contenido de una pestaña acepta
-cualquier componente, asi que los botones estan detras del modal de paragraphs_ee, igual
-que las columnas de un layout.
+Las dos ranuras se agregan distinto, y el mapping lo dice. La lista de pestañas acepta un
+solo bundle, asi que el boton "Añadir Tab" esta suelto. El contenido de una pestaña acepta
+nueve tipos (`banner`, `banner_wrapper`, `block`, `html`, `ln_c_cardgrid`,
+`c_externalvideo`, `c_image`, `c_sideimagetext`, `c_text` — **no** los layouts, ni otro
+Tabs, ni un Accordion) y estan en un **dropbutton de Gin**: el primero a la vista y los
+otros ocho plegados detras del toggle, que hay que abrir antes de poder clickearlos. No es
+el modal de paragraphs_ee que usan las columnas de un layout: son tres formas distintas de
+agregar y cada ranura declara la suya.
 
 Dos cosas mas que el formulario real obliga y el mapping declara: los campos de cuerpo
 arrancan en un **formato de texto que no admite HTML**, asi que el formato se cambia
@@ -184,13 +188,15 @@ npm test
 ```
 
 Levanta un Drupal de mentira que reproduce las formas del formulario real de Paragraphs
-(los `name` con delta y subform, los `id` con sufijo aleatorio, el alta por AJAX, las dos
+(los `name` con delta y subform, los `id` con sufijo aleatorio, el alta por AJAX, las tres
 formas de agregar — desplegable+boton en el nodo, un boton por tipo detras de un modal en
-los contenedores —, los contenedores con varios slots, los `<details>` plegados y CKEditor
-sobre un textarea) y verifica que el motor sabe agregar, esperar, abrir desplegables,
-cambiar el formato de texto, llenar texto / rich text / selects / checkboxes, anidar hijos
-en el slot que les toca, dejar la pagina despublicada, escribir el alias, leer el node id
-y **frenar** ante un campo o un slot que no existe.
+las columnas de un layout, y el dropbutton de Gin con los tipos plegados en una pestaña —,
+los contenedores con varios slots, los `<details>` plegados y CKEditor sobre un textarea)
+y verifica que el motor sabe agregar, esperar, abrir desplegables, cambiar el formato de
+texto, llenar texto / rich text / selects / checkboxes, anidar hijos en el slot que les
+toca — incluido un contenedor adentro de otro, que es la forma del Tabs —, dejar la pagina
+despublicada, escribir el alias, leer el node id y **frenar** ante un campo, un slot que no
+existe o una ranura pasada de su tope.
 
 Eso prueba el MOTOR. Para probar el MAPPING sin tocar el CMS esta el otro:
 
@@ -212,7 +218,7 @@ Lo que ninguno de los dos puede decir es si el CMS acepta la pagina: eso solo lo
 El mapping de Purina LATAM (`mapping/purina-latam.json`) esta escrito a partir del HTML
 real de `/node/add/dsu_component_page` en **preprod MX**. Son dos volcados: uno con 8
 paragraphs sueltos (**275 selectores, 0 sin encontrar**) y otro con un Tabs de 3 pestañas
-(**130 selectores, 0 sin encontrar**). `npm test` pasa.
+(**132 selectores, 0 sin encontrar**). `npm test` pasa.
 
 Cubre 12 paragraphs: `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`,
 `ln_c_cardgrid` (+ `ln_c_grid_card_item`), `accordion_grid` (+ `accordion_item`),
@@ -221,13 +227,9 @@ Cubre 12 paragraphs: `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`,
 con uno de cada uno agregado para escribirlos, y hasta entonces un manifiesto que los pida
 se frena solo.
 
-**Lo unico sin verificar es el boton que mete el componente adentro de una pestaña.** En
-el CMS `field_component` es de cardinalidad **1**, y con la ranura llena Drupal esconde el
-widget de alta — en el volcado las tres pestañas ya venian con su componente, asi que no
-hay nada que mirar. Los selectores estan escritos con el mismo patron que las columnas de
-un layout (ese si verificado); si el CMS los nombra distinto, el motor frena con "No
-aparecio el boton para agregar" y se corrigen en el mapping. Para cerrarlo alcanza con un
-volcado de un Tabs con **una pestaña vacia**.
+Los 12 estan verificados contra el HTML real, el alta de una pestaña incluida: hizo falta
+un volcado extra de una pestaña **vacia**, porque con la ranura llena Drupal esconde el
+widget de alta y no habia nada que mirar.
 
 **Falta la primera corrida contra el CMS.** Todo lo verificable sin conexion esta
 verificado; lo que no se puede saber offline es si Drupal acepta la pagina que resulta.

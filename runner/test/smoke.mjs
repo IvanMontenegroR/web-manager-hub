@@ -1,7 +1,8 @@
 // Prueba del MOTOR contra el Drupal de mentira: agrega paragraphs por delta, espera el
 // AJAX, abre los desplegables, cambia el formato de texto antes de escribir, llena
 // texto / rich text / selects / checkboxes, y anida hijos en los DOS slots de un
-// contenedor (con modal) y en el slot sin modal de otro.
+// contenedor (detras del modal) y en el slot con tope de otro (detras del dropbutton,
+// que es la forma de una pestaña).
 // Despues lee el DOM y verifica que cada valor quedo donde tenia que quedar.
 import { rmSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -14,17 +15,25 @@ import { validateManifest } from '../src/manifest.js'
 const CHROME = process.env.RUNNER_CHROME || '/opt/pw-browsers/chromium'
 
 // Un slot del contenedor, escrito como en el mapping real: las variables de la fila
-// PADRE resueltas, el {delta} del hijo pendiente.
-const slot = (field, modal) => ({
-  label: field,
-  dsel: `{dsel}-subform-${field.replaceAll('_', '-')}-{delta}`,
-  base: `{base}[${field}][{delta}][subform]`,
-  add: {
-    mode: 'buttons',
-    ...(modal ? { open: `input[name="button_add_modal"][data-drupal-selector="{dsel}-subform-${field.replaceAll('_', '-')}-add-more-add-modal-form-area-add-more"]` } : {}),
-    button: `button[name="{npath}_subform_${field}_{bundle}_add_more"]`,
-  },
-})
+// PADRE resueltas, el {delta} del hijo pendiente. `modo` es como se abre la lista de
+// tipos: el modal de paragraphs_ee o el dropbutton de Gin (el de las pestañas).
+const slot = (field, modo) => {
+  const fd = field.replaceAll('_', '-')
+  const abre = {
+    modal: `input[name="button_add_modal"][data-drupal-selector="{dsel}-subform-${fd}-add-more-add-modal-form-area-add-more"]`,
+    drop: `[data-drupal-selector="{dsel}-subform-${fd}-add-more"] button.dropbutton__toggle`,
+  }
+  return {
+    label: field,
+    dsel: `{dsel}-subform-${fd}-{delta}`,
+    base: `{base}[${field}][{delta}][subform]`,
+    add: {
+      mode: 'buttons',
+      ...(abre[modo] ? { open: abre[modo] } : {}),
+      button: `button[name="{npath}_subform_${field}_{bundle}_add_more"]`,
+    },
+  }
+}
 
 const mapping = (site) => ({
   name: 'fake', site,
@@ -68,13 +77,14 @@ const mapping = (site) => ({
           field_c_cardgrid_view_mode: { sel: 'select[name="{base}[field_c_cardgrid_view_mode]"]', kind: 'select' },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
         },
-        // `max: 1` es lo que hace una pestaña: adentro entra UN componente y no mas.
-        children: { slots: [{ ...slot('field_c_subitems', false), max: 1 }] },
+        // Igual que una pestaña del CMS: UN solo componente (`max: 1`) y los tipos
+        // plegados detras del dropbutton de Gin.
+        children: { slots: [{ ...slot('field_c_subitems', 'drop'), max: 1 }] },
       },
       layout_columns_2: {
         label: 'Layout: 2 columnas', value: 'layout_columns_2',
         fields: { 'advanced.section_id': { sel: 'input[name="{base}[section_id][0][value]"]' } },
-        children: { slots: [slot('field_column_first', true), slot('field_column_second', true)] },
+        children: { slots: [slot('field_column_first', 'modal'), slot('field_column_second', 'modal')] },
       },
     },
   },
@@ -153,7 +163,7 @@ try {
   check(dom.tag === 'h2', 'select por valor de maquina (h2)')
   check(dom.classy === 'bg_brand_01', 'select adentro de Classy')
   check(dom.viewMode === 'slider-default-card', 'view mode del card grid')
-  check(dom.cardHijo, 'hijo en un slot SIN modal (card grid)')
+  check(dom.cardHijo, 'hijo detras del dropbutton, plegado (como una pestaña)')
   check(dom.sectionId === 'cuidados', 'campo adentro de Avanzado (plegado)')
   check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
   check(dom.col2 === 'grid-cards', 'hijo en la columna 2 (slot 1, con modal)')

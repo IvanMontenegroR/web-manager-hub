@@ -3,8 +3,9 @@
 //   - los `name` con delta y subform, y los `id` con sufijo aleatorio (por eso el motor
 //     se apoya en `name=` y `data-drupal-selector=`)
 //   - el alta por AJAX: el subform no existe hasta que se lo pide
-//   - las dos formas de agregar: desplegable + boton (el nodo) y un boton por tipo
-//     detras de un modal (los contenedores)
+//   - las tres formas de agregar: desplegable + boton (el nodo), un boton por tipo detras
+//     de un modal (las columnas de un layout) y el dropbutton de Gin, donde el primer
+//     tipo esta a la vista y el resto plegado detras del toggle (adentro de una pestaña)
 //   - contenedores con VARIOS slots (las dos columnas de un layout)
 //   - los <details> plegados, con la variante "widget-" que usa field_group
 //   - el select de formato de texto arrancando en uno que NO admite HTML
@@ -17,7 +18,8 @@ import { createServer } from 'node:http'
 const FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear pagina</title>
 <style>body{font:14px system-ui;margin:24px} .js-form-item{margin:8px 0}
 details{margin:8px 0;padding:6px;border:1px solid #ccc} details:not([open]) .js-form-item{display:none}
-.row{border:1px solid #ddd;padding:10px;margin:8px 0} .modal{display:none} .modal.on{display:block}</style></head><body>
+.row{border:1px solid #ddd;padding:10px;margin:8px 0} .modal{display:none} .modal.on{display:block}
+.drop .secondary-action{display:none} .drop.open .secondary-action{display:inline-block}</style></head><body>
 <h1>Crear pagina</h1>
 <form id="f" onsubmit="return false">
   <div class="js-form-item"><label for="t">Titulo</label>
@@ -86,28 +88,36 @@ function subform(type, base, dsel, npath) {
       <summary>Optional fields</summary>
       <div class="js-form-item"><label>Titulo</label>
         <input type="text" name="\${base}[field_c_advanced_title][0][value]"></div></details>
-    \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', false)}\`
+    \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', 'drop')}\`
 
   // Layout: DOS slots, cada uno con su modal de tipos.
   return advanced
-    + slotHtml('Columna 1', base, dsel, npath, 'field_column_first', true)
-    + slotHtml('Columna 2', base, dsel, npath, 'field_column_second', true)
+    + slotHtml('Columna 1', base, dsel, npath, 'field_column_first', 'modal')
+    + slotHtml('Columna 2', base, dsel, npath, 'field_column_second', 'modal')
 }
 
-// Una ranura de un contenedor. Con modal, el boton de cada tipo esta tapado hasta que
-// se abre; sin modal (un solo bundle permitido) el boton esta suelto, como en el CMS.
-function slotHtml(label, base, dsel, npath, field, modal) {
+// Una ranura de un contenedor, en las tres formas que usa el CMS:
+//   'modal' — los botones tapados hasta que se abre el modal de paragraphs_ee
+//   'drop'  — dropbutton de Gin: el primero a la vista, el resto plegado tras el toggle
+//   'plain' — un solo bundle permitido, el boton suelto
+function slotHtml(label, base, dsel, npath, field, modo) {
   const fd = field.replace(/_/g, '-')
-  const types = ['c_text', 'ln_c_cardgrid']
-  const btns = types.map((t) =>
-    \`<button type="button" name="\${npath}_subform_\${field}_\${t}_add_more">\${t}</button>\`).join('')
+  // El primero queda a la vista y el resto plegado, asi que c_text va segundo a proposito:
+  // es el que agrega la prueba, y solo llega a el si abrio el toggle.
+  const types = ['ln_c_cardgrid', 'c_text']
+  const btns = types.map((t, i) =>
+    \`<button type="button" class="\${modo === 'drop' && i ? 'secondary-action' : ''}"
+       name="\${npath}_subform_\${field}_\${t}_add_more">\${t}</button>\`).join('')
   return \`<fieldset class="slot" data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
       data-npath="\${npath}_subform_\${field}">
     <legend>\${label}</legend><div class="slotrows"></div>
-    \${modal ? \`<input type="submit" name="button_add_modal"
+    \${modo === 'modal' ? \`<input type="submit" name="button_add_modal"
         data-drupal-selector="\${dsel}-subform-\${fd}-add-more-add-modal-form-area-add-more"
         value="Add Component to Column">\` : ''}
-    <div class="modal\${modal ? '' : ' on'}">\${btns}</div></fieldset>\`
+    <div class="\${modo === 'drop' ? 'drop' : 'modal'}\${modo === 'modal' ? '' : ' on'}"
+         data-drupal-selector="\${dsel}-subform-\${fd}-add-more">
+      \${modo === 'drop' ? '<button type="button" class="dropbutton__toggle">Mas</button>' : ''}
+      \${btns}</div></fieldset>\`
 }
 
 // El "AJAX" de mentira: el subform aparece un rato despues de pedirlo, como en Drupal.
@@ -127,13 +137,17 @@ function wire(scope) {
     if (s.dataset.wired) return
     s.dataset.wired = '1'
     const list = s.querySelector('.slotrows')
+    const box = s.querySelector('.modal, .drop')
     const opener = s.querySelector('input[name="button_add_modal"]')
-    if (opener) opener.addEventListener('click', () => s.querySelector('.modal').classList.add('on'))
-    s.querySelectorAll('.modal button').forEach((b) => b.addEventListener('click', () => {
+    if (opener) opener.addEventListener('click', () => box.classList.add('on'))
+    const toggle = box.querySelector('.dropbutton__toggle')
+    if (toggle) toggle.addEventListener('click', () => box.classList.toggle('open'))
+    box.querySelectorAll('button[name]').forEach((b) => b.addEventListener('click', () => {
       const type = b.name.replace(s.dataset.npath + '_', '').replace('_add_more', '')
       const d = list.children.length
       addTo(list, s.dataset.base + '[' + d + '][subform]', s.dataset.slot + '-' + d, s.dataset.npath + '_' + d, type)
-      if (opener) s.querySelector('.modal').classList.remove('on')
+      if (opener) box.classList.remove('on')
+      box.classList.remove('open')
     }))
   })
 }

@@ -1043,8 +1043,8 @@
               "base": "{base}[field_component][{delta}][subform]",
               "add": {
                 "mode": "buttons",
-                "_": "SIN VERIFICAR contra un volcado: en el HTML que tenemos las tres pestañas ya venian con su componente, y con la ranura llena Drupal esconde el widget de alta. Los dos selectores salen del MISMO patron que las columnas de un layout, que si esta verificado. Si el CMS los escribe de otra forma, el motor frena con \"No aparecio el boton para agregar\" y se corrigen aca.",
-                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-component-add-more-add-modal-form-area-add-more\"]",
+                "_": "No es el modal de paragraphs_ee sino un DROPBUTTON de Gin: el primer tipo (Banner) queda a la vista y los otros ocho estan plegados detras del toggle, asi que hay que abrirlo antes de poder clickear. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. NO entran los layouts, ni otro comp_tabs, ni un accordion_grid.",
+                "open": "[data-drupal-selector=\"{dsel}-subform-field-component-add-more\"] button.dropbutton__toggle",
                 "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
               }
             }
