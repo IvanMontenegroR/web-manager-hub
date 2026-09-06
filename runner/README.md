@@ -38,26 +38,44 @@ npm install
 
 ## Uso
 
-**1. Loguearse una vez.** Se abre una ventana, entras con tu usuario como siempre. La
-sesion queda en el perfil del runner (`.profile/`, que no se versiona). El runner nunca
-ve ni guarda tu contraseña.
+### Con la interfaz (lo normal)
+
+**Doble clic** en `Abrir page-runner.command` (Mac) o `Abrir page-runner.bat` (Windows).
+Se abre una pagina en tu navegador de todos los dias y ahi esta todo: iniciar sesion,
+elegir la pagina, probarla sin guardar, crearla. No hace falta terminal.
+
+La primera vez instala las dependencias solo, y si falta Node.js te lo dice en castellano
+en vez de tirar un error.
+
+Los tres pasos de la pantalla:
+
+1. **Sesion en Drupal.** "Iniciar sesion" abre una ventana de Chrome. Entras con tu
+   usuario como siempre, la dejas abierta y volves a tocar "Ya me logueé". Se hace una
+   sola vez: la sesion queda en el perfil del runner y el runner nunca ve tu contraseña.
+2. **Elegis la pagina.** Lista lo que haya en `manifests/`, con su titulo, cuantos
+   bloques tiene y su ruta. Un manifiesto que pida un paragraph que el mapping todavia no
+   conoce aparece bloqueado y dice cual falta, en vez de fallar a mitad de camino. Tambien
+   se puede pegar un manifiesto que te haya dado el hub y queda guardado en esa carpeta.
+3. **Dos botones.** *Probar sin guardar* llena el formulario para que lo mires y **no crea
+   nada** en el CMS. *Crear borrador* lo guarda despublicado y te da el link para revisar,
+   subir las imagenes y publicar. Los pasos se ven en vivo mientras corre.
+
+### Por terminal
+
+Lo mismo, para quien lo prefiera o para automatizar:
 
 ```bash
-node src/cli.js login --mapping mapping/purina-latam.json
+node src/cli.js ui                                        # la interfaz
+node src/cli.js login   --mapping mapping/purina-latam.json
+node src/cli.js build   manifests/ejemplo-tabs.json --mapping mapping/purina-latam.json
+node src/cli.js build   manifests/*.json --mapping mapping/purina-latam.json --save
 ```
 
-**2. Armar una pagina.** Sin `--save` llena el formulario y **deja la ventana abierta**
-para que lo mires: no escribe nada en el CMS y la cerras vos cuando terminaste. Con
-`--save` aprieta Guardar, deja el borrador despublicado y cierra sola.
+Sin `--save` llena el formulario y **deja la ventana abierta** para que lo mires: no
+escribe nada en el CMS. Con `--save` aprieta Guardar y deja el borrador despublicado.
 
-```bash
-node src/cli.js build manifests/ejemplo-tenencia.json --mapping mapping/purina-latam.json
-node src/cli.js build manifests/ejemplo-tabs.json --mapping mapping/purina-latam.json
-node src/cli.js build manifests/*.json --mapping mapping/purina-latam.json --save
-```
-
-Opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`
-(mantiene la ventana abierta tambien con `--save`).
+Si hay un solo archivo en `mapping/`, `--mapping` se puede omitir.
+Otras opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
 
 **Si el CMS cambia** (un campo nuevo, un paragraph nuevo), hay dos formas de rehacer el
 mapping. `inspect` lo vuelca desde el sitio — solo lee, no escribe nada:
@@ -106,6 +124,11 @@ npm run verify -- mapping/purina-latam.json form.html
   ids se crearon para poder borrarlos.
 - **Codigo:** fuente legible, sin ofuscar y sin empaquetar en un ejecutable, para que se
   pueda revisar entero. Son unos pocos cientos de lineas.
+- **La interfaz es un servidor LOCAL**, no un sitio: escucha solo en `127.0.0.1`, nunca en
+  la red. Cada arranque genera un token aleatorio que va en la URL y que toda llamada
+  tiene que repetir; se rechaza cualquier pedido con un `Origin` de otro lado (para que
+  una web abierta en otra pestaña no pueda darle ordenes) y cualquier `Host` que no sea
+  `127.0.0.1` (rebinding de DNS). Esta cubierto por `npm test`.
 
 Conviene preguntar tambien si en la organizacion esto cae bajo gobernanza de **RPA**
 (automatizacion de interfaces), que suele ser un proceso distinto al de aprobar un
@@ -114,7 +137,10 @@ script comun.
 ## Estructura
 
 ```
-src/cli.js             comandos (login | inspect | build)
+Abrir page-runner.*    doble clic: instala si falta y abre la interfaz
+src/cli.js             comandos (ui | login | inspect | build)
+src/ui.js              servidor local de la interfaz (solo 127.0.0.1, con token)
+src/ui/app.html        la interfaz
 src/browser.js         abre Chrome/Edge del sistema con perfil propio
 src/manifest.js        formato del manifiesto + validacion
 src/mapping.js         formato del mapping + resolucion de selectores
@@ -125,6 +151,7 @@ mapping/               un archivo por sitio
 manifests/             las paginas a armar
 test/fake-drupal.mjs   Drupal de mentira con las formas del real
 test/smoke.mjs         prueba del motor
+test/ui.mjs            prueba del servidor de la interfaz, permisos incluidos
 test/verify-mapping.mjs prueba del mapping contra un volcado del HTML
 ```
 

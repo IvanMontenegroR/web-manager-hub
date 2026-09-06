@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // page-runner — arma paginas en Drupal desde un manifiesto JSON.
 //
+//   page-runner ui       --mapping <f>            la interfaz, en el navegador
 //   page-runner login    --mapping <f>            abre el sitio para loguearte a mano
 //   page-runner inspect  --mapping <f> [--url u]  vuelca la estructura del formulario
 //   page-runner build    <manifiesto...> --mapping <f> [--save]
@@ -10,12 +11,24 @@
 //   --profile <dir>         (default .profile)    perfil donde queda la sesion
 //   --slowmo <ms>           (default 120)         despacio: se sigue a ojo y no atropella
 //   --out <archivo>         salida de inspect
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
 import { openBrowser, isLoggedIn } from './browser.js'
 import { loadMapping, missingTypes } from './mapping.js'
 import { loadManifest, countBlocks } from './manifest.js'
 import { inspectForm, summarize } from './inspect.js'
 import { buildPage } from './build.js'
 import { logRun } from './log.js'
+import { startUi, abrirEnNavegador } from './ui.js'
+
+// Si en mapping/ hay UN solo archivo, se asume ese: quien abre la interfaz con doble
+// clic no tiene por que saber que existe un mapping.
+function mappingUnico() {
+  try {
+    const f = readdirSync('mapping').filter((x) => x.endsWith('.json'))
+    return f.length === 1 ? join('mapping', f[0]) : null
+  } catch { return null }
+}
 
 function parseArgs(argv) {
   const out = { _: [] }
@@ -40,12 +53,25 @@ async function main() {
     say(HELP)
     return
   }
+  if (!args.mapping) args.mapping = mappingUnico()
   if (!args.mapping) throw new Error('Falta --mapping <archivo>')
   const mapping = loadMapping(args.mapping)
   const openOpts = {
     browser: args.browser || 'chrome',
     profileDir: args.profile,
     slowMo: Number(args.slowmo ?? 120),
+  }
+
+  if (cmd === 'ui') {
+    const { url } = await startUi({ mapping, mappingFile: args.mapping, openOpts })
+    say('')
+    say('page-runner esta abierto en:')
+    say('  ' + url)
+    say('')
+    say('Se abre solo en tu navegador. Para cerrarlo, cerra esta ventana (Ctrl+C).')
+    abrirEnNavegador(url)
+    await new Promise(() => {})   // vive hasta que lo corten
+    return
   }
 
   if (cmd === 'login') {
@@ -126,6 +152,7 @@ async function main() {
 
 const HELP = `page-runner — arma paginas en Drupal desde un manifiesto JSON
 
+  page-runner ui      --mapping <f>     la interfaz grafica (lo normal)
   page-runner login   --mapping <f>
   page-runner inspect --mapping <f> [--url /node/add/page] [--out dump.json]
   page-runner build   <manifiesto...> --mapping <f> [--save]

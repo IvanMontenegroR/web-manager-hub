@@ -4,16 +4,21 @@
   "private": true,
   "description": "Arma paginas en Drupal (nodo + paragraphs) a partir de un manifiesto JSON, manejando el navegador con la sesion del propio usuario.",
   "type": "module",
-  "bin": { "page-runner": "./src/cli.js" },
+  "bin": {
+    "page-runner": "./src/cli.js"
+  },
   "scripts": {
+    "ui": "node src/cli.js ui",
     "login": "node src/cli.js login",
     "inspect": "node src/cli.js inspect",
     "build": "node src/cli.js build",
-    "test": "node test/smoke.mjs",
+    "test": "node test/smoke.mjs && node test/ui.mjs",
     "verify": "node test/verify-mapping.mjs"
   },
   "dependencies": {
     "playwright-core": "1.49.1"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

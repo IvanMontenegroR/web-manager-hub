@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>page-runner</title>
+<style>
+  :root{
+    --rojo:#ED1C24; --tinta:#16181d; --gris:#5b6270; --linea:#e2e5ea;
+    --fondo:#f6f7f9; --papel:#fff; --ok:#137a43; --okbg:#e8f6ee;
+    --mal:#b3261e; --malbg:#fdecea; --avisobg:#fff6e5; --aviso:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  h1{font-size:22px;margin:0;letter-spacing:-.01em}
+  h1 b{color:var(--rojo)}
+  .sitio{color:var(--gris);font-size:13px}
+  .sub{color:var(--gris);font-size:13px;margin:0 0 24px}
+  .card{background:var(--papel);border:1px solid var(--linea);border-radius:10px;
+    padding:16px 18px;margin-bottom:14px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);
+    margin:0 0 12px;font-weight:600}
+  .fila{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .crece{flex:1;min-width:200px}
+  button{font:inherit;font-weight:500;border-radius:7px;padding:9px 15px;cursor:pointer;
+    border:1px solid var(--linea);background:var(--papel);color:var(--tinta)}
+  button:hover:not(:disabled){border-color:#c6cbd4}
+  button:disabled{opacity:.45;cursor:default}
+  button.primario{background:var(--rojo);border-color:var(--rojo);color:#fff}
+  button.primario:hover:not(:disabled){background:#d3161d;border-color:#d3161d}
+  button.chico{padding:6px 11px;font-size:13px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;
+    padding:5px 11px;border-radius:999px}
+  .pill.si{background:var(--okbg);color:var(--ok)}
+  .pill.no{background:var(--malbg);color:var(--mal)}
+  .punto{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .pagina{border:1px solid var(--linea);border-radius:9px;padding:14px 16px;margin-bottom:10px}
+  .pagina:last-child{margin-bottom:0}
+  .pagina .tit{font-weight:600;font-size:16px}
+  .meta{color:var(--gris);font-size:13px;margin-top:2px}
+  .meta code{background:var(--fondo);padding:1px 5px;border-radius:4px;font-size:12px}
+  .acciones{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .nota{font-size:13px;padding:9px 12px;border-radius:7px;margin-top:10px}
+  .nota.mal{background:var(--malbg);color:var(--mal)}
+  .nota.aviso{background:var(--avisobg);color:var(--aviso)}
+  .pasos{font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;background:#12141a;
+    color:#dfe3ea;border-radius:8px;padding:14px 16px;max-height:320px;overflow:auto;
+    white-space:pre-wrap;margin:0}
+  .pasos .destacado{color:#7fd1a0}
+  .resultado{border-radius:9px;padding:16px 18px}
+  .resultado.bien{background:var(--okbg);border:1px solid #bfe3cf}
+  .resultado.falla{background:var(--malbg);border:1px solid #f3c9c5}
+  .resultado h3{margin:0 0 6px;font-size:16px}
+  .resultado.bien h3{color:var(--ok)} .resultado.falla h3{color:var(--mal)}
+  .resultado p{margin:0 0 4px;font-size:14px}
+  a{color:var(--rojo)}
+  textarea{width:100%;min-height:120px;font:13px/1.5 ui-monospace,Menlo,monospace;
+    border:1px solid var(--linea);border-radius:8px;padding:11px;resize:vertical}
+  details summary{cursor:pointer;color:var(--gris);font-size:14px}
+  .reglas{color:var(--gris);font-size:13px;margin-top:26px;line-height:1.7}
+  .reglas b{color:var(--tinta)}
+  .cargando{color:var(--gris);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>page<b>-</b>runner</h1>
+    <span class="sitio" id="sitio"></span>
+  </header>
+  <p class="sub">Arma paginas en Drupal a partir de un manifiesto. Siempre las deja en
+    <b>borrador</b>: nada se publica sin que vos lo apruebes.</p>
+
+  <div class="card" id="cSesion">
+    <h2>1. Sesion en Drupal</h2>
+    <div class="fila">
+      <span id="estadoSesion" class="cargando">Consultando…</span>
+      <span class="crece"></span>
+      <button id="bLogin">Iniciar sesion</button>
+      <button id="bChequear" class="chico">Ya me logueé</button>
+    </div>
+    <div class="nota aviso" id="ayudaLogin" hidden>
+      Se abrio una ventana de Chrome. Entra con tu usuario como siempre, <b>dejala abierta</b>
+      y volve aca a tocar “Ya me logueé”.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Paginas para armar</h2>
+    <div id="lista" class="cargando">Buscando manifiestos…</div>
+    <details style="margin-top:14px">
+      <summary>Agregar una pagina pegando su manifiesto</summary>
+      <p class="meta" style="margin:10px 0">Pega acá el JSON que te dio el hub y queda guardado
+        en la carpeta <code>manifests</code>.</p>
+      <textarea id="pegado" placeholder='{ "manifest": 1, "page": { … }, "blocks": [ … ] }'></textarea>
+      <div class="acciones"><button id="bPegar" class="chico">Guardar manifiesto</button>
+        <span id="avisoPegado" class="meta"></span></div>
+    </details>
+  </div>
+
+  <div class="card" id="cAvance" hidden>
+    <h2>3. Avance</h2>
+    <pre class="pasos" id="pasos"></pre>
+  </div>
+
+  <div id="cResultado" hidden></div>
+
+  <p class="reglas">
+    <b>Nunca publica.</b> Todo queda despublicado hasta que una persona lo revise.<br>
+    <b>No toca nada que ya exista.</b> Solo crea paginas nuevas.<br>
+    <b>Las imagenes se suben a mano</b> desde la Media library: el runner arma la estructura
+    y el texto, vos subis las imagenes y publicas.<br>
+    <b>Si algo no cuadra, frena.</b> Prefiere no armar la pagina antes que armarla a medias.
+  </p>
+</div>
+
+<script>
+const T = new URLSearchParams(location.search).get('t')
+const api = async (ruta, cuerpo) => {
+  const r = await fetch(ruta, {
+    method: cuerpo === undefined ? 'GET' : 'POST',
+    headers: { 'x-token': T, ...(cuerpo === undefined ? {} : { 'content-type': 'application/json' }) },
+    body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+  })
+  const j = await r.json()
+  if (!r.ok) throw new Error(j?.error || 'error')
+  return j
+}
+const $ = (id) => document.getElementById(id)
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+let ultimaCorrida = null
+
+function pintarSesion(e) {
+  const el = $('estadoSesion')
+  el.className = 'pill ' + (e.sesion ? 'si' : 'no')
+  el.innerHTML = '<span class="punto"></span>' + (e.sesion ? 'Sesion iniciada' : 'Sin sesion')
+  $('bLogin').hidden = e.sesion
+  $('bChequear').hidden = e.sesion
+}
+
+function pintarLista(e) {
+  const cont = $('lista')
+  if (!e.manifiestos.length) {
+    cont.className = 'meta'
+    cont.textContent = 'No hay ningun manifiesto en la carpeta manifests.'
+    return
+  }
+  cont.className = ''
+  // Sin sesion los botones estan grises: hay que decir por que, no dejarlo adivinar.
+  const sinSesion = e.sesion ? '' :
+    '<div class="nota aviso">Para armar paginas primero tenes que iniciar sesion en Drupal, arriba.</div>'
+  cont.innerHTML = sinSesion + e.manifiestos.map((m) => {
+    if (m.error) return `<div class="pagina"><div class="tit">${esc(m.nombre)}</div>
+      <div class="nota mal">No se pudo leer: ${esc(m.error)}</div></div>`
+    const bloqueado = m.falta.length > 0 || !e.sesion
+    return `<div class="pagina">
+      <div class="tit">${esc(m.titulo)}</div>
+      <div class="meta">${m.bloques} bloque${m.bloques === 1 ? '' : 's'}
+        ${m.ruta ? ' · <code>' + esc(m.ruta) + '</code>' : ''} · ${esc(m.nombre)}</div>
+      ${m.publicada ? '<div class="nota aviso">Este manifiesto pide la pagina PUBLICADA.</div>' : ''}
+      ${m.falta.length ? `<div class="nota mal">El mapping todavia no conoce:
+        ${esc(m.falta.join(', '))}. Avisale a quien mantiene el runner.</div>` : ''}
+      <div class="acciones">
+        <button data-a="${esc(m.archivo)}" data-s="0" ${bloqueado ? 'disabled' : ''}>Probar sin guardar</button>
+        <button class="primario" data-a="${esc(m.archivo)}" data-s="1" ${bloqueado ? 'disabled' : ''}>Crear borrador</button>
+      </div>
+      <div class="meta" style="margin-top:8px">Probar llena el formulario para que lo mires y
+        <b>no crea nada</b>. Crear borrador lo guarda despublicado en Drupal.</div>
+    </div>`
+  }).join('')
+  cont.querySelectorAll('button[data-a]').forEach((b) => b.addEventListener('click', () => {
+    correr(b.dataset.a, b.dataset.s === '1')
+  }))
+}
+
+function pintarCorrida(c) {
+  $('cAvance').hidden = !c
+  if (!c) return
+  $('pasos').innerHTML = c.pasos.map((p) =>
+    /^\s{2,}\d/.test(p) ? `<span class="destacado">${esc(p)}</span>` : esc(p)).join('\n')
+  $('pasos').scrollTop = $('pasos').scrollHeight
+
+  const r = $('cResultado')
+  if (c.estado === 'corriendo') { r.hidden = true; return }
+  r.hidden = false
+  if (c.estado === 'error') {
+    r.innerHTML = `<div class="resultado falla"><h3>Freno y no guardo nada</h3>
+      <p>${esc(c.error || '')}</p>
+      <p class="meta" style="margin-top:8px">La pagina quedo a medio llenar en el formulario,
+      pero <b>no se guardo</b> en Drupal. Copiale este mensaje a quien mantiene el runner.</p></div>`
+    return
+  }
+  const res = c.resultado || {}
+  r.innerHTML = res.saved
+    ? `<div class="resultado bien"><h3>Borrador creado</h3>
+        <p>${esc(res.titulo || '')}${res.nodeId ? ' — nodo ' + esc(res.nodeId) : ''}</p>
+        <p><a href="${esc(res.url)}" target="_blank" rel="noopener">Abrir en Drupal</a> para
+        revisar, subir las imagenes y publicar.</p></div>`
+    : `<div class="resultado bien"><h3>Listo, sin guardar</h3>
+        <p>El formulario quedo lleno en la ventana de Chrome. Revisalo: si esta bien,
+        volve y toca <b>Crear borrador</b>.</p>
+        <p class="meta" style="margin-top:8px">En Drupal no quedo nada.</p></div>`
+}
+
+async function correr(archivo, save) {
+  if (save && !confirm('Se va a crear la pagina en Drupal, despublicada. ¿Seguimos?')) return
+  $('cResultado').hidden = true
+  document.querySelectorAll('button[data-a]').forEach((b) => (b.disabled = true))
+  try { await api('/api/build', { archivo, save }) } catch (e) { alert(e.message) }
+  seguir()
+}
+
+let timer = null
+function seguir() {
+  clearInterval(timer)
+  timer = setInterval(async () => {
+    const c = await api('/api/corrida').catch(() => null)
+    pintarCorrida(c)
+    if (!c || c.estado !== 'corriendo') { clearInterval(timer); timer = null; refrescar() }
+  }, 600)
+}
+
+async function refrescar() {
+  const e = await api('/api/estado')
+  $('sitio').textContent = e.sitio
+  pintarSesion(e)
+  pintarLista(e)
+  if (e.corrida && e.corrida !== ultimaCorrida) { ultimaCorrida = e.corrida; pintarCorrida(e.corrida) }
+  // Si se recargo la pestaña con una corrida en curso, se retoma el seguimiento.
+  if (e.corrida?.estado === 'corriendo' && !timer) seguir()
+}
+
+$('bLogin').addEventListener('click', async () => {
+  $('ayudaLogin').hidden = false
+  await api('/api/login', {}).catch((e) => alert(e.message))
+})
+$('bChequear').addEventListener('click', async () => {
+  const { sesion } = await api('/api/sesion', {}).catch(() => ({ sesion: false }))
+  if (!sesion) alert('Todavia no hay sesion. Entra en la ventana de Chrome que se abrio y volve a probar.')
+  $('ayudaLogin').hidden = sesion
+  refrescar()
+})
+$('bPegar').addEventListener('click', async () => {
+  try {
+    const contenido = JSON.parse($('pegado').value)
+    const { nombre } = await api('/api/guardar-manifiesto', { contenido })
+    $('avisoPegado').textContent = 'Guardado como ' + nombre
+    $('pegado').value = ''
+    refrescar()
+  } catch (e) { $('avisoPegado').textContent = 'No se pudo: ' + e.message }
+})
+
+refrescar()
+setInterval(() => { if (!timer) refrescar() }, 4000)
+</script>
+</body>
+</html>

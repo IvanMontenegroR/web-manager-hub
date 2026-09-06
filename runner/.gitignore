@@ -7,5 +7,6 @@ inspect-*.json
 dump*.json
 # Volcados del formulario para `npm run verify`: llevan el token CSRF de la sesion,
 # rutas internas y nombres de usuario. Se miran en local y no salen de la maquina.
-*.html
+# Solo los de la RAIZ, que es donde se guardan: la interfaz vive en src/ui/ y si va.
+/*.html
 form*.txt
