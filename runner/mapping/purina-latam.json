@@ -1,0 +1,925 @@
+{
+  "_": "Escrito a partir del HTML real de /node/add/dsu_component_page (preprod MX, 8 paragraphs ya agregados). Los selectores se apoyan en name= y data-drupal-selector= porque Drupal le pega un sufijo aleatorio a cada id.",
+  "name": "purina-latam",
+  "site": "https://content-ef5-purina-latam-mx.pantheonsite.io",
+  "nodeAdd": "/node/add/dsu_component_page",
+  "title": "input[name=\"title[0][value]\"]",
+  "published": "input[name=\"status[value]\"]",
+  "pathauto": "input[name=\"path[0][pathauto]\"]",
+  "path": "input[name=\"path[0][alias]\"]",
+  "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
+  "paragraphs": {
+    "dsel": "edit-field-ln-n-components-{delta}",
+    "base": "field_ln_n_components[{delta}][subform]",
+    "add": {
+      "mode": "select",
+      "select": "select[name=\"field_ln_n_components[add_more][add_more_select]\"]",
+      "button": "input[name=\"field_ln_n_components_add_more\"]"
+    },
+    "open": [
+      "[data-drupal-selector=\"{dselw}-subform-group-optional-fields\"]",
+      "[data-drupal-selector=\"{dsel}-subform-advanced\"]",
+      "[data-drupal-selector=\"{dsel}-subform-classy\"]",
+      "[data-drupal-selector=\"{dsel}-subform-field-c-link-0-options-attributes\"]"
+    ],
+    "types": {
+      "c_externalvideo": {
+        "label": "Content: External Video",
+        "value": "c_externalvideo",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][c_externalvideo][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][c_externalvideo][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][c_externalvideo][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][c_externalvideo][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][c_externalvideo][text_color]\"]",
+            "kind": "select"
+          },
+          "field_c_external_video": {
+            "kind": "image",
+            "note": "Media library: el editor la elige a mano."
+          }
+        }
+      },
+      "c_image": {
+        "label": "Content: Image",
+        "value": "c_image",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "field_c_link.target": {
+            "sel": "select[name=\"{base}[field_c_link][0][options][attributes][target]\"]",
+            "kind": "select"
+          },
+          "field_c_link.rel": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][rel]\"]"
+          },
+          "field_c_link.aria_label": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][aria-label]\"]"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][c_image][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][c_image][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.image_position": {
+            "sel": "select[name=\"{base}[classy][0][c_image][image_position]\"]",
+            "kind": "select"
+          },
+          "classy.image_style": {
+            "sel": "select[name=\"{base}[classy][0][c_image][image_style]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][c_image][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.style_button": {
+            "sel": "select[name=\"{base}[classy][0][c_image][style_button]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][c_image][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][c_image][text_color]\"]",
+            "kind": "select"
+          },
+          "field_c_image": {
+            "kind": "image",
+            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+          }
+        }
+      },
+      "c_sideimagetext": {
+        "label": "Content: Text + Image",
+        "value": "c_sideimagetext",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "field_c_link.target": {
+            "sel": "select[name=\"{base}[field_c_link][0][options][attributes][target]\"]",
+            "kind": "select"
+          },
+          "field_c_link.rel": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][rel]\"]"
+          },
+          "field_c_link.aria_label": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][aria-label]\"]"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.dsu_c_sideimagetext_image_position": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][dsu_c_sideimagetext_image_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.style_button": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][style_button]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][c_sideimagetext][text_color]\"]",
+            "kind": "select"
+          },
+          "field_c_image": {
+            "kind": "image",
+            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+          }
+        }
+      },
+      "c_text": {
+        "label": "Content: Text",
+        "value": "c_text",
+        "fields": {
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "field_c_link.target": {
+            "sel": "select[name=\"{base}[field_c_link][0][options][attributes][target]\"]",
+            "kind": "select"
+          },
+          "field_c_link.rel": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][rel]\"]"
+          },
+          "field_c_link.aria_label": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][aria-label]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][c_text][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][c_text][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.content_text_styles": {
+            "sel": "select[name=\"{base}[classy][0][c_text][content_text_styles]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][c_text][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.style_button": {
+            "sel": "select[name=\"{base}[classy][0][c_text][style_button]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][c_text][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][c_text][text_color]\"]",
+            "kind": "select"
+          }
+        }
+      },
+      "layout_columns_2": {
+        "label": "Layout Columns - 50",
+        "value": "layout_columns_2",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_2][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_2][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_2][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "ln_c_cardgrid": {
+        "label": "Content: Card Grid",
+        "value": "ln_c_cardgrid",
+        "fields": {
+          "field_c_cardgrid_view_mode": {
+            "sel": "select[name=\"{base}[field_c_cardgrid_view_mode]\"]",
+            "kind": "select"
+          },
+          "field_show_card_pet_id": {
+            "sel": "input[name=\"{base}[field_show_card_pet_id][value]\"]",
+            "kind": "checkbox"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_card_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][background_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_degrade_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][background_degrade_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.card_style_card": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][card_style_card]\"]",
+            "kind": "select"
+          },
+          "classy.card_title_position": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][card_title_position]\"]",
+            "kind": "select"
+          },
+          "classy.icon_card_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][icon_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.position_arrows": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][position_arrows]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_card_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][text_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.title_card_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_cardgrid][title_card_color]\"]",
+            "kind": "select"
+          },
+          "field_media": {
+            "kind": "image",
+            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Cards",
+              "dsel": "{dsel}-subform-field-c-subitems-{delta}",
+              "base": "{base}[field_c_subitems][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-c-subitems-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_c_subitems_{bundle}_add_more\"], input[name=\"{npath}_subform_field_c_subitems_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "accordion_grid": {
+        "label": "Accordion Grid",
+        "value": "accordion_grid",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][accordion_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][accordion_grid][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][accordion_grid][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][accordion_grid][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][accordion_grid][text_color]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Items",
+              "dsel": "{dsel}-subform-field-items-{delta}",
+              "base": "{base}[field_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "banner": {
+        "label": "Banner",
+        "value": "banner",
+        "fields": {
+          "field_banner_type": {
+            "sel": "select[name=\"{base}[field_banner_type]\"]",
+            "kind": "select"
+          },
+          "field_remover_overlay_background": {
+            "sel": "input[name=\"{base}[field_remover_overlay_background][value]\"]",
+            "kind": "checkbox"
+          },
+          "field_show_search": {
+            "sel": "input[name=\"{base}[field_show_search][value]\"]",
+            "kind": "checkbox"
+          },
+          "field_search_ai_pos_fixed_mob": {
+            "sel": "input[name=\"{base}[field_search_ai_pos_fixed_mob][value]\"]",
+            "kind": "checkbox"
+          },
+          "field_search_ai_suggestions": {
+            "sel": "input[name=\"{base}[field_search_ai_suggestions][0][value]\"]"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_html": {
+            "sel": "textarea[name=\"{base}[field_html][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_html][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "field_c_link.target": {
+            "sel": "select[name=\"{base}[field_c_link][0][options][attributes][target]\"]",
+            "kind": "select"
+          },
+          "field_c_link.rel": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][rel]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][banner][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.banner_align": {
+            "sel": "select[name=\"{base}[classy][0][banner][banner_align]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][banner][spacing]\"]",
+            "kind": "select"
+          },
+          "field_c_image": {
+            "kind": "image",
+            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+          }
+        }
+      },
+      "ln_c_grid_card_item": {
+        "label": "Content: Card Grid Item",
+        "value": "ln_c_grid_card_item",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_icon": {
+            "sel": "select[name=\"{base}[field_icon][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "field_show_ia_icon": {
+            "sel": "input[name=\"{base}[field_show_ia_icon][value]\"]",
+            "kind": "checkbox"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "field_c_link.target": {
+            "sel": "select[name=\"{base}[field_c_link][0][options][attributes][target]\"]",
+            "kind": "select"
+          },
+          "field_c_link.rel": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][rel]\"]"
+          },
+          "field_c_link.class": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][class]\"]"
+          },
+          "field_c_link.aria_label": {
+            "sel": "input[name=\"{base}[field_c_link][0][options][attributes][aria-label]\"]"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][ln_c_grid_card_item][background_color]\"]",
+            "kind": "select"
+          },
+          "field_c_image": {
+            "kind": "image",
+            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+          }
+        }
+      },
+      "accordion_item": {
+        "label": "Accordion Item",
+        "value": "accordion_item",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
+              "value": "rich_text"
+            }
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      }
+    }
+  }
+}

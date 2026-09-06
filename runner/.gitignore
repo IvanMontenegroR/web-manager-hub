@@ -5,3 +5,7 @@ node_modules/
 logs/
 inspect-*.json
 dump*.json
+# Volcados del formulario para `npm run verify`: llevan el token CSRF de la sesion,
+# rutas internas y nombres de usuario. Se miran en local y no salen de la maquina.
+*.html
+form*.txt

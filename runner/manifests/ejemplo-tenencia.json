@@ -10,15 +10,58 @@
       "type": "c_text",
       "fields": {
         "field_c_advanced_title": "¿Qué considerar antes de adoptar?",
-        "field_c_title_tag": "h2"
+        "field_c_advanced_title.html_tag": "h2",
+        "field_c_text": "Adoptar es una decisión para toda la vida del animal.",
+        "classy.text_align": "text_align_center"
       }
     },
     {
       "type": "ln_c_cardgrid",
       "fields": {
-        "field_view_mode": "slider-default-card",
-        "field_c_advanced_title": "Paso 1: ¡Prepara todo para la llegada de tu mejor amigo!"
-      }
+        "field_c_cardgrid_view_mode": "slider-default-card",
+        "field_c_advanced_title": "Paso 1: ¡Prepara todo para la llegada de tu mejor amigo!",
+        "classy.card_style_card": "card_grid_default_square"
+      },
+      "children": [
+        {
+          "type": "ln_c_grid_card_item",
+          "fields": {
+            "field_c_advanced_title": "Un lugar para dormir",
+            "field_c_text": "Una cama en un rincón tranquilo, lejos del paso."
+          }
+        },
+        {
+          "type": "ln_c_grid_card_item",
+          "fields": {
+            "field_c_advanced_title": "Comida y agua",
+            "field_c_text": "Dos bowls, y el alimento que corresponde a su edad."
+          }
+        }
+      ]
+    },
+    {
+      "type": "layout_columns_2",
+      "fields": { "advanced.section_id": "preguntas" },
+      "children": [
+        {
+          "slot": 0,
+          "type": "c_text",
+          "fields": { "field_c_text": "Las dudas más frecuentes de quien adopta por primera vez." }
+        },
+        {
+          "slot": 1,
+          "type": "accordion_grid",
+          "children": [
+            {
+              "type": "accordion_item",
+              "fields": {
+                "field_c_advanced_title": "¿Cuánto cuesta mantener un perro?",
+                "field_c_text": "Depende del tamaño y la edad. Contá alimento, vacunas y control anual."
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -2,39 +2,58 @@
 // proposito — es lo unico especifico del proyecto, asi que otro sitio se soporta
 // agregando un mapping, no tocando el runner.
 //
-// Se escribe a partir de lo que devuelve `page-runner inspect`, que vuelca la
-// estructura real del formulario. NO se inventa.
+// Se escribe a partir del HTML real del formulario (o de lo que devuelve
+// `page-runner inspect`). NO se inventa.
 //
 // Formato:
 //
 // {
 //   "name": "purina-latam",
 //   "site": "https://…",
-//   "nodeAdd": "/node/add/page",
-//   "title": "input[name=\"title[0][value]\"]",
+//   "nodeAdd": "/node/add/dsu_component_page",
+//   "title":     "input[name=\"title[0][value]\"]",
 //   "published": "input[name=\"status[value]\"]",
-//   "save": "#edit-submit",
+//   "pathauto":  "input[name=\"path[0][pathauto]\"]",   // opcional
+//   "path":      "input[name=\"path[0][alias]\"]",      // opcional
+//   "save":      "input[name=\"op\"][value=\"Guardar\"]:visible",
 //   "paragraphs": {
-//     "row": "[data-drupal-selector^=\"edit-field-components-\"] > table > tbody > tr",
-//     "base": "field_components[{delta}][subform]",
-//     "add": { "mode": "select",           // "select" (desplegable + boton) o "button"
-//              "select": "select[name=\"field_components[add_more][add_more_select]\"]",
-//              "button": "input[name=\"field_components_add_more_add_more_button\"]" },
-//     "types": {
-//       "c_text": {
-//         "label": "Content: Text",        // lo que se elige en el desplegable
-//         "value": "c_text",               // value de la opcion, si difiere
-//         "open": ["summary:has-text(\"Optional fields\")"],   // desplegables a abrir
-//         "fields": {
-//           "field_c_text": { "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]", "kind": "richtext" },
-//           "field_c_advanced_title": { "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]" }
-//         }
-//       }
-//     }
+//     "dsel": "edit-field-ln-n-components-{delta}",     // ver abajo
+//     "base": "field_ln_n_components[{delta}][subform]",
+//     "add":  { "mode": "select", "select": "…", "button": "…" },
+//     "open": ["[data-drupal-selector=\"{dsel}-subform-advanced\"]"],
+//     "types": { … }
 //   }
 // }
 //
-// `kind`: text (default) | richtext | select | checkbox | image (se saltea).
+// DIRECCIONAR UNA FILA. Drupal le pega un sufijo aleatorio a cada `id`
+// (`…-top-type--2CcdPKqYQCQ`), asi que los selectores se apoyan SIEMPRE en `name=` o en
+// `data-drupal-selector=`, que son estables. Cada paragraph se direcciona por su DELTA,
+// no contando filas: `dsel` es el `data-drupal-selector` de la fila con `{delta}`
+// adentro. De ahi salen tres variables que el motor calcula solo y que los selectores
+// pueden usar:
+//
+//   {dsel}   edit-field-ln-n-components-4
+//   {dselw}  edit-field-ln-n-components-widget-4        (la variante de field_group:
+//            Drupal mete "widget-" antes de cada delta en los grupos plegables)
+//   {npath}  field_ln_n_components_4                    (la misma ruta en formato de
+//            `name`, que es como se llaman los botones de agregar)
+//
+// mas `{base}` (el prefijo del `name` de los campos del paragraph) y `{delta}`.
+//
+// AGREGAR UN PARAGRAPH — dos formas, segun como este configurado el widget:
+//   "select":  un desplegable de tipos + un boton      { select, button }
+//   "buttons": un boton por tipo, con `{bundle}` en el
+//              nombre; si hay un modal que los tapa,
+//              `open` es el boton que lo abre           { open?, button }
+//
+// CONTENEDORES. Un tipo con `children.slots` acepta hijos. Cada slot es una ranura
+// (las dos columnas de un layout, los items de un acordeon) y trae su propio `dsel`,
+// `base` y `add`, escritos con las variables de la fila PADRE. El hijo del manifiesto
+// elige con `"slot": 0`.
+//
+// `kind` de un campo: text (default) | richtext | select | checkbox | image (se saltea).
+// Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se
+// pone ANTES de escribir, porque el CMS arranca en uno que no admite HTML.
 import { readFileSync } from 'node:fs'
 
 export function loadMapping(file) {
@@ -48,21 +67,34 @@ export function loadMapping(file) {
   if (!m.site) err('falta "site"')
   for (const k of ['nodeAdd', 'title', 'save']) if (!m[k]) err(`falta "${k}"`)
   if (!m.paragraphs?.base) err('falta "paragraphs.base"')
-  if (!m.paragraphs?.row) err('falta "paragraphs.row"')
+  if (!m.paragraphs?.dsel) err('falta "paragraphs.dsel"')
   if (!m.paragraphs?.add?.mode) err('falta "paragraphs.add.mode"')
   m.paragraphs.types = m.paragraphs.types || {}
   return m
 }
 
-// Reemplaza {base} y {delta} en un selector. `base` sale de `paragraphs.base` con el
-// delta ya puesto: es el prefijo del `name` de todos los campos de ese paragraph.
-export function resolveSelector(sel, { base, delta }) {
-  return String(sel).replaceAll('{base}', base).replaceAll('{delta}', String(delta))
+// Reemplaza las variables en un selector. Las que no se pasan quedan sin tocar, que es
+// como los selectores de un slot conservan su `{delta}` hasta que el hijo sabe en que
+// posicion cayo.
+export function resolveSelector(sel, vars) {
+  let out = String(sel)
+  for (const [k, v] of Object.entries(vars)) {
+    if (v === undefined || v === null) continue
+    out = out.replaceAll(`{${k}}`, String(v))
+  }
+  return out
 }
 
-export function baseFor(mapping, delta) {
-  return resolveSelector(mapping.paragraphs.base, { base: '', delta })
-}
+// La fila con ese `data-drupal-selector`. Es un elemento o ninguno: no se cuenta nada.
+export const rowSelector = (dsel) => `[data-drupal-selector="${dsel}"]`
+
+// Las dos formas en que Drupal escribe la misma ruta.
+//   edit-field-ln-n-components-4  ->  edit-field-ln-n-components-widget-4
+// field_group mete "widget-" antes de cada delta. (Si algun dia un campo del CMS
+// terminara en un numero, este reemplazo lo tomaria por un delta.)
+export const widgetDsel = (dsel) => dsel.replace(/-(\d+)(?=-|$)/g, '-widget-$1')
+//   edit-field-ln-n-components-4  ->  field_ln_n_components_4
+export const namePath = (dsel) => dsel.replace(/^edit-/, '').replaceAll('-', '_')
 
 // Los tipos de paragraph que el mapping conoce. Un manifiesto que pida uno que no
 // esta se frena antes de tocar el navegador, con la lista de lo que falta.

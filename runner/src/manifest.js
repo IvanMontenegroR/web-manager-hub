@@ -17,6 +17,8 @@
 //
 // Reglas:
 //   - `type` y `fields` usan los nombres de MAQUINA del CMS, no nuestras etiquetas.
+//   - `slot` es la ranura del contenedor donde cae el hijo (las dos columnas de un
+//     layout, los items de un acordeon). Por defecto 0, que es la primera.
 //   - Las IMAGENES no van en el manifiesto: subirlas a la Media library se hace a
 //     mano (ver README). Un campo de imagen en `fields` se ignora con aviso.
 //   - `published` es siempre opcional y por defecto FALSE: el runner deja borradores.
@@ -47,6 +49,7 @@ export function validateManifest(m, file = '(inline)') {
     if (!b || typeof b !== 'object') err(`${at} no es un objeto`)
     if (!b.type || typeof b.type !== 'string') err(`${at} no tiene "type"`)
     if (b.fields && typeof b.fields !== 'object') err(`${at}.fields no es un objeto`)
+    if (b.slot !== undefined && (!Number.isInteger(b.slot) || b.slot < 0)) err(`${at}.slot tiene que ser un entero >= 0`)
     if (b.children) {
       if (!Array.isArray(b.children)) err(`${at}.children no es un array`)
       walk(b.children, `${at}.children`)

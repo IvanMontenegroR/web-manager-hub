@@ -46,26 +46,28 @@ ve ni guarda tu contraseña.
 node src/cli.js login --mapping mapping/purina-latam.json
 ```
 
-**2. Inspeccionar el formulario.** Este es el primer paso real contra el CMS: vuelca
-todos los campos, los selects con sus opciones, los botones de agregar paragraph y los
-desplegables. **Solo lee, no escribe nada.** Con esa salida se escribe el mapping.
+**2. Armar una pagina.** Sin `--save` llena el formulario y lo deja abierto para que lo
+mires. Con `--save` guarda el borrador.
+
+```bash
+node src/cli.js build manifests/ejemplo-tenencia.json --mapping mapping/purina-latam.json
+node src/cli.js build manifests/*.json --mapping mapping/purina-latam.json --save
+```
+
+Opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
+
+**Si el CMS cambia** (un campo nuevo, un paragraph nuevo), hay dos formas de rehacer el
+mapping. `inspect` lo vuelca desde el sitio — solo lee, no escribe nada:
 
 ```bash
 node src/cli.js inspect --mapping mapping/purina-latam.json --out dump.json
 ```
 
-Deja dos archivos: `dump.json` (todo) y `dump-draft.json` (los campos agrupados por
-paragraph, que es el borrador para completar el mapping).
-
-**3. Armar una pagina.** Sin `--save` llena el formulario y lo deja abierto para que lo
-mires. Con `--save` guarda el borrador.
+y `verify` compara el mapping contra un volcado del HTML guardado a mano, sin conexion:
 
 ```bash
-node src/cli.js build manifests/tenencia.json --mapping mapping/purina-latam.json
-node src/cli.js build manifests/*.json --mapping mapping/purina-latam.json --save
+npm run verify -- mapping/purina-latam.json form.html
 ```
-
-Opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
 
 ## Reglas de la casa
 
@@ -109,17 +111,41 @@ script comun.
 ## Estructura
 
 ```
-src/cli.js        comandos (login | inspect | build)
-src/browser.js    abre Chrome/Edge del sistema con perfil propio
-src/manifest.js   formato del manifiesto + validacion
-src/mapping.js    formato del mapping + resolucion de selectores
-src/inspect.js    volcado del formulario real
-src/build.js      el motor: agrega paragraphs, abre desplegables, llena campos
-src/log.js        registro local de corridas
-mapping/          un archivo por sitio (se escribe con la salida de inspect)
-manifests/        las paginas a armar
-test/             Drupal de mentira + prueba del motor
+src/cli.js             comandos (login | inspect | build)
+src/browser.js         abre Chrome/Edge del sistema con perfil propio
+src/manifest.js        formato del manifiesto + validacion
+src/mapping.js         formato del mapping + resolucion de selectores
+src/inspect.js         volcado del formulario real
+src/build.js           el motor: agrega paragraphs, abre desplegables, llena campos
+src/log.js             registro local de corridas
+mapping/               un archivo por sitio
+manifests/             las paginas a armar
+test/fake-drupal.mjs   Drupal de mentira con las formas del real
+test/smoke.mjs         prueba del motor
+test/verify-mapping.mjs prueba del mapping contra un volcado del HTML
 ```
+
+## Como direcciona los campos
+
+Drupal le pega un **sufijo aleatorio a cada `id`** (`…-top-type--2CcdPKqYQCQ`), asi que
+los selectores se apoyan siempre en `name=` o `data-drupal-selector=`. Cada paragraph se
+direcciona por su **delta** — la primera posicion libre de la lista — y no contando
+filas: mas exacto y no se confunde con los hijos.
+
+Del delta salen las tres formas en que Drupal escribe la misma ruta, que el motor calcula
+solo y los selectores del mapping pueden usar:
+
+| variable  | ejemplo                                | donde aparece                     |
+|-----------|----------------------------------------|-----------------------------------|
+| `{base}`  | `field_ln_n_components[4][subform]`     | el `name` de los campos           |
+| `{dsel}`  | `edit-field-ln-n-components-4`          | `data-drupal-selector` de la fila |
+| `{dselw}` | `edit-field-ln-n-components-widget-4`   | los grupos plegables (field_group)|
+| `{npath}` | `field_ln_n_components_4`               | los botones de agregar            |
+
+Dos cosas mas que el formulario real obliga y el mapping declara: los campos de cuerpo
+arrancan en un **formato de texto que no admite HTML**, asi que el formato se cambia
+ANTES de escribir; y el **alias de URL** esta deshabilitado mientras Pathauto lo genere
+solo, asi que se destilda antes de poder escribirlo.
 
 ## Tests
 
@@ -128,17 +154,41 @@ npm test
 ```
 
 Levanta un Drupal de mentira que reproduce las formas del formulario real de Paragraphs
-(los `name` con delta y subform, el alta por AJAX, los `<details>` plegados, CKEditor
+(los `name` con delta y subform, los `id` con sufijo aleatorio, el alta por AJAX, las dos
+formas de agregar — desplegable+boton en el nodo, un boton por tipo detras de un modal en
+los contenedores —, los contenedores con varios slots, los `<details>` plegados y CKEditor
 sobre un textarea) y verifica que el motor sabe agregar, esperar, abrir desplegables,
-llenar texto / rich text / selects, anidar hijos en un contenedor, dejar la pagina
-despublicada, leer el node id y **frenar** ante un campo desconocido.
+cambiar el formato de texto, llenar texto / rich text / selects / checkboxes, anidar hijos
+en el slot que les toca, dejar la pagina despublicada, escribir el alias, leer el node id
+y **frenar** ante un campo o un slot que no existe.
 
-Lo que el test **no** puede decir es si el mapping es correcto: eso solo lo dice el CMS
-de verdad. Por eso el orden es `inspect` primero, y `build` contra QA despues.
+Eso prueba el MOTOR. Para probar el MAPPING sin tocar el CMS esta el otro:
+
+```bash
+npm run verify -- mapping/purina-latam.json form.html
+```
+
+que resuelve cada selector del mapping y comprueba que ese `name` exista de verdad en un
+volcado del formulario. El volcado se guarda a mano desde el navegador, sobre
+`/node/add/<tipo>` **con un paragraph de cada clase ya agregado** (los subforms no existen
+en el DOM hasta que se los agrega). Ese archivo **no se versiona**: lleva el token CSRF de
+la sesion, rutas internas y nombres de usuario.
+
+Lo que ninguno de los dos puede decir es si el CMS acepta la pagina: eso solo lo dice
+`build` contra el sitio.
 
 ## Estado
 
-El motor esta probado contra el formulario de mentira. **Falta correr `inspect` contra
-el Drupal real** para escribir el mapping de Purina LATAM: los selectores de
-`mapping/purina-latam.example.json` son una plantilla con la forma esperada, no valores
-verificados.
+El mapping de Purina LATAM (`mapping/purina-latam.json`) esta escrito a partir del HTML
+real de `/node/add/dsu_component_page` en **preprod MX**, con 8 paragraphs ya agregados.
+`npm run verify` da **275 selectores encontrados, 0 sin encontrar**, y `npm test` pasa.
+
+Cubre 10 paragraphs: `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`,
+`ln_c_cardgrid` (+ `ln_c_grid_card_item`), `accordion_grid` (+ `accordion_item`),
+`layout_columns_2` y `banner`. Los demas del CMS (los otros 11 layouts, `comp_tabs`,
+`banner_wrapper`, `dsu_tint`…) **no estan**: hace falta un volcado con uno de cada uno
+agregado para escribirlos, y hasta entonces un manifiesto que los pida se frena solo.
+
+**Falta la primera corrida contra el CMS.** Todo lo verificable sin conexion esta
+verificado; lo que no se puede saber offline es si Drupal acepta la pagina que resulta.
+La primera prueba conviene hacerla sin `--save`, mirando el formulario.

@@ -1,5 +1,7 @@
-// Prueba del MOTOR contra el Drupal de mentira: agrega paragraphs, espera el AJAX,
-// abre los desplegables, llena texto/rich text/selects y anida hijos en un contenedor.
+// Prueba del MOTOR contra el Drupal de mentira: agrega paragraphs por delta, espera el
+// AJAX, abre los desplegables, cambia el formato de texto antes de escribir, llena
+// texto / rich text / selects / checkboxes, y anida hijos en los DOS slots de un
+// contenedor (con modal) y en el slot sin modal de otro.
 // Despues lee el DOM y verifica que cada valor quedo donde tenia que quedar.
 import { rmSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -11,50 +13,67 @@ import { validateManifest } from '../src/manifest.js'
 
 const CHROME = process.env.RUNNER_CHROME || '/opt/pw-browsers/chromium'
 
+// Un slot del contenedor, escrito como en el mapping real: las variables de la fila
+// PADRE resueltas, el {delta} del hijo pendiente.
+const slot = (field, modal) => ({
+  label: field,
+  dsel: `{dsel}-subform-${field.replaceAll('_', '-')}-{delta}`,
+  base: `{base}[${field}][{delta}][subform]`,
+  add: {
+    mode: 'buttons',
+    ...(modal ? { open: `input[name="button_add_modal"][data-drupal-selector="{dsel}-subform-${field.replaceAll('_', '-')}-add-more-add-modal-form-area-add-more"]` } : {}),
+    button: `button[name="{npath}_subform_${field}_{bundle}_add_more"]`,
+  },
+})
+
 const mapping = (site) => ({
   name: 'fake', site,
   nodeAdd: '/node/add/page',
   title: 'input[name="title[0][value]"]',
   published: 'input[name="status[value]"]',
-  save: '#edit-submit',
+  pathauto: 'input[name="path[0][pathauto]"]',
+  path: 'input[name="path[0][alias]"]',
+  save: 'input[name="op"][value="Guardar"]:visible',
   paragraphs: {
-    row: '#rows > .row',
+    dsel: 'edit-field-components-{delta}',
     base: 'field_components[{delta}][subform]',
     add: {
       mode: 'select',
       select: 'select[name="field_components[add_more][add_more_select]"]',
-      button: 'input[name="field_components_add_more_add_more_button"]',
+      button: 'input[name="field_components_add_more"]',
     },
+    open: [
+      '[data-drupal-selector="{dselw}-subform-group-optional-fields"]',
+      '[data-drupal-selector="{dsel}-subform-advanced"]',
+      '[data-drupal-selector="{dsel}-subform-classy"]',
+    ],
     types: {
       c_text: {
         label: 'Content: Text', value: 'c_text',
-        open: ['summary:has-text("Optional fields")'],
         fields: {
-          field_c_text: { sel: 'textarea[name="{base}[field_c_text][0][value]"]', kind: 'richtext' },
+          field_c_text: {
+            sel: 'textarea[name="{base}[field_c_text][0][value]"]', kind: 'richtext',
+            format: { sel: 'select[name="{base}[field_c_text][0][format]"]', value: 'rich_text' },
+          },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
-          field_c_title_tag: { sel: 'select[name="{base}[field_c_title_tag]"]', kind: 'select' },
+          'field_c_advanced_title.html_tag': { sel: 'select[name="{base}[field_c_advanced_title][0][html_tag]"]', kind: 'select' },
+          'advanced.section_id': { sel: 'input[name="{base}[section_id][0][value]"]' },
+          'classy.background_color': { sel: 'select[name="{base}[classy][0][c_text][background_color]"]', kind: 'select' },
+          field_c_image: { kind: 'image', note: 'se sube a mano' },
         },
       },
       ln_c_cardgrid: {
         label: 'Content: Card Grid', value: 'ln_c_cardgrid',
-        open: ['summary:has-text("Optional fields")'],
         fields: {
-          field_view_mode: { sel: 'select[name="{base}[field_view_mode]"]', kind: 'select' },
+          field_c_cardgrid_view_mode: { sel: 'select[name="{base}[field_c_cardgrid_view_mode]"]', kind: 'select' },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
         },
+        children: { slots: [slot('field_c_subitems', false)] },
       },
       layout_columns_2: {
         label: 'Layout: 2 columnas', value: 'layout_columns_2',
-        fields: { field_section_id: { sel: 'input[name="{base}[field_section_id][0][value]"]' } },
-        children: {
-          row: '.kids[data-base="{base}"] .kidrow',
-          base: '{base}[field_children][{delta}][subform]',
-          add: {
-            mode: 'select',
-            select: '.kids[data-base="{base}"] > select',
-            button: '.kids[data-base="{base}"] > input[type=submit]',
-          },
-        },
+        fields: { 'advanced.section_id': { sel: 'input[name="{base}[section_id][0][value]"]' } },
+        children: { slots: [slot('field_column_first', true), slot('field_column_second', true)] },
       },
     },
   },
@@ -62,14 +81,21 @@ const mapping = (site) => ({
 
 const manifest = validateManifest({
   manifest: 1,
-  page: { title: 'Tenencia Responsable', published: false },
+  page: { title: 'Tenencia Responsable', path: '/adopta/tenencia-responsable', published: false },
   blocks: [
-    { type: 'c_text', fields: { field_c_text: 'Cuerpo del bloque de texto.', field_c_advanced_title: '¿Que considerar antes de adoptar?', field_c_title_tag: 'h2' } },
-    { type: 'ln_c_cardgrid', fields: { field_view_mode: 'slider-default-card', field_c_advanced_title: 'Perros' } },
-    { type: 'layout_columns_2', fields: { field_section_id: 'cuidados' },
+    { type: 'c_text', fields: {
+      field_c_text: 'Cuerpo del bloque de texto.',
+      field_c_advanced_title: '¿Que considerar antes de adoptar?',
+      'field_c_advanced_title.html_tag': 'h2',
+      'classy.background_color': 'bg_brand_01',
+      field_c_image: 'foto.jpg',
+    } },
+    { type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'slider-default-card', field_c_advanced_title: 'Perros' },
+      children: [{ type: 'c_text', fields: { field_c_text: 'Card uno.' } }] },
+    { type: 'layout_columns_2', fields: { 'advanced.section_id': 'cuidados' },
       children: [
-        { type: 'c_text', fields: { field_c_text: 'Columna izquierda.' } },
-        { type: 'ln_c_cardgrid', fields: { field_view_mode: 'grid-cards' } },
+        { slot: 0, type: 'c_text', fields: { field_c_text: 'Columna izquierda.' } },
+        { slot: 1, type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'grid-cards' } },
       ] },
   ],
 })
@@ -88,35 +114,45 @@ try {
 
   const dom = await page.evaluate(() => {
     const v = (sel) => document.querySelector(sel)?.value ?? null
-    const rows = [...document.querySelectorAll('#rows > .row')]
+    const B = 'field_components'
+    const col1 = `${B}[2][subform][field_column_first][0][subform]`
+    const col2 = `${B}[2][subform][field_column_second][0][subform]`
     return {
       titulo: v('input[name="title[0][value]"]'),
       publicado: document.querySelector('input[name="status[value]"]')?.checked,
-      bloques: rows.length,
+      pathauto: document.querySelector('input[name="path[0][pathauto]"]')?.checked,
+      alias: v('input[name="path[0][alias]"]'),
+      bloques: document.querySelectorAll('#rows > .row').length,
       texto: document.querySelector('.ck-editor__editable')?.innerText ?? null,
-      tituloTexto: v('input[name="field_components[0][subform][field_c_advanced_title][0][value]"]'),
-      tag: v('select[name="field_components[0][subform][field_c_title_tag]"]'),
-      viewMode: v('select[name="field_components[1][subform][field_view_mode]"]'),
-      cardTitulo: v('input[name="field_components[1][subform][field_c_advanced_title][0][value]"]'),
-      sectionId: v('input[name="field_components[2][subform][field_section_id][0][value]"]'),
-      hijos: document.querySelectorAll('.kidrow').length,
-      hijoViewMode: v('select[name="field_components[2][subform][field_children][1][subform][field_view_mode]"]'),
+      formato: v(`select[name="${B}[0][subform][field_c_text][0][format]"]`),
+      tituloTexto: v(`input[name="${B}[0][subform][field_c_advanced_title][0][value]"]`),
+      tag: v(`select[name="${B}[0][subform][field_c_advanced_title][0][html_tag]"]`),
+      classy: v(`select[name="${B}[0][subform][classy][0][c_text][background_color]"]`),
+      viewMode: v(`select[name="${B}[1][subform][field_c_cardgrid_view_mode]"]`),
+      cardHijo: v(`textarea[name="${B}[1][subform][field_c_subitems][0][subform][field_c_text][0][value]"]`) !== null,
+      sectionId: v(`input[name="${B}[2][subform][section_id][0][value]"]`),
+      col1: document.querySelector(`textarea[name="${col1}[field_c_text][0][value]"]`) !== null,
+      col2: v(`select[name="${col2}[field_c_cardgrid_view_mode]"]`),
       abiertos: [...document.querySelectorAll('details')].filter((d) => d.open).length,
     }
   })
 
   check(dom.titulo === 'Tenencia Responsable', 'titulo de la pagina')
   check(dom.publicado === false, 'quedo DESPUBLICADA')
+  check(dom.pathauto === false, 'destildo el alias automatico')
+  check(dom.alias === '/adopta/tenencia-responsable', `escribio el alias (${dom.alias})`)
   check(dom.bloques === 3, `3 bloques sueltos (${dom.bloques})`)
+  check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')
   check(dom.tituloTexto === '¿Que considerar antes de adoptar?', 'titulo adentro de Optional fields')
   check(dom.tag === 'h2', 'select por valor de maquina (h2)')
+  check(dom.classy === 'bg_brand_01', 'select adentro de Classy')
   check(dom.viewMode === 'slider-default-card', 'view mode del card grid')
-  check(dom.cardTitulo === 'Perros', 'titulo del card grid')
-  check(dom.sectionId === 'cuidados', 'campo del contenedor')
-  check(dom.hijos === 2, `2 hijos adentro del contenedor (${dom.hijos})`)
-  check(dom.hijoViewMode === 'grid-cards', 'campo de un hijo anidado')
-  check(dom.abiertos >= 2, 'se abrieron los desplegables Optional fields')
+  check(dom.cardHijo, 'hijo en un slot SIN modal (card grid)')
+  check(dom.sectionId === 'cuidados', 'campo adentro de Avanzado (plegado)')
+  check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
+  check(dom.col2 === 'grid-cards', 'hijo en la columna 2 (slot 1, con modal)')
+  check(dom.abiertos >= 4, `se abrieron los desplegables (${dom.abiertos})`)
 
   // Con --save: guarda y lee el node id de la URL a la que cae.
   const res = await buildPage({ page, mapping: mapping(site), save: true, onStep: () => {},
@@ -131,6 +167,15 @@ try {
       manifest: validateManifest({ manifest: 1, page: { title: 'x' }, blocks: [{ type: 'c_text', fields: { campo_inventado: 'x' } }] }) })
   } catch (e) { freno = /no tiene el campo "campo_inventado"/.test(e.message) }
   check(freno, 'frena ante un campo que el mapping no conoce')
+
+  // Un slot que no existe tambien frena: mejor eso que meter el bloque en otro lado.
+  let slotMalo = false
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {},
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'layout_columns_2', children: [{ slot: 5, type: 'c_text' }] }] }) })
+  } catch (e) { slotMalo = /no tiene el slot 5/.test(e.message) }
+  check(slotMalo, 'frena ante un slot que no existe')
 } finally {
   await ctx.close()
   server.close()
