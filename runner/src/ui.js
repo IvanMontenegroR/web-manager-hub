@@ -22,7 +22,7 @@ import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join, resolve, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { openBrowser, isLoggedIn } from './browser.js'
+import { openBrowser } from './browser.js'
 import { loadManifest, countBlocks, validateManifest } from './manifest.js'
 import { missingTypes } from './mapping.js'
 import { buildPage } from './build.js'
@@ -37,13 +37,50 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   // UN solo navegador para toda la sesion: el login lo abre y las corridas lo reusan,
   // asi la persona no vuelve a loguearse en cada pagina.
   let nav = null
+  let abriendo = null
+  const vivo = () => !!nav && !nav.cerrado
+
   async function navegador() {
-    if (nav && !nav.ctx.pages().length) nav = null   // la cerraron a mano
-    if (!nav) {
-      nav = await openBrowser(openOpts)
-      nav.ctx.on('close', () => { nav = null })
+    if (nav?.cerrado) nav = null
+    if (nav) return nav
+    // Dos clics seguidos no tienen que abrir dos navegadores.
+    if (abriendo) return abriendo
+    abriendo = (async () => {
+      // Al cerrar la ventana, Chrome tarda un momento en soltar el perfil. Sin reintento,
+      // volver a abrir justo despues falla con "el perfil esta en uso".
+      let ultimo
+      for (let i = 0; i < 4; i++) {
+        try {
+          const n = await openBrowser(openOpts)
+          n.ctx.on('close', () => { n.cerrado = true; sesion = null })
+          nav = n
+          return n
+        } catch (e) {
+          ultimo = e
+          await new Promise((ok) => setTimeout(ok, 800))
+        }
+      }
+      throw new Error(`No se pudo abrir el navegador: ${ultimo?.message || 'desconocido'}`)
+    })()
+    try { return await abriendo } finally { abriendo = null }
+  }
+
+  // ¿Hay sesion? Se pregunta por HTTP con las cookies del perfil, NO navegando la
+  // ventana: mientras la persona escribe sus credenciales, moverle la pagina de abajo
+  // le borra lo que puso. El valor queda cacheado y la pagina lo lee de ahi, asi que el
+  // refresco automatico no le pega a Drupal cada pocos segundos.
+  //   null = no lo sabemos (no hay navegador abierto)  ·  true/false = comprobado
+  let sesion = null
+  async function comprobarSesion({ abrir = false } = {}) {
+    if (!vivo()) {
+      if (!abrir) { sesion = null; return sesion }
+      await navegador()
     }
-    return nav
+    try {
+      const res = await nav.ctx.request.get(new URL('/user', mapping.site).href, { timeout: 15000 })
+      sesion = res.ok() && !/\/user\/login/.test(res.url())
+    } catch { sesion = false }
+    return sesion
   }
 
   // Una corrida por vez. El estado vive aca y la pagina lo consulta cada medio segundo:
@@ -77,12 +114,12 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     const falta = missingTypes(mapping, m.blocks)
     if (falta.length) throw new Error(`El mapping no conoce: ${falta.join(', ')}`)
     const c = nuevaCorrida(archivo, save)
-    const { page } = await navegador()
-    if (!(await isLoggedIn(page, mapping.site))) {
+    if (!(await comprobarSesion({ abrir: true }))) {
       c.estado = 'error'
-      c.error = 'No hay sesion en Drupal. Inicia sesion primero.'
-      throw new Error(c.error)
+      c.error = 'No hay sesion en Drupal. Conectate primero.'
+      return
     }
+    const { page } = await navegador()
     try {
       const res = await buildPage({ page, mapping, manifest: m, save, onStep: (s) => c.pasos.push(s) })
       logRun({ manifest: archivo, title: m.page.title, ...res })
@@ -96,21 +133,21 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   }
 
   const rutas = {
+    // Lee el estado CACHEADO: no toca Drupal ni la ventana. La pagina lo consulta cada
+    // pocos segundos y tiene que ser inofensivo.
     'GET /api/estado': async () => ({
       sitio: mapping.site, mapping: basename(mappingFile),
-      sesion: nav ? await isLoggedIn(nav.page, mapping.site) : false,
-      navegador: !!nav, manifiestos: manifiestos(), corrida,
+      sesion, navegador: vivo(), manifiestos: manifiestos(), corrida,
     }),
     'GET /api/corrida': async () => corrida,
-    'POST /api/login': async () => {
+    // Abre la ventana y comprueba. Si el perfil ya tenia la sesion de la vez pasada,
+    // esto solo alcanza y la persona no vuelve a escribir nada.
+    'POST /api/conectar': async () => {
       const { page } = await navegador()
-      await page.goto(mapping.site, { waitUntil: 'domcontentloaded' })
-      return { ok: true }
+      await page.goto(mapping.site, { waitUntil: 'domcontentloaded' }).catch(() => {})
+      return { sesion: await comprobarSesion() }
     },
-    'POST /api/sesion': async () => {
-      const { page } = await navegador()
-      return { sesion: await isLoggedIn(page, mapping.site) }
-    },
+    'POST /api/sesion': async () => ({ sesion: await comprobarSesion({ abrir: true }) }),
     'POST /api/build': async (body) => {
       if (corrida?.estado === 'corriendo') throw new Error('Ya hay una pagina armandose.')
       if (!body?.archivo) throw new Error('Falta el manifiesto.')
@@ -127,8 +164,9 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
       return { nombre }
     },
     'POST /api/cerrar-navegador': async () => {
-      if (nav) await nav.ctx.close()
+      if (vivo()) await nav.ctx.close().catch(() => {})
       nav = null
+      sesion = null
       return { ok: true }
     },
   }
@@ -173,7 +211,7 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
 
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok))
   const url = `http://127.0.0.1:${server.address().port}/?t=${token}`
-  return { server, url, cerrar: async () => { if (nav) await nav.ctx.close(); server.close() } }
+  return { server, url, cerrar: async () => { if (vivo()) await nav.ctx.close().catch(() => {}); server.close() } }
 }
 
 function leerCuerpo(req) {

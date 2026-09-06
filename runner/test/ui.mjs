@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { startUi } from '../src/ui.js'
 import { loadMapping } from '../src/mapping.js'
+import { startFakeDrupal } from './fake-drupal.mjs'
 import { request } from 'node:http'
 
 // Un pedido sin la libreria de fetch, para poder mandar headers que fetch no permite.
@@ -49,7 +50,10 @@ try {
 
   const estado = await (await api('/api/estado')).json()
   check(estado.sitio === mapping.site, `informa el sitio (${estado.sitio})`)
-  check(estado.sesion === false, 'arranca sin sesion, sin abrir ningun navegador')
+  // `null` (no lo sabemos) no es lo mismo que `false` (comprobamos y no hay): el perfil
+  // guarda las cookies, asi que al conectar de nuevo lo normal es que ya haya sesion.
+  check(estado.sesion === null, `arranca sin comprobar la sesion (${JSON.stringify(estado.sesion)})`)
+  check(estado.navegador === false, 'y sin abrir ningun navegador')
 
   const porNombre = Object.fromEntries(estado.manifiestos.map((m) => [m.nombre, m]))
   check(porNombre['una.json']?.titulo === 'Pagina de prueba', 'lista el manifiesto y lee su titulo')
@@ -88,10 +92,57 @@ try {
   const otroHost = await pedirCrudo(new URL(url).port, '/api/estado', { 'x-token': token, host: 'evil.example' })
   check(otroHost === 403, `un Host que no es 127.0.0.1 se rechaza (rebinding de DNS) — dio ${otroHost}`)
 
+  // El estado se lee CACHEADO: no puede navegar la ventana ni pegarle a Drupal, porque
+  // la pagina lo consulta cada pocos segundos mientras la persona escribe su contraseña.
+  const antes = Date.now()
+  for (let i = 0; i < 5; i++) await api('/api/estado')
+  check(Date.now() - antes < 500, 'cinco consultas de estado seguidas no tocan la red')
+
   const noExiste = await api('/api/lo-que-sea')
   check(noExiste.status === 404, 'una ruta que no existe da 404')
 } finally {
   await cerrar()
+}
+
+// --- El ciclo del navegador, con uno de verdad contra el Drupal de mentira ---
+// Es el caso que rompio en la practica: se cierra la ventana de Chrome y despues no se
+// podia volver a abrir. Y el otro: comprobar la sesion NO puede navegar la ventana, que
+// es lo que le borraba las credenciales a medio escribir.
+const CHROME = process.env.RUNNER_CHROME
+const { server: falso, port } = await startFakeDrupal()
+const perfil = mkdtempSync(join(tmpdir(), 'perfil-'))
+const u2 = await startUi({
+  mapping: { ...mapping, site: `http://127.0.0.1:${port}` },
+  mappingFile: 'x.json', manifestDir: dir,
+  openOpts: { profileDir: perfil, headless: true, slowMo: 0,
+    ...(CHROME ? { executablePath: CHROME } : { browser: 'chrome' }) },
+})
+const api2 = (ruta) => fetch(new URL(ruta, u2.url).href, {
+  method: 'POST', headers: { 'x-token': new URL(u2.url).searchParams.get('t') },
+})
+try {
+  const a = await (await api2('/api/conectar')).json()
+  check(a.sesion === true, 'conectar abre el navegador y ve la sesion')
+
+  const leer = async () => (await fetch(new URL('/api/estado', u2.url).href,
+    { headers: { 'x-token': new URL(u2.url).searchParams.get('t') } })).json()
+  check((await leer()).navegador === true, 'informa que hay un navegador abierto')
+
+  const rechequeo = await (await api2('/api/sesion')).json()
+  check(rechequeo.sesion === true, 'comprobar la sesion de nuevo la mantiene (va por HTTP, no navegando)')
+
+  await api2('/api/cerrar-navegador')
+  const cerrado = await (await fetch(new URL('/api/estado', u2.url).href,
+    { headers: { 'x-token': new URL(u2.url).searchParams.get('t') } })).json()
+  check(cerrado.navegador === false && cerrado.sesion === null,
+    'al cerrar la ventana vuelve a "sin comprobar", no a "sin sesion"')
+
+  const b = await (await api2('/api/conectar')).json()
+  check(b.sesion === true, 'y se puede volver a abrir despues de cerrarla')
+} finally {
+  await u2.cerrar()
+  falso.close()
+  rmSync(perfil, { recursive: true, force: true })
   rmSync(dir, { recursive: true, force: true })
 }
 

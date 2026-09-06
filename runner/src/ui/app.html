@@ -79,11 +79,13 @@
     <div class="fila">
       <span id="estadoSesion" class="cargando">Consultando…</span>
       <span class="crece"></span>
-      <button id="bLogin">Iniciar sesion</button>
-      <button id="bChequear" class="chico">Ya me logueé</button>
+      <button id="bLogin" class="primario">Conectar con Drupal</button>
+      <button id="bChequear">Ya me logueé</button>
+      <button id="bCerrarNav" class="chico" hidden>Cerrar la ventana de Drupal</button>
     </div>
     <div class="nota aviso" id="ayudaLogin" hidden>
-      Se abrio una ventana de Chrome. Entra con tu usuario como siempre, <b>dejala abierta</b>
+      Se abrio una ventana de Chrome. Entra con tu usuario y contraseña con calma —
+      <b>nada te va a mover la pagina</b>. Cuando estes adentro, <b>deja esa ventana abierta</b>
       y volve aca a tocar “Ya me logueé”.
     </div>
   </div>
@@ -134,12 +136,20 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 let ultimaCorrida = null
 
+// Tres estados, no dos: `null` es "todavia no lo sabemos" (no hay ventana abierta) y no
+// es lo mismo que "no hay sesion". El perfil guarda las cookies, asi que al conectar de
+// nuevo lo mas probable es que ya estes adentro sin escribir nada.
 function pintarSesion(e) {
   const el = $('estadoSesion')
-  el.className = 'pill ' + (e.sesion ? 'si' : 'no')
-  el.innerHTML = '<span class="punto"></span>' + (e.sesion ? 'Sesion iniciada' : 'Sin sesion')
-  $('bLogin').hidden = e.sesion
-  $('bChequear').hidden = e.sesion
+  const sinComprobar = e.sesion === null || e.sesion === undefined
+  el.className = 'pill ' + (e.sesion === true ? 'si' : sinComprobar ? '' : 'no')
+  if (sinComprobar) { el.className = 'meta'; el.textContent = 'Sin conectar todavia' }
+  else el.innerHTML = '<span class="punto"></span>' + (e.sesion ? 'Sesion iniciada' : 'Sin sesion')
+  $('bLogin').hidden = e.sesion === true
+  $('bLogin').textContent = sinComprobar ? 'Conectar con Drupal' : 'Abrir Drupal de nuevo'
+  $('bChequear').hidden = sinComprobar || e.sesion === true
+  $('bCerrarNav').hidden = !e.navegador
+  if (e.sesion === true) $('ayudaLogin').hidden = true
 }
 
 function pintarLista(e) {
@@ -151,12 +161,12 @@ function pintarLista(e) {
   }
   cont.className = ''
   // Sin sesion los botones estan grises: hay que decir por que, no dejarlo adivinar.
-  const sinSesion = e.sesion ? '' :
-    '<div class="nota aviso">Para armar paginas primero tenes que iniciar sesion en Drupal, arriba.</div>'
+  const sinSesion = e.sesion === true ? '' :
+    '<div class="nota aviso">Para armar paginas, primero conectate con Drupal ahi arriba.</div>'
   cont.innerHTML = sinSesion + e.manifiestos.map((m) => {
     if (m.error) return `<div class="pagina"><div class="tit">${esc(m.nombre)}</div>
       <div class="nota mal">No se pudo leer: ${esc(m.error)}</div></div>`
-    const bloqueado = m.falta.length > 0 || !e.sesion
+    const bloqueado = m.falta.length > 0 || e.sesion !== true
     return `<div class="pagina">
       <div class="tit">${esc(m.titulo)}</div>
       <div class="meta">${m.bloques} bloque${m.bloques === 1 ? '' : 's'}
@@ -234,14 +244,24 @@ async function refrescar() {
   if (e.corrida?.estado === 'corriendo' && !timer) seguir()
 }
 
-$('bLogin').addEventListener('click', async () => {
-  $('ayudaLogin').hidden = false
-  await api('/api/login', {}).catch((e) => alert(e.message))
+$('bLogin').addEventListener('click', async (ev) => {
+  ev.target.disabled = true
+  try {
+    const { sesion } = await api('/api/conectar', {})
+    // Si el perfil ya traia la sesion, no hay nada que escribir.
+    $('ayudaLogin').hidden = sesion === true
+  } catch (e) { alert(e.message) } finally { ev.target.disabled = false; refrescar() }
 })
-$('bChequear').addEventListener('click', async () => {
-  const { sesion } = await api('/api/sesion', {}).catch(() => ({ sesion: false }))
-  if (!sesion) alert('Todavia no hay sesion. Entra en la ventana de Chrome que se abrio y volve a probar.')
-  $('ayudaLogin').hidden = sesion
+$('bChequear').addEventListener('click', async (ev) => {
+  ev.target.disabled = true
+  try {
+    const { sesion } = await api('/api/sesion', {})
+    if (!sesion) alert('Todavia no hay sesion. Termina de entrar en la ventana de Chrome y volve a tocar el boton.')
+    $('ayudaLogin').hidden = sesion === true
+  } catch (e) { alert(e.message) } finally { ev.target.disabled = false; refrescar() }
+})
+$('bCerrarNav').addEventListener('click', async () => {
+  await api('/api/cerrar-navegador', {}).catch(() => {})
   refrescar()
 })
 $('bPegar').addEventListener('click', async () => {
