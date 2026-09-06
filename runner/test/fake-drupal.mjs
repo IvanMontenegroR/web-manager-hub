@@ -7,7 +7,8 @@
 //     de un modal (las columnas de un layout) y el dropbutton de Gin, donde el primer
 //     tipo esta a la vista y el resto plegado detras del toggle (adentro de una pestaña)
 //   - contenedores con VARIOS slots (las dos columnas de un layout)
-//   - los <details> plegados, con la variante "widget-" que usa field_group
+//   - los <details> plegados, con la variante "widget-" que usa field_group, y el panel
+//     cerrado de la barra lateral donde vive el alias de URL
 //   - el select de formato de texto arrancando en uno que NO admite HTML
 //   - CKEditor sobre un textarea
 //
@@ -26,10 +27,14 @@ details{margin:8px 0;padding:6px;border:1px solid #ccc} details:not([open]) .js-
     <input id="t" name="title[0][value]" type="text"></div>
   <div class="js-form-item"><label for="pub">Publicado</label>
     <input id="pub" name="status[value]" type="checkbox" checked></div>
-  <div class="js-form-item"><label for="pa">Generar alias automatico</label>
-    <input id="pa" name="path[0][pathauto]" type="checkbox" checked></div>
-  <div class="js-form-item"><label for="al">Alias</label>
-    <input id="al" name="path[0][alias]" type="text" disabled></div>
+  <!-- Como en el formulario real: el alias vive en un panel PLEGADO de la barra lateral,
+       asi que el check existe pero no se ve hasta que alguien lo abre. -->
+  <details id="urlpath"><summary>Configuracion de la ruta URL</summary>
+    <div class="js-form-item"><label for="pa">Generar alias automatico</label>
+      <input id="pa" name="path[0][pathauto]" type="checkbox" checked></div>
+    <div class="js-form-item"><label for="al">Alias</label>
+      <input id="al" name="path[0][alias]" type="text" disabled></div>
+  </details>
 
   <h2>Componentes</h2>
   <div id="rows"></div>

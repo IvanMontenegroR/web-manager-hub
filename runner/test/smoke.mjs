@@ -140,6 +140,7 @@ try {
       publicado: document.querySelector('input[name="status[value]"]')?.checked,
       pathauto: document.querySelector('input[name="path[0][pathauto]"]')?.checked,
       alias: v('input[name="path[0][alias]"]'),
+      panelUrl: document.getElementById('urlpath')?.open === true,
       bloques: document.querySelectorAll('#rows > .row').length,
       texto: document.querySelector('.ck-editor__editable')?.innerText ?? null,
       formato: v(`select[name="${B}[0][subform][field_c_text][0][format]"]`),
@@ -160,6 +161,7 @@ try {
   check(dom.publicado === false, 'quedo DESPUBLICADA')
   check(dom.pathauto === false, 'destildo el alias automatico')
   check(dom.alias === '/adopta/tenencia-responsable', `escribio el alias (${dom.alias})`)
+  check(dom.panelUrl, 'abrio el panel plegado donde vive el alias')
   check(dom.bloques === 3, `3 bloques sueltos (${dom.bloques})`)
   check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')

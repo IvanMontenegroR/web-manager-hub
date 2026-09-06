@@ -25,17 +25,17 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
   }
 
   onStep(`Titulo: ${manifest.page.title}`)
-  await page.locator(mapping.title).first().fill(manifest.page.title)
+  await escribir(page.locator(mapping.title).first(), manifest.page.title)
 
   // El alias esta DESHABILITADO mientras Pathauto lo genere solo: hay que destildarlo
   // antes de poder escribirlo.
   if (manifest.page.path && mapping.path) {
     if (mapping.pathauto) {
       const auto = page.locator(mapping.pathauto).first()
-      if (await auto.count()) await auto.setChecked(false)
+      if (await auto.count()) await tildar(auto, false)
     }
     onStep(`Alias: ${manifest.page.path}`)
-    await page.locator(mapping.path).first().fill(manifest.page.path)
+    await escribir(page.locator(mapping.path).first(), manifest.page.path)
   }
 
   // Despublicado SIEMPRE, salvo que el manifiesto pida lo contrario Y el mapping sepa
@@ -43,7 +43,7 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
   if (mapping.published) {
     const wants = manifest.page.published === true
     const box = page.locator(mapping.published).first()
-    if (await box.count()) await box.setChecked(wants)
+    if (await box.count()) await tildar(box, wants)
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
@@ -181,10 +181,34 @@ async function clickAdd(page, add, def, type) {
   throw new Error(`Modo de alta desconocido: "${add.mode}"`)
 }
 
+// Un campo puede EXISTIR y no verse: en el formulario del nodo, el alias y la
+// publicacion viven en paneles plegados de la barra lateral, y en un paragraph hay
+// grupos que arrancan cerrados. Antes de tocar cualquier cosa se abren todos los
+// <details> que la tapan — que es lo que haria una persona. Sin esto, Playwright espera
+// 30 segundos un elemento que esta ahi pero escondido, y la corrida se corta.
+async function revelar(loc) {
+  await loc.evaluate((node) => {
+    for (let p = node.parentElement; p; p = p.parentElement) {
+      if (p.tagName === 'DETAILS' && !p.open) p.open = true
+    }
+  }).catch(() => { /* si no se puede evaluar, se intenta igual: quiza ya se ve */ })
+}
+
+async function escribir(loc, valor) {
+  await revelar(loc)
+  await loc.fill(String(valor))
+}
+
+async function tildar(loc, valor) {
+  await revelar(loc)
+  await loc.setChecked(!!valor)
+}
+
 async function fillField(page, f, vars, value, ref) {
   const selector = resolveSelector(f.sel, vars)
   const el = page.locator(selector).first()
   if (!(await el.count())) throw new Error(`No encontre el campo ${ref} (${selector})`)
+  await revelar(el)
 
   if (f.kind === 'select') {
     // Se intenta por VALOR de maquina, que es lo que guarda nuestro catalogo; si esa
