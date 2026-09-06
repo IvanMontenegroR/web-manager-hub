@@ -12,7 +12,11 @@ import { openBrowser } from '../src/browser.js'
 import { buildPage } from '../src/build.js'
 import { validateManifest } from '../src/manifest.js'
 
-const CHROME = process.env.RUNNER_CHROME || '/opt/pw-browsers/chromium'
+// Por defecto, el Chrome del SISTEMA — el mismo que usa una corrida de verdad, asi que
+// la prueba se parece a lo que va a pasar. `RUNNER_CHROME` apunta a un binario a mano,
+// para un contenedor de CI o un Chrome instalado fuera del path habitual.
+const CHROME = process.env.RUNNER_CHROME
+const NAVEGADOR = CHROME ? { executablePath: CHROME } : { browser: 'chrome' }
 
 // Un slot del contenedor, escrito como en el mapping real: las variables de la fila
 // PADRE resueltas, el {delta} del hijo pendiente. `modo` es como se abre la lista de
@@ -120,7 +124,7 @@ const check = (ok, msg) => { console.log(`${ok ? 'OK  ' : 'FALLA'} ${msg}`); if 
 const { server, port } = await startFakeDrupal()
 const site = `http://127.0.0.1:${port}`
 const profile = mkdtempSync(join(tmpdir(), 'runner-'))
-const { ctx, page } = await openBrowser({ executablePath: CHROME, profileDir: profile, headless: true, slowMo: 0 })
+const { ctx, page } = await openBrowser({ ...NAVEGADOR, profileDir: profile, headless: true, slowMo: 0 })
 
 try {
   // Sin guardar: el formulario queda lleno y se puede leer lo que escribio el motor.

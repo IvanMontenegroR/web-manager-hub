@@ -189,7 +189,9 @@ solo, asi que se destilda antes de poder escribirlo.
 npm test
 ```
 
-Levanta un Drupal de mentira que reproduce las formas del formulario real de Paragraphs
+Usa el **Chrome del sistema**, igual que una corrida de verdad (`RUNNER_CHROME=<binario>`
+para apuntar a otro, en CI o si Chrome esta fuera del path habitual). Levanta un Drupal de
+mentira que reproduce las formas del formulario real de Paragraphs
 (los `name` con delta y subform, los `id` con sufijo aleatorio, el alta por AJAX, las tres
 formas de agregar — desplegable+boton en el nodo, un boton por tipo detras de un modal en
 las columnas de un layout, y el dropbutton de Gin con los tipos plegados en una pestaña —,
