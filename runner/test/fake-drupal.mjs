@@ -118,9 +118,14 @@ function slotHtml(label, base, dsel, npath, field, modo) {
   // En 'entre', el area del final existe pero esta escondida: es exactamente lo que hace
   // paragraphs_features, y lo que hacia fallar al runner con "element is not visible".
   const escondida = modo === 'entre' ? ' style="display:none"' : ''
-  const enMedio = modo === 'entre' ? types.map((t) =>
-    \`<button type="button" class="paragraphs-features__add-in-between__button"
-       data-paragraph-bundle="\${t}">+ \${t}</button>\`).join('') : ''
+  // Dos clases de boton "en el medio", como en el CMS: uno por bundle cuando la lista
+  // tiene pocos tipos a mano, y uno GENERICO ("+ Add") que abre el dialogo cuando no.
+  // Aca c_text tiene el suyo y ln_c_cardgrid no, para que la prueba pase por los dos.
+  const enMedio = modo === 'entre'
+    ? \`<button type="button" class="paragraphs-features__add-in-between__button"
+         data-paragraph-bundle="c_text">+ c_text</button>
+       <button type="button" class="paragraphs-features__add-in-between__button gen">+ Add</button>\`
+    : ''
   return \`<fieldset class="slot" data-drupal-selector="\${dsel}-subform-\${fd}-wrapper"
       data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
       data-npath="\${npath}_subform_\${field}">
@@ -130,7 +135,7 @@ function slotHtml(label, base, dsel, npath, field, modo) {
         data-drupal-selector="\${dsel}-subform-\${fd}-add-more-add-modal-form-area-add-more"
         value="Add Component to Column"></div>\` : ''}
     <div class="\${modo === 'drop' ? 'drop' : 'modal'}\${modo === 'modal' || modo === 'entre' ? '' : ' on'}"
-         data-drupal-selector="\${dsel}-subform-\${fd}-add-more"\${escondida}>
+         data-drupal-selector="\${dsel}-subform-\${fd}-add-more">
       \${modo === 'drop' ? '<button type="button" class="dropbutton__toggle">Mas</button>' : ''}
       \${btns}</div></fieldset>\`
 }
@@ -158,6 +163,8 @@ function wire(scope) {
     const toggle = box.querySelector('.dropbutton__toggle')
     if (toggle) toggle.addEventListener('click', () => box.classList.toggle('open'))
     s.querySelectorAll('.enmedio button').forEach((b) => b.addEventListener('click', () => {
+      // El generico no agrega: destapa la lista de tipos, igual que el dialogo de ee.
+      if (!b.dataset.paragraphBundle) { box.classList.add('on'); return }
       const d = list.children.length
       addTo(list, s.dataset.base + '[' + d + '][subform]', s.dataset.slot + '-' + d,
         s.dataset.npath + '_' + d, b.dataset.paragraphBundle)

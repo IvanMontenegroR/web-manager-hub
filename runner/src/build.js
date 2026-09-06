@@ -168,7 +168,11 @@ async function addBlock(ctx, block, num, holder) {
         base: resolveSelector(slot.base, padre),
         // `enMedio` no se escribe en el mapping: sale de como Drupal nombra las cosas,
         // igual que {dselw} y {npath}. Un mapping puede declararlo si su sitio difiere.
-        add: { enMedio: EN_MEDIO(fieldWrapper(dselHijo)), ...resolveIn(slot.add, padre) },
+        add: {
+          enMedio: EN_MEDIO(fieldWrapper(dselHijo)),
+          enMedioAbre: EN_MEDIO_GENERICO(fieldWrapper(dselHijo)),
+          ...resolveIn(slot.add, padre),
+        },
       })
     }
   }
@@ -180,9 +184,15 @@ function resolveIn(add, vars) {
   return out
 }
 
-// El boton de paragraphs_features que agrega ESE bundle adentro de ESA lista.
+// Los botones de "agregar en el medio" de paragraphs_features, acotados a ESA lista.
+// Hay de dos clases y hacen cosas distintas:
+//   - el de un bundle puntual (`data-paragraph-bundle`) agrega ESE tipo de una;
+//   - el generico ("+ Add"), que aparece cuando la lista acepta muchos tipos, ABRE el
+//     dialogo de paragraphs_ee y recien ahi esta el boton del tipo.
 const EN_MEDIO = (wrapper) => `[data-drupal-selector="${wrapper}"] `
   + 'button.paragraphs-features__add-in-between__button[data-paragraph-bundle="{bundle}"]'
+const EN_MEDIO_GENERICO = (wrapper) => `[data-drupal-selector="${wrapper}"] `
+  + 'button.paragraphs-features__add-in-between__button:not([data-paragraph-bundle])'
 
 const seVe = async (loc) => (await loc.count()) > 0 && await loc.first().isVisible()
 
@@ -239,20 +249,25 @@ async function clickAdd(page, add, def, type) {
       const b = page.locator(resolveSelector(add.enMedio, { bundle })).last()
       if (await seVe(b)) { await b.click(); await esperarAjax(page); return }
     }
-    // 2. El modal de paragraphs_ee, cuando el area del final si se ve.
-    if (add.open) {
-      const opener = page.locator(add.open).first()
-      if (await seVe(opener)) { await opener.click(); await esperarAjax(page) }
+    // 2. Algo que ABRA la lista de tipos, porque el boton del bundle todavia no existe:
+    //    el "+ Add" generico de paragraphs_features (cuando la lista acepta muchos tipos)
+    //    o el modal de paragraphs_ee. Se usa el primero que se vea, nunca los dos.
+    for (const sel of [add.enMedioAbre, add.open].filter(Boolean)) {
+      const b = page.locator(sel).last()
+      if (await seVe(b)) { await b.click(); await esperarAjax(page); break }
     }
     // 3. El boton suelto del bundle: una lista de un solo tipo, o el que abrio el modal.
     const btn = page.locator(resolveSelector(add.button, { bundle })).first()
     await btn.waitFor({ state: 'visible', timeout: 20000 }).catch(async () => {
+      // La etiqueta sola no alcanza para saber que ES cada boton: va el markup, que dice
+      // la clase y si trae data-paragraph-bundle. Es la diferencia entre "agrega este
+      // tipo" y "abre el dialogo".
       const opciones = await page.evaluate(() => [...document.querySelectorAll(
         'input[name="button_add_modal"], button.paragraphs-features__add-in-between__button, .field-add-more-submit')]
         .filter((e) => e.offsetParent !== null)
-        .map((e) => (e.value || e.textContent || '').trim().slice(0, 40)).slice(0, 10)).catch(() => [])
+        .map((e) => e.outerHTML.replace(/\s+/g, ' ').slice(0, 220)).slice(0, 6)).catch(() => [])
       throw new Error(`No aparecio el boton para agregar "${type}" en este contenedor. `
-        + `Los botones de alta que SI se ven ahora: ${opciones.length ? opciones.join(', ') : 'ninguno'}.`)
+        + `Los botones de alta que SI se ven ahora: ${opciones.length ? opciones.join('  ///  ') : 'ninguno'}.`)
     })
     await btn.click()
     await esperarAjax(page)

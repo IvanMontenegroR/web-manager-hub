@@ -115,6 +115,10 @@ const manifest = validateManifest({
         // (nodo -> comp_tabs -> comp_tabs_tab_item -> componente).
         { slot: 1, type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'grid-cards' },
           children: [{ type: 'c_text', fields: { field_c_text: 'Tres niveles.' } }] },
+        // En esta columna el area del final esta escondida. El card grid de arriba no
+        // tiene boton propio "en el medio", asi que pasa por el generico "+ Add" que
+        // destapa la lista; este c_text si lo tiene y se agrega de una.
+        { slot: 1, type: 'c_text', fields: { field_c_text: 'Con boton propio.' } },
       ] },
   ],
 })
@@ -155,6 +159,7 @@ try {
       col1: document.querySelector(`textarea[name="${col1}[field_c_text][0][value]"]`) !== null,
       col2: v(`select[name="${col2}[field_c_cardgrid_view_mode]"]`),
       nieto: document.querySelector(`textarea[name="${col2}[field_c_subitems][0][subform][field_c_text][0][value]"]`) !== null,
+      col2b: document.querySelector(`textarea[name="${B}[2][subform][field_column_second][1][subform][field_c_text][0][value]"]`) !== null,
       abiertos: [...document.querySelectorAll('details')].filter((d) => d.open).length,
     }
   })
@@ -177,6 +182,7 @@ try {
   check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
   check(dom.col2 === 'grid-cards', 'hijo en la columna 2, con el area del final ESCONDIDA:\n     usa el boton "agregar en el medio" de paragraphs_features')
   check(dom.nieto, 'contenedor adentro de contenedor (3 niveles, como el Tabs)')
+  check(dom.col2b, 'y el segundo hijo, con su propio boton "agregar en el medio"')
   check(dom.abiertos >= 4, `se abrieron los desplegables (${dom.abiertos})`)
 
   // Con --save: guarda y lee el node id de la URL a la que cae.

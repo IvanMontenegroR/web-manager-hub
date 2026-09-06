@@ -147,7 +147,10 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     // esto solo alcanza y la persona no vuelve a escribir nada.
     'POST /api/conectar': async () => {
       const { page } = await navegador()
-      await page.goto(mapping.site, { waitUntil: 'domcontentloaded' }).catch(() => {})
+      // Directo a la pantalla de login, no a la home: es a lo que se vino. Si la sesion
+      // ya estaba viva, Drupal redirige solo al perfil y no hay nada que escribir.
+      const donde = new URL('/user/login', mapping.site).href
+      await page.goto(donde, { waitUntil: 'domcontentloaded' }).catch(() => {})
       return { sesion: await comprobarSesion() }
     },
     'POST /api/sesion': async () => ({ sesion: await comprobarSesion({ abrir: true }) }),
