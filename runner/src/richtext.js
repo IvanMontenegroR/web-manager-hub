@@ -18,35 +18,63 @@
 // `Drupal.CKEditor5Instances` es de Drupal y puede no estar, o estar y no coincidir.
 // Se prueba igual como segunda opcion, pero el editable manda.
 
-const RUTAS = ['editor', 'tecleado', 'textarea']
+// La ultima no es una ruta distinta: es volver a probar el editor DESPUES de esperarlo.
+// Si Drupal lo monto tarde, se llevo puesto lo que hubiera en el textarea, y esta es la
+// oportunidad de escribirle al editor que ahora si existe.
+const RUTAS = ['editor', 'tecleado', 'textarea', 'editor-tarde']
 
-// Espera a que el campo se ASIENTE: o hay un editor VIVO, o el textarea quedo a la vista
-// (que es lo que pasa con un formato sin editor). Cualquiera de las dos sirve.
-export async function esperarEditor(page, ta, ms = 10000) {
-  return ta.evaluate((el, tope) => new Promise((listo) => {
+// Espera a que el campo se ASIENTE: o hay un editor VIVO, o quedo claro que este campo
+// no va a tener editor y lo que hay es el textarea pelado.
+//
+// La pregunta dificil es la segunda. "El textarea se ve" NO alcanza: Drupal carga
+// CKEditor tarde — el subform aparece por AJAX y el editor monta segundos despues —, asi
+// que un textarea a la vista puede ser un campo sin editor o uno cuyo editor todavia
+// viene en camino. Escribir en el segundo caso es tirar el texto: cuando el editor monta,
+// arranca con lo suyo y pisa el textarea.
+//
+// Quien sabe la respuesta es Drupal: `drupalSettings.editor.formats` lista los formatos
+// que tienen editor. Si el formato de este campo esta ahi, se espera y punto, sin
+// heuristicas. La heuristica del textarea queda solo para cuando eso no se puede saber.
+export async function esperarEditor(page, ta, opciones = {}) {
+  const { formato = null, ms = 20000 } = opciones
+  return ta.evaluate((el, [tope, fmt]) => new Promise((listo) => {
     const t0 = Date.now()
     const QUIETO = 900
     let visibleDesde = null
+
+    // true = va a tener editor, false = no, null = no se puede saber.
+    const tendraEditor = () => {
+      const F = window.drupalSettings && window.drupalSettings.editor
+        && window.drupalSettings.editor.formats
+      const activo = fmt || el.getAttribute('data-editor-active-text-format')
+      if (!F || !activo) return null
+      return !!F[activo]
+    }
+
     const mirar = () => {
       const cont = el.closest('.js-form-item, .form-item') || el.parentElement
       const ed = cont && cont.querySelector('.ck-editor__editable')
       if (ed && ed.ckeditorInstance) return listo('editor')
-      // OJO con este "esta a la vista": al DESTRUIR el editor, CKEditor devuelve el
-      // textarea a la pantalla por un instante, justo antes de que monte el siguiente.
-      // Creerle a ese instante es escribir en el hueco entre un editor y el otro, que es
-      // exactamente el bug que esto viene a arreglar. Por eso tiene que quedarse quieto
-      // un rato antes de darlo por bueno.
-      if (el.offsetParent !== null) {
-        if (visibleDesde == null) visibleDesde = Date.now()
-        if (Date.now() - visibleDesde > QUIETO) return listo('textarea')
-      } else {
-        visibleDesde = null
+
+      // Medio editor dibujado tambien cuenta como "esta montando": no es momento de
+      // escribir el textarea.
+      const montando = !!(cont && cont.querySelector('.ck-editor'))
+      if (tendraEditor() !== true && !montando) {
+        // OJO con este "esta a la vista": al DESTRUIR el editor, CKEditor devuelve el
+        // textarea a la pantalla por un instante, justo antes de que monte el siguiente.
+        // Creerle a ese instante es escribir en el hueco entre un editor y el otro.
+        if (el.offsetParent !== null) {
+          if (visibleDesde == null) visibleDesde = Date.now()
+          if (Date.now() - visibleDesde > QUIETO) return listo('textarea')
+        } else {
+          visibleDesde = null
+        }
       }
       if (Date.now() - t0 > tope) return listo(null)
       setTimeout(mirar, 100)
     }
     mirar()
-  }), ms).catch(() => null)
+  }), [ms, formato]).catch(() => null)
 }
 
 // Escribe el valor y COMPRUEBA que haya quedado, ruta por ruta. Si la primera no pega, se
@@ -56,7 +84,8 @@ export async function esperarEditor(page, ta, ms = 10000) {
 export async function escribirRich(page, ta, valor) {
   const intentos = []
   for (const via of RUTAS) {
-    const pudo = await porRuta(page, ta, String(valor), via)
+    if (via === 'editor-tarde') await esperarEditor(page, ta, { ms: 8000 })
+    const pudo = await porRuta(page, ta, String(valor), via === 'editor-tarde' ? 'editor' : via)
     if (!pudo) { intentos.push(`${via}: no disponible`); continue }
     const leido = await leerRich(page, ta)
     if (leido) return { via, intentos }

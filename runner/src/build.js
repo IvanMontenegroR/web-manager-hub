@@ -435,7 +435,7 @@ async function fillField(page, f, vars, value, ref) {
     // Cambiar el formato DESTRUYE el editor y monta otro, y eso no es una peticion de
     // Drupal: `esperarAjax` no lo ve. Escribir en el medio del cambio es escribirle al
     // editor que se esta muriendo — el texto se ve un instante y despues no esta.
-    await esperarEditor(page, el)
+    await esperarEditor(page, el, { formato: f.format?.value })
     const r = await escribirRich(page, el, String(value))
     rutaRich = r.via
     if (!r.via) {

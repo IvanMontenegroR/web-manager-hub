@@ -54,20 +54,29 @@ const PAGINA = `<!doctype html><html><head><meta charset="utf-8">
 <script>
 // Lo mismo que hace Drupal: el Map global, el id en el textarea, y el editor encima.
 window.Drupal = { CKEditor5Instances: new Map() }
+// Y lo que Drupal publica sobre los formatos: cuales tienen editor. Es lo unico que
+// permite saber, ANTES de que monte, que este campo va a tener uno.
+window.drupalSettings = { editor: { formats: { rich_text: { editor: 'ckeditor5' } } } }
 let proximo = 1
 
-async function montar() {
+async function montar(datosIniciales) {
   const ta = document.getElementById('cuerpo')
   const id = String(proximo++)
   ta.setAttribute('data-ckeditor5-id', id)
-  const ed = await CKEDITOR.ClassicEditor.create(ta, {
+  const cfg = {
     licenseKey: 'GPL',
     plugins: [CKEDITOR.Essentials, CKEDITOR.Paragraph, CKEDITOR.Bold, CKEDITOR.Italic],
     toolbar: ['bold', 'italic'],
-  })
+  }
+  // Drupal saca los datos iniciales de una FOTO del campo tomada cuando llega el subform,
+  // no del textarea en el momento de montar. Por eso un editor que monta tarde arranca
+  // vacio y se lleva puesto lo que se haya escrito mientras tanto.
+  if (datosIniciales != null) cfg.initialData = datosIniciales
+  const ed = await CKEDITOR.ClassicEditor.create(ta, cfg)
   window.Drupal.CKEditor5Instances.set(id, ed)
   window.__listo = true
 }
+window.__montar = montar
 
 // El cambio de formato NO va al servidor: destruye el editor y monta otro. Y tarda, que
 // es exactamente donde el runner se metia a escribir.
@@ -175,12 +184,40 @@ try {
   await page.locator('#formato').selectOption('plain_text')
   await page.waitForFunction(() => window.__listo === true)
   await page.locator('#formato').selectOption('rich_text')
-  await esperarEditor(page, ta)
+  await esperarEditor(page, ta, { formato: 'rich_text' })
   await escribirRich(page, ta, TEXTO)
   await page.waitForTimeout(400)
   const quedoNuevo = await contenido()
   check(String(quedoNuevo || '').includes('Adoptar'),
     `y con el arreglo sobrevive al mismo cambio (${JSON.stringify(quedoNuevo)})`)
+
+  // EL CASO DE IVAN: Drupal monta CKEditor TARDE. El subform llega por AJAX y el editor
+  // aparece segundos despues; mientras tanto el textarea esta a la vista y parece un
+  // campo comun. Escribirlo ahi es tirar el texto — cuando el editor monta, pisa todo.
+  await page.evaluate(async () => {
+    const M = window.Drupal.CKEditor5Instances
+    for (const [k, ed] of M) { M.delete(k); await ed.destroy() }
+    // El campo arranca VACIO, que es el caso real: la pagina se esta armando de cero.
+    // Sin esto la foto sale con el texto de la prueba anterior y no se prueba nada.
+    document.getElementById('cuerpo').value = ''
+  })
+  await page.waitForTimeout(200)
+  // La foto se toma AHORA (el campo esta vacio) y el editor monta con ella 2,5s despues.
+  const foto = await ta.inputValue()
+  const tarde = page.evaluate((datos) => new Promise((r) => setTimeout(async () => {
+    await window.__montar(datos); r(true)
+  }, 2500)), foto)
+
+  const via = await (async () => {
+    await esperarEditor(page, ta, { formato: 'rich_text' })
+    return escribirRich(page, ta, TEXTO)
+  })()
+  await tarde
+  await page.waitForTimeout(400)
+  const conMonteTardio = await contenido()
+  check(String(conMonteTardio || '').includes('Adoptar'),
+    `sobrevive aunque el editor monte 2,5s tarde — por "${via.via}" `
+    + `(${JSON.stringify(conMonteTardio)})`)
 } finally {
   await ctx.close()
   server.close()
