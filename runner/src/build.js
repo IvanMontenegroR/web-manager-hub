@@ -12,8 +12,11 @@ import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper } from
 
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
+// Cuantas veces se vuelve a intentar un alta que fallo POR EL SERVIDOR.
+const REINTENTOS = 3
+const culpaDelServidor = (lineas) => lineas.some((t) => /HTTP (5\d\d|429)\b/.test(t))
 
-export async function buildPage({ page, mapping, manifest, save = false, onStep = () => {}, esperaSubform = 30000 }) {
+export async function buildPage({ page, mapping, manifest, save = false, onStep = () => {}, esperaSubform = 45000 }) {
   // Drupal, cuando algo falla, dice "revisa la consola del navegador". El runner puede
   // hacer eso: se escuchan los errores y se pegan al mensaje si la corrida termina mal.
   const consola = []
@@ -25,7 +28,7 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
   ]
   for (const [ev, fn] of oyentes) page.on(ev, fn)
   try {
-    return await armarPagina({ page, mapping, manifest, save, onStep, esperaSubform })
+    return await armarPagina({ page, mapping, manifest, save, onStep, esperaSubform, consola })
   } catch (e) {
     if (consola.length) e.message += ` — La consola del navegador dice: ${consola.slice(-3).join(' | ')}`
     throw e
@@ -34,7 +37,7 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
   }
 }
 
-async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubform }) {
+async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubform, consola = [] }) {
   const site = mapping.site.replace(/\/+$/, '')
   const url = new URL(mapping.nodeAdd, site + '/').href
 
@@ -68,7 +71,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep, esperaSubform }
+  const ctx = { mapping, page, onStep, esperaSubform, consola }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
   let n = 0
   for (const block of manifest.blocks) {
@@ -93,7 +96,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
 // paragraphs del nodo, o un slot adentro del subform de un contenedor. Sus plantillas
 // ya vienen resueltas salvo el `{delta}`, que se decide aca.
 async function addBlock(ctx, block, num, holder) {
-  const { mapping, page, onStep, esperaSubform } = ctx
+  const { mapping, page, onStep, esperaSubform, consola } = ctx
   const def = mapping.paragraphs.types[block.type]
   if (!def) throw new Error(`El mapping no conoce el paragraph "${block.type}"`)
 
@@ -105,24 +108,39 @@ async function addBlock(ctx, block, num, holder) {
   const vars = { base, delta, dsel, dselw: widgetDsel(dsel), npath: namePath(dsel) }
 
   onStep(`  ${num}. ${def.label || block.type}`)
-  await clickAdd(page, holder.add, def, block.type)
 
-  // El alta va por AJAX: se espera a que aparezca el subform de ESTE delta.
-  await page.locator(rowSelector(dsel)).first().waitFor({ state: 'attached', timeout: esperaSubform })
-    .catch(async () => {
-      // Si no aparecio, el mensaje tiene que traer la EVIDENCIA: que filas hay realmente
-      // en esa lista y si Drupal se quejo de algo. Sin eso, del otro lado solo queda
-      // adivinar — y quien lo corre no tiene como mirar el DOM.
-      const prefijo = String(holder.dsel).split('{delta}')[0]
-      const hay = await page.evaluate((p) => [...document.querySelectorAll('[data-drupal-selector]')]
-        .map((e) => e.getAttribute('data-drupal-selector'))
-        .filter((d) => d && d.startsWith(p)).slice(0, 20), prefijo).catch(() => [])
-      const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
-      throw new Error(`No aparecio el subform de "${block.type}" despues de agregarlo `
-        + `(esperaba ${rowSelector(dsel)}).`
-        + (quejas.length ? ` Drupal dice: "${quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)}".` : '')
-        + ` Con el prefijo "${prefijo}" hay: ${hay.length ? hay.join(', ') : 'NADA'}.`)
-    })
+  // El alta va por AJAX y se espera a que aparezca el subform de ESTE delta.
+  //
+  // Si el servidor contesta 502/503/504, no es que el mapping este mal: es el CMS que
+  // tardo demasiado y el proxy corto. Una persona apretaria de nuevo, asi que el runner
+  // tambien — pero SOLO ante un error del servidor, y solo despues de confirmar que la
+  // fila no aparecio. Cualquier otra falla sigue frenando en seco, como corresponde.
+  const fila = page.locator(rowSelector(dsel)).first()
+  let puesto = false
+  for (let intento = 1; intento <= REINTENTOS && !puesto; intento++) {
+    const desde = consola.length
+    if (intento > 1) onStep(`     El CMS no respondio. Reintento ${intento - 1} de ${REINTENTOS - 1}…`)
+    await clickAdd(page, holder.add, def, block.type)
+    puesto = await fila.waitFor({ state: 'attached', timeout: esperaSubform }).then(() => true).catch(() => false)
+    // Si no fue el servidor, insistir no va a cambiar nada.
+    if (!puesto && !culpaDelServidor(consola.slice(desde))) break
+  }
+  if (!puesto) {
+    // El mensaje tiene que traer la EVIDENCIA: que filas hay realmente en esa lista y si
+    // Drupal se quejo de algo. Sin eso, del otro lado solo queda adivinar — y quien lo
+    // corre no tiene como mirar el DOM.
+    const prefijo = String(holder.dsel).split('{delta}')[0]
+    const hay = await page.evaluate((p) => [...document.querySelectorAll('[data-drupal-selector]')]
+      .map((e) => e.getAttribute('data-drupal-selector'))
+      .filter((d) => d && d.startsWith(p)).slice(0, 20), prefijo).catch(() => [])
+    const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
+    throw new Error(`No aparecio el subform de "${block.type}" despues de agregarlo `
+      + `(esperaba ${rowSelector(dsel)}).`
+      + (quejas.length ? ` Drupal dice: "${quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)}".` : '')
+      + ` Con el prefijo "${prefijo}" hay: ${hay.length ? hay.join(', ') : 'NADA'}.`
+      + (culpaDelServidor(consola) ? ' ESTO NO ES EL RUNNER: el CMS contesto con un error de '
+        + 'servidor (5xx), o sea que tardo demasiado. Volve a probar en un rato.' : ''))
+  }
 
   // Desplegables del formulario (Optional fields, Avanzado, Classy, Atributos): si el
   // campo vive adentro, hay que abrirlos antes de escribir. Los selectores ya traen el

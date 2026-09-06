@@ -197,7 +197,16 @@ sel.addEventListener('change', () => {
   setTimeout(() => { enVuelo = false; throbber(false) }, 400)
 })
 
+// El CMS de verdad, en preprod, a veces contesta 504: el servidor tardo y el proxy corto.
+// Aca se reproduce fallando la PRIMERA vez que se agrega un card grid, para que la prueba
+// pase por el reintento.
+let yaFallo = false
 document.querySelector('input[name="field_components_add_more"]').addEventListener('click', () => {
+  if (!yaFallo && sel.value === 'ln_c_cardgrid') {
+    yaFallo = true
+    fetch('/boom').catch(() => {})
+    return
+  }
   if (enVuelo) {
     const e = document.createElement('div')
     e.className = 'messages messages--error'
@@ -224,6 +233,7 @@ export function startFakeDrupal() {
     if (url === '/user') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Ivan</h1>') }
     if (url === '/node/add/page') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }
     if (url === '/node/123') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Guardado</h1>') }
+    if (url === '/boom') { res.writeHead(504); return res.end('gateway timeout') }
     res.writeHead(404); res.end('no')
   })
   return new Promise((ok) => server.listen(0, '127.0.0.1', () => ok({ server, port: server.address().port })))

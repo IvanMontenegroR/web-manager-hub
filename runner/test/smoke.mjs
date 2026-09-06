@@ -133,7 +133,9 @@ const { ctx, page } = await openBrowser({ ...NAVEGADOR, profileDir: profile, hea
 
 try {
   // Sin guardar: el formulario queda lleno y se puede leer lo que escribio el motor.
-  await buildPage({ page, mapping: mapping(site), manifest, save: false, onStep: (s) => console.log('   ' + s) })
+  const pasos = []
+  await buildPage({ page, mapping: mapping(site), manifest, save: false, esperaSubform: 4000,
+    onStep: (s) => { pasos.push(s); console.log('   ' + s) } })
 
   const dom = await page.evaluate(() => {
     const v = (sel) => document.querySelector(sel)?.value ?? null
@@ -171,6 +173,8 @@ try {
   check(dom.panelUrl, 'abrio el panel plegado donde vive el alias')
   check(dom.bloques === 3, `3 bloques sueltos (${dom.bloques})`)
   check(dom.oops === 0, `espero el AJAX del desplegable antes de agregar (${dom.oops} "Oops")`)
+  check(pasos.some((p) => /Reintento/.test(p)),
+    'reintento el alta que el servidor corto con 504, en vez de frenar la corrida')
   check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')
   check(dom.tituloTexto === '¿Que considerar antes de adoptar?', 'titulo adentro de Optional fields')
