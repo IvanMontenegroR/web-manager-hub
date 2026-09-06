@@ -214,6 +214,20 @@ const EN_MEDIO_GENERICO = (wrapper) => `[data-drupal-selector="${wrapper}"] `
 
 const seVe = async (loc) => (await loc.count()) > 0 && await loc.first().isVisible()
 
+// El PRIMERO QUE SE VEA, no el primero del DOM. Un mismo `name` puede estar repetido —
+// el formulario trae el dialogo de tipos escondido y jQuery lo monta aparte —, asi que
+// `.first()` puede quedarse esperando para siempre a un elemento que nunca se muestra.
+async function esperarVisible(page, sel, ms) {
+  const hasta = Date.now() + ms
+  for (;;) {
+    const loc = page.locator(sel)
+    const n = await loc.count()
+    for (let i = 0; i < n; i++) if (await loc.nth(i).isVisible().catch(() => false)) return loc.nth(i)
+    if (Date.now() > hasta) return null
+    await page.waitForTimeout(250)
+  }
+}
+
 // La primera posicion libre de la lista. Corta apenas encuentra un hueco, asi que en
 // una pagina normal son un par de consultas.
 async function freeDelta(page, dselTpl) {
@@ -275,8 +289,9 @@ async function clickAdd(page, add, def, type) {
       if (await seVe(b)) { await b.click(); await esperarAjax(page); break }
     }
     // 3. El boton suelto del bundle: una lista de un solo tipo, o el que abrio el modal.
-    const btn = page.locator(resolveSelector(add.button, { bundle })).first()
-    await btn.waitFor({ state: 'visible', timeout: 20000 }).catch(async () => {
+    const selBoton = resolveSelector(add.button, { bundle })
+    const btn = await esperarVisible(page, selBoton, 20000)
+    if (!btn) {
       // La etiqueta sola no alcanza para saber que ES cada boton: va el markup, que dice
       // la clase y si trae data-paragraph-bundle. Es la diferencia entre "agrega este
       // tipo" y "abre el dialogo".
@@ -284,9 +299,23 @@ async function clickAdd(page, add, def, type) {
         'input[name="button_add_modal"], button.paragraphs-features__add-in-between__button, .field-add-more-submit')]
         .filter((e) => e.offsetParent !== null)
         .map((e) => e.outerHTML.replace(/\s+/g, ' ').slice(0, 220)).slice(0, 6)).catch(() => [])
+      // Y sobre el boton que se esperaba: si existe pero no se ve, lo que importa es
+      // QUIEN lo tapa. Eso es lo que separa "el selector esta mal" de "esta escondido".
+      const nombre = /name="([^"]+)"/.exec(selBoton)?.[1]
+      const suerte = nombre ? await page.evaluate((n) => [...document.querySelectorAll(`[name="${n}"]`)]
+        .map((el) => {
+          let tapa = null
+          for (let p = el.parentElement; p && !tapa; p = p.parentElement) {
+            const cs = getComputedStyle(p)
+            if (cs.display === 'none' || cs.visibility === 'hidden') tapa = (p.className || p.tagName).toString().slice(0, 70)
+          }
+          return `${el.offsetParent !== null ? 'SE VE' : 'escondido'}${tapa ? ' por ' + tapa : ''}`
+        }), nombre).catch(() => []) : []
+
       throw new Error(`No aparecio el boton para agregar "${type}" en este contenedor. `
+        + `Elementos con name="${nombre}": ${suerte.length ? suerte.join(' | ') : 'NINGUNO'}. `
         + `Los botones de alta que SI se ven ahora: ${opciones.length ? opciones.join('  ///  ') : 'ninguno'}.`)
-    })
+    }
     await btn.click()
     await esperarAjax(page)
     return

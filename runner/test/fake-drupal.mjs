@@ -105,7 +105,10 @@ function subform(type, base, dsel, npath) {
 //   'modal' — los botones tapados hasta que se abre el modal de paragraphs_ee
 //   'drop'  — dropbutton de Gin: el primero a la vista, el resto plegado tras el toggle
 //   'entre' — paragraphs_features: el area del final ESCONDIDA (display:none) y en su
-//             lugar un boton por bundle adentro de la tabla ("agregar en el medio")
+//             lugar un boton por bundle adentro de la tabla ("agregar en el medio").
+//             Ademas deja una PLANTILLA escondida del dialogo con los mismos nombres,
+//             como paragraphs_ee: por eso hay que quedarse con el que SE VE y no con
+//             el primero del DOM.
 //   'plain' — un solo bundle permitido, el boton suelto
 function slotHtml(label, base, dsel, npath, field, modo) {
   const fd = field.replace(/_/g, '-')
@@ -131,6 +134,7 @@ function slotHtml(label, base, dsel, npath, field, modo) {
       data-npath="\${npath}_subform_\${field}">
     <legend>\${label}</legend><div class="slotrows"></div>
     <div class="enmedio">\${enMedio}</div>
+    \${modo === 'entre' ? \`<div class="dialogo-plantilla" style="display:none">\${btns}</div>\` : ''}
     \${modo === 'modal' || modo === 'entre' ? \`<div\${escondida}><input type="submit" name="button_add_modal"
         data-drupal-selector="\${dsel}-subform-\${fd}-add-more-add-modal-form-area-add-more"
         value="Add Component to Column"></div>\` : ''}
