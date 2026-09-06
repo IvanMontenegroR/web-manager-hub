@@ -74,7 +74,8 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep, esperaSubform, consola, escritos: [], pendientes: [], listas: new Set() }
+  const ctx = { mapping, page, onStep, esperaSubform, consola,
+    escritos: [], pendientes: [], listas: new Set(), imagenes: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
 
   onStep('Armando la estructura…')
@@ -131,7 +132,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
 
   if (!save) {
     onStep('Listo (sin guardar). Revisa el formulario y guarda vos.')
-    return { saved: false, url: page.url() }
+    return { saved: false, url: page.url(), imagenes: ctx.imagenes }
   }
 
   onStep('Guardando…')
@@ -139,7 +140,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   await page.waitForLoadState('domcontentloaded')
   const after = page.url()
   const nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
-  return { saved: true, url: after, nodeId }
+  return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
 }
 
 // Agrega UN paragraph y llena sus campos. `holder` es donde vive la lista: el campo de
@@ -266,7 +267,11 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
   for (const [key, value] of campos) {
     const f = def.fields?.[key]
     if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
-    if (IMAGE_KINDS.has(f.kind)) { onStep(`     (imagen "${key}": se sube a mano)`); continue }
+    if (IMAGE_KINDS.has(f.kind)) {
+      onStep(`     (imagen "${key}": se elige a mano)`)
+      await guardarWidget(ctx, key, vars, `${num}. ${block.type}.${key}`)
+      continue
+    }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(page, f, vars, value, `${num}. ${block.type}.${key}`))
@@ -455,6 +460,34 @@ async function fillField(page, f, vars, value, ref) {
       + `Elementos con ese selector: ${total}.`)
   }
   return { selector, f, ref, valor: value, puesto, rutaRich }
+}
+
+// Se guarda el HTML del widget de cada campo de IMAGEN. El runner todavia no sabe
+// elegirlas, y para enseñarle hace falta ver como es ese widget en ESTE sitio: no es lo
+// mismo una Media library (un modal con buscador) que un inline entity form (un
+// autocompletar). Adivinarlo sale caro, y el propio formulario lo tiene a mano.
+//
+// El campo no trae selector en el mapping, asi que se busca por el nombre: Drupal arma el
+// `data-drupal-selector` con el nombre del campo en guiones.
+async function guardarWidget(ctx, key, vars, ref) {
+  const { page } = ctx
+  const enGuiones = key.split('.').pop().replace(/_/g, '-')
+  const fila = rowSelector(vars.dsel)
+  const cand = page.locator(`${fila} [data-drupal-selector*="${enGuiones}"]`).first()
+  if (!(await cand.count())) return
+  const html = await cand.evaluate((el, filaSel) => {
+    // El wrapper de mas AFUERA que siga siendo del campo: ahi es donde vive el boton que
+    // abre el selector, que es justo lo que hay que ver.
+    const f = el.closest(filaSel)
+    let n = el
+    for (let p = el.parentElement; p && p !== f; p = p.parentElement) {
+      if (/field|media|image/i.test(p.className || '')) n = p
+    }
+    return n.outerHTML
+  }, fila).catch(() => null)
+  // Un widget puede ser enorme (una Media library trae su modal entero). Con el principio
+  // alcanza para ver de que clase es y como se abre.
+  if (html) ctx.imagenes.push({ ref, html: html.slice(0, 20000) })
 }
 
 // Dos lecturas del mismo campo son "la misma" si dicen lo mismo: los espacios de un

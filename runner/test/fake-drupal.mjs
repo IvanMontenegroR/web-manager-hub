@@ -94,6 +94,11 @@ function subform(type, base, dsel, npath) {
       <summary>Optional fields</summary>
       <div class="js-form-item"><label>Titulo</label>
         <input type="text" name="\${base}[field_c_advanced_title][0][value]"></div></details>
+    <div class="field--type-entity-reference field--name-field-media"
+         data-drupal-selector="\${dsel}-subform-field-media-wrapper">
+      <label>Imagen de fondo</label>
+      <input type="submit" class="js-media-library-open-button" value="Añadir medio">
+    </div>
     \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', 'drop')}\`
 
   // Layout: DOS slots, cada uno con su modal de tipos.

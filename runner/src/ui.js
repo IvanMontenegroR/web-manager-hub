@@ -122,9 +122,10 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     const { page } = await navegador()
     try {
       const res = await buildPage({ page, mapping, manifest: m, save, onStep: (s) => c.pasos.push(s) })
-      logRun({ manifest: archivo, title: m.page.title, ...res })
+      const widgets = guardarWidgets(res.imagenes)
+      logRun({ manifest: archivo, title: m.page.title, ...res, imagenes: undefined, widgets })
       c.estado = 'listo'
-      c.resultado = { ...res, titulo: m.page.title }
+      c.resultado = { ...res, imagenes: undefined, widgets, titulo: m.page.title }
     } catch (e) {
       // Una foto de como quedo la pantalla: es lo que hace falta para entender un error
       // contra el CMS, y quien lo corre no tiene por que saber mirar el DOM.
@@ -218,6 +219,17 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok))
   const url = `http://127.0.0.1:${server.address().port}/?t=${token}`
   return { server, url, cerrar: async () => { if (vivo()) await nav.ctx.close().catch(() => {}); server.close() } }
+}
+
+// El HTML de los widgets de imagen, para poder enseñarle al runner a elegirlas. Cada
+// sitio los arma distinto (una Media library es un modal con buscador, un inline entity
+// form es un autocompletar), y sin ver el de ESTE no se puede escribir el mapping.
+function guardarWidgets(imagenes) {
+  if (!imagenes || !imagenes.length) return null
+  const f = resolve('logs', 'campos-imagen.html')
+  mkdirSync(dirname(f), { recursive: true })
+  writeFileSync(f, imagenes.map((i) => `<!-- ===== ${i.ref} ===== -->\n${i.html}`).join('\n\n'))
+  return f
 }
 
 async function sacarFoto(page) {

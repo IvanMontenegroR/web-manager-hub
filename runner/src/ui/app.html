@@ -207,15 +207,19 @@ function pintarCorrida(c) {
     return
   }
   const res = c.resultado || {}
+  // Mientras el runner no sepa elegir imagenes, deja el HTML de esos widgets a mano: es
+  // lo unico que hace falta para enseñarle, y sale de la corrida que ya se hizo.
+  const widgets = res.widgets ? `<p class="meta" style="margin-top:8px">Los campos de
+    imagen se dejaron sin tocar. Su HTML quedo en:<br><code>${esc(res.widgets)}</code></p>` : ''
   r.innerHTML = res.saved
     ? `<div class="resultado bien"><h3>Borrador creado</h3>
         <p>${esc(res.titulo || '')}${res.nodeId ? ' — nodo ' + esc(res.nodeId) : ''}</p>
         <p><a href="${esc(res.url)}" target="_blank" rel="noopener">Abrir en Drupal</a> para
-        revisar, subir las imagenes y publicar.</p></div>`
+        revisar, elegir las imagenes y publicar.</p>${widgets}</div>`
     : `<div class="resultado bien"><h3>Listo, sin guardar</h3>
         <p>El formulario quedo lleno en la ventana de Chrome. Revisalo: si esta bien,
         volve y toca <b>Crear borrador</b>.</p>
-        <p class="meta" style="margin-top:8px">En Drupal no quedo nada.</p></div>`
+        <p class="meta" style="margin-top:8px">En Drupal no quedo nada.</p>${widgets}</div>`
 }
 
 async function correr(archivo, save) {

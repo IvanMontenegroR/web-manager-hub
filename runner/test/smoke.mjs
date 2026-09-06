@@ -81,6 +81,7 @@ const mapping = (site) => ({
         fields: {
           field_c_cardgrid_view_mode: { sel: 'select[name="{base}[field_c_cardgrid_view_mode]"]', kind: 'select' },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
+          field_media: { kind: 'image', note: 'Media library: la elige el editor.' },
         },
         // Igual que una pestaña del CMS: UN solo componente (`max: 1`) y los tipos
         // plegados detras del dropbutton de Gin.
@@ -106,7 +107,7 @@ const manifest = validateManifest({
       'classy.background_color': 'bg_brand_01',
       field_c_image: 'foto.jpg',
     } },
-    { type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'slider-default-card', field_c_advanced_title: 'Perros' },
+    { type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'slider-default-card', field_c_advanced_title: 'Perros', field_media: 'placeholder-x-desktop-10x10' },
       children: [{ type: 'c_text', fields: { field_c_text: 'Card uno.' } }] },
     { type: 'layout_columns_2', fields: { 'advanced.section_id': 'cuidados' },
       children: [
@@ -134,7 +135,7 @@ const { ctx, page } = await openBrowser({ ...NAVEGADOR, profileDir: profile, hea
 try {
   // Sin guardar: el formulario queda lleno y se puede leer lo que escribio el motor.
   const pasos = []
-  await buildPage({ page, mapping: mapping(site), manifest, save: false, esperaSubform: 4000,
+  const primera = await buildPage({ page, mapping: mapping(site), manifest, save: false, esperaSubform: 4000,
     onStep: (s) => { pasos.push(s); console.log('   ' + s) } })
 
   const dom = await page.evaluate(() => {
@@ -223,6 +224,15 @@ try {
   } catch (e) { evidencia = e.message }
   check(/Con el prefijo "edit-esto-no-existe-" hay: NADA/.test(evidencia),
     'cuando no aparece el subform, el error dice que hay en esa lista')
+
+  // Los campos de imagen se dejan sin tocar, pero se guarda el HTML de su widget: sin ver
+  // como lo arma ESTE sitio no se le puede enseñar al runner a elegir la imagen.
+  const img = primera.imagenes || []
+  check(img.length === 1, `guarda el widget del campo de imagen que existe en el form (${img.length})`)
+  check(img.some((i) => /js-media-library-open-button/.test(i.html)),
+    'y el HTML guardado incluye el boton que abre el selector')
+  check(img.some((i) => /2\. ln_c_cardgrid\.field_media/.test(i.ref)),
+    `cada volcado dice de que bloque y campo salio (${img.map((i) => i.ref).join(' | ')})`)
 
   // Un campo que se lleno bien y despues se vacio (Drupal re-dibuja el formulario en
   // cada alta) NO puede pasar en silencio: la pagina saldria armada y sin contenido.
