@@ -149,8 +149,12 @@ el mapping bajo `"media"`; si en otro sitio el formulario es distinto, se corrig
 tocar codigo (las claves y sus valores por defecto estan en `src/media.js`). Dos detalles
 de ese formulario que importan:
 
-- **No tiene campo alt.** El alt no es del medio: es del campo que lo referencia. Si otro
-  sitio si lo pide, el subidor lo llena; si no esta, sigue de largo.
+- **El formulario antes de elegir el archivo no es el mismo que despues.** El alt, la
+  vista previa y el resto los dibuja el AJAX recien cuando la subida termina. Por eso la
+  señal que espera el subidor es el hidden `fids` — el unico dato que significa "el
+  archivo ya esta en el servidor" — y no la aparicion de un campo. Un sitio cuyo
+  formulario no pida alt (porque el alt viva en el campo que referencia al medio) tambien
+  funciona: si no esta, sigue de largo.
 - **El medio queda publicado**, a diferencia de las paginas. La regla de "siempre
   borrador" es para el contenido; un medio despublicado no se puede elegir de la libreria,
   que es justamente para lo que se sube. Con `"publicar": false` en el mapping se destilda.

@@ -19,11 +19,16 @@ export const MEDIA_POR_DEFECTO = {
   lista: '/admin/content/media?name={nombre}',
   archivo: 'input[type="file"]',
   // La señal de que la subida TERMINO. El widget de archivo de Drupal deja este hidden
-  // vacio hasta que el AJAX vuelve con el id del archivo subido. Antes se esperaba a que
-  // apareciera el campo alt, y en este formulario alt NO EXISTE: se esperaba para siempre
-  // a algo que no iba a llegar, y peor, se apretaba Guardar antes de que subiera nada.
+  // vacio hasta que el AJAX vuelve con el id del archivo subido.
+  //
+  // El formulario ANTES de elegir el archivo no se parece al de despues: no hay alt, no
+  // hay vista previa, no hay nada. Todo eso — el alt incluido — lo dibuja el AJAX cuando
+  // termina de subir. Por eso la señal es el `fids` y no un campo cualquiera: es el unico
+  // dato que significa "el archivo YA esta en el servidor", y no depende de que este
+  // formulario tenga o no cada campo.
   subido: 'input[name="field_media_image[0][fids]"]',
-  // Este formulario no tiene alt. Otros si: si esta, se llena; si no, no pasa nada.
+  // El alt aparece RECIEN despues de subir, adentro del widget que el AJAX redibuja. Por
+  // eso se busca despues de esperar el `fids` y no antes: antes no existe.
   alt: 'input[name$="[alt]"]',
   nombre: 'input[name="name[0][value]"]',
   // Gin repite Guardar en su barra pegajosa: hay DOS con el mismo name. Se aprieta el
@@ -116,9 +121,10 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
   return { subidos, salteados, total: archivos.length }
 }
 
-// Un campo OPCIONAL: si el formulario no lo tiene, se sigue de largo AL INSTANTE. Nada
-// de esperar un rato "por las dudas": el alt no esta en este formulario y esperarlo en
-// cada imagen son minutos regalados, que es justo lo que hacia antes.
+// Un campo OPCIONAL: si el formulario no lo tiene, se sigue de largo AL INSTANTE. Un
+// formulario de medios que no pida alt es perfectamente valido — el alt puede vivir en el
+// campo que REFERENCIA al medio — y esperarlo "por las dudas" en cada imagen serian
+// minutos regalados.
 async function siEsta(page, sel, ms = 2000) {
   if (!(await page.locator(sel).count())) return null
   return esperarVisible(page, sel, ms)

@@ -9,7 +9,7 @@
   "path": "input[name=\"path[0][alias]\"]",
   "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
   "media": {
-    "_": "Verificado contra el HTML real de /media/add/image. Este formulario NO tiene campo alt (el alt vive en el campo que REFERENCIA al medio, no en el medio) y repite Guardar en la barra pegajosa de Gin, asi que se aprieta el que se ve. `subido` es el hidden que Drupal llena cuando el AJAX termino de subir el archivo: es la unica señal de que ya hay algo que guardar.",
+    "_": "Verificado contra el HTML real de /media/add/image, antes y despues de elegir el archivo. El formulario cambia entero al subir: el alt y la vista previa los dibuja el AJAX, antes no existen. Por eso `subido` (el hidden fids) es la señal de que la subida termino, y el alt se busca despues. Gin ademas repite Guardar en su barra pegajosa, asi que se aprieta el que se ve.",
     "add": "/media/add/image",
     "lista": "/admin/content/media?name={nombre}",
     "archivo": "input[name=\"files[field_media_image_0]\"]",

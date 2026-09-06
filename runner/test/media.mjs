@@ -52,22 +52,32 @@ try {
   const guardados = await (await fetch(`${mapping.site}/media/estado`)).json()
   check(Object.keys(guardados).sort().join() === 'placeholder-dos-mobile-20x20,placeholder-uno-desktop-10x10',
     `guarda el nombre sin extension (${Object.keys(guardados).sort().join(' ')})`)
-  check(Object.values(guardados).every((p) => p === true),
+  check(Object.values(guardados).every((m) => m.publicado === true),
     'deja el medio publicado: uno despublicado no se puede elegir de la libreria')
 
+  // El alt NO existe hasta que la subida termina: si se lo busca antes, no esta. Que
+  // aparezca lleno es la prueba de que se lo busco DESPUES.
+  check(Object.values(guardados).every((m) => m.alt === 'Placeholder de prueba'),
+    `llena el alt, que Drupal dibuja recien al terminar de subir (${Object.values(guardados)[0]?.alt || 'vacio'})`)
+
   // Si se apretara Guardar antes de que el AJAX suba el archivo, el formulario de
-  // mentira contesta con el error de campo obligatorio y esto se caeria. Y el tiempo
-  // importa tanto como el resultado: la señal tiene que ser el fin de la subida y NO un
-  // plazo fijo "por las dudas" — esperar un campo alt que este formulario no tiene eran
-  // segundos por imagen, o minutos en las 36.
-  const t0 = Date.now()
+  // mentira contesta con el error de campo obligatorio y esto se caeria.
   const d = await subirPlaceholders({
     page, mapping, onStep: () => {},
     carpeta: carpetaCon('placeholder-tres-desktop-30x30.png'),
   })
-  const tardo = Date.now() - t0
   check(d.subidos === 1, 'espera a que la subida termine antes de guardar')
-  check(tardo < 4000, `no espera de mas a campos que no existen (${tardo}ms para una imagen)`)
+
+  // Un sitio cuyo formulario de medios NO pide alt tambien es valido: ahi el alt vive en
+  // el campo que referencia al medio. No se lo tiene que esperar "por las dudas".
+  const t0 = Date.now()
+  const e = await subirPlaceholders({
+    page, onStep: () => {}, carpeta: carpetaCon('placeholder-cinco-desktop-50x50.png'),
+    mapping: { ...mapping, media: { add: '/media/add/simple' } },
+  })
+  const tardo = Date.now() - t0
+  check(e.subidos === 1, 'sube igual en un formulario que no pide alt')
+  check(tardo < 4000, `y no lo espera de gusto (${tardo}ms para una imagen)`)
 
   // Un sitio donde el hidden que avisa el fin de la subida no existe tiene que decirlo,
   // no quedarse dos minutos esperando.

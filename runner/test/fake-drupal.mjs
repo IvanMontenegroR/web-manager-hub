@@ -290,28 +290,37 @@ document.querySelector('input[name="op"]').addEventListener('click', () => { loc
 </script></body></html>`
 
 // La MEDIA LIBRARY de mentira, copiada del formulario REAL de /media/add/image de este
-// sitio. Reproduce las tres cosas que rompieron el subidor:
-//   - NO hay campo alt (es un campo del REFERENCIADOR, no del medio)
+// sitio. Lo que reproduce, que es lo que rompio al subidor:
+//   - antes de elegir el archivo el formulario es OTRO: no hay alt, ni vista previa, ni
+//     nada. Todo eso lo dibuja el AJAX cuando la subida termina.
 //   - lo unico que dice "la subida termino" es el hidden `fids`, que tarda
 //   - Gin repite Guardar en su barra pegajosa: DOS botones con el mismo name, uno oculto
-const MEDIA_FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear medio</title></head><body>
+//
+// `conAlt` distingue el formulario de este sitio (dibuja el alt al subir) de uno que no
+// pida alt: los dos son validos y el subidor tiene que andar con los dos.
+const MEDIA_FORM = (conAlt = true) => `<!doctype html><html><head><meta charset="utf-8"><title>Crear medio</title></head><body>
 <div class="gin-sticky" style="display:none">
   <input type="submit" name="op" value="Guardar" form="media-image-add-form">
 </div>
 <h1>Crear medio</h1>
 <form id="media-image-add-form" onsubmit="return false">
-  <input type="hidden" name="field_media_image[0][fids]" value="">
+  <div id="widget"><input type="hidden" name="field_media_image[0][fids]" value=""></div>
   <input type="file" name="files[field_media_image_0]" id="ar">
   <label>Nombre <input type="text" name="name[0][value]" value=""></label>
   <label>Publicado <input type="checkbox" name="status[value]" checked></label>
   <input type="submit" name="op" value="Guardar">
 </form>
 <script>
-// Drupal sube el archivo por AJAX: recien cuando vuelve hay fids y nombre precargado.
+const CON_ALT = ${conAlt ? 'true' : 'false'}
+// Drupal sube el archivo por AJAX y REDIBUJA el widget entero: recien ahi hay fids, vista
+// previa y — si el sitio lo pide — el campo de texto alternativo.
 document.getElementById('ar').addEventListener('change', (e) => {
   const f = e.target.files[0]
   setTimeout(() => {
-    document.querySelector('input[name="field_media_image[0][fids]"]').value = '42'
+    document.getElementById('widget').innerHTML =
+      '<input type="hidden" name="field_media_image[0][fids]" value="42">'
+      + (CON_ALT ? '<label>Texto alternativo <input type="text" name="field_media_image[0][alt]"'
+        + ' maxlength="125" value=""></label>' : '')
     // Drupal precarga el nombre CON extension: el subidor lo tiene que pisar.
     document.querySelector('input[name="name[0][value]"]').value = f ? f.name : ''
   }, 400)
@@ -323,24 +332,28 @@ for (const b of document.querySelectorAll('input[name="op"]')) {
       location.href = '/media/guardar?error=1'
       return
     }
+    const alt = document.querySelector('input[name="field_media_image[0][alt]"]')
     const n = document.querySelector('input[name="name[0][value]"]').value
     const p = document.querySelector('input[name="status[value]"]').checked ? '1' : '0'
     location.href = '/media/guardar?name=' + encodeURIComponent(n) + '&pub=' + p
+      + '&alt=' + encodeURIComponent(alt ? alt.value : '')
   })
 }
 </script></body></html>`
 
 export function startFakeDrupal() {
-  const medios = new Map()   // nombre -> publicado
+  const medios = new Map()   // nombre -> { publicado, alt }
   const server = createServer((req, res) => {
     const url = req.url.split('?')[0]
     const q = new URLSearchParams(req.url.split('?')[1] || '')
     const html = (h) => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(h) }
 
-    if (url === '/media/add/image') return html(MEDIA_FORM)
+    if (url === '/media/add/image') return html(MEDIA_FORM(true))
+    // El mismo formulario en un sitio que NO pide alt: el subidor no se tiene que colgar.
+    if (url === '/media/add/simple') return html(MEDIA_FORM(false))
     if (url === '/media/guardar') {
       if (q.get('error')) return html('<div class="messages--error">El campo Imagen es obligatorio.</div>')
-      medios.set(q.get('name'), q.get('pub') === '1')
+      medios.set(q.get('name'), { publicado: q.get('pub') === '1', alt: q.get('alt') || '' })
       return html('<h1>Medio creado</h1>')
     }
     if (url === '/admin/content/media') {
