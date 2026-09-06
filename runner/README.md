@@ -125,10 +125,33 @@ archivos arrancan con `placeholder-`, asi que en la librería quedan juntos y se
 un tecleo. Si en el catalogo cambia una medida, se regeneran todas pero solo hace falta
 volver a subir la que cambio — el INDICE dice cual.
 
+### Como subirlas
+
+Al subir cada archivo, **dejar el nombre del media igual al nombre del archivo, sin el
+`.png`**. Por ejemplo, `placeholder-banner-main-hero-desktop-2100x1050.png` se sube como
+un media llamado:
+
+```
+placeholder-banner-main-hero-desktop-2100x1050
+```
+
+Ese nombre ES el identificador: es lo que el manifiesto va a escribir y lo que el runner
+va a buscar en la librería. Drupal ya lo propone solo a partir del archivo, asi que en
+general alcanza con no tocarlo. Si se renombra a mano, deja de encontrarse.
+
+El alt text de estas no importa (son de prueba): cualquier cosa que aclare que son
+placeholders.
+
 **Elegirlas desde el manifiesto todavia no esta hecho**: hoy el runner saltea los campos
-de imagen, asi que por ahora se seleccionan a mano en el CMS. Cuando se haga, va a
-BUSCAR y SELECCIONAR de la librería, nunca subir: si no encuentra la que el manifiesto
-pide, frena. Subir sola llenaria la librería de duplicados.
+de imagen, asi que por ahora se seleccionan a mano en el CMS. Cuando se haga, el
+manifiesto va a nombrar la imagen asi:
+
+```json
+"field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+```
+
+y el runner va a BUSCAR y SELECCIONAR ese media, nunca subir: si no lo encuentra, frena.
+Subir sola llenaria la librería de duplicados.
 
 ## Para la revision de compliance
 
