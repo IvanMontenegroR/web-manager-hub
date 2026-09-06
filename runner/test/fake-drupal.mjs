@@ -289,46 +289,69 @@ document.querySelector('input[name="field_components_edit_all"]')
 document.querySelector('input[name="op"]').addEventListener('click', () => { location.href = '/node/123' })
 </script></body></html>`
 
-// La MEDIA LIBRARY de mentira: un formulario de alta y un listado que filtra por nombre.
-// Alcanza para probar que el subidor no duplique, que es lo unico que importa ahi.
+// La MEDIA LIBRARY de mentira, copiada del formulario REAL de /media/add/image de este
+// sitio. Reproduce las tres cosas que rompieron el subidor:
+//   - NO hay campo alt (es un campo del REFERENCIADOR, no del medio)
+//   - lo unico que dice "la subida termino" es el hidden `fids`, que tarda
+//   - Gin repite Guardar en su barra pegajosa: DOS botones con el mismo name, uno oculto
 const MEDIA_FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear medio</title></head><body>
+<div class="gin-sticky" style="display:none">
+  <input type="submit" name="op" value="Guardar" form="media-image-add-form">
+</div>
 <h1>Crear medio</h1>
-<form id="f" onsubmit="return false">
+<form id="media-image-add-form" onsubmit="return false">
+  <input type="hidden" name="field_media_image[0][fids]" value="">
   <input type="file" name="files[field_media_image_0]" id="ar">
-  <div id="tras" style="display:none">
-    <label>Alt <input type="text" name="field_media_image[0][alt]"></label>
-    <label>Nombre <input type="text" name="name[0][value]"></label>
-  </div>
+  <label>Nombre <input type="text" name="name[0][value]" value=""></label>
+  <label>Publicado <input type="checkbox" name="status[value]" checked></label>
   <input type="submit" name="op" value="Guardar">
 </form>
 <script>
-// Drupal sube el archivo por AJAX y RECIEN AHI muestra el alt y el nombre.
+// Drupal sube el archivo por AJAX: recien cuando vuelve hay fids y nombre precargado.
 document.getElementById('ar').addEventListener('change', (e) => {
   const f = e.target.files[0]
   setTimeout(() => {
-    document.getElementById('tras').style.display = 'block'
+    document.querySelector('input[name="field_media_image[0][fids]"]').value = '42'
+    // Drupal precarga el nombre CON extension: el subidor lo tiene que pisar.
     document.querySelector('input[name="name[0][value]"]').value = f ? f.name : ''
-  }, 200)
+  }, 400)
 })
-document.querySelector('input[name="op"]').addEventListener('click', () => {
-  const n = document.querySelector('input[name="name[0][value]"]').value
-  location.href = '/media/guardar?name=' + encodeURIComponent(n)
-})
+for (const b of document.querySelectorAll('input[name="op"]')) {
+  b.addEventListener('click', () => {
+    // Guardar sin archivo subido es lo que pasaba antes de esperar el fids.
+    if (!document.querySelector('input[name="field_media_image[0][fids]"]').value) {
+      location.href = '/media/guardar?error=1'
+      return
+    }
+    const n = document.querySelector('input[name="name[0][value]"]').value
+    const p = document.querySelector('input[name="status[value]"]').checked ? '1' : '0'
+    location.href = '/media/guardar?name=' + encodeURIComponent(n) + '&pub=' + p
+  })
+}
 </script></body></html>`
 
 export function startFakeDrupal() {
-  const medios = new Set()
+  const medios = new Map()   // nombre -> publicado
   const server = createServer((req, res) => {
     const url = req.url.split('?')[0]
     const q = new URLSearchParams(req.url.split('?')[1] || '')
     const html = (h) => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(h) }
 
     if (url === '/media/add/image') return html(MEDIA_FORM)
-    if (url === '/media/guardar') { medios.add(q.get('name')); return html('<h1>Medio creado</h1>') }
+    if (url === '/media/guardar') {
+      if (q.get('error')) return html('<div class="messages--error">El campo Imagen es obligatorio.</div>')
+      medios.set(q.get('name'), q.get('pub') === '1')
+      return html('<h1>Medio creado</h1>')
+    }
     if (url === '/admin/content/media') {
       const n = q.get('name') || ''
-      const filas = [...medios].filter((m) => m.includes(n)).map((m) => `<tr><td>${m}</td></tr>`).join('')
+      const filas = [...medios.keys()].filter((m) => m.includes(n))
+        .map((m) => `<tr><td>${m}</td></tr>`).join('')
       return html(`<table>${filas}</table>`)
+    }
+    if (url === '/media/estado') {
+      res.writeHead(200, { 'content-type': 'application/json' })
+      return res.end(JSON.stringify(Object.fromEntries(medios)))
     }
     if (url === '/user') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Ivan</h1>') }
     if (url === '/node/add/page' || url.startsWith('/node/add/page')) { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }

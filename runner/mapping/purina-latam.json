@@ -8,6 +8,15 @@
   "pathauto": "input[name=\"path[0][pathauto]\"]",
   "path": "input[name=\"path[0][alias]\"]",
   "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
+  "media": {
+    "_": "Verificado contra el HTML real de /media/add/image. Este formulario NO tiene campo alt (el alt vive en el campo que REFERENCIA al medio, no en el medio) y repite Guardar en la barra pegajosa de Gin, asi que se aprieta el que se ve. `subido` es el hidden que Drupal llena cuando el AJAX termino de subir el archivo: es la unica señal de que ya hay algo que guardar.",
+    "add": "/media/add/image",
+    "lista": "/admin/content/media?name={nombre}",
+    "archivo": "input[name=\"files[field_media_image_0]\"]",
+    "subido": "input[name=\"field_media_image[0][fids]\"]",
+    "nombre": "input[name=\"name[0][value]\"]",
+    "guardar": "input[name=\"op\"][value=\"Guardar\"]"
+  },
   "paragraphs": {
     "dsel": "edit-field-ln-n-components-{delta}",
     "base": "field_ln_n_components[{delta}][subform]",

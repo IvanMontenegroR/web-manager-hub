@@ -138,9 +138,22 @@ saltea. Se puede cortar y volver a correr las veces que haga falta sin duplicar 
 Opciones: `--carpeta <dir>`, `--solo <texto>` (sube solo las que contengan ese texto),
 `--mapping <f>`.
 
-Si el formulario de medios de este sitio no es el estandar (`/media/add/image`), se
-corrige en el mapping bajo `"media"` — ver `src/media.js` para las claves. No hace falta
-tocar codigo.
+La primera vez conviene probar con una sola:
+
+```bash
+npm run subir-placeholders -- --solo banner-main-hero-desktop
+```
+
+Los selectores estan sacados del HTML real de `/media/add/image` de este sitio y viven en
+el mapping bajo `"media"`; si en otro sitio el formulario es distinto, se corrigen ahi sin
+tocar codigo (las claves y sus valores por defecto estan en `src/media.js`). Dos detalles
+de ese formulario que importan:
+
+- **No tiene campo alt.** El alt no es del medio: es del campo que lo referencia. Si otro
+  sitio si lo pide, el subidor lo llena; si no esta, sigue de largo.
+- **El medio queda publicado**, a diferencia de las paginas. La regla de "siempre
+  borrador" es para el contenido; un medio despublicado no se puede elegir de la libreria,
+  que es justamente para lo que se sube. Con `"publicar": false` en el mapping se destilda.
 
 A mano tambien se puede, y en ese caso la regla es la misma: **dejar el nombre del media
 igual al nombre del archivo, sin el `.png`**. Por ejemplo, `placeholder-banner-main-hero-desktop-2100x1050.png` se sube como
