@@ -98,10 +98,28 @@ npm run verify -- mapping/purina-latam.json form.html
 - **Frena ante la duda.** Un campo que el mapping no conoce, o que no aparece en el
   formulario, es un ERROR y corta la corrida. Una pagina a medio armar es peor que una
   que no se armo. Si corta antes de `--save`, no quedo nada en el CMS.
-- **Las imagenes no se automatizan.** Subir a la Media library (archivo + alt + decidir
-  si se reusa un media existente) se hace a mano. El runner arma toda la estructura y
-  todo el texto con la configuracion correcta; el editor sube las imagenes y publica.
-  Un campo de imagen en el manifiesto se saltea con aviso.
+- **Las imagenes no se automatizan TODAVIA.** Subir a la Media library (archivo + alt +
+  decidir si se reusa un media existente) se hace a mano. El runner arma toda la
+  estructura y todo el texto con la configuracion correcta; el editor sube las imagenes y
+  publica. Un campo de imagen en el manifiesto se saltea con aviso.
+
+## Placeholders
+
+`placeholders/` trae una imagen de relleno por cada medida que pide el CMS — 36 archivos,
+desktop y mobile — para subir UNA vez a la Media library y tener siempre algo que elegir
+mientras se prueba, sin esperar el material definitivo. Cada una dice su medida bien
+grande y la palabra PLACEHOLDER, para que se note si alguna se escapa.
+
+Las medidas NO estan escritas a mano: salen de `src/data/components.js`, la misma fuente
+que usa la matriz de contenido. Si ahi cambia una, se regeneran:
+
+```bash
+node tools/placeholders.mjs
+```
+
+`placeholders/INDICE.md` dice que archivo va en que componente. **Elegirlas desde el
+manifiesto todavia no esta hecho**: hoy el runner saltea los campos de imagen, asi que
+por ahora se seleccionan a mano en el CMS.
 
 ## Para la revision de compliance
 
