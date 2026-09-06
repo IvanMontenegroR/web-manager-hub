@@ -96,7 +96,10 @@ const manifest = validateManifest({
     { type: 'layout_columns_2', fields: { 'advanced.section_id': 'cuidados' },
       children: [
         { slot: 0, type: 'c_text', fields: { field_c_text: 'Columna izquierda.' } },
-        { slot: 1, type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'grid-cards' } },
+        // Contenedor adentro de contenedor: la misma forma que tiene el Tabs del CMS
+        // (nodo -> comp_tabs -> comp_tabs_tab_item -> componente).
+        { slot: 1, type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'grid-cards' },
+          children: [{ type: 'c_text', fields: { field_c_text: 'Tres niveles.' } }] },
       ] },
   ],
 })
@@ -134,6 +137,7 @@ try {
       sectionId: v(`input[name="${B}[2][subform][section_id][0][value]"]`),
       col1: document.querySelector(`textarea[name="${col1}[field_c_text][0][value]"]`) !== null,
       col2: v(`select[name="${col2}[field_c_cardgrid_view_mode]"]`),
+      nieto: document.querySelector(`textarea[name="${col2}[field_c_subitems][0][subform][field_c_text][0][value]"]`) !== null,
       abiertos: [...document.querySelectorAll('details')].filter((d) => d.open).length,
     }
   })
@@ -153,6 +157,7 @@ try {
   check(dom.sectionId === 'cuidados', 'campo adentro de Avanzado (plegado)')
   check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
   check(dom.col2 === 'grid-cards', 'hijo en la columna 2 (slot 1, con modal)')
+  check(dom.nieto, 'contenedor adentro de contenedor (3 niveles, como el Tabs)')
   check(dom.abiertos >= 4, `se abrieron los desplegables (${dom.abiertos})`)
 
   // Con --save: guarda y lee el node id de la URL a la que cae.

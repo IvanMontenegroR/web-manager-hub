@@ -1,0 +1,54 @@
+{
+  "_": "Un Tabs con dos pestañas. El arbol es de tres niveles: comp_tabs -> comp_tabs_tab_item -> el componente de adentro. Cada pestaña lleva UN solo componente, que es la cardinalidad del CMS; poner dos frena la corrida.",
+  "manifest": 1,
+  "page": {
+    "title": "Alimentación por etapa",
+    "path": "/perros/alimentacion-por-etapa",
+    "published": false
+  },
+  "blocks": [
+    {
+      "type": "comp_tabs",
+      "fields": {
+        "field_tab_type": "only_tabs",
+        "advanced.section_id": "etapas"
+      },
+      "children": [
+        {
+          "type": "comp_tabs_tab_item",
+          "fields": {
+            "field_title": "Cachorro",
+            "field_description": "Del destete hasta el año."
+          },
+          "children": [
+            {
+              "type": "c_text",
+              "fields": {
+                "field_c_advanced_title": "Cuánto y cada cuánto",
+                "field_c_advanced_title.html_tag": "h3",
+                "field_c_text": "Tres o cuatro comidas por día, con alimento formulado para cachorros."
+              }
+            }
+          ]
+        },
+        {
+          "type": "comp_tabs_tab_item",
+          "fields": {
+            "field_title": "Adulto",
+            "field_description": "Del año hasta los siete."
+          },
+          "children": [
+            {
+              "type": "c_text",
+              "fields": {
+                "field_c_advanced_title": "Cuánto y cada cuánto",
+                "field_c_advanced_title.html_tag": "h3",
+                "field_c_text": "Dos comidas por día, y agua fresca siempre disponible."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -96,6 +96,7 @@ chk(M.paragraphs.add.button, 'add.button')
 
 const vistos = new Set()
 const ausentes = []
+const sinWidget = []
 for (const { bundle, v } of positions()) {
   const def = M.paragraphs.types[bundle]
   if (!def) { fail(`el mapping no conoce "${bundle}", que esta en el volcado`); continue }
@@ -110,6 +111,13 @@ for (const { bundle, v } of positions()) {
     if (!exists(res(tpl, v))) ausentes.push(`${bundle}: ${/"([^"]+)"/.exec(res(tpl, v))?.[1]}`)
   }
   for (const s of def.children?.slots || []) {
+    // Una ranura con tope LLENA no dibuja el widget de alta: Drupal lo esconde cuando la
+    // cardinalidad esta cubierta. Ahi sus selectores no se pueden verificar con ESTE
+    // volcado — no es que falten, es que no hay nada que mirar.
+    if (s.max != null && hasDsel(res(s.dsel, { ...v, delta: s.max - 1 }))) {
+      sinWidget.push(`${bundle}.${s.label}`)
+      continue
+    }
     if (s.add.open) chk(res(s.add.open, v), `${bundle}.${s.label}: abrir el modal`)
     // El boton de alta se prueba con el bundle que el volcado tenga en ese slot.
     const kid = bundleAt(res(s.dsel, { ...v, delta: 0 }))
@@ -120,6 +128,7 @@ for (const { bundle, v } of positions()) {
 const sinProbar = Object.keys(M.paragraphs.types).filter((t) => !vistos.has(t))
 console.log(`\n${ok} selectores encontrados, ${mal} sin encontrar`)
 if (ausentes.length) console.log(`grupos plegables que ese tipo no tiene (esperable): ${ausentes.length}`)
+if (sinWidget.length) console.log(`ranuras que en el volcado ya estaban llenas, asi que su boton de alta no se pudo mirar: ${[...new Set(sinWidget)].join(', ')}`)
 if (sinProbar.length) console.log(`tipos del mapping que el volcado no trae, sin verificar: ${sinProbar.join(', ')}`)
 console.log(mal ? 'MAL' : 'OK')
 process.exit(mal ? 1 : 0)

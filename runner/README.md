@@ -51,6 +51,7 @@ mires. Con `--save` guarda el borrador.
 
 ```bash
 node src/cli.js build manifests/ejemplo-tenencia.json --mapping mapping/purina-latam.json
+node src/cli.js build manifests/ejemplo-tabs.json --mapping mapping/purina-latam.json
 node src/cli.js build manifests/*.json --mapping mapping/purina-latam.json --save
 ```
 
@@ -142,6 +143,35 @@ solo y los selectores del mapping pueden usar:
 | `{dselw}` | `edit-field-ln-n-components-widget-4`   | los grupos plegables (field_group)|
 | `{npath}` | `field_ln_n_components_4`               | los botones de agregar            |
 
+### Contenedores: las pestañas
+
+Un paragraph que acepta hijos declara `children.slots`: una ranura por lugar donde pueden
+caer, con su propio `dsel`, `base` y boton de alta escritos con las variables del PADRE.
+El hijo del manifiesto elige con `"slot": 0`.
+
+Las pestañas son el caso mas anidado, y en el CMS son **dos paragraphs**, no uno:
+
+```
+comp_tabs                 el bloque de pestañas   (Tab type: Only Tabs | Full Background)
+└─ comp_tabs_tab_item     UNA pestaña             (Title, Description, Background Image)
+   └─ field_component     el contenido de esa pestaña — UN componente
+```
+
+O sea que un Tabs con tres pestañas son **siete** paragraphs: el Tabs, tres Tab y tres
+componentes. En el manifiesto eso se escribe como un arbol de tres niveles, cada uno con
+sus `children` (ver `manifests/ejemplo-tabs.json`).
+
+Lo que hay que tener presente es la **cardinalidad**: `field_component` acepta **UNO**.
+No es una decision nuestra, es como esta configurado el campo — con la pestaña ocupada
+Drupal ni siquiera dibuja el boton de agregar. Por eso la ranura declara `"max": 1` y el
+motor frena antes de tocar el navegador si el manifiesto le pone dos. El hub hace lo
+mismo del otro lado: con la pestaña llena no ofrece el boton de agregar.
+
+Las dos ranuras se agregan distinto, y el mapping lo dice: la lista de pestañas acepta un
+solo bundle, asi que el boton "Añadir Tab" esta suelto; el contenido de una pestaña acepta
+cualquier componente, asi que los botones estan detras del modal de paragraphs_ee, igual
+que las columnas de un layout.
+
 Dos cosas mas que el formulario real obliga y el mapping declara: los campos de cuerpo
 arrancan en un **formato de texto que no admite HTML**, asi que el formato se cambia
 ANTES de escribir; y el **alias de URL** esta deshabilitado mientras Pathauto lo genere
@@ -180,14 +210,24 @@ Lo que ninguno de los dos puede decir es si el CMS acepta la pagina: eso solo lo
 ## Estado
 
 El mapping de Purina LATAM (`mapping/purina-latam.json`) esta escrito a partir del HTML
-real de `/node/add/dsu_component_page` en **preprod MX**, con 8 paragraphs ya agregados.
-`npm run verify` da **275 selectores encontrados, 0 sin encontrar**, y `npm test` pasa.
+real de `/node/add/dsu_component_page` en **preprod MX**. Son dos volcados: uno con 8
+paragraphs sueltos (**275 selectores, 0 sin encontrar**) y otro con un Tabs de 3 pestañas
+(**130 selectores, 0 sin encontrar**). `npm test` pasa.
 
-Cubre 10 paragraphs: `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`,
+Cubre 12 paragraphs: `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`,
 `ln_c_cardgrid` (+ `ln_c_grid_card_item`), `accordion_grid` (+ `accordion_item`),
-`layout_columns_2` y `banner`. Los demas del CMS (los otros 11 layouts, `comp_tabs`,
-`banner_wrapper`, `dsu_tint`…) **no estan**: hace falta un volcado con uno de cada uno
-agregado para escribirlos, y hasta entonces un manifiesto que los pida se frena solo.
+`layout_columns_2`, `banner` y `comp_tabs` (+ `comp_tabs_tab_item`). Los demas del CMS
+(los otros 11 layouts, `banner_wrapper`, `dsu_tint`…) **no estan**: hace falta un volcado
+con uno de cada uno agregado para escribirlos, y hasta entonces un manifiesto que los pida
+se frena solo.
+
+**Lo unico sin verificar es el boton que mete el componente adentro de una pestaña.** En
+el CMS `field_component` es de cardinalidad **1**, y con la ranura llena Drupal esconde el
+widget de alta — en el volcado las tres pestañas ya venian con su componente, asi que no
+hay nada que mirar. Los selectores estan escritos con el mismo patron que las columnas de
+un layout (ese si verificado); si el CMS los nombra distinto, el motor frena con "No
+aparecio el boton para agregar" y se corrigen en el mapping. Para cerrarlo alcanza con un
+volcado de un Tabs con **una pestaña vacia**.
 
 **Falta la primera corrida contra el CMS.** Todo lo verificable sin conexion esta
 verificado; lo que no se puede saber offline es si Drupal acepta la pagina que resulta.

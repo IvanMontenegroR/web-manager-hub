@@ -919,6 +919,137 @@
             "sel": "input[name=\"{base}[css_class][0][value]\"]"
           }
         }
+      },
+      "comp_tabs": {
+        "label": "Tabs",
+        "value": "comp_tabs",
+        "fields": {
+          "field_tab_type": {
+            "sel": "select[name=\"{base}[field_tab_type]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][comp_tabs][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][comp_tabs][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][comp_tabs][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][comp_tabs][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_tabs_active": {
+            "sel": "select[name=\"{base}[classy][0][comp_tabs][text_tabs_active]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Tabs",
+              "dsel": "{dsel}-subform-field-tab-item-{delta}",
+              "base": "{base}[field_tab_item][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"], input[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "comp_tabs_tab_item": {
+        "label": "Tab",
+        "value": "comp_tabs_tab_item",
+        "fields": {
+          "field_c_image": {
+            "kind": "image",
+            "note": "Background Image (inline entity form): el editor la sube a mano desde la Media library."
+          },
+          "field_title": {
+            "sel": "input[name=\"{base}[field_title][0][value]\"]"
+          },
+          "field_description": {
+            "sel": "textarea[name=\"{base}[field_description][0][value]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Componente",
+              "max": 1,
+              "dsel": "{dsel}-subform-field-component-{delta}",
+              "base": "{base}[field_component][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "_": "SIN VERIFICAR contra un volcado: en el HTML que tenemos las tres pestañas ya venian con su componente, y con la ranura llena Drupal esconde el widget de alta. Los dos selectores salen del MISMO patron que las columnas de un layout, que si esta verificado. Si el CMS los escribe de otra forma, el motor frena con \"No aparecio el boton para agregar\" y se corrigen aca.",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-component-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
       }
     }
   }
