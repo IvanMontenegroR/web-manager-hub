@@ -1,0 +1,18 @@
+{
+  "name": "drupal-page-runner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arma paginas en Drupal (nodo + paragraphs) a partir de un manifiesto JSON, manejando el navegador con la sesion del propio usuario.",
+  "type": "module",
+  "bin": { "page-runner": "./src/cli.js" },
+  "scripts": {
+    "login": "node src/cli.js login",
+    "inspect": "node src/cli.js inspect",
+    "build": "node src/cli.js build",
+    "test": "node test/smoke.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.49.1"
+  },
+  "engines": { "node": ">=20" }
+}

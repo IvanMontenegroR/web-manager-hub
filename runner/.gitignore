@@ -1,0 +1,7 @@
+node_modules/
+# Perfil del navegador: ahi vive la SESION de Drupal. Nunca se versiona.
+.profile/
+# Registro local de corridas y volcados de inspect (pueden traer datos del CMS).
+logs/
+inspect-*.json
+dump*.json

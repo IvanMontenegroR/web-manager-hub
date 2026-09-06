@@ -1,0 +1,24 @@
+{
+  "manifest": 1,
+  "page": {
+    "title": "Tenencia Responsable",
+    "path": "/adopta/tenencia-responsable",
+    "published": false
+  },
+  "blocks": [
+    {
+      "type": "c_text",
+      "fields": {
+        "field_c_advanced_title": "¿Qué considerar antes de adoptar?",
+        "field_c_title_tag": "h2"
+      }
+    },
+    {
+      "type": "ln_c_cardgrid",
+      "fields": {
+        "field_view_mode": "slider-default-card",
+        "field_c_advanced_title": "Paso 1: ¡Prepara todo para la llegada de tu mejor amigo!"
+      }
+    }
+  ]
+}

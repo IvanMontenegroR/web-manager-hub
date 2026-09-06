@@ -1,0 +1,55 @@
+{
+  "_": "PLANTILLA - los selectores son la FORMA esperada, no valores verificados. Se completan con la salida de `page-runner inspect` contra el Drupal real. Hasta entonces esto no sirve para armar nada.",
+  "name": "purina-latam",
+  "site": "https://REEMPLAZAR.example.com",
+  "nodeAdd": "/node/add/page",
+  "title": "input[name=\"title[0][value]\"]",
+  "published": "input[name=\"status[value]\"]",
+  "save": "#edit-submit",
+  "paragraphs": {
+    "row": "#rows > .row",
+    "base": "field_components[{delta}][subform]",
+    "add": {
+      "mode": "select",
+      "select": "select[name=\"field_components[add_more][add_more_select]\"]",
+      "button": "input[name=\"field_components_add_more_add_more_button\"]"
+    },
+    "types": {
+      "c_text": {
+        "label": "Content: Text",
+        "value": "c_text",
+        "open": ["summary:has-text(\"Optional fields\")"],
+        "fields": {
+          "field_c_text": { "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]", "kind": "richtext" },
+          "field_c_advanced_title": { "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]" },
+          "field_c_title_tag": { "sel": "select[name=\"{base}[field_c_title_tag]\"]", "kind": "select" }
+        }
+      },
+      "ln_c_cardgrid": {
+        "label": "Content: Card Grid",
+        "value": "ln_c_cardgrid",
+        "open": ["summary:has-text(\"Optional fields\")"],
+        "fields": {
+          "field_view_mode": { "sel": "select[name=\"{base}[field_view_mode]\"]", "kind": "select" },
+          "field_c_advanced_title": { "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]" }
+        }
+      },
+      "layout_columns_2": {
+        "label": "Layout: 2 columnas",
+        "value": "layout_columns_2",
+        "fields": {
+          "field_section_id": { "sel": "input[name=\"{base}[field_section_id][0][value]\"]" }
+        },
+        "children": {
+          "row": ".kids[data-base=\"{base}\"] .kidrow",
+          "base": "{base}[field_children][{delta}][subform]",
+          "add": {
+            "mode": "select",
+            "select": ".kids[data-base=\"{base}\"] > select",
+            "button": ".kids[data-base=\"{base}\"] > input[type=submit]"
+          }
+        }
+      }
+    }
+  }
+}
