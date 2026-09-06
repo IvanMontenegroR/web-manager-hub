@@ -200,10 +200,18 @@ export default function PageBuilder({ page, onBack }) {
       const kids = kidsOf(c.id, si, si === slots.length - 1)
       const off = isTabs && si !== active
       const open = picker && picker.parent_id === c.id && picker.tab_index === si
+      // Una ranura con tope lleno no ofrece el boton: en el CMS no entra otro.
+      const full = s.max != null && kids.length >= s.max
       return (
         <div key={si} className={`pb-slot${isTabs ? ' pb-tabpanel' : ''}${off ? ' pb-tabpanel--off' : ''}`}>
           {kids.map((k, i) => renderBlock(k, i, kids))}
-          {editMode && !off && (
+          {editMode && !off && full && (
+            <div className="pb-addhere pb-addhere--full">
+              {s.max === 1 ? 'Una pestaña lleva UN solo componente, igual que en el CMS.'
+                : `Esta ranura lleva hasta ${s.max} componentes.`}
+            </div>
+          )}
+          {editMode && !off && !full && (
             <div className="pb-addhere" onClick={(e) => e.stopPropagation()}>
               <button className="btn btn-sm" disabled={busy} onClick={() => setPicker(open ? null : { parent_id: c.id, tab_index: si })}>
                 <Plus size={13} /> {isTabs ? 'Agregar componente acá' : `Agregar en ${s.label}`}

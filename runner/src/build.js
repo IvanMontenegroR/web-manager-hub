@@ -115,11 +115,20 @@ async function addBlock(ctx, block, num, holder) {
     const slots = def.children?.slots
     if (!slots?.length) throw new Error(`"${block.type}" tiene hijos pero el mapping no declara "children.slots"`)
     let k = 0
+    const enSlot = {}
     for (const child of block.children) {
       k += 1
       const i = child.slot || 0
       const slot = slots[i]
       if (!slot) throw new Error(`"${block.type}" no tiene el slot ${i} (tiene ${slots.length})`)
+      // `max` = cuantos componentes entran en esa ranura. Una pestaña lleva UNO solo:
+      // en el CMS el tab item tiene un componente, no una lista. Mejor frenar aca que
+      // dejar la mitad de la pestaña afuera.
+      enSlot[i] = (enSlot[i] || 0) + 1
+      if (slot.max != null && enSlot[i] > slot.max) {
+        throw new Error(`"${block.type}" acepta ${slot.max} componente(s) en "${slot.label || i}" `
+          + `y el manifiesto pone ${enSlot[i]}`)
+      }
       // Se resuelven las variables del PADRE y se deja `{delta}`, que es el del hijo.
       await addBlock(ctx, child, `${num}.${k}`, {
         dsel: resolveSelector(slot.dsel, { base, dsel, dselw: vars.dselw, npath: vars.npath }),

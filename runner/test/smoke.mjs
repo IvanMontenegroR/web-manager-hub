@@ -68,7 +68,8 @@ const mapping = (site) => ({
           field_c_cardgrid_view_mode: { sel: 'select[name="{base}[field_c_cardgrid_view_mode]"]', kind: 'select' },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
         },
-        children: { slots: [slot('field_c_subitems', false)] },
+        // `max: 1` es lo que hace una pestaña: adentro entra UN componente y no mas.
+        children: { slots: [{ ...slot('field_c_subitems', false), max: 1 }] },
       },
       layout_columns_2: {
         label: 'Layout: 2 columnas', value: 'layout_columns_2',
@@ -176,6 +177,15 @@ try {
         blocks: [{ type: 'layout_columns_2', children: [{ slot: 5, type: 'c_text' }] }] }) })
   } catch (e) { slotMalo = /no tiene el slot 5/.test(e.message) }
   check(slotMalo, 'frena ante un slot que no existe')
+
+  // Una ranura con tope (la pestaña) no acepta un segundo componente.
+  let tope = false
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {},
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', children: [{ type: 'c_text' }, { type: 'c_text' }] }] }) })
+  } catch (e) { tope = /acepta 1 componente\(s\)/.test(e.message) }
+  check(tope, 'frena al pasarse del tope de una ranura')
 } finally {
   await ctx.close()
   server.close()

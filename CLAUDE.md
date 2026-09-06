@@ -281,9 +281,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      `TAB_SAMPLE`). El hijo apunta al suyo con `tab_index`, que se sigue llamando asi por historia (nacio
      con las pestañas) pero es el **indice de slot** y vale para cualquier contenedor. Si se borra una
      pestaña, sus hijos NO se pierden: caen en el ULTIMO slot (mismo criterio en el builder y en el Excel).
-     La UNICA diferencia entre las dos clases es como se ven: en las **pestañas** se ve un slot por vez
+     Las dos clases se diferencian en dos cosas. Como se ven: en las **pestañas** se ve un slot por vez
      (los demas se montan fuera de pantalla, `.pb-tabpanel--off`, para que el export capture tambien lo
-     que esta en las pestañas cerradas); en las **columnas** se ven todos a la vez. En el builder el
+     que esta en las pestañas cerradas); en las **columnas** se ven todos a la vez. Y cuanto entra: un
+     slot puede declarar `max` (`TAB_MAX_COMPONENTS`), y las pestañas valen **1** porque en el CMS un
+     `comp_tabs_tab_item` tiene UN componente, no una lista. Con la ranura llena el builder no ofrece el
+     boton de agregar, muestra la razon (`.pb-addhere--full`); una columna no tiene tope. El limite no
+     toca lo ya armado: una pestaña que hoy tenga dos bloques los conserva, simplemente no crece. En el
+     builder el
      contenido de cada slot se le pasa al preview por `slots` (un nodo por slot, en orden) y se agrega con
      el boton que aparece adentro. El arbol es de UN nivel: la paleta de ese boton excluye los
      contenedores, asi que no se anidan (en el CMS si se puede, es una limitacion nuestra).
@@ -307,10 +312,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
      quedan `deprecated` (siguen renderizando lo ya armado pero salen de la paleta). Trae la estructura
      completa del CMS: titulo/subtitulo con HTML tag y Title/SubTitle Size (los cuatro adentro del
-     desplegable "Optional fields"), background image, subitems (titulo+tag, icono,
-     descripcion, subtitulo+tag, imagen desktop y mobile **cada una con su alt**, CTA con texto/URL/destino,
+     desplegable "Optional fields"), background image, **Show Card PET ID**, subitems (titulo+tag, icono,
+     descripcion, **Show IA Icon**, subtitulo+tag, imagen desktop y mobile **cada una con su alt**, CTA con
+     texto/URL/destino,
      background color, section ID y CSS por card), el bloque **Avanzado** (See more, visibilidad Gato/Perro,
      section ID, CSS) y los 13 selects de **Classy**. Ver `sql/2026_card_grid_migracion.sql`.
+     Los dos checkbox `Show ...` salieron del formulario real y estan cargados como campos del CMS, pero
+     **que dibujan en el sitio esta PENDIENTE**: el mockup todavia no los pinta. Cuando se sepa, se agrega
+     al render y se saca esta nota.
      La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
@@ -448,7 +457,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   El Banner Type **"Full Image + Box Content" YA NO existe**: ese layout (imagen a sangre con la card
   frosted encima) se arma con el `c_image` y el Image position en **"Image Background Box"**. Salio de
   `BANNER_TYPES`, y su medida y su mockup (`.cp-fib`) se mudaron al Imagen. Ver
-  `sql/2026_box_content_a_c_image.sql`.
+  `sql/2026_box_content_a_c_image.sql`. El select del CMS **todavia lo ofrece**
+  (`full-image-box-content`): eso es el CMS que quedo desactualizado, no una opcion viva. No se vuelve a
+  agregar a `BANNER_TYPES`.
   El **`c_image`** ("Imagen") es una imagen con texto encima: el Media lleva desktop y mobile, cada uno
   con su **alt text**, y del mercado lo unico que se pide es la imagen (el alt lo carga SEO en la hoja CMS
   y el editor ya sabe subir el archivo). Suma

@@ -49,7 +49,8 @@
 // CONTENEDORES. Un tipo con `children.slots` acepta hijos. Cada slot es una ranura
 // (las dos columnas de un layout, los items de un acordeon) y trae su propio `dsel`,
 // `base` y `add`, escritos con las variables de la fila PADRE. El hijo del manifiesto
-// elige con `"slot": 0`.
+// elige con `"slot": 0`. Un slot puede declarar `max`: cuantos componentes entran ahi
+// (una pestaña lleva UNO solo). Pasarse frena la corrida.
 //
 // `kind` de un campo: text (default) | richtext | select | checkbox | image (se saltea).
 // Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se

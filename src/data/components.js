@@ -388,11 +388,19 @@ export function tabList(content) {
 // El hijo apunta a su slot con `page_components.tab_index`. La columna se sigue
 // llamando asi por historia (nacio con las pestañas) pero es el INDICE DE SLOT y vale
 // para cualquier contenedor.
+//
+// `max` = cuantos componentes entran en esa ranura. Solo lo usan las PESTAÑAS, y vale
+// 1: en el CMS un `comp_tabs_tab_item` tiene UN componente, no una lista. Sin el limite
+// se podia armar en el hub una pestaña con tres bloques que despues no se puede cargar.
+// Las columnas de un layout no tienen tope.
+export const TAB_MAX_COMPONENTS = 1
+
 export function slotsOf(def, content) {
   if (!def?.container) return []
   if (def.slots) return def.slots
   return tabList(content).map((t, i) => ({
     label: t.label || `Pestaña ${i + 1}`, description: t.description || '',
+    max: TAB_MAX_COMPONENTS,
   }))
 }
 
@@ -875,6 +883,9 @@ export const COMPONENTS = [
     fields: [
       { key: 'view_mode', label: 'Modo de vista', cmsLabel: 'Modo de vista', type: 'select', cms: true, options: CARD_GRID_MODES,
         hint: 'Es el campo obligatorio del CMS. Cambia el layout de todo el bloque.' },
+      // Checkbox del formulario, entre el modo de vista y "Optional fields". Que dibuja
+      // en el sitio esta PENDIENTE de confirmar, asi que el mockup todavia no lo pinta.
+      { key: 'show_card_pet_id', label: 'Show Card PET ID', cmsLabel: 'Show Card PET ID', type: 'checkbox', cms: true, default: false },
       // Titulo y subtitulo del BLOQUE (no los de cada card) viven en el desplegable
       // "Optional fields" de Drupal: si el editor no lo abre, no los encuentra.
       { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
@@ -895,6 +906,9 @@ export const COMPONENTS = [
         // verticales son altas y el texto tiene lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
           maxLength: (c) => (c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
+        // Checkbox del formulario de la CARD, entre la descripcion y el subtitulo. Igual
+        // que Show Card PET ID: falta confirmar que dibuja, asi que el mockup no lo pinta.
+        { key: 'show_ia_icon', label: 'Show IA Icon', cmsLabel: 'Show IA Icon', type: 'checkbox', cms: true, default: false },
         { key: 'subtitle', label: 'Subtítulo (opcional)', cmsLabel: 'Subtítulo', type: 'text' },
         { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtítulo)', type: 'select', cms: true, options: HTML_TAGS },
         { key: 'image', label: 'Imagen desktop', cmsLabel: 'Image Desktop', type: 'image', hideTypes: CARD_GRID_ICON_MODES },

@@ -2251,6 +2251,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-block--kid { box-shadow: none; border: 1px dashed var(--border); }
 .pb-block--kid.sel { border: 2px solid var(--purina); }
 .pb-addhere { position: relative; display: flex; justify-content: center; padding: 4px 0 2px; }
+/* Ranura llena: en vez del boton, la razon por la que no esta. */
+.pb-addhere--full { font-size: 11px; color: var(--muted); font-style: italic; }
 .pb-picker {
   position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 30;
   width: 260px; max-height: 320px; overflow: auto; margin-top: 6px; padding: 8px;
