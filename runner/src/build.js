@@ -8,7 +8,7 @@
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
 //   - Las IMAGENES no se tocan (ver README): el editor las sube a mano.
-import { resolveSelector, rowSelector, widgetDsel, namePath } from './mapping.js'
+import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper } from './mapping.js'
 
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
@@ -161,10 +161,14 @@ async function addBlock(ctx, block, num, holder) {
           + `y el manifiesto pone ${enSlot[i]}`)
       }
       // Se resuelven las variables del PADRE y se deja `{delta}`, que es el del hijo.
+      const padre = { base, dsel, dselw: vars.dselw, npath: vars.npath }
+      const dselHijo = resolveSelector(slot.dsel, padre)
       await addBlock(ctx, child, `${num}.${k}`, {
-        dsel: resolveSelector(slot.dsel, { base, dsel, dselw: vars.dselw, npath: vars.npath }),
-        base: resolveSelector(slot.base, { base, dsel, dselw: vars.dselw, npath: vars.npath }),
-        add: resolveIn(slot.add, { base, dsel, dselw: vars.dselw, npath: vars.npath }),
+        dsel: dselHijo,
+        base: resolveSelector(slot.base, padre),
+        // `enMedio` no se escribe en el mapping: sale de como Drupal nombra las cosas,
+        // igual que {dselw} y {npath}. Un mapping puede declararlo si su sitio difiere.
+        add: { enMedio: EN_MEDIO(fieldWrapper(dselHijo)), ...resolveIn(slot.add, padre) },
       })
     }
   }
@@ -172,9 +176,15 @@ async function addBlock(ctx, block, num, holder) {
 
 function resolveIn(add, vars) {
   const out = { ...add }
-  for (const k of ['select', 'button', 'open']) if (out[k]) out[k] = resolveSelector(out[k], vars)
+  for (const k of ['select', 'button', 'open', 'enMedio']) if (out[k]) out[k] = resolveSelector(out[k], vars)
   return out
 }
+
+// El boton de paragraphs_features que agrega ESE bundle adentro de ESA lista.
+const EN_MEDIO = (wrapper) => `[data-drupal-selector="${wrapper}"] `
+  + 'button.paragraphs-features__add-in-between__button[data-paragraph-bundle="{bundle}"]'
+
+const seVe = async (loc) => (await loc.count()) > 0 && await loc.first().isVisible()
 
 // La primera posicion libre de la lista. Corta apenas encuentra un hueco, asi que en
 // una pagina normal son un par de consultas.
@@ -217,13 +227,32 @@ async function clickAdd(page, add, def, type) {
     return
   }
   if (add.mode === 'buttons') {
+    const bundle = def.value || type
+    // Hay hasta TRES formas de agregar en una ranura, y cual esta a la vista depende de
+    // como quedo la lista. Se prueban en orden y se usa la que se VE:
+    //
+    // 1. "Agregar en el medio" (paragraphs_features). Cuando esta activado para ese
+    //    campo, Drupal ESCONDE el area de agregar del final (le pone display:none) y
+    //    pone un boton por bundle adentro de la tabla — el que toca una persona. Se
+    //    clickea el ULTIMO, que es el que agrega al final y no al principio.
+    if (add.enMedio) {
+      const b = page.locator(resolveSelector(add.enMedio, { bundle })).last()
+      if (await seVe(b)) { await b.click(); await esperarAjax(page); return }
+    }
+    // 2. El modal de paragraphs_ee, cuando el area del final si se ve.
     if (add.open) {
       const opener = page.locator(add.open).first()
-      if (await opener.count()) await opener.click()
+      if (await seVe(opener)) { await opener.click(); await esperarAjax(page) }
     }
-    const btn = page.locator(resolveSelector(add.button, { bundle: def.value || type })).first()
-    await btn.waitFor({ state: 'visible', timeout: 20000 }).catch(() => {
-      throw new Error(`No aparecio el boton para agregar "${type}" en este contenedor.`)
+    // 3. El boton suelto del bundle: una lista de un solo tipo, o el que abrio el modal.
+    const btn = page.locator(resolveSelector(add.button, { bundle })).first()
+    await btn.waitFor({ state: 'visible', timeout: 20000 }).catch(async () => {
+      const opciones = await page.evaluate(() => [...document.querySelectorAll(
+        'input[name="button_add_modal"], button.paragraphs-features__add-in-between__button, .field-add-more-submit')]
+        .filter((e) => e.offsetParent !== null)
+        .map((e) => (e.value || e.textContent || '').trim().slice(0, 40)).slice(0, 10)).catch(() => [])
+      throw new Error(`No aparecio el boton para agregar "${type}" en este contenedor. `
+        + `Los botones de alta que SI se ven ahora: ${opciones.length ? opciones.join(', ') : 'ninguno'}.`)
     })
     await btn.click()
     await esperarAjax(page)

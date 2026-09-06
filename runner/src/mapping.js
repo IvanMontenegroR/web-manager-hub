@@ -96,6 +96,10 @@ export const rowSelector = (dsel) => `[data-drupal-selector="${dsel}"]`
 export const widgetDsel = (dsel) => dsel.replace(/-(\d+)(?=-|$)/g, '-widget-$1')
 //   edit-field-ln-n-components-4  ->  field_ln_n_components_4
 export const namePath = (dsel) => dsel.replace(/^edit-/, '').replaceAll('-', '_')
+// El wrapper del CAMPO, a partir de la plantilla de sus filas. Es lo que acota la
+// busqueda de los botones "agregar en el medio" a ESA lista y no a una de adentro.
+//   edit-…-field-c-subitems-{delta}  ->  edit-…-field-c-subitems-wrapper
+export const fieldWrapper = (dselTpl) => String(dselTpl).replace(/-\{delta\}$/, '-wrapper')
 
 // Los tipos de paragraph que el mapping conoce. Un manifiesto que pida uno que no
 // esta se frena antes de tocar el navegador, con la lista de lo que falta.

@@ -3,9 +3,9 @@
 //   - los `name` con delta y subform, y los `id` con sufijo aleatorio (por eso el motor
 //     se apoya en `name=` y `data-drupal-selector=`)
 //   - el alta por AJAX: el subform no existe hasta que se lo pide
-//   - las tres formas de agregar: desplegable + boton (el nodo), un boton por tipo detras
-//     de un modal (las columnas de un layout) y el dropbutton de Gin, donde el primer
-//     tipo esta a la vista y el resto plegado detras del toggle (adentro de una pestaña)
+//   - las CUATRO formas de agregar: desplegable + boton (el nodo), un boton por tipo
+//     detras de un modal, el dropbutton de Gin (el primero a la vista y el resto plegado)
+//     y el "agregar en el medio" de paragraphs_features, que ESCONDE el area del final
 //   - contenedores con VARIOS slots (las dos columnas de un layout)
 //   - los <details> plegados, con la variante "widget-" que usa field_group, y el panel
 //     cerrado de la barra lateral donde vive el alias de URL
@@ -98,12 +98,14 @@ function subform(type, base, dsel, npath) {
   // Layout: DOS slots, cada uno con su modal de tipos.
   return advanced
     + slotHtml('Columna 1', base, dsel, npath, 'field_column_first', 'modal')
-    + slotHtml('Columna 2', base, dsel, npath, 'field_column_second', 'modal')
+    + slotHtml('Columna 2', base, dsel, npath, 'field_column_second', 'entre')
 }
 
-// Una ranura de un contenedor, en las tres formas que usa el CMS:
+// Una ranura de un contenedor, en las CUATRO formas que usa el CMS:
 //   'modal' — los botones tapados hasta que se abre el modal de paragraphs_ee
 //   'drop'  — dropbutton de Gin: el primero a la vista, el resto plegado tras el toggle
+//   'entre' — paragraphs_features: el area del final ESCONDIDA (display:none) y en su
+//             lugar un boton por bundle adentro de la tabla ("agregar en el medio")
 //   'plain' — un solo bundle permitido, el boton suelto
 function slotHtml(label, base, dsel, npath, field, modo) {
   const fd = field.replace(/_/g, '-')
@@ -113,14 +115,22 @@ function slotHtml(label, base, dsel, npath, field, modo) {
   const btns = types.map((t, i) =>
     \`<button type="button" class="\${modo === 'drop' && i ? 'secondary-action' : ''}"
        name="\${npath}_subform_\${field}_\${t}_add_more">\${t}</button>\`).join('')
-  return \`<fieldset class="slot" data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
+  // En 'entre', el area del final existe pero esta escondida: es exactamente lo que hace
+  // paragraphs_features, y lo que hacia fallar al runner con "element is not visible".
+  const escondida = modo === 'entre' ? ' style="display:none"' : ''
+  const enMedio = modo === 'entre' ? types.map((t) =>
+    \`<button type="button" class="paragraphs-features__add-in-between__button"
+       data-paragraph-bundle="\${t}">+ \${t}</button>\`).join('') : ''
+  return \`<fieldset class="slot" data-drupal-selector="\${dsel}-subform-\${fd}-wrapper"
+      data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
       data-npath="\${npath}_subform_\${field}">
     <legend>\${label}</legend><div class="slotrows"></div>
-    \${modo === 'modal' ? \`<input type="submit" name="button_add_modal"
+    <div class="enmedio">\${enMedio}</div>
+    \${modo === 'modal' || modo === 'entre' ? \`<div\${escondida}><input type="submit" name="button_add_modal"
         data-drupal-selector="\${dsel}-subform-\${fd}-add-more-add-modal-form-area-add-more"
-        value="Add Component to Column">\` : ''}
-    <div class="\${modo === 'drop' ? 'drop' : 'modal'}\${modo === 'modal' ? '' : ' on'}"
-         data-drupal-selector="\${dsel}-subform-\${fd}-add-more">
+        value="Add Component to Column"></div>\` : ''}
+    <div class="\${modo === 'drop' ? 'drop' : 'modal'}\${modo === 'modal' || modo === 'entre' ? '' : ' on'}"
+         data-drupal-selector="\${dsel}-subform-\${fd}-add-more"\${escondida}>
       \${modo === 'drop' ? '<button type="button" class="dropbutton__toggle">Mas</button>' : ''}
       \${btns}</div></fieldset>\`
 }
@@ -147,6 +157,11 @@ function wire(scope) {
     if (opener) opener.addEventListener('click', () => box.classList.add('on'))
     const toggle = box.querySelector('.dropbutton__toggle')
     if (toggle) toggle.addEventListener('click', () => box.classList.toggle('open'))
+    s.querySelectorAll('.enmedio button').forEach((b) => b.addEventListener('click', () => {
+      const d = list.children.length
+      addTo(list, s.dataset.base + '[' + d + '][subform]', s.dataset.slot + '-' + d,
+        s.dataset.npath + '_' + d, b.dataset.paragraphBundle)
+    }))
     box.querySelectorAll('button[name]').forEach((b) => b.addEventListener('click', () => {
       const type = b.name.replace(s.dataset.npath + '_', '').replace('_add_more', '')
       const d = list.children.length

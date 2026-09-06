@@ -1,8 +1,9 @@
 // Prueba del MOTOR contra el Drupal de mentira: agrega paragraphs por delta, espera el
 // AJAX, abre los desplegables, cambia el formato de texto antes de escribir, llena
 // texto / rich text / selects / checkboxes, y anida hijos en los DOS slots de un
-// contenedor (detras del modal) y en el slot con tope de otro (detras del dropbutton,
-// que es la forma de una pestaña).
+// contenedor (uno detras del modal y el otro con el area del final escondida, donde hay
+// que usar el boton "agregar en el medio") y en el slot con tope de otro (detras del
+// dropbutton, que es la forma de una pestaña).
 // Despues lee el DOM y verifica que cada valor quedo donde tenia que quedar.
 import { rmSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -174,7 +175,7 @@ try {
   check(dom.cardHijo, 'hijo detras del dropbutton, plegado (como una pestaña)')
   check(dom.sectionId === 'cuidados', 'campo adentro de Avanzado (plegado)')
   check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
-  check(dom.col2 === 'grid-cards', 'hijo en la columna 2 (slot 1, con modal)')
+  check(dom.col2 === 'grid-cards', 'hijo en la columna 2, con el area del final ESCONDIDA:\n     usa el boton "agregar en el medio" de paragraphs_features')
   check(dom.nieto, 'contenedor adentro de contenedor (3 niveles, como el Tabs)')
   check(dom.abiertos >= 4, `se abrieron los desplegables (${dom.abiertos})`)
 
