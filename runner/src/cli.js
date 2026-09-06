@@ -109,7 +109,14 @@ async function main() {
         }
       }
     } finally {
-      if (!args.keepopen) await ctx.close()
+      // Sin --save la gracia es MIRAR el formulario, asi que la ventana queda abierta y
+      // se cierra a mano. Con --save ya no hay nada que mirar y se cierra sola.
+      if (args.save && !args.keepopen) await ctx.close()
+      else {
+        say('')
+        say('La ventana queda abierta para que revises. Cerrala cuando termines.')
+        await ctx.waitForEvent('close', { timeout: 0 })
+      }
     }
     return
   }
@@ -126,8 +133,9 @@ const HELP = `page-runner — arma paginas en Drupal desde un manifiesto JSON
   --browser chrome|edge   navegador ya instalado (default chrome)
   --profile <dir>         perfil con la sesion (default .profile)
   --slowmo <ms>           velocidad (default 120)
-  --keepopen              no cerrar el navegador al terminar
+  --keepopen              no cerrar el navegador al terminar (con --save)
 
-Sin --save deja el formulario lleno y NO guarda: sirve para mirar antes de confiar.`
+Sin --save deja el formulario lleno y NO guarda: sirve para mirar antes de confiar. En
+ese caso la ventana queda abierta hasta que la cierres vos.`
 
 main().catch((e) => { process.stderr.write('\n' + e.message + '\n'); process.exit(1) })

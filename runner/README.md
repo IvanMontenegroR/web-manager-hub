@@ -46,8 +46,9 @@ ve ni guarda tu contraseña.
 node src/cli.js login --mapping mapping/purina-latam.json
 ```
 
-**2. Armar una pagina.** Sin `--save` llena el formulario y lo deja abierto para que lo
-mires. Con `--save` guarda el borrador.
+**2. Armar una pagina.** Sin `--save` llena el formulario y **deja la ventana abierta**
+para que lo mires: no escribe nada en el CMS y la cerras vos cuando terminaste. Con
+`--save` aprieta Guardar, deja el borrador despublicado y cierra sola.
 
 ```bash
 node src/cli.js build manifests/ejemplo-tenencia.json --mapping mapping/purina-latam.json
@@ -55,7 +56,8 @@ node src/cli.js build manifests/ejemplo-tabs.json --mapping mapping/purina-latam
 node src/cli.js build manifests/*.json --mapping mapping/purina-latam.json --save
 ```
 
-Opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
+Opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`
+(mantiene la ventana abierta tambien con `--save`).
 
 **Si el CMS cambia** (un campo nuevo, un paragraph nuevo), hay dos formas de rehacer el
 mapping. `inspect` lo vuelca desde el sitio — solo lee, no escribe nada:
