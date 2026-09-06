@@ -142,6 +142,7 @@ try {
       alias: v('input[name="path[0][alias]"]'),
       panelUrl: document.getElementById('urlpath')?.open === true,
       bloques: document.querySelectorAll('#rows > .row').length,
+      oops: document.querySelectorAll('.messages--error').length,
       texto: document.querySelector('.ck-editor__editable')?.innerText ?? null,
       formato: v(`select[name="${B}[0][subform][field_c_text][0][format]"]`),
       tituloTexto: v(`input[name="${B}[0][subform][field_c_advanced_title][0][value]"]`),
@@ -163,6 +164,7 @@ try {
   check(dom.alias === '/adopta/tenencia-responsable', `escribio el alias (${dom.alias})`)
   check(dom.panelUrl, 'abrio el panel plegado donde vive el alias')
   check(dom.bloques === 3, `3 bloques sueltos (${dom.bloques})`)
+  check(dom.oops === 0, `espero el AJAX del desplegable antes de agregar (${dom.oops} "Oops")`)
   check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')
   check(dom.tituloTexto === '¿Que considerar antes de adoptar?', 'titulo adentro de Optional fields')

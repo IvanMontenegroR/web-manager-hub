@@ -157,8 +157,33 @@ function wire(scope) {
   })
 }
 
+// El desplegable de tipos TAMBIEN dispara AJAX en el CMS real. Mientras esa peticion
+// esta en vuelo, apretar Agregar encima hace que Drupal conteste "Oops, something went
+// wrong" y no agregue nada. Se reproduce igual: un throbber mientras dura, y el boton
+// que falla si lo tocan antes de tiempo.
+const sel = document.querySelector('select[name="field_components[add_more][add_more_select]"]')
+let enVuelo = false
+function throbber(prender) {
+  document.getElementById('thr')?.remove()
+  if (!prender) return
+  const d = document.createElement('div')
+  d.id = 'thr'; d.className = 'ajax-progress'; d.textContent = 'Cargando…'
+  sel.after(d)
+}
+sel.addEventListener('change', () => {
+  enVuelo = true; throbber(true)
+  setTimeout(() => { enVuelo = false; throbber(false) }, 400)
+})
+
 document.querySelector('input[name="field_components_add_more"]').addEventListener('click', () => {
-  const type = document.querySelector('select[name="field_components[add_more][add_more_select]"]').value
+  if (enVuelo) {
+    const e = document.createElement('div')
+    e.className = 'messages messages--error'
+    e.textContent = 'Oops, something went wrong.'
+    document.body.prepend(e)
+    return
+  }
+  const type = sel.value
   const d = rows.children.length
   addTo(rows, 'field_components[' + d + '][subform]', 'edit-field-components-' + d, 'field_components_' + d, type)
 })

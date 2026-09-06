@@ -14,6 +14,27 @@ const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
 
 export async function buildPage({ page, mapping, manifest, save = false, onStep = () => {}, esperaSubform = 30000 }) {
+  // Drupal, cuando algo falla, dice "revisa la consola del navegador". El runner puede
+  // hacer eso: se escuchan los errores y se pegan al mensaje si la corrida termina mal.
+  const consola = []
+  const anotar = (t) => { if (consola.length < 40) consola.push(String(t).replace(/\s+/g, ' ').slice(0, 200)) }
+  const oyentes = [
+    ['console', (m) => { if (m.type() === 'error') anotar(m.text()) }],
+    ['pageerror', (e) => anotar('JS: ' + e.message)],
+    ['response', (r) => { if (r.status() >= 400) anotar(`HTTP ${r.status()} ${r.url()}`) }],
+  ]
+  for (const [ev, fn] of oyentes) page.on(ev, fn)
+  try {
+    return await armarPagina({ page, mapping, manifest, save, onStep, esperaSubform })
+  } catch (e) {
+    if (consola.length) e.message += ` — La consola del navegador dice: ${consola.slice(-3).join(' | ')}`
+    throw e
+  } finally {
+    for (const [ev, fn] of oyentes) page.off(ev, fn)
+  }
+}
+
+async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubform }) {
   const site = mapping.site.replace(/\/+$/, '')
   const url = new URL(mapping.nodeAdd, site + '/').href
 
@@ -167,13 +188,32 @@ async function freeDelta(page, dselTpl) {
 // Dos formas de agregar un paragraph, segun como este configurado el widget:
 //   - "select":  un desplegable de tipos + un boton
 //   - "buttons": un boton por tipo; si estan detras de un modal, `open` lo abre primero
+// Drupal no termina de procesar una peticion AJAX cuando el DOM ya cambio: hay un rato
+// en el que la anterior sigue viva. Si se le encima otra, el servidor contesta con
+// "Oops, something went wrong" y NO pasa nada — que es exactamente lo que se ve cuando
+// se elige el tipo en el desplegable (que tambien tiene AJAX) y se aprieta Agregar en el
+// mismo instante. Asi que se espera a que no quede ninguna en vuelo.
+async function esperarAjax(page, max = 20000) {
+  await page.waitForTimeout(120)   // que la peticion alcance a arrancar
+  await page.waitForFunction(() => {
+    const hayThrobber = !!document.querySelector('.ajax-progress, .ajax-progress-throbber, .ajax-progress-fullscreen')
+    const D = window.Drupal
+    const enVuelo = D && D.ajax && Array.isArray(D.ajax.instances)
+      && D.ajax.instances.some((i) => i && i.ajaxing)
+    return !hayThrobber && !enVuelo
+  }, null, { timeout: max }).catch(() => { /* si no se puede saber, se sigue igual */ })
+}
+
 async function clickAdd(page, add, def, type) {
   if (add.mode === 'select') {
     const sel = page.locator(add.select).first()
     if (!(await sel.count())) throw new Error(`No encontre el desplegable de tipos (${add.select})`)
     if (def.value) await sel.selectOption(def.value)
     else await sel.selectOption({ label: def.label })
+    // El desplegable tambien dispara AJAX: apretar Agregar sin esperar rompe las dos.
+    await esperarAjax(page)
     await page.locator(add.button).first().click()
+    await esperarAjax(page)
     return
   }
   if (add.mode === 'buttons') {
@@ -186,6 +226,7 @@ async function clickAdd(page, add, def, type) {
       throw new Error(`No aparecio el boton para agregar "${type}" en este contenedor.`)
     })
     await btn.click()
+    await esperarAjax(page)
     return
   }
   throw new Error(`Modo de alta desconocido: "${add.mode}"`)
