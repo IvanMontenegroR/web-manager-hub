@@ -17,6 +17,14 @@
     "nombre": "input[name=\"name[0][value]\"]",
     "guardar": "input[name=\"op\"][value=\"Guardar\"]"
   },
+  "mediaExistente": {
+    "_": "Como se ELIGE un medio ya subido. Sacado del HTML real: el campo de imagen es un inline entity form con dos botones, y el runner usa SOLO el de \"existente\" — crear medios no es cosa suya. Los selectores van por sufijo del data-drupal-selector y acotados al fieldset del campo, porque el name completo del boton lleva adentro toda la ruta del paragraph (ief-field_ln_n_components-1-subform-...) y armarla a mano es pedir que se rompa.",
+    "abrir": "[data-drupal-selector$=\"-actions-ief-add-existing\"]",
+    "buscar": "input[data-drupal-selector$=\"-entity-id\"]",
+    "opciones": "ul.ui-autocomplete li",
+    "confirmar": "[data-drupal-selector$=\"-ief-reference-save\"]",
+    "error": ".form-item--error-message, .messages--error"
+  },
   "paragraphs": {
     "dsel": "edit-field-ln-n-components-{delta}",
     "base": "field_ln_n_components[{delta}][subform]",
@@ -208,8 +216,9 @@
             "kind": "select"
           },
           "field_c_image": {
-            "kind": "image",
-            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           }
         }
       },
@@ -316,8 +325,9 @@
             "kind": "select"
           },
           "field_c_image": {
-            "kind": "image",
-            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           }
         }
       },
@@ -606,8 +616,9 @@
             "kind": "select"
           },
           "field_media": {
-            "kind": "image",
-            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-media\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           }
         },
         "children": {
@@ -784,8 +795,9 @@
             "kind": "select"
           },
           "field_c_image": {
-            "kind": "image",
-            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           }
         }
       },
@@ -875,8 +887,9 @@
             "kind": "select"
           },
           "field_c_image": {
-            "kind": "image",
-            "note": "Inline entity form: el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           }
         }
       },
@@ -1005,8 +1018,9 @@
         "value": "comp_tabs_tab_item",
         "fields": {
           "field_c_image": {
-            "kind": "image",
-            "note": "Background Image (inline entity form): el editor la sube a mano desde la Media library."
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
           },
           "field_title": {
             "sel": "input[name=\"{base}[field_title][0][value]\"]"

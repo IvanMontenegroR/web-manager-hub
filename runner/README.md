@@ -98,10 +98,11 @@ npm run verify -- mapping/purina-latam.json form.html
 - **Frena ante la duda.** Un campo que el mapping no conoce, o que no aparece en el
   formulario, es un ERROR y corta la corrida. Una pagina a medio armar es peor que una
   que no se armo. Si corta antes de `--save`, no quedo nada en el CMS.
-- **Las imagenes no se automatizan TODAVIA.** Subir a la Media library (archivo + alt +
-  decidir si se reusa un media existente) se hace a mano. El runner arma toda la
-  estructura y todo el texto con la configuracion correcta; el editor sube las imagenes y
-  publica. Un campo de imagen en el manifiesto se saltea con aviso.
+- **Las imagenes se ELIGEN, nunca se suben.** El manifiesto pone el NOMBRE de un medio y
+  el runner lo busca en la Media library y lo referencia. Si no esta, FRENA y dice cual
+  falta. Subir por su cuenta llenaria la libreria de duplicados — un medio de Drupal se
+  reutiliza — y despues no los limpia nadie. Para subir esta `npm run subir-placeholders`,
+  que es otra cosa y se corre a proposito.
 
 ## Placeholders
 
@@ -170,6 +171,30 @@ placeholder-banner-main-hero-desktop-2100x1050
 Ese nombre ES el identificador: es lo que el manifiesto va a escribir y lo que el runner
 va a buscar en la librería. Drupal ya lo propone solo a partir del archivo, asi que en
 general alcanza con no tocarlo. Si se renombra a mano, deja de encontrarse.
+
+### Como se eligen desde el manifiesto
+
+Un campo de imagen lleva el NOMBRE del medio, nada mas:
+
+```json
+"field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+```
+
+En este CMS ese campo es un **inline entity form** con dos botones: "Añadir nuevo elemento
+multimedia" y "Añadir elemento multimedia existente". El runner usa **solo el segundo** —
+crear medios no es cosa suya. Abre el autocompletar, teclea el nombre (teclea de verdad:
+el autocompletar de Drupal escucha teclas, un valor puesto de prensa no lo despierta),
+elige la opcion cuyo texto es EXACTAMENTE ese nombre — un nombre puede ser prefijo de otro
+y agarrar el que no era pasa desapercibido — y confirma.
+
+Si el medio no esta, el propio Drupal lo dice y el runner **frena** nombrando cual falta y
+recordando como subirlos. `manifests/ejemplo-imagenes.json` esta para probar esto.
+
+Los selectores viven en el mapping bajo `"mediaExistente"` y salieron del HTML real. Van
+por sufijo del `data-drupal-selector` y acotados al fieldset del campo: el `name` completo
+del boton lleva adentro toda la ruta del paragraph
+(`ief-field_ln_n_components-1-subform-field_c_subitems-2-subform-field_c_image-form-add-existing`)
+y armarla a mano es pedir que se rompa.
 
 El alt text de estas no importa (son de prueba): cualquier cosa que aclare que son
 placeholders.

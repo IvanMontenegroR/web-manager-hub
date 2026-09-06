@@ -7,12 +7,15 @@
 //   - No modifica contenido existente: solo entra a "crear contenido".
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
-//   - Las IMAGENES no se tocan (ver README): el editor las sube a mano.
+//   - Las IMAGENES se ELIGEN de la Media library por su nombre, nunca se suben. Si la
+//     que pide el manifiesto no esta, frena y dice cual falta.
 import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath } from './mapping.js'
 import { esperarAjax, esperarVisible } from './esperas.js'
 import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
+import { elegirMedia, leerMedia } from './mediaExistente.js'
 
-const IMAGE_KINDS = new Set(['image', 'media', 'file'])
+// Los que el runner todavia NO sabe tocar. `media` salio de la lista: ese si se elige.
+const IMAGE_KINDS = new Set(['image', 'file'])
 const MAX_DELTA = 100
 // Cuantas veces se vuelve a intentar un alta que fallo POR EL SERVIDOR.
 const REINTENTOS = 3
@@ -267,14 +270,20 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
   for (const [key, value] of campos) {
     const f = def.fields?.[key]
     if (!f) throw new Error(`El mapping de "${block.type}" no tiene el campo "${key}"`)
+    const ref = `${num}. ${block.type}.${key}`
     if (IMAGE_KINDS.has(f.kind)) {
       onStep(`     (imagen "${key}": se elige a mano)`)
-      await guardarWidget(ctx, key, vars, `${num}. ${block.type}.${key}`)
+      await guardarWidget(ctx, key, vars, ref)
+      continue
+    }
+    if (f.kind === 'media') {
+      onStep(`     imagen "${key}": eligiendo "${value}" de la libreria`)
+      ctx.escritos.push(await ponerMedia(ctx, f, vars, String(value), ref))
       continue
     }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
-    ctx.escritos.push(await fillField(page, f, vars, value, `${num}. ${block.type}.${key}`))
+    ctx.escritos.push(await fillField(page, f, vars, value, ref))
   }
 }
 
@@ -462,6 +471,24 @@ async function fillField(page, f, vars, value, ref) {
   return { selector, f, ref, valor: value, puesto, rutaRich }
 }
 
+// Elige un medio YA subido. El valor del manifiesto es el NOMBRE del medio en la
+// libreria, que para los placeholders es el nombre del archivo sin el .png.
+async function ponerMedia(ctx, f, vars, nombre, ref) {
+  const { page, mapping } = ctx
+  const campo = resolveSelector(f.sel, vars)
+  if (!(await page.locator(campo).count())) {
+    throw new Error(`No encontre el campo de imagen ${ref} (${campo})`)
+  }
+  const puesto = await elegirMedia({ page, campo, nombre, cfg: mapping.mediaExistente, ref })
+  // La verificacion es la de siempre, y aca importa el doble: un autocompletar que no
+  // engancho deja el campo igual de vacio que antes, sin decir nada.
+  if (!puesto.includes(nombre)) {
+    throw new Error(`Elegi "${nombre}" en ${ref} pero el campo no lo muestra. `
+      + `Dice: "${puesto.slice(0, 120)}".`)
+  }
+  return { selector: campo, f, ref, valor: nombre, puesto }
+}
+
 // Se guarda el HTML del widget de cada campo de IMAGEN. El runner todavia no sabe
 // elegirlas, y para enseñarle hace falta ver como es ese widget en ESTE sitio: no es lo
 // mismo una Media library (un modal con buscador) que un inline entity form (un
@@ -516,6 +543,9 @@ async function loQueQuedo(page, f, selector, el) {
   try {
     if (f.kind === 'checkbox') return await el.isChecked()
     if (f.kind === 'richtext') return await leerRich(page, el)
+    // Un medio no tiene "valor": lo que hay es la fila que dibuja el inline entity form
+    // con el nombre del medio adentro.
+    if (f.kind === 'media') return await leerMedia(page, selector)
     return await el.inputValue()
   } catch { return null }
 }

@@ -1,0 +1,44 @@
+{
+  "_": "Para probar que el runner ELIGE imagenes de la Media library. El valor de un campo de imagen es el NOMBRE del medio, que para los placeholders es el nombre del archivo sin el .png (ver placeholders/INDICE.md). Antes de correr esto hay que haberlos subido: npm run subir-placeholders. Si falta alguno, el runner frena y dice cual — nunca lo sube por su cuenta.",
+  "manifest": 1,
+  "page": {
+    "title": "Prueba de imagenes",
+    "path": "/pruebas/imagenes",
+    "published": false
+  },
+  "blocks": [
+    {
+      "type": "c_text",
+      "fields": {
+        "field_c_advanced_title": "Prueba de seleccion de imagenes",
+        "field_c_advanced_title.html_tag": "h2",
+        "field_c_text": "Esta pagina existe para comprobar que el runner elige las imagenes de la libreria. Se puede borrar."
+      }
+    },
+    {
+      "type": "banner",
+      "fields": {
+        "field_banner_type": "main-hero",
+        "field_c_advanced_title": "Banner con placeholder",
+        "field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+      }
+    },
+    {
+      "type": "ln_c_cardgrid",
+      "fields": {
+        "field_c_cardgrid_view_mode": "slider-default-card",
+        "field_c_advanced_title": "Cards con imagen"
+      },
+      "children": [
+        {
+          "type": "ln_c_grid_card_item",
+          "fields": {
+            "field_c_advanced_title": "Card con placeholder",
+            "field_c_text": "La imagen sale de la libreria, no se sube.",
+            "field_c_image": "placeholder-card-grid-slider-default-card-desktop-822x1230"
+          }
+        }
+      ]
+    }
+  ]
+}

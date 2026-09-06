@@ -55,6 +55,25 @@ const rnd = () => '--' + Math.random().toString(36).slice(2, 10)
 
 // Campos por tipo, con las mismas formas que usa Drupal. \`dsel\` es la ruta estable de
 // la fila; \`dw\` es la variante con "widget-" que field_group usa en los plegables.
+// El campo de imagen tal como lo arma inline_entity_form: dos botones (nuevo / existente)
+// y, al elegir "existente", un autocompletar + un boton que confirma. El runner solo usa
+// el de existente: crear medios no es cosa suya.
+const iefHtml = (dsel, campo) => \`
+  <fieldset class="fieldset js-form-item" data-drupal-selector="\${dsel}-subform-\${campo}">
+    <legend><span class="fieldset__label">Imagen</span></legend>
+    <div class="fieldset__wrapper">
+      <div class="container-inline" data-drupal-selector="\${dsel}-subform-\${campo}-actions">
+        <input type="submit" class="button ief-add"
+          data-drupal-selector="\${dsel}-subform-\${campo}-actions-ief-add"
+          value="Añadir nuevo elemento multimedia">
+        <input type="submit" class="button ief-add-existing"
+          data-drupal-selector="\${dsel}-subform-\${campo}-actions-ief-add-existing"
+          value="Añadir elemento multimedia existente">
+      </div>
+      <div class="ief-hueco"></div>
+    </div>
+  </fieldset>\`
+
 function subform(type, base, dsel, npath) {
   const dw = dsel.replace(/-(\\d+)(?=-|$)/g, '-widget-$1')
   const advanced = \`
@@ -94,11 +113,7 @@ function subform(type, base, dsel, npath) {
       <summary>Optional fields</summary>
       <div class="js-form-item"><label>Titulo</label>
         <input type="text" name="\${base}[field_c_advanced_title][0][value]"></div></details>
-    <div class="field--type-entity-reference field--name-field-media"
-         data-drupal-selector="\${dsel}-subform-field-media-wrapper">
-      <label>Imagen de fondo</label>
-      <input type="submit" class="js-media-library-open-button" value="Añadir medio">
-    </div>
+    \${iefHtml(dsel, 'field-media')}
     \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', 'drop')}\`
 
   // Layout: DOS slots, cada uno con su modal de tipos.
@@ -199,7 +214,63 @@ function addTo(container, base, dsel, npath, type) {
 // "Abrir todas" de una lista: es lo que usa el runner antes de llenar.
 function abrirTodas(container) { [...container.children].forEach(desplegar) }
 
+// La libreria de medios de mentira: lo que hay para elegir.
+const MEDIOS = ['placeholder-x-desktop-10x10', 'placeholder-x-desktop-10x10-v2',
+  'placeholder-y-mobile-20x20']
+
+function wireIef(scope) {
+  scope.querySelectorAll('.ief-add-existing').forEach((b) => {
+    if (b.dataset.wired) return
+    b.dataset.wired = '1'
+    const campo = b.closest('fieldset')
+    const dsel = campo.getAttribute('data-drupal-selector')
+    b.addEventListener('click', () => {
+      // Igual que inline_entity_form: llega por AJAX, no esta desde el principio.
+      setTimeout(() => {
+        campo.querySelector('.ief-hueco').innerHTML =
+          '<div class="js-form-item"><label>Elemento multimedia</label>'
+          + '<input type="text" class="form-autocomplete" data-drupal-selector="'
+          + dsel + '-form-0-entity-id"></div>'
+          + '<input type="submit" class="button" data-drupal-selector="'
+          + dsel + '-form-0-actions-ief-reference-save" value="Añadir elemento multimedia">'
+        const input = campo.querySelector('.form-autocomplete')
+        // El autocompletar de Drupal escucha TECLAS: un fill no lo despierta.
+        input.addEventListener('input', () => {
+          document.querySelectorAll('ul.ui-autocomplete').forEach((u) => u.remove())
+          const q = input.value.trim()
+          if (!q) return
+          const hay = MEDIOS.filter((m) => m.includes(q))
+          if (!hay.length) return
+          const ul = document.createElement('ul')
+          ul.className = 'ui-autocomplete'
+          ul.innerHTML = hay.map((m) => '<li class="ui-menu-item">' + m + '</li>').join('')
+          document.body.appendChild(ul)
+          ul.querySelectorAll('li').forEach((li) => li.addEventListener('click', () => {
+            input.value = li.textContent
+            ul.remove()
+          }))
+        })
+        campo.querySelector('[data-drupal-selector$="-ief-reference-save"]')
+          .addEventListener('click', () => {
+            const v = input.value.trim()
+            setTimeout(() => {
+              if (!MEDIOS.includes(v)) {
+                campo.querySelector('.ief-hueco').innerHTML =
+                  '<div class="form-item--error-message">No hay elementos multimedia que '
+                  + 'coincidan con "' + v + '".</div>'
+                return
+              }
+              campo.querySelector('.ief-hueco').innerHTML =
+                '<table class="ief-entity-table"><tr><td>' + v + '</td></tr></table>'
+            }, 200)
+          })
+      }, 250)
+    })
+  })
+}
+
 function wire(scope) {
+  wireIef(scope)
   scope.querySelectorAll('.slot').forEach((s) => {
     if (s.dataset.wired) return
     s.dataset.wired = '1'

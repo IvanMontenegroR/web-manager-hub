@@ -81,7 +81,7 @@ const mapping = (site) => ({
         fields: {
           field_c_cardgrid_view_mode: { sel: 'select[name="{base}[field_c_cardgrid_view_mode]"]', kind: 'select' },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
-          field_media: { kind: 'image', note: 'Media library: la elige el editor.' },
+          field_media: { kind: 'media', sel: '[data-drupal-selector="{dsel}-subform-field-media"]' },
         },
         // Igual que una pestaña del CMS: UN solo componente (`max: 1`) y los tipos
         // plegados detras del dropbutton de Gin.
@@ -145,6 +145,7 @@ try {
     const col2 = `${B}[2][subform][field_column_second][0][subform]`
     return {
       titulo: v('input[name="title[0][value]"]'),
+      medio: document.querySelector('[data-drupal-selector="edit-field-components-1-subform-field-media"] .ief-entity-table td')?.textContent?.trim() ?? null,
       publicado: document.querySelector('input[name="status[value]"]')?.checked,
       pathauto: document.querySelector('input[name="path[0][pathauto]"]')?.checked,
       alias: v('input[name="path[0][alias]"]'),
@@ -227,12 +228,22 @@ try {
 
   // Los campos de imagen se dejan sin tocar, pero se guarda el HTML de su widget: sin ver
   // como lo arma ESTE sitio no se le puede enseñar al runner a elegir la imagen.
-  const img = primera.imagenes || []
-  check(img.length === 1, `guarda el widget del campo de imagen que existe en el form (${img.length})`)
-  check(img.some((i) => /js-media-library-open-button/.test(i.html)),
-    'y el HTML guardado incluye el boton que abre el selector')
-  check(img.some((i) => /2\. ln_c_cardgrid\.field_media/.test(i.ref)),
-    `cada volcado dice de que bloque y campo salio (${img.map((i) => i.ref).join(' | ')})`)
+  check(dom.medio === 'placeholder-x-desktop-10x10',
+    `elige de la libreria el medio que pide el manifiesto (${dom.medio})`)
+  check(!/placeholder-x-desktop-10x10-v2/.test(dom.medio || ''),
+    'y elige el nombre EXACTO, no el que empieza igual')
+
+  // La regla de la casa: el runner NO sube imagenes. Si la que pide el manifiesto no
+  // esta en la libreria, frena y dice cual — subir por las suyas llenaria la libreria de
+  // duplicados que despues no limpia nadie.
+  let sinMedio = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {}, esperaSubform: 4000,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', fields: { field_media: 'no-subi-esta-imagen' } }] }) })
+  } catch (e) { sinMedio = e.message }
+  check(/no-subi-esta-imagen/.test(sinMedio) && /subir-placeholders/.test(sinMedio),
+    `frena si la imagen no esta en la libreria, y dice como subirla (${sinMedio.slice(0, 90)})`)
 
   // Un campo que se lleno bien y despues se vacio (Drupal re-dibuja el formulario en
   // cada alta) NO puede pasar en silencio: la pagina saldria armada y sin contenido.
