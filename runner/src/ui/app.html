@@ -201,7 +201,9 @@ function pintarCorrida(c) {
     r.innerHTML = `<div class="resultado falla"><h3>Freno y no guardo nada</h3>
       <p>${esc(c.error || '')}</p>
       <p class="meta" style="margin-top:8px">La pagina quedo a medio llenar en el formulario,
-      pero <b>no se guardo</b> en Drupal. Copiale este mensaje a quien mantiene el runner.</p></div>`
+      pero <b>no se guardo</b> en Drupal. Copiale este mensaje a quien mantiene el runner.</p>
+      ${c.foto ? `<p class="meta">Se guardo una captura de como quedo la pantalla:<br>
+        <code>${esc(c.foto)}</code></p>` : ''}</div>`
     return
   }
   const res = c.resultado || {}

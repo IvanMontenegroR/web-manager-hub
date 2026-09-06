@@ -199,6 +199,18 @@ try {
   } catch (e) { slotMalo = /no tiene el slot 5/.test(e.message) }
   check(slotMalo, 'frena ante un slot que no existe')
 
+  // Si el subform no aparece, el mensaje tiene que traer la EVIDENCIA: que hay de
+  // verdad en esa lista. Es lo unico que se puede mirar desde el otro lado.
+  let evidencia = ''
+  try {
+    const roto = mapping(site)
+    roto.paragraphs.dsel = 'edit-esto-no-existe-{delta}'
+    await buildPage({ page, mapping: roto, save: false, onStep: () => {}, esperaSubform: 1500,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' }, blocks: [{ type: 'c_text' }] }) })
+  } catch (e) { evidencia = e.message }
+  check(/Con el prefijo "edit-esto-no-existe-" hay: NADA/.test(evidencia),
+    'cuando no aparece el subform, el error dice que hay en esa lista')
+
   // Una ranura con tope (la pestaña) no acepta un segundo componente.
   let tope = false
   try {

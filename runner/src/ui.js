@@ -18,8 +18,8 @@
 //     DNS. Nada de esto es paranoia de mas: es lo que va a preguntar compliance.
 import { createServer } from 'node:http'
 import { randomBytes } from 'node:crypto'
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs'
-import { join, resolve, basename } from 'node:path'
+import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { join, resolve, basename, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 import { openBrowser } from './browser.js'
@@ -126,7 +126,10 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
       c.estado = 'listo'
       c.resultado = { ...res, titulo: m.page.title }
     } catch (e) {
-      logRun({ manifest: archivo, title: m.page.title, error: e.message })
+      // Una foto de como quedo la pantalla: es lo que hace falta para entender un error
+      // contra el CMS, y quien lo corre no tiene por que saber mirar el DOM.
+      c.foto = await sacarFoto(page).catch(() => null)
+      logRun({ manifest: archivo, title: m.page.title, error: e.message, foto: c.foto })
       c.estado = 'error'
       c.error = e.message
     }
@@ -212,6 +215,13 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok))
   const url = `http://127.0.0.1:${server.address().port}/?t=${token}`
   return { server, url, cerrar: async () => { if (vivo()) await nav.ctx.close().catch(() => {}); server.close() } }
+}
+
+async function sacarFoto(page) {
+  const f = resolve('logs', `error-${new Date().toISOString().replace(/[:.]/g, '-')}.png`)
+  mkdirSync(dirname(f), { recursive: true })
+  await page.screenshot({ path: f, fullPage: true })
+  return f
 }
 
 function leerCuerpo(req) {

@@ -13,7 +13,7 @@ import { resolveSelector, rowSelector, widgetDsel, namePath } from './mapping.js
 const IMAGE_KINDS = new Set(['image', 'media', 'file'])
 const MAX_DELTA = 100
 
-export async function buildPage({ page, mapping, manifest, save = false, onStep = () => {} }) {
+export async function buildPage({ page, mapping, manifest, save = false, onStep = () => {}, esperaSubform = 30000 }) {
   const site = mapping.site.replace(/\/+$/, '')
   const url = new URL(mapping.nodeAdd, site + '/').href
 
@@ -47,7 +47,7 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
     if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
   }
 
-  const ctx = { mapping, page, onStep }
+  const ctx = { mapping, page, onStep, esperaSubform }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
   let n = 0
   for (const block of manifest.blocks) {
@@ -72,7 +72,7 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
 // paragraphs del nodo, o un slot adentro del subform de un contenedor. Sus plantillas
 // ya vienen resueltas salvo el `{delta}`, que se decide aca.
 async function addBlock(ctx, block, num, holder) {
-  const { mapping, page, onStep } = ctx
+  const { mapping, page, onStep, esperaSubform } = ctx
   const def = mapping.paragraphs.types[block.type]
   if (!def) throw new Error(`El mapping no conoce el paragraph "${block.type}"`)
 
@@ -87,10 +87,20 @@ async function addBlock(ctx, block, num, holder) {
   await clickAdd(page, holder.add, def, block.type)
 
   // El alta va por AJAX: se espera a que aparezca el subform de ESTE delta.
-  await page.locator(rowSelector(dsel)).first().waitFor({ state: 'attached', timeout: 30000 })
-    .catch(() => {
+  await page.locator(rowSelector(dsel)).first().waitFor({ state: 'attached', timeout: esperaSubform })
+    .catch(async () => {
+      // Si no aparecio, el mensaje tiene que traer la EVIDENCIA: que filas hay realmente
+      // en esa lista y si Drupal se quejo de algo. Sin eso, del otro lado solo queda
+      // adivinar — y quien lo corre no tiene como mirar el DOM.
+      const prefijo = String(holder.dsel).split('{delta}')[0]
+      const hay = await page.evaluate((p) => [...document.querySelectorAll('[data-drupal-selector]')]
+        .map((e) => e.getAttribute('data-drupal-selector'))
+        .filter((d) => d && d.startsWith(p)).slice(0, 20), prefijo).catch(() => [])
+      const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
       throw new Error(`No aparecio el subform de "${block.type}" despues de agregarlo `
-        + `(esperaba ${rowSelector(dsel)}). Revisa "dsel" en el mapping.`)
+        + `(esperaba ${rowSelector(dsel)}).`
+        + (quejas.length ? ` Drupal dice: "${quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)}".` : '')
+        + ` Con el prefijo "${prefijo}" hay: ${hay.length ? hay.join(', ') : 'NADA'}.`)
     })
 
   // Desplegables del formulario (Optional fields, Avanzado, Classy, Atributos): si el
