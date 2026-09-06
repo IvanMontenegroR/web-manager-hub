@@ -117,9 +117,18 @@ que usa la matriz de contenido. Si ahi cambia una, se regeneran:
 node tools/placeholders.mjs
 ```
 
-`placeholders/INDICE.md` dice que archivo va en que componente. **Elegirlas desde el
-manifiesto todavia no esta hecho**: hoy el runner saltea los campos de imagen, asi que
-por ahora se seleccionan a mano en el CMS.
+`placeholders/INDICE.md` dice que archivo va en que componente.
+
+**Se suben UNA sola vez.** Un media de Drupal es una entidad reutilizable: la misma imagen
+queda referenciada desde cuantos paragraphs haga falta, sin volver a subirla. Todos los
+archivos arrancan con `placeholder-`, asi que en la librería quedan juntos y se filtran de
+un tecleo. Si en el catalogo cambia una medida, se regeneran todas pero solo hace falta
+volver a subir la que cambio — el INDICE dice cual.
+
+**Elegirlas desde el manifiesto todavia no esta hecho**: hoy el runner saltea los campos
+de imagen, asi que por ahora se seleccionan a mano en el CMS. Cuando se haga, va a
+BUSCAR y SELECCIONAR de la librería, nunca subir: si no encuentra la que el manifiesto
+pide, frena. Subir sola llenaria la librería de duplicados.
 
 ## Para la revision de compliance
 

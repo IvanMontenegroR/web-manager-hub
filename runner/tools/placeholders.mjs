@@ -65,7 +65,10 @@ const limpio = (s) => String(s || '').toLowerCase()
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
   .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
+// Todos arrancan con "placeholder-": en la Media library quedan juntos, se filtran de
+// un tecleo y se distinguen del material de verdad sin abrirlos.
 const nombre = (e) => [
+  'placeholder',
   limpio(e.componente),
   e.variante ? limpio(e.variante) : null,
   e.campo ? limpio(e.campo) : null,
