@@ -157,7 +157,7 @@ try {
   check(fin?.tipo === 'imagenes', `la subida corre desde la interfaz (${fin?.tipo})`)
   // Sin PNG que coincida, el subidor avisa en vez de reventar: eso prueba que llego
   // hasta el, no que suba (subir de verdad lo cubre test/media.mjs).
-  check(fin?.estado === 'error' && /No hay ningun PNG/.test(fin.error || ''),
+  check(fin?.estado === 'error' && /Ningun placeholder contiene/.test(fin.error || ''),
     `y llega al subidor de verdad (${(fin?.error || '').slice(0, 60)})`)
 } finally {
   await u2.cerrar()

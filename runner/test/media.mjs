@@ -21,15 +21,26 @@ const PNG = Buffer.from(
 
 // Una carpeta nueva con una imagen que nunca se subio: cada prueba que tiene que subir
 // de verdad necesita la suya, porque el subidor saltea lo que ya esta.
+// Cada medio son DOS archivos y un INDICE que dice cuales: es lo que genera
+// tools/placeholders.mjs y lo que lee el subidor.
 const temporales = []
 const carpetaCon = (...nombres) => {
   const d = mkdtempSync(join(tmpdir(), 'ph-'))
-  for (const n of nombres) writeFileSync(join(d, n), PNG)
+  const indice = nombres.map((n) => {
+    writeFileSync(join(d, `${n}-desktop-10x10.png`), PNG)
+    writeFileSync(join(d, `${n}-mobile-5x5.png`), PNG)
+    return {
+      nombre: n,
+      desktop: { archivo: `${n}-desktop-10x10.png`, w: 10, h: 10 },
+      mobile: { archivo: `${n}-mobile-5x5.png`, w: 5, h: 5 },
+    }
+  })
+  writeFileSync(join(d, 'INDICE.json'), JSON.stringify(indice, null, 2))
   temporales.push(d)
   return d
 }
 
-const carpeta = carpetaCon('placeholder-uno-desktop-10x10.png', 'placeholder-dos-mobile-20x20.png')
+const carpeta = carpetaCon('placeholder-uno', 'placeholder-dos')
 
 const { server, port } = await startFakeDrupal()
 const mapping = { site: `http://127.0.0.1:${port}` }
@@ -50,8 +61,8 @@ try {
   // El nombre del media es el IDENTIFICADOR con el que el manifiesto va a pedir la
   // imagen: tiene que quedar sin ".png", no como lo precarga Drupal.
   const guardados = await (await fetch(`${mapping.site}/media/estado`)).json()
-  check(Object.keys(guardados).sort().join() === 'placeholder-dos-mobile-20x20,placeholder-uno-desktop-10x10',
-    `guarda el nombre sin extension (${Object.keys(guardados).sort().join(' ')})`)
+  check(Object.keys(guardados).sort().join() === 'placeholder-dos,placeholder-uno',
+    `guarda el nombre del medio, no el del archivo (${Object.keys(guardados).sort().join(' ')})`)
   check(Object.values(guardados).every((m) => m.publicado === true),
     'deja el medio publicado: uno despublicado no se puede elegir de la libreria')
 
@@ -64,7 +75,7 @@ try {
   // mentira contesta con el error de campo obligatorio y esto se caeria.
   const d = await subirPlaceholders({
     page, mapping, onStep: () => {},
-    carpeta: carpetaCon('placeholder-tres-desktop-30x30.png'),
+    carpeta: carpetaCon('placeholder-tres'),
   })
   check(d.subidos === 1, 'espera a que la subida termine antes de guardar')
 
@@ -80,7 +91,7 @@ try {
   const pasos = []
   const f = await subirPlaceholders({
     page, mapping, onStep: (t) => pasos.push(t),
-    carpeta: carpetaCon('placeholder-corta-la-red-desktop-60x60.png'),
+    carpeta: carpetaCon('placeholder-corta-la-red'),
   })
   await page.unroute('**/admin/content/media**')
   check(f.subidos === 1, `un corte de red no voltea la tanda: reintenta y sigue (${f.subidos})`)
@@ -91,7 +102,7 @@ try {
   // el campo que referencia al medio. No se lo tiene que esperar "por las dudas".
   const t0 = Date.now()
   const e = await subirPlaceholders({
-    page, onStep: () => {}, carpeta: carpetaCon('placeholder-cinco-desktop-50x50.png'),
+    page, onStep: () => {}, carpeta: carpetaCon('placeholder-cinco'),
     mapping: { ...mapping, media: { add: '/media/add/simple' } },
   })
   const tardo = Date.now() - t0
@@ -103,7 +114,7 @@ try {
   let sinSenal = ''
   try {
     await subirPlaceholders({
-      page, onStep: () => {}, carpeta: carpetaCon('placeholder-cuatro-desktop-40x40.png'),
+      page, onStep: () => {}, carpeta: carpetaCon('placeholder-cuatro'),
       mapping: { ...mapping, media: { subido: 'input[name="no-existe"]' } },
     })
   } catch (e) { sinSenal = e.message }

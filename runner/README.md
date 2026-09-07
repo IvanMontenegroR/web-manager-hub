@@ -106,10 +106,22 @@ npm run verify -- mapping/purina-latam.json form.html
 
 ## Placeholders
 
-`placeholders/` trae una imagen de relleno por cada medida que pide el CMS — 36 archivos,
-desktop y mobile — para subir UNA vez a la Media library y tener siempre algo que elegir
-mientras se prueba, sin esperar el material definitivo. Cada una dice su medida bien
-grande y la palabra PLACEHOLDER, para que se note si alguna se escapa.
+`placeholders/` trae material de relleno con las medidas EXACTAS que pide cada
+componente, para subir UNA vez a la Media library y tener siempre algo que elegir
+mientras se prueba. Cada imagen dice su medida bien grande y la palabra PLACEHOLDER, para
+que se note si alguna se escapa.
+
+Son **20 medios** (36 archivos): los campos de imagen de los componentes piden el bundle
+**`responsive_image`**, y un medio de ese tipo lleva DOS imagenes adentro —- Image Desktop
+e Image Mobile, las dos obligatorias. Por eso el nombre del medio **no lleva medida**: la
+que corresponde depende de cual de las dos mire el sitio. Ese nombre es el que va en el
+manifiesto.
+
+Cuando el catalogo no declara medida mobile (el mosaico, image features, text wide
+image), se sube la misma imagen de desktop: el campo es obligatorio y esto es relleno.
+
+`placeholders/INDICE.json` es lo que lee el subidor —- dice que dos archivos forman cada
+medio -— y `INDICE.md` la misma tabla para leer.
 
 Las medidas NO estan escritas a mano: salen de `src/data/components.js`, la misma fuente
 que usa la matriz de contenido. Si ahi cambia una, se regeneran:
@@ -122,9 +134,14 @@ node tools/placeholders.mjs
 
 **Se suben UNA sola vez.** Un media de Drupal es una entidad reutilizable: la misma imagen
 queda referenciada desde cuantos paragraphs haga falta, sin volver a subirla. Todos los
-archivos arrancan con `placeholder-`, asi que en la librería quedan juntos y se filtran de
+nombres arrancan con `placeholder-`, asi que en la librería quedan juntos y se filtran de
 un tecleo. Si en el catalogo cambia una medida, se regeneran todas pero solo hace falta
 volver a subir la que cambio — el INDICE dice cual.
+
+**El bundle importa.** Subirlos como `image` en vez de `responsive_image` deja los medios
+en la librería y aun asi el campo no los ofrece nunca: el autocompletar filtra por bundle,
+y el error que se ve es "No existe ningún elemento multimedia con valor igual a…" con la
+imagen ahi a la vista. Costo una tanda entera.
 
 ### Como subirlas
 

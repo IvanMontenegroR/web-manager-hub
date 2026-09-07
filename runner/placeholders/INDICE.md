@@ -7,44 +7,35 @@ todavia el material definitivo.
 Salen de `src/data/components.js`, la misma fuente que usa la matriz de contenido. Para
 regenerarlas: `node tools/placeholders.mjs` desde `runner/`.
 
-Son 36 archivos. El peso de la columna "Max" es el limite que pide el CMS:
-estas pesan mucho menos, asi que no hay problema.
+Cada fila es UN medio de tipo **responsive_image**, que en este CMS lleva las dos
+imagenes adentro (Image Desktop e Image Mobile, las dos obligatorias). Por eso el nombre
+del medio no lleva medida: la que corresponde depende de cual de las dos mire el sitio.
+**Ese nombre es el que va en el manifiesto.**
 
-| Componente | Variante | Campo | Vista | Medida | Max | Archivo |
-|---|---|---|---|---|---|---|
-| Menú de marca | — | Logo | desktop | 100×100 | 500kb | `placeholder-brand-menu-logo-desktop-100x100.png` |
-| Menú de marca | — | Logo | mobile | 100×100 | 500kb | `placeholder-brand-menu-logo-mobile-100x100.png` |
-| Banner | Main Hero | — | desktop | 2100×1050 | 500kb / 2-4MB | `placeholder-banner-main-hero-desktop-2100x1050.png` |
-| Banner | Main Hero | — | mobile | 526×936 | 500kb / 2-4MB | `placeholder-banner-main-hero-mobile-526x936.png` |
-| Banner | Secondary Hero | — | desktop | 2100×700 | 500kb / 2-4MB | `placeholder-banner-title-description-desktop-2100x700.png` |
-| Banner | Secondary Hero | — | mobile | 526×526 | 500kb / 2-4MB | `placeholder-banner-title-description-mobile-526x526.png` |
-| Banner | Brand Hero | — | desktop | 2088×835 | 500kb / 2-4MB | `placeholder-banner-brand-hero-desktop-2088x835.png` |
-| Banner | Brand Hero | — | mobile | 526×789 | 500kb / 2-4MB | `placeholder-banner-brand-hero-mobile-526x789.png` |
-| Banner | Promotional banner (Only image) | — | desktop | 2088×696 | 500kb / 2-4MB | `placeholder-banner-only-image-desktop-2088x696.png` |
-| Banner | Promotional banner (Only image) | — | mobile | 465×675 | 500kb / 2-4MB | `placeholder-banner-only-image-mobile-465x675.png` |
-| Imagen | image_background_box | — | desktop | 2088×1044 | 500kb / 2-4MB | `placeholder-content-image-image-background-box-desktop-2088x1044.png` |
-| Imagen | image_background_box | — | mobile | 526×789 | 500kb / 2-4MB | `placeholder-content-image-image-background-box-mobile-526x789.png` |
-| Carrusel de servicios | — | Fondo | desktop | 2160×1212 | 500kb | `placeholder-services-carousel-fondo-desktop-2160x1212.png` |
-| Carrusel de servicios | — | Fondo | mobile | 562×999 | 500kb | `placeholder-services-carousel-fondo-mobile-562x999.png` |
-| Carrusel de testimonios | — | Imagen | desktop | 1552×1014 | 500kb | `placeholder-testimonials-imagen-desktop-1552x1014.png` |
-| Carrusel de testimonios | — | Imagen | mobile | 670×446 | 500kb | `placeholder-testimonials-imagen-mobile-670x446.png` |
-| Carrusel de marcas | — | Imagen de marca | desktop | 822×616 | 500kb | `placeholder-brand-cards-imagen-de-marca-desktop-822x616.png` |
-| Carrusel de marcas | — | Imagen de marca | mobile | 822×616 | 500kb | `placeholder-brand-cards-imagen-de-marca-mobile-822x616.png` |
-| Carrusel de productos | — | Imagen izquierda (imagen única) | desktop | 650×692 | 500kb | `placeholder-product-list-imagen-izquierda-imagen-unica-desktop-650x692.png` |
-| Carrusel de productos | — | Imagen izquierda (imagen única) | mobile | 650×692 | 500kb | `placeholder-product-list-imagen-izquierda-imagen-unica-mobile-650x692.png` |
-| Línea de tiempo | — | — | desktop | 670×502 | 500kb | `placeholder-timeline-desktop-670x502.png` |
-| Línea de tiempo | — | — | mobile | 670×502 | 500kb | `placeholder-timeline-mobile-670x502.png` |
-| Carrusel de cards | Cards verticales | — | desktop | 822×1230 | 500kb | `placeholder-commitment-carousel-cards-verticales-desktop-822x1230.png` |
-| Carrusel de cards | Cards verticales | — | mobile | 670×1004 | 500kb | `placeholder-commitment-carousel-cards-verticales-mobile-670x1004.png` |
-| Card Grid | Slider Cards Default | — | desktop | 822×1230 | 500kb | `placeholder-card-grid-slider-default-card-desktop-822x1230.png` |
-| Card Grid | Slider Cards Default | — | mobile | 670×1004 | 500kb | `placeholder-card-grid-slider-default-card-mobile-670x1004.png` |
-| Card Grid | slider-default-card-square | — | desktop | 485×280 | 500kb | `placeholder-card-grid-slider-default-card-square-desktop-485x280.png` |
-| Card Grid | slider-default-card-square | — | mobile | 335×280 | 500kb | `placeholder-card-grid-slider-default-card-square-mobile-335x280.png` |
-| Card Grid | Grid Cards (Max 3 Cards) | Imagen de la card | desktop | 760×760 | 500kb | `placeholder-card-grid-grid-cards-imagen-de-la-card-desktop-760x760.png` |
-| Banner con tarjetas | — | Fondo | desktop | 2784×1994 | 500kb | `placeholder-gradient-cards-fondo-desktop-2784x1994.png` |
-| Banner con tarjetas | — | Fondo | mobile | 702×1600 | 500kb | `placeholder-gradient-cards-fondo-mobile-702x1600.png` |
-| Texto con imagen ancha | — | — | desktop | 2100×760 | 500kb | `placeholder-text-wide-image-desktop-2100x760.png` |
-| Imagen + destacados | — | — | desktop | 2160×1080 | 500kb | `placeholder-image-features-desktop-2160x1080.png` |
-| Mosaico | — | Imagen del mosaico | desktop | 760×760 | 500kb | `placeholder-mosaic-imagen-del-mosaico-desktop-760x760.png` |
-| Cards con logo | — | Imagen de fondo | desktop | 768×557 | 500kb | `placeholder-logo-cards-imagen-de-fondo-desktop-768x557.png` |
-| Cards con logo | — | Imagen de fondo | mobile | 702×1048 | 500kb | `placeholder-logo-cards-imagen-de-fondo-mobile-702x1048.png` |
+Cuando el catalogo no declara medida mobile, se sube la misma imagen de desktop: el campo
+es obligatorio y esto es relleno; inventar una medida que nadie definio seria peor.
+
+Son 20 medios (36 archivos).
+
+| Componente | Variante | Campo | Nombre del medio | Desktop | Mobile |
+|---|---|---|---|---|---|
+| Menú de marca | — | Logo | `placeholder-brand-menu-logo` | 100×100 | 100×100 |
+| Banner | Main Hero | — | `placeholder-banner-main-hero` | 2100×1050 | 526×936 |
+| Banner | Secondary Hero | — | `placeholder-banner-title-description` | 2100×700 | 526×526 |
+| Banner | Brand Hero | — | `placeholder-banner-brand-hero` | 2088×835 | 526×789 |
+| Banner | Promotional banner (Only image) | — | `placeholder-banner-only-image` | 2088×696 | 465×675 |
+| Imagen | image_background_box | — | `placeholder-content-image-image-background-box` | 2088×1044 | 526×789 |
+| Carrusel de servicios | — | Fondo | `placeholder-services-carousel-fondo` | 2160×1212 | 562×999 |
+| Carrusel de testimonios | — | Imagen | `placeholder-testimonials-imagen` | 1552×1014 | 670×446 |
+| Carrusel de marcas | — | Imagen de marca | `placeholder-brand-cards-imagen-de-marca` | 822×616 | 822×616 |
+| Carrusel de productos | — | Imagen izquierda (imagen única) | `placeholder-product-list-imagen-izquierda-imagen-unica` | 650×692 | 650×692 |
+| Línea de tiempo | — | — | `placeholder-timeline` | 670×502 | 670×502 |
+| Carrusel de cards | Cards verticales | — | `placeholder-commitment-carousel-cards-verticales` | 822×1230 | 670×1004 |
+| Card Grid | Slider Cards Default | — | `placeholder-card-grid-slider-default-card` | 822×1230 | 670×1004 |
+| Card Grid | slider-default-card-square | — | `placeholder-card-grid-slider-default-card-square` | 485×280 | 335×280 |
+| Card Grid | Grid Cards (Max 3 Cards) | Imagen de la card | `placeholder-card-grid-grid-cards-imagen-de-la-card` | 760×760 | 760×760 *(la de desktop)* |
+| Banner con tarjetas | — | Fondo | `placeholder-gradient-cards-fondo` | 2784×1994 | 702×1600 |
+| Texto con imagen ancha | — | — | `placeholder-text-wide-image` | 2100×760 | 2100×760 *(la de desktop)* |
+| Imagen + destacados | — | — | `placeholder-image-features` | 2160×1080 | 2160×1080 *(la de desktop)* |
+| Mosaico | — | Imagen del mosaico | `placeholder-mosaic-imagen-del-mosaico` | 760×760 | 760×760 *(la de desktop)* |
+| Cards con logo | — | Imagen de fondo | `placeholder-logo-cards-imagen-de-fondo` | 768×557 | 702×1048 |

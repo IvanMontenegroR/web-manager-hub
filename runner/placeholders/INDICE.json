@@ -1,0 +1,326 @@
+[
+  {
+    "nombre": "placeholder-brand-menu-logo",
+    "componente": "Menú de marca",
+    "variante": null,
+    "campo": "Logo",
+    "desktop": {
+      "archivo": "placeholder-brand-menu-logo-desktop-100x100.png",
+      "w": 100,
+      "h": 100
+    },
+    "mobile": {
+      "archivo": "placeholder-brand-menu-logo-mobile-100x100.png",
+      "w": 100,
+      "h": 100
+    }
+  },
+  {
+    "nombre": "placeholder-banner-main-hero",
+    "componente": "Banner",
+    "variante": "Main Hero",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-banner-main-hero-desktop-2100x1050.png",
+      "w": 2100,
+      "h": 1050
+    },
+    "mobile": {
+      "archivo": "placeholder-banner-main-hero-mobile-526x936.png",
+      "w": 526,
+      "h": 936
+    }
+  },
+  {
+    "nombre": "placeholder-banner-title-description",
+    "componente": "Banner",
+    "variante": "Secondary Hero",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-banner-title-description-desktop-2100x700.png",
+      "w": 2100,
+      "h": 700
+    },
+    "mobile": {
+      "archivo": "placeholder-banner-title-description-mobile-526x526.png",
+      "w": 526,
+      "h": 526
+    }
+  },
+  {
+    "nombre": "placeholder-banner-brand-hero",
+    "componente": "Banner",
+    "variante": "Brand Hero",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-banner-brand-hero-desktop-2088x835.png",
+      "w": 2088,
+      "h": 835
+    },
+    "mobile": {
+      "archivo": "placeholder-banner-brand-hero-mobile-526x789.png",
+      "w": 526,
+      "h": 789
+    }
+  },
+  {
+    "nombre": "placeholder-banner-only-image",
+    "componente": "Banner",
+    "variante": "Promotional banner (Only image)",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-banner-only-image-desktop-2088x696.png",
+      "w": 2088,
+      "h": 696
+    },
+    "mobile": {
+      "archivo": "placeholder-banner-only-image-mobile-465x675.png",
+      "w": 465,
+      "h": 675
+    }
+  },
+  {
+    "nombre": "placeholder-content-image-image-background-box",
+    "componente": "Imagen",
+    "variante": "image_background_box",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-content-image-image-background-box-desktop-2088x1044.png",
+      "w": 2088,
+      "h": 1044
+    },
+    "mobile": {
+      "archivo": "placeholder-content-image-image-background-box-mobile-526x789.png",
+      "w": 526,
+      "h": 789
+    }
+  },
+  {
+    "nombre": "placeholder-services-carousel-fondo",
+    "componente": "Carrusel de servicios",
+    "variante": null,
+    "campo": "Fondo",
+    "desktop": {
+      "archivo": "placeholder-services-carousel-fondo-desktop-2160x1212.png",
+      "w": 2160,
+      "h": 1212
+    },
+    "mobile": {
+      "archivo": "placeholder-services-carousel-fondo-mobile-562x999.png",
+      "w": 562,
+      "h": 999
+    }
+  },
+  {
+    "nombre": "placeholder-testimonials-imagen",
+    "componente": "Carrusel de testimonios",
+    "variante": null,
+    "campo": "Imagen",
+    "desktop": {
+      "archivo": "placeholder-testimonials-imagen-desktop-1552x1014.png",
+      "w": 1552,
+      "h": 1014
+    },
+    "mobile": {
+      "archivo": "placeholder-testimonials-imagen-mobile-670x446.png",
+      "w": 670,
+      "h": 446
+    }
+  },
+  {
+    "nombre": "placeholder-brand-cards-imagen-de-marca",
+    "componente": "Carrusel de marcas",
+    "variante": null,
+    "campo": "Imagen de marca",
+    "desktop": {
+      "archivo": "placeholder-brand-cards-imagen-de-marca-desktop-822x616.png",
+      "w": 822,
+      "h": 616
+    },
+    "mobile": {
+      "archivo": "placeholder-brand-cards-imagen-de-marca-mobile-822x616.png",
+      "w": 822,
+      "h": 616
+    }
+  },
+  {
+    "nombre": "placeholder-product-list-imagen-izquierda-imagen-unica",
+    "componente": "Carrusel de productos",
+    "variante": null,
+    "campo": "Imagen izquierda (imagen única)",
+    "desktop": {
+      "archivo": "placeholder-product-list-imagen-izquierda-imagen-unica-desktop-650x692.png",
+      "w": 650,
+      "h": 692
+    },
+    "mobile": {
+      "archivo": "placeholder-product-list-imagen-izquierda-imagen-unica-mobile-650x692.png",
+      "w": 650,
+      "h": 692
+    }
+  },
+  {
+    "nombre": "placeholder-timeline",
+    "componente": "Línea de tiempo",
+    "variante": null,
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-timeline-desktop-670x502.png",
+      "w": 670,
+      "h": 502
+    },
+    "mobile": {
+      "archivo": "placeholder-timeline-mobile-670x502.png",
+      "w": 670,
+      "h": 502
+    }
+  },
+  {
+    "nombre": "placeholder-commitment-carousel-cards-verticales",
+    "componente": "Carrusel de cards",
+    "variante": "Cards verticales",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-commitment-carousel-cards-verticales-desktop-822x1230.png",
+      "w": 822,
+      "h": 1230
+    },
+    "mobile": {
+      "archivo": "placeholder-commitment-carousel-cards-verticales-mobile-670x1004.png",
+      "w": 670,
+      "h": 1004
+    }
+  },
+  {
+    "nombre": "placeholder-card-grid-slider-default-card",
+    "componente": "Card Grid",
+    "variante": "Slider Cards Default",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-card-grid-slider-default-card-desktop-822x1230.png",
+      "w": 822,
+      "h": 1230
+    },
+    "mobile": {
+      "archivo": "placeholder-card-grid-slider-default-card-mobile-670x1004.png",
+      "w": 670,
+      "h": 1004
+    }
+  },
+  {
+    "nombre": "placeholder-card-grid-slider-default-card-square",
+    "componente": "Card Grid",
+    "variante": "slider-default-card-square",
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-card-grid-slider-default-card-square-desktop-485x280.png",
+      "w": 485,
+      "h": 280
+    },
+    "mobile": {
+      "archivo": "placeholder-card-grid-slider-default-card-square-mobile-335x280.png",
+      "w": 335,
+      "h": 280
+    }
+  },
+  {
+    "nombre": "placeholder-card-grid-grid-cards-imagen-de-la-card",
+    "componente": "Card Grid",
+    "variante": "Grid Cards (Max 3 Cards)",
+    "campo": "Imagen de la card",
+    "desktop": {
+      "archivo": "placeholder-card-grid-grid-cards-imagen-de-la-card-desktop-760x760.png",
+      "w": 760,
+      "h": 760
+    },
+    "mobile": {
+      "archivo": "placeholder-card-grid-grid-cards-imagen-de-la-card-desktop-760x760.png",
+      "w": 760,
+      "h": 760,
+      "repetida": true
+    }
+  },
+  {
+    "nombre": "placeholder-gradient-cards-fondo",
+    "componente": "Banner con tarjetas",
+    "variante": null,
+    "campo": "Fondo",
+    "desktop": {
+      "archivo": "placeholder-gradient-cards-fondo-desktop-2784x1994.png",
+      "w": 2784,
+      "h": 1994
+    },
+    "mobile": {
+      "archivo": "placeholder-gradient-cards-fondo-mobile-702x1600.png",
+      "w": 702,
+      "h": 1600
+    }
+  },
+  {
+    "nombre": "placeholder-text-wide-image",
+    "componente": "Texto con imagen ancha",
+    "variante": null,
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-text-wide-image-desktop-2100x760.png",
+      "w": 2100,
+      "h": 760
+    },
+    "mobile": {
+      "archivo": "placeholder-text-wide-image-desktop-2100x760.png",
+      "w": 2100,
+      "h": 760,
+      "repetida": true
+    }
+  },
+  {
+    "nombre": "placeholder-image-features",
+    "componente": "Imagen + destacados",
+    "variante": null,
+    "campo": null,
+    "desktop": {
+      "archivo": "placeholder-image-features-desktop-2160x1080.png",
+      "w": 2160,
+      "h": 1080
+    },
+    "mobile": {
+      "archivo": "placeholder-image-features-desktop-2160x1080.png",
+      "w": 2160,
+      "h": 1080,
+      "repetida": true
+    }
+  },
+  {
+    "nombre": "placeholder-mosaic-imagen-del-mosaico",
+    "componente": "Mosaico",
+    "variante": null,
+    "campo": "Imagen del mosaico",
+    "desktop": {
+      "archivo": "placeholder-mosaic-imagen-del-mosaico-desktop-760x760.png",
+      "w": 760,
+      "h": 760
+    },
+    "mobile": {
+      "archivo": "placeholder-mosaic-imagen-del-mosaico-desktop-760x760.png",
+      "w": 760,
+      "h": 760,
+      "repetida": true
+    }
+  },
+  {
+    "nombre": "placeholder-logo-cards-imagen-de-fondo",
+    "componente": "Cards con logo",
+    "variante": null,
+    "campo": "Imagen de fondo",
+    "desktop": {
+      "archivo": "placeholder-logo-cards-imagen-de-fondo-desktop-768x557.png",
+      "w": 768,
+      "h": 557
+    },
+    "mobile": {
+      "archivo": "placeholder-logo-cards-imagen-de-fondo-mobile-702x1048.png",
+      "w": 702,
+      "h": 1048
+    }
+  }
+]

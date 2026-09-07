@@ -12,7 +12,7 @@
       "fields": {
         "field_banner_type": "main_hero",
         "field_c_advanced_title": "Tenencia responsable",
-        "field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+        "field_c_image": "placeholder-banner-main-hero"
       }
     },
     {
@@ -37,7 +37,7 @@
           "fields": {
             "field_c_advanced_title": "Un lugar para dormir",
             "field_c_text": "Una cama en un rincón tranquilo, lejos del paso.",
-            "field_c_image": "placeholder-card-grid-slider-default-card-square-desktop-485x280"
+            "field_c_image": "placeholder-card-grid-slider-default-card-square"
           }
         },
         {
@@ -45,7 +45,7 @@
           "fields": {
             "field_c_advanced_title": "Comida y agua",
             "field_c_text": "Dos bowls, y el alimento que corresponde a su edad.",
-            "field_c_image": "placeholder-card-grid-slider-default-card-square-desktop-485x280"
+            "field_c_image": "placeholder-card-grid-slider-default-card-square"
           }
         }
       ]

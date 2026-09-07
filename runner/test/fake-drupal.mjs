@@ -398,6 +398,8 @@ const MEDIA_FORM = (conAlt = true) => `<!doctype html><html><head><meta charset=
 <form id="media-image-add-form" onsubmit="return false">
   <div id="widget"><input type="hidden" name="field_media_image[0][fids]" value=""></div>
   <input type="file" name="files[field_media_image_0]" id="ar">
+  <input type="hidden" name="field_image_mobile[0][fids]" value="">
+  <input type="file" name="files[field_image_mobile_0]" id="arm">
   <label>Nombre <input type="text" name="name[0][value]" value=""></label>
   <label>Publicado <input type="checkbox" name="status[value]" checked></label>
   <input type="submit" name="op" value="Guardar">
@@ -406,6 +408,12 @@ const MEDIA_FORM = (conAlt = true) => `<!doctype html><html><head><meta charset=
 const CON_ALT = ${conAlt ? 'true' : 'false'}
 // Drupal sube el archivo por AJAX y REDIBUJA el widget entero: recien ahi hay fids, vista
 // previa y — si el sitio lo pide — el campo de texto alternativo.
+// El de mobile sube igual que el de desktop: su propio AJAX, su propio fids.
+document.getElementById('arm').addEventListener('change', () => {
+  setTimeout(() => {
+    document.querySelector('input[name="field_image_mobile[0][fids]"]').value = '43'
+  }, 300)
+})
 document.getElementById('ar').addEventListener('change', (e) => {
   const f = e.target.files[0]
   setTimeout(() => {
@@ -420,7 +428,9 @@ document.getElementById('ar').addEventListener('change', (e) => {
 for (const b of document.querySelectorAll('input[name="op"]')) {
   b.addEventListener('click', () => {
     // Guardar sin archivo subido es lo que pasaba antes de esperar el fids.
-    if (!document.querySelector('input[name="field_media_image[0][fids]"]').value) {
+    const d = document.querySelector('input[name="field_media_image[0][fids]"]').value
+    const m = document.querySelector('input[name="field_image_mobile[0][fids]"]').value
+    if (!d || !m) {
       location.href = '/media/guardar?error=1'
       return
     }
@@ -440,7 +450,7 @@ export function startFakeDrupal() {
     const q = new URLSearchParams(req.url.split('?')[1] || '')
     const html = (h) => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(h) }
 
-    if (url === '/media/add/image') return html(MEDIA_FORM(true))
+    if (url === '/media/add/responsive_image') return html(MEDIA_FORM(true))
     // El mismo formulario en un sitio que NO pide alt: el subidor no se tiene que colgar.
     if (url === '/media/add/simple') return html(MEDIA_FORM(false))
     if (url === '/media/guardar') {

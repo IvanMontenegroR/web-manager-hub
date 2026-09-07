@@ -67,14 +67,36 @@ const limpio = (s) => String(s || '').toLowerCase()
 
 // Todos arrancan con "placeholder-": en la Media library quedan juntos, se filtran de
 // un tecleo y se distinguen del material de verdad sin abrirlos.
-const nombre = (e) => [
+//
+// El nombre NO lleva la medida ni la vista: un medio `responsive_image` de este CMS
+// contiene las DOS imagenes (Image Desktop e Image Mobile), asi que una sola medida
+// mentiria. El nombre dice para que sirve, y adentro estan las dos.
+const nombreMedio = (e) => [
   'placeholder',
   limpio(e.componente),
   e.variante ? limpio(e.variante) : null,
   e.campo ? limpio(e.campo) : null,
-  e.vista,
-  `${e.w}x${e.h}`,
-].filter(Boolean).join('-') + '.png'
+].filter(Boolean).join('-')
+
+// El archivo si la lleva: son dos por medio y hay que poder distinguirlos de un vistazo.
+const nombre = (e) => `${nombreMedio(e)}-${e.vista}-${e.w}x${e.h}.png`
+
+// Un MEDIO por componente+variante+campo, con sus dos archivos. Cuando el catalogo no
+// declara medida mobile, se sube el mismo archivo de desktop: el campo es obligatorio en
+// el CMS y esto es material de relleno — inventar una medida mobile que nadie definio
+// seria peor que repetir la que si conocemos.
+function medios(lista) {
+  const grupos = new Map()
+  for (const e of lista) {
+    const k = nombreMedio(e)
+    if (!grupos.has(k)) grupos.set(k, { nombre: k, componente: e.etiqueta, variante: e.varianteLabel, campo: e.campo })
+    grupos.get(k)[e.vista] = { archivo: nombre(e), w: e.w, h: e.h }
+  }
+  for (const g of grupos.values()) {
+    if (!g.mobile && g.desktop) g.mobile = { ...g.desktop, repetida: true }
+  }
+  return [...grupos.values()]
+}
 
 // El dibujo. Tiene que gritar PLACEHOLDER — si alguna se escapa a produccion, que se vea.
 const html = (e) => `<!doctype html><meta charset="utf-8"><style>
@@ -115,8 +137,15 @@ try {
     process.stdout.write(`${nombre(e)}\n`)
   }
 
-  const filas = lista.map((e) => `| ${e.etiqueta} | ${e.varianteLabel || '—'} | ${e.campo || '—'} `
-    + `| ${e.vista} | ${e.w}×${e.h} | ${e.peso || '—'} | \`${nombre(e)}\` |`).join('\n')
+  // El INDICE que lee el subidor. Explicito y sin adivinar nombres: cada medio dice sus
+  // dos archivos. Parsear el nombre del archivo para reconstruir los pares funcionaria
+  // hasta el dia que un componente se llame "algo-mobile".
+  const pares = medios(lista)
+  writeFileSync(join(DESTINO, 'INDICE.json'), JSON.stringify(pares, null, 2) + '\n')
+
+  const filas = pares.map((g) => `| ${g.componente} | ${g.variante || '—'} | ${g.campo || '—'} `
+    + `| \`${g.nombre}\` | ${g.desktop.w}×${g.desktop.h} `
+    + `| ${g.mobile.w}×${g.mobile.h}${g.mobile.repetida ? ' *(la de desktop)*' : ''} |`).join('\n')
   writeFileSync(join(DESTINO, 'INDICE.md'), `# Placeholders
 
 Imagenes de relleno con las medidas EXACTAS que pide cada componente. Se suben UNA vez a
@@ -126,14 +155,21 @@ todavia el material definitivo.
 Salen de \`src/data/components.js\`, la misma fuente que usa la matriz de contenido. Para
 regenerarlas: \`node tools/placeholders.mjs\` desde \`runner/\`.
 
-Son ${lista.length} archivos. El peso de la columna "Max" es el limite que pide el CMS:
-estas pesan mucho menos, asi que no hay problema.
+Cada fila es UN medio de tipo **responsive_image**, que en este CMS lleva las dos
+imagenes adentro (Image Desktop e Image Mobile, las dos obligatorias). Por eso el nombre
+del medio no lleva medida: la que corresponde depende de cual de las dos mire el sitio.
+**Ese nombre es el que va en el manifiesto.**
 
-| Componente | Variante | Campo | Vista | Medida | Max | Archivo |
-|---|---|---|---|---|---|---|
+Cuando el catalogo no declara medida mobile, se sube la misma imagen de desktop: el campo
+es obligatorio y esto es relleno; inventar una medida que nadie definio seria peor.
+
+Son ${pares.length} medios (${lista.length} archivos).
+
+| Componente | Variante | Campo | Nombre del medio | Desktop | Mobile |
+|---|---|---|---|---|---|
 ${filas}
 `)
-  process.stdout.write(`\n${lista.length} imagenes en ${DESTINO}\n`)
+  process.stdout.write(`\n${pares.length} medios (${lista.length} archivos) en ${DESTINO}\n`)
 } finally {
   await ctx.close()
   rmSync(perfil, { recursive: true, force: true })
