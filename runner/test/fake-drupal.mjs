@@ -24,7 +24,10 @@ const MEDIOS_LIB = ['placeholder-x-desktop-10x10', 'placeholder-x-desktop-10x10-
   // El caso raro que le paso a Ivan: el buscador SI lo encuentra, pero al confirmar
   // Drupal dice que no existe. Sirve para probar que el error cuente lo que sabe el
   // runner (cuantas opciones vinieron, cual eligio, que quedo en el campo).
-  'placeholder-terco-desktop-10x10']
+  'placeholder-terco-desktop-10x10',
+  // Se engancha bien pero el sitio tira "Oops" igual: el JS del tema se rompe procesando
+  // la respuesta AJAX. Lo que importa es el resultado, no la queja.
+  'placeholder-quejoso-desktop-10x10']
 
 const FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear pagina</title>
 <style>body{font:14px system-ui;margin:24px} .js-form-item{margin:8px 0}
@@ -272,8 +275,15 @@ function wireIef(scope) {
                   + 'coincidan con "' + v + '".</div>'
                 return
               }
-              campo.querySelector('.ief-hueco').innerHTML =
-                '<table class="ief-entity-table"><tr><td>' + v + '</td></tr></table>'
+              // El caso de Ivan: el medio QUEDA puesto y ademas aparece un "Oops"
+              // porque el JS del sitio se rompio procesando la respuesta. Frenar por esa
+              // queja seria tirar abajo una corrida que salio bien.
+              const quejoso = v.includes('quejoso')
+                ? '<div class="messages--error">Oops, something went wrong. Check your '
+                  + "browser's developer console for more details.</div>"
+                : ''
+              campo.querySelector('.ief-hueco').innerHTML = quejoso
+                + '<table class="ief-entity-table"><tr><td>' + v + '</td></tr></table>'
             }, 200)
           })
       }, 250)

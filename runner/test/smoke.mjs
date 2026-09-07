@@ -272,6 +272,21 @@ try {
   check(/placeholder-x-desktop-10x10/.test(parecido),
     `y cuando el nombre no coincide, lista los que SI estan (${parecido.slice(0, 140)})`)
 
+  // El sitio tira "Oops" pero el medio QUEDA enganchado: no se frena por la queja. Es
+  // exactamente lo que paso con el banner de Ivan — la imagen estaba puesta y el runner
+  // abortaba igual.
+  const pasosQ = []
+  let quejoso = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, esperaSubform: 4000,
+      onStep: (t) => pasosQ.push(t),
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', fields: { field_media: 'placeholder-quejoso-desktop-10x10' } }] }) })
+  } catch (e) { quejoso = e.message }
+  check(!quejoso, `una queja del CMS con el medio ya puesto no frena la corrida (${quejoso.slice(0, 90) || 'no freno'})`)
+  check(pasosQ.some((t) => /el CMS se quejo pero la imagen quedo/.test(t)),
+    'pero se avisa, para no perder la pista si despues algo sale raro')
+
   // El caso raro: el buscador lo encuentra y Drupal igual lo rechaza al confirmar. Ahi el
   // error tiene que contar lo que sabe el runner —- cuantas opciones vinieron, cual
   // eligio, que quedo escrito -— porque el mensaje de Drupal solo no alcanza.

@@ -491,14 +491,19 @@ async function ponerMedia(ctx, f, vars, nombre, ref) {
   if (!(await page.locator(campo).count())) {
     throw new Error(`No encontre el campo de imagen ${ref} (${campo})`)
   }
-  const puesto = await elegirMedia({ page, campo, nombre, cfg: mapping.mediaExistente, ref })
+  const r = await elegirMedia({ page, campo, nombre, cfg: mapping.mediaExistente, ref })
+  // El sitio a veces muestra "Oops, something went wrong" porque su propio JS se rompe
+  // procesando la respuesta, aunque el medio haya quedado enganchado. No es motivo para
+  // frenar —- el resultado esta -— pero tampoco para callarlo: si despues algo sale raro,
+  // conviene saber que el CMS venia quejandose.
+  if (r.ruido) ctx.onStep(`     (el CMS se quejo pero la imagen quedo: ${r.ruido.slice(0, 90)})`)
   // La verificacion es la de siempre, y aca importa el doble: un autocompletar que no
   // engancho deja el campo igual de vacio que antes, sin decir nada.
-  if (!puesto.includes(nombre)) {
+  if (!r.texto.includes(nombre)) {
     throw new Error(`Elegi "${nombre}" en ${ref} pero el campo no lo muestra. `
-      + `Dice: "${puesto.slice(0, 120)}".`)
+      + `Dice: "${r.texto.slice(0, 120)}".`)
   }
-  return { selector: campo, f, ref, valor: nombre, puesto }
+  return { selector: campo, f, ref, valor: nombre, puesto: r.texto }
 }
 
 // Se guarda el HTML del widget de cada campo de IMAGEN. El runner todavia no sabe

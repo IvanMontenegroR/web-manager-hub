@@ -24,6 +24,8 @@ export const MEDIA_EXISTENTE = {
   opciones: 'ul.ui-autocomplete li',
   confirmar: '[data-drupal-selector$="-ief-reference-save"]',
   error: '.form-item--error-message, .messages--error',
+  // La tabla que el inline entity form dibuja con el medio ya enganchado.
+  puesto: 'table',
 }
 
 export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
@@ -86,24 +88,32 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
 
   // Confirmar tambien va por AJAX: el resultado — la fila con el medio, o la queja de que
   // no existe — llega despues. Leer una sola vez es leer antes de tiempo.
+  //
+  // Primero se mira si QUEDO PUESTO, y recien despues si hay quejas. El orden importa: el
+  // sitio muestra "Oops, something went wrong" cuando su propio JS se rompe procesando la
+  // respuesta, aunque el servidor haya hecho lo que tenia que hacer. Frenar por esa queja
+  // teniendo el medio ya enganchado es tirar abajo una corrida que salio bien.
   const hasta = Date.now() + 20000
+  let ruido = ''
   for (;;) {
+    const puesto = await leerMedia(page, campo, c)
     const queja = await page.locator(`${campo} ${c.error}`).allInnerTexts().catch(() => [])
-    const texto = (queja.join(' ') || '').replace(/\s+/g, ' ').trim()
-    if (texto) {
-      // Lo que sabe el runner va PRIMERO: si Drupal se explaya, el recorte se come su
-      // mensaje y no el nuestro. Y lo que hace falta para entender esto es justamente
-      // que devolvio el buscador y que quedo escrito en el campo.
-      throw new Error(`Drupal no acepto la imagen "${nombre}" en ${ref}. `
-        + `El buscador devolvio ${hay.length} opcion(es)`
-        + (exacta ? `, la exacta era ${JSON.stringify(String(exacta.value))}` : ' y ninguna exacta')
-        + `; en el campo quedo ${JSON.stringify(enElCampo)}. `
-        + `Drupal dice: ${texto.slice(0, 300)}`)
-    }
-    const puesto = await leerMedia(page, campo)
-    if (puesto.includes(nombre) || Date.now() > hasta) return puesto
+    const t = (queja.join(' ') || '').replace(/\s+/g, ' ').trim()
+    if (t) ruido = t
+    // El medio quedo: eso es lo que importa. Si ademas hubo queja, se devuelve para que
+    // quien mire los pasos sepa que el CMS venia protestando.
+    if (puesto.includes(nombre)) return { texto: puesto, ruido }
+    if (Date.now() > hasta) break
     await page.waitForTimeout(200)
   }
+
+  // No quedo. Ahora si es un error, y va con todo lo que sabe el runner PRIMERO: si Drupal
+  // se explaya, el recorte se come su mensaje y no el nuestro.
+  throw new Error(`Drupal no acepto la imagen "${nombre}" en ${ref}. `
+    + `El buscador devolvio ${hay.length} opcion(es)`
+    + (exacta ? `, la exacta era ${JSON.stringify(String(exacta.value))}` : ' y ninguna exacta')
+    + `; en el campo quedo ${JSON.stringify(enElCampo)}. `
+    + (ruido ? `Drupal dice: ${ruido.slice(0, 300)}` : 'Drupal no dijo nada.'))
 }
 
 // Le pregunta al endpoint del autocompletar que hay para ese texto. Devuelve la lista, o
@@ -136,10 +146,19 @@ const etiqueta = (o) => String(o?.label ?? o?.value ?? '')
 const recorte = (nombre) => nombre.split('-').slice(0, 3).join('-') || nombre
 
 // Lo que el campo muestra ahora. Con el medio puesto, el inline entity form dibuja una
-// fila con su nombre; es la unica forma de comprobar que quedo.
-export async function leerMedia(page, campo) {
-  const t = await page.locator(campo).first().innerText().catch(() => '')
-  return String(t).replace(/\s+/g, ' ').trim()
+// TABLA con su nombre; es la unica forma de comprobar que quedo.
+//
+// Se lee la tabla y no el fieldset entero a proposito: un mensaje de error puede repetir
+// el nombre del medio ("no existe ningun elemento multimedia con valor igual a X") y
+// entonces buscarlo en todo el texto daria por bueno justo el caso que fallo.
+export async function leerMedia(page, campo, cfg) {
+  const tabla = (cfg && cfg.puesto) || 'table'
+  const t = await page.locator(`${campo} ${tabla}`).first().innerText().catch(() => null)
+  // Sin tabla NO hay medio, y se devuelve vacio a proposito. Caer al texto del fieldset
+  // entero parece mas tolerante y es peor: un error de Drupal repite el nombre del medio
+  // ("no existe ningun elemento multimedia con valor igual a X"), asi que buscarlo ahi
+  // daria por bueno justo el caso que fallo.
+  return t == null ? '' : String(t).replace(/\s+/g, ' ').trim()
 }
 
 // La opcion cuyo texto es EXACTAMENTE el nombre pedido. Un nombre puede ser prefijo de
