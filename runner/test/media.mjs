@@ -68,6 +68,25 @@ try {
   })
   check(d.subidos === 1, 'espera a que la subida termine antes de guardar')
 
+  // La red se corta a mitad de una tanda: no puede tirar todo abajo. Es lo que pasa con
+  // 36 imagenes seguidas contra un CMS remoto — un cambio de wifi y chau. Se simula
+  // haciendo caer UNA peticion, que es exactamente lo que ve Playwright.
+  let yaCorto = false
+  await page.route('**/admin/content/media**', async (route) => {
+    if (yaCorto) return route.continue()
+    yaCorto = true
+    await route.abort('internetdisconnected')
+  })
+  const pasos = []
+  const f = await subirPlaceholders({
+    page, mapping, onStep: (t) => pasos.push(t),
+    carpeta: carpetaCon('placeholder-corta-la-red-desktop-60x60.png'),
+  })
+  await page.unroute('**/admin/content/media**')
+  check(f.subidos === 1, `un corte de red no voltea la tanda: reintenta y sigue (${f.subidos})`)
+  check(pasos.some((p) => /se corto la red, reintento/.test(p)),
+    `y lo dice mientras espera (${pasos.find((p) => /reintento/.test(p)) || 'no lo dijo'})`)
+
   // Un sitio cuyo formulario de medios NO pide alt tambien es valido: ahi el alt vive en
   // el campo que referencia al medio. No se lo tiene que esperar "por las dudas".
   const t0 = Date.now()

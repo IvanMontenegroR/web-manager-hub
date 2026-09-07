@@ -64,61 +64,83 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
 
   for (const archivo of archivos) {
     const nombre = basename(archivo, '.png')
-
-    // ¿Ya esta? Se busca el nombre EXACTO: uno mas largo puede contener a este.
-    await page.goto(url(cfg.lista.replace('{nombre}', encodeURIComponent(nombre))),
-      { waitUntil: 'domcontentloaded' })
-    if (await page.getByText(nombre, { exact: true }).count().catch(() => 0)) {
-      salteados += 1
-      onStep(`  =  ${nombre} (ya estaba)`)
-      continue
-    }
-
-    await page.goto(url(cfg.add), { waitUntil: 'domcontentloaded' })
-    const file = page.locator(cfg.archivo).first()
-    if (!(await file.count())) {
-      throw new Error(`No encontre el campo de archivo en ${cfg.add} (${cfg.archivo}). `
-        + 'Si el formulario de medios de este sitio es otro, corregi "media" en el mapping.')
-    }
-    await file.setInputFiles(join(carpeta, archivo))
-    await esperarSubida(page, cfg, nombre)
-
-    // Si este formulario pide alt, se llena; si no lo pide, no se inventa nada.
-    const alt = await siEsta(page, cfg.alt)
-    if (alt) await alt.fill(cfg.alUsar)
-
-    // El nombre del media es el identificador: se fuerza al del archivo. Drupal lo
-    // precarga con el nombre del archivo CON extension, asi que hay que pisarlo.
-    const campoNombre = await esperarVisible(page, cfg.nombre, 5000)
-    if (!campoNombre) {
-      throw new Error(`No encontre el campo "Nombre" (${cfg.nombre}) en ${cfg.add}. `
-        + 'Corregi "media.nombre" en el mapping.')
-    }
-    await campoNombre.fill(nombre)
-
-    if (cfg.publicar === false) {
-      const pub = await siEsta(page, cfg.publicado)
-      if (pub) await pub.uncheck().catch(() => {})
-    }
-
-    const guardar = await esperarVisible(page, cfg.guardar, 10000)
-    if (!guardar) {
-      throw new Error(`No encontre el boton de guardar (${cfg.guardar}) en ${cfg.add}. `
-        + 'Corregi "media.guardar" en el mapping.')
-    }
-    await guardar.click()
-    await page.waitForLoadState('domcontentloaded')
-
-    const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
-    if (quejas.length) {
-      throw new Error(`Drupal rechazo "${nombre}": `
-        + quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)
-        + ` — subidas antes de frenar: ${subidos}. Se puede volver a correr: las que ya estan se saltean.`)
-    }
-    subidos += 1
-    onStep(`  +  ${nombre}`)
+    const r = await conReintentos(() => unaImagen({ page, cfg, url, carpeta, archivo, nombre }),
+      { onStep, nombre })
+    if (r === 'salteada') { salteados += 1; onStep(`  =  ${nombre} (ya estaba)`) }
+    else { subidos += 1; onStep(`  +  ${nombre}`) }
   }
   return { subidos, salteados, total: archivos.length }
+}
+
+// Treinta y seis imagenes seguidas contra un CMS remoto es un rato largo, y basta un
+// parpadeo de la red — cambiar de wifi, la VPN, la maquina que se suspende — para cortar
+// todo. Eso NO es un error del runner ni del CMS: es la red, y una persona simplemente
+// volveria a intentar. Asi que se reintenta, con esperas cada vez mas largas, y solo ante
+// fallas de red. Cualquier otra cosa (Drupal que rechaza el archivo, un selector que no
+// aparece) sigue frenando en seco, que es lo que corresponde.
+const ES_DE_RED = /net::ERR_|ERR_NETWORK|ERR_CONNECTION|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|ERR_TIMED_OUT|Timeout .* exceeded/i
+
+async function conReintentos(fn, { onStep, nombre, veces = 4 }) {
+  for (let i = 1; ; i++) {
+    try { return await fn() } catch (e) {
+      if (i >= veces || !ES_DE_RED.test(e.message)) throw e
+      const espera = 2000 * 2 ** (i - 1)
+      onStep(`  …  ${nombre}: se corto la red, reintento ${i} de ${veces - 1} en ${espera / 1000}s`)
+      await new Promise((r) => setTimeout(r, espera))
+    }
+  }
+}
+
+async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
+  // ¿Ya esta? Se busca el nombre EXACTO: uno mas largo puede contener a este.
+  await page.goto(url(cfg.lista.replace('{nombre}', encodeURIComponent(nombre))),
+    { waitUntil: 'domcontentloaded' })
+  if (await page.getByText(nombre, { exact: true }).count().catch(() => 0)) {
+    return 'salteada'
+  }
+
+  await page.goto(url(cfg.add), { waitUntil: 'domcontentloaded' })
+  const file = page.locator(cfg.archivo).first()
+  if (!(await file.count())) {
+    throw new Error(`No encontre el campo de archivo en ${cfg.add} (${cfg.archivo}). `
+      + 'Si el formulario de medios de este sitio es otro, corregi "media" en el mapping.')
+  }
+  await file.setInputFiles(join(carpeta, archivo))
+  await esperarSubida(page, cfg, nombre)
+
+  // Si este formulario pide alt, se llena; si no lo pide, no se inventa nada.
+  const alt = await siEsta(page, cfg.alt)
+  if (alt) await alt.fill(cfg.alUsar)
+
+  // El nombre del media es el identificador: se fuerza al del archivo. Drupal lo
+  // precarga con el nombre del archivo CON extension, asi que hay que pisarlo.
+  const campoNombre = await esperarVisible(page, cfg.nombre, 5000)
+  if (!campoNombre) {
+    throw new Error(`No encontre el campo "Nombre" (${cfg.nombre}) en ${cfg.add}. `
+      + 'Corregi "media.nombre" en el mapping.')
+  }
+  await campoNombre.fill(nombre)
+
+  if (cfg.publicar === false) {
+    const pub = await siEsta(page, cfg.publicado)
+    if (pub) await pub.uncheck().catch(() => {})
+  }
+
+  const guardar = await esperarVisible(page, cfg.guardar, 10000)
+  if (!guardar) {
+    throw new Error(`No encontre el boton de guardar (${cfg.guardar}) en ${cfg.add}. `
+      + 'Corregi "media.guardar" en el mapping.')
+  }
+  await guardar.click()
+  await page.waitForLoadState('domcontentloaded')
+
+  const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
+  if (quejas.length) {
+    throw new Error(`Drupal rechazo "${nombre}": `
+      + quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)
+      + ' — se puede volver a correr: las que ya estan se saltean.')
+  }
+  return 'subida'
 }
 
 // Un campo OPCIONAL: si el formulario no lo tiene, se sigue de largo AL INSTANTE. Un

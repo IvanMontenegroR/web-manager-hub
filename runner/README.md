@@ -142,6 +142,12 @@ npm run subir-placeholders
 
 Es **idempotente**: antes de cada una busca si ya hay un media con ese nombre y la
 saltea. Se puede cortar y volver a correr las veces que haga falta sin duplicar nada.
+
+Treinta y seis imagenes contra un CMS remoto es un rato largo, y un parpadeo de la red
+—cambiar de wifi, la VPN, la maquina que se suspende— alcanzaba para tirar la tanda
+entera. Ahora un corte se **reintenta** (hasta 3 veces, esperando 2s, 4s y 8s) y la tanda
+sigue. Solo se reintenta ante fallas de RED: si Drupal rechaza un archivo o falta un
+campo, frena en seco como corresponde.
 Opciones: `--carpeta <dir>`, `--solo <texto>` (sube solo las que contengan ese texto),
 `--mapping <f>`.
 
