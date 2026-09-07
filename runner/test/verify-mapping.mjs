@@ -39,6 +39,21 @@ function exists(sel) {
   return false
 }
 
+// Los `value` de un desplegable, para comprobar que un `default` del mapping es una
+// opcion de verdad. Un valor inventado no se nota hasta que la corrida se planta, y es el
+// error mas facil de cometer: en el CMS conviven `main_hero` y `title-description`.
+function opciones(sel) {
+  const n = /name="([^"]+)"/.exec(sel)?.[1]
+  if (!n) return null
+  const i = H.indexOf(` name="${n}"`)
+  if (i < 0) return null
+  const a = H.lastIndexOf('<select', i)
+  if (a < 0) return null
+  const b = H.indexOf('</select>', i)
+  if (b < 0) return null
+  return [...H.slice(a, b).matchAll(/<option value="([^"]*)"/g)].map((m) => m[1])
+}
+
 // etiqueta del desplegable de tipos -> machine name del bundle
 const LABEL2BUNDLE = new Map()
 {
@@ -105,6 +120,13 @@ for (const { bundle, v } of positions()) {
     if (f.kind === 'image') continue          // no se automatizan: no tienen campo
     chk(res(f.sel, v), `${bundle}.${key}`)
     if (f.format) chk(res(f.format.sel, v), `${bundle}.${key} (formato)`)
+    if (f.default != null) {
+      const ops = opciones(res(f.sel, v))
+      if (!ops) continue
+      if (ops.includes(String(f.default))) ok++
+      else fail(`${bundle}.${key}: el default "${f.default}" no es una opcion `
+        + `(el CMS ofrece: ${ops.filter(Boolean).join(', ') || 'ninguna'})`)
+    }
   }
   // Un grupo plegable que este tipo no tiene NO es un error: el motor lo saltea.
   for (const tpl of [...(M.paragraphs.open || []), ...(def.open || [])]) {

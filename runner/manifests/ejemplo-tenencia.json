@@ -1,5 +1,5 @@
 {
-  "_": "Las imagenes son NOMBRES de medios ya subidos a la libreria (ver placeholders/INDICE.md). La de las cards es la variante SQUARE porque el bloque usa card_grid_default_square: la forma de la card la decide ese estilo, y con el la imagen es apaisada (485x280) y no vertical.",
+  "_": "Las imagenes son NOMBRES de medios ya subidos a la libreria (ver placeholders/INDICE.md). La de las cards es la variante SQUARE porque el bloque usa card_grid_default_square: la forma de la card la decide ese estilo, y con el la imagen es apaisada (485x280) y no vertical. Los html_tag de los titulos no se escriben: los pone el mapping (banner h1, componente h2, card h3). Se nombran solo para cambiarlos.",
   "manifest": 1,
   "page": {
     "title": "Tenencia Responsable",
@@ -19,7 +19,6 @@
       "type": "c_text",
       "fields": {
         "field_c_advanced_title": "¿Qué considerar antes de adoptar?",
-        "field_c_advanced_title.html_tag": "h2",
         "field_c_text": "Adoptar es una decisión para toda la vida del animal.",
         "classy.text_align": "text_align_center"
       }

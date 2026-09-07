@@ -127,7 +127,7 @@ function subform(type, base, dsel, npath) {
       <div class="js-form-item"><label>Titulo</label>
         <input type="text" name="\${base}[field_c_advanced_title][0][value]"></div></details>
     \${iefHtml(dsel, 'field-media')}
-    \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', 'drop')}\`
+    \${advanced}\${slotHtml('Cards', base, dsel, npath, 'field_c_subitems', 'drop', 'c_text')}\`
 
   // Layout: DOS slots, cada uno con su modal de tipos.
   return advanced
@@ -144,7 +144,11 @@ function subform(type, base, dsel, npath) {
 //             como paragraphs_ee: por eso hay que quedarse con el que SE VE y no con
 //             el primero del DOM.
 //   'plain' — un solo bundle permitido, el boton suelto
-function slotHtml(label, base, dsel, npath, field, modo) {
+// \`precrear\` es un bundle: la lista nace con UNA fila vacia de ese tipo, que es lo que
+// hace Drupal cuando el campo es obligatorio (al card grid le nace un card item de
+// entrada). Es la trampa que dejaba una card fantasma en la pagina: el runner agregaba
+// la suya al lado en vez de usar la que ya estaba.
+function slotHtml(label, base, dsel, npath, field, modo, precrear) {
   const fd = field.replace(/_/g, '-')
   // El primero queda a la vista y el resto plegado, asi que c_text va segundo a proposito:
   // es el que agrega la prueba, y solo llega a el si abrio el toggle.
@@ -165,7 +169,7 @@ function slotHtml(label, base, dsel, npath, field, modo) {
     : ''
   return \`<fieldset class="slot" data-drupal-selector="\${dsel}-subform-\${fd}-wrapper"
       data-slot="\${dsel}-subform-\${fd}" data-base="\${base}[\${field}]"
-      data-npath="\${npath}_subform_\${field}">
+      data-npath="\${npath}_subform_\${field}"\${precrear ? \` data-precrear="\${precrear}"\` : ''}>
     <legend>\${label}</legend><div class="slotrows"></div>
     <input type="button" name="\${npath}_subform_\${field}_edit_all" value="Edit all">
     <div class="enmedio">\${enMedio}</div>
@@ -209,19 +213,24 @@ function desplegar(row) {
   delete row.dataset.plegada
 }
 
+// Una fila ya armada. La clase \`paragraph-type--<bundle>\` es la que Drupal le pone al
+// <tr> de cada paragraph: es por donde se sabe de que tipo es una fila que ya estaba.
+function crearFila(container, base, dsel, npath, type) {
+  const el = document.createElement('div')
+  el.className = 'row paragraph-type--' + type.replace(/_/g, '-')
+  el.setAttribute('data-drupal-selector', dsel)
+  Object.assign(el.dataset, { tipo: type, base, dsel, npath })
+  el.innerHTML = subform(type, base, dsel, npath)
+  container.appendChild(el)
+  wire(el)
+  return el
+}
+
 // El "AJAX" de mentira: el subform aparece un rato despues de pedirlo, como en Drupal.
 function addTo(container, base, dsel, npath, type) {
   // Al agregar una fila, las anteriores de ESA lista se pliegan.
   ;[...container.children].forEach(plegar)
-  const el = document.createElement('div')
-  el.className = 'row'
-  el.setAttribute('data-drupal-selector', dsel)
-  Object.assign(el.dataset, { tipo: type, base, dsel, npath })
-  setTimeout(() => {
-    el.innerHTML = subform(type, base, dsel, npath)
-    container.appendChild(el)
-    wire(el)
-  }, 250)
+  setTimeout(() => crearFila(container, base, dsel, npath, type), 250)
 }
 
 // "Abrir todas" de una lista: es lo que usa el runner antes de llenar.
@@ -297,6 +306,13 @@ function wire(scope) {
     if (s.dataset.wired) return
     s.dataset.wired = '1'
     const list = s.querySelector('.slotrows')
+    // La fila obligatoria nace CON el subform del padre, en la misma respuesta: no llega
+    // despues por AJAX. Si llegara tarde, el runner podria mirar la lista antes de que
+    // exista y la prueba pasaria por la razon equivocada.
+    if (s.dataset.precrear && !list.children.length) {
+      crearFila(list, s.dataset.base + '[0][subform]', s.dataset.slot + '-0',
+        s.dataset.npath + '_0', s.dataset.precrear)
+    }
     s.querySelector('input[name$="_edit_all"]')
       ?.addEventListener('click', () => abrirTodas(list))
     const box = s.querySelector('.modal, .drop')

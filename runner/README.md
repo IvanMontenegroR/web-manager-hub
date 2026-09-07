@@ -306,6 +306,12 @@ los selectores se apoyan siempre en `name=` o `data-drupal-selector=`. Cada para
 direcciona por su **delta** — la primera posicion libre de la lista — y no contando
 filas: mas exacto y no se confunde con los hijos.
 
+Con una excepcion: cuando la lista de un paragraph es **obligatoria**, Drupal abre el
+formulario con una fila ya puesta y vacia — al Card Grid le nace un card item de entrada.
+Esa fila se **reusa**: si no, la pagina termina con una card fantasma que nadie cargo y
+que despues hay que borrar a mano. Se reusa solo si es del **mismo bundle** y esta
+**vacia**; si tiene contenido no se toca (no se pisa trabajo ajeno) y el paso lo avisa.
+
 Del delta salen las tres formas en que Drupal escribe la misma ruta, que el motor calcula
 solo y los selectores del mapping pueden usar:
 
@@ -349,6 +355,34 @@ otros ocho plegados detras del toggle, que hay que abrir antes de poder clickear
 el modal de paragraphs_ee que usan las columnas de un layout: son tres formas distintas de
 agregar y cada ranura declara la suya.
 
+### Los valores por defecto (`default`)
+
+Un campo del mapping puede traer un `default`: el valor que el runner pone **cuando el
+manifiesto no menciona ese campo y el CMS lo dejo vacio**. Es para lo que depende del TIPO
+de bloque y no de la pagina, y hoy son los **niveles de encabezado**:
+
+| bloque                                        | `html_tag` del titulo |
+|-----------------------------------------------|-----------------------|
+| `banner`                                       | `h1`                  |
+| `c_text`, `c_image`, `c_sideimagetext`, `c_externalvideo`, `ln_c_cardgrid` | `h2` |
+| `ln_c_grid_card_item`, `accordion_item`        | `h3`                  |
+
+El banner es el titulo de la pagina, un componente abre una seccion y una card cuelga de
+esa seccion. Escribirlo en cada bloque de cada manifiesto es pedir que alguien se lo
+olvide, y un "- Ninguno -" no se nota hasta que la pagina esta publicada y no tiene
+jerarquia.
+
+Dos salvedades. Lo que pide el **manifiesto manda siempre**: si nombra el campo, el
+default ni se mira. Y un `html_tag` **sin titulo no se pone**: la etiqueta es del texto, y
+sin texto no hay nada que etiquetar (vale para cualquier campo escrito como
+`<campo>.<propiedad>`).
+
+Los **subtitulos** quedan a proposito sin default: un subtitulo no es un nivel del esquema
+de la pagina, y elegirle uno seria inventar. Si hace falta, se pone en el manifiesto.
+
+Ojo con una pagina de **dos banners**: los dos van a pedir `h1`. Si eso pasa, el segundo
+se corrige desde el manifiesto.
+
 Dos cosas mas que el formulario real obliga y el mapping declara: los campos de cuerpo
 arrancan en un **formato de texto que no admite HTML**, asi que el formato se cambia
 ANTES de escribir; y el **alias de URL** esta deshabilitado mientras Pathauto lo genere
@@ -386,6 +420,11 @@ toca — incluido un contenedor adentro de otro, que es la forma del Tabs —, d
 despublicada, escribir el alias, leer el node id y **frenar** ante un campo, un slot que no
 existe o una ranura pasada de su tope.
 
+Ahi tambien esta la lista obligatoria que **nace con una fila vacia** (la del Card Grid) y
+los `default` del mapping: que el contenido caiga en la fila que ya estaba en vez de dejar
+una card fantasma, que el `html_tag` que nadie escribio lo ponga el default, que lo que
+pida el manifiesto le gane, y que no se ponga ninguno si no hay titulo que etiquetar.
+
 El CKEditor de ahi es de mentira, y para lo que se rompio de verdad no alcanzaba: que el
 editor se destruya y se monte otro solo pasa con el CKEditor de verdad. Para eso hay una
 prueba aparte, que arma un rig con el **CKEditor 5 real** y el mismo andamiaje que le pone
@@ -407,7 +446,8 @@ npm run verify -- mapping/purina-latam.json form.html
 ```
 
 que resuelve cada selector del mapping y comprueba que ese `name` exista de verdad en un
-volcado del formulario. El volcado se guarda a mano desde el navegador, sobre
+volcado del formulario — y que cada `default` sea de verdad una opcion de su desplegable,
+que es el error mas facil de cometer (en el CMS conviven `main_hero` y `title-description`). El volcado se guarda a mano desde el navegador, sobre
 `/node/add/<tipo>` **con un paragraph de cada clase ya agregado** (los subforms no existen
 en el DOM hasta que se los agrega). Ese archivo **no se versiona**: lleva el token CSRF de
 la sesion, rutas internas y nombres de usuario.

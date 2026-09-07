@@ -11,7 +11,6 @@
       "type": "c_text",
       "fields": {
         "field_c_advanced_title": "Prueba de seleccion de imagenes",
-        "field_c_advanced_title.html_tag": "h2",
         "field_c_text": "Esta pagina existe para comprobar que el runner elige las imagenes de la libreria. Se puede borrar."
       }
     },

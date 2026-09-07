@@ -70,7 +70,9 @@ const mapping = (site) => ({
             format: { sel: 'select[name="{base}[field_c_text][0][format]"]', value: 'rich_text' },
           },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
-          'field_c_advanced_title.html_tag': { sel: 'select[name="{base}[field_c_advanced_title][0][html_tag]"]', kind: 'select' },
+          // Con `default`: el nivel del encabezado no depende de la pagina sino del tipo
+          // de bloque, asi que lo pone el mapping y el manifiesto no lo repite.
+          'field_c_advanced_title.html_tag': { sel: 'select[name="{base}[field_c_advanced_title][0][html_tag]"]', kind: 'select', default: 'h2' },
           'advanced.section_id': { sel: 'input[name="{base}[section_id][0][value]"]' },
           'classy.background_color': { sel: 'select[name="{base}[classy][0][c_text][background_color]"]', kind: 'select' },
           field_c_image: { kind: 'image', note: 'se sube a mano' },
@@ -103,7 +105,8 @@ const manifest = validateManifest({
     { type: 'c_text', fields: {
       field_c_text: 'Cuerpo del bloque de texto.',
       field_c_advanced_title: '¿Que considerar antes de adoptar?',
-      'field_c_advanced_title.html_tag': 'h2',
+      // A proposito distinto del `default` del mapping: lo que pide el manifiesto manda.
+      'field_c_advanced_title.html_tag': 'h3',
       'classy.background_color': 'bg_brand_01',
       field_c_image: 'foto.jpg',
     } },
@@ -111,7 +114,8 @@ const manifest = validateManifest({
       children: [{ type: 'c_text', fields: { field_c_text: 'Card uno.' } }] },
     { type: 'layout_columns_2', fields: { 'advanced.section_id': 'cuidados' },
       children: [
-        { slot: 0, type: 'c_text', fields: { field_c_text: 'Columna izquierda.' } },
+        // Con titulo y SIN html_tag: es el caso que tiene que completar el `default`.
+        { slot: 0, type: 'c_text', fields: { field_c_text: 'Columna izquierda.', field_c_advanced_title: 'Cuidados' } },
         // Contenedor adentro de contenedor: la misma forma que tiene el Tabs del CMS
         // (nodo -> comp_tabs -> comp_tabs_tab_item -> componente).
         { slot: 1, type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'grid-cards' },
@@ -159,6 +163,15 @@ try {
       classy: v(`select[name="${B}[0][subform][classy][0][c_text][background_color]"]`),
       viewMode: v(`select[name="${B}[1][subform][field_c_cardgrid_view_mode]"]`),
       cardHijo: v(`textarea[name="${B}[1][subform][field_c_subitems][0][subform][field_c_text][0][value]"]`) !== null,
+      // La lista de cards nace con UNA fila vacia (es obligatoria). Si el runner la usa,
+      // queda una sola card y el texto esta en la posicion 0; si la ignora, quedan dos y
+      // la primera es la fantasma.
+      cards: document.querySelectorAll('[data-drupal-selector="edit-field-components-1-subform-field-c-subitems-wrapper"] .slotrows > .row').length,
+      cardTexto: document.querySelector('[data-drupal-selector="edit-field-components-1-subform-field-c-subitems-0"] .ck-editor__editable')?.innerText ?? null,
+      // El html_tag que nadie escribio: en el bloque con titulo lo pone el default, y en
+      // la card, que no tiene titulo, no se pone nada.
+      tagPorDefecto: v(`select[name="${B}[2][subform][field_column_first][0][subform][field_c_advanced_title][0][html_tag]"]`),
+      tagSinTitulo: v(`select[name="${B}[1][subform][field_c_subitems][0][subform][field_c_advanced_title][0][html_tag]"]`),
       sectionId: v(`input[name="${B}[2][subform][section_id][0][value]"]`),
       col1: document.querySelector(`textarea[name="${col1}[field_c_text][0][value]"]`) !== null,
       col2: v(`select[name="${col2}[field_c_cardgrid_view_mode]"]`),
@@ -180,10 +193,14 @@ try {
   check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')
   check(dom.tituloTexto === '¿Que considerar antes de adoptar?', 'titulo adentro de Optional fields')
-  check(dom.tag === 'h2', 'select por valor de maquina (h2)')
+  check(dom.tag === 'h3', `select por valor de maquina, y el manifiesto le gana al default (${dom.tag})`)
+  check(dom.tagPorDefecto === 'h2', `el html_tag que nadie escribio lo pone el default (${dom.tagPorDefecto})`)
+  check(dom.tagSinTitulo === '', `y no se pone si no hay titulo que etiquetar (${JSON.stringify(dom.tagSinTitulo)})`)
   check(dom.classy === 'bg_brand_01', 'select adentro de Classy')
   check(dom.viewMode === 'slider-default-card', 'view mode del card grid')
   check(dom.cardHijo, 'hijo detras del dropbutton, plegado (como una pestaña)')
+  check(dom.cards === 1, `usa la fila vacia que el CMS ya traia, no deja una card fantasma (${dom.cards} fila/s)`)
+  check(dom.cardTexto === 'Card uno.', `y el contenido va en esa fila, la 0 (${JSON.stringify(dom.cardTexto)})`)
   check(dom.sectionId === 'cuidados', 'campo adentro de Avanzado (plegado)')
   check(dom.col1, 'hijo en la columna 1 (slot 0, con modal)')
   check(dom.col2 === 'grid-cards', 'hijo en la columna 2, con el area del final ESCONDIDA:\n     usa el boton "agregar en el medio" de paragraphs_features')

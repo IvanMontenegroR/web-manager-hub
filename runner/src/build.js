@@ -78,7 +78,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   }
 
   const ctx = { mapping, page, onStep, esperaSubform, consola,
-    escritos: [], pendientes: [], listas: new Set(), imagenes: [] }
+    escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map() }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
 
   onStep('Armando la estructura…')
@@ -154,14 +154,15 @@ async function addBlock(ctx, block, num, holder) {
   const def = mapping.paragraphs.types[block.type]
   if (!def) throw new Error(`El mapping no conoce el paragraph "${block.type}"`)
 
-  // El delta es la primera posicion LIBRE de esta lista. Se pregunta por el DOM en vez
-  // de contar filas: una fila se direcciona por su data-drupal-selector, que es exacto.
-  const delta = await freeDelta(page, holder.dsel)
+  // Donde cae este bloque. Puede ser una fila NUEVA (la primera posicion libre) o una
+  // que el CMS ya traia vacia — ver `reservarFila`.
+  const { delta, reusar } = await reservarFila(ctx, holder, def, block.type)
   const dsel = resolveSelector(holder.dsel, { delta })
   const base = resolveSelector(holder.base, { delta })
   const vars = { base, delta, dsel, dselw: widgetDsel(dsel), npath: namePath(dsel) }
 
-  onStep(`  ${num}. ${def.label || block.type}`)
+  onStep(`  ${num}. ${def.label || block.type}`
+    + (reusar ? ' (en la fila vacia que ya traia el CMS)' : ''))
 
   // El alta va por AJAX y se espera a que aparezca el subform de ESTE delta.
   //
@@ -170,7 +171,8 @@ async function addBlock(ctx, block, num, holder) {
   // tambien — pero SOLO ante un error del servidor, y solo despues de confirmar que la
   // fila no aparecio. Cualquier otra falla sigue frenando en seco, como corresponde.
   const fila = page.locator(rowSelector(dsel)).first()
-  let puesto = false
+  // Reusando no hay nada que agregar: la fila ya esta.
+  let puesto = reusar
   for (let intento = 1; intento <= REINTENTOS && !puesto; intento++) {
     const desde = consola.length
     if (intento > 1) onStep(`     El CMS no respondio. Reintento ${intento - 1} de ${REINTENTOS - 1}…`)
@@ -246,7 +248,8 @@ async function addBlock(ctx, block, num, holder) {
 async function llenarBloque(ctx, { block, def, vars, num }) {
   const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
-  if (!campos.length) return
+  const conDefault = Object.entries(def.fields || {}).filter(([, f]) => f.default != null)
+  if (!campos.length && !conDefault.length) return
 
   // Por las dudas: si "abrir todas" no alcanzo, esta fila trae su propio boton.
   const subform = page.locator(`[data-drupal-selector="${vars.dsel}-subform"]`)
@@ -285,6 +288,35 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(page, f, vars, value, ref))
   }
+
+  await ponerPorDefecto(ctx, { block, def, vars, num, conDefault })
+}
+
+// Los `default` del mapping. Son los valores que el CMS deja sin elegir y que no dependen
+// de la pagina sino del TIPO de bloque: el nivel del encabezado, por ejemplo — el titulo
+// de un banner es el h1 de la pagina, el de un componente un h2 y el de una card un h3.
+// Repetir eso en cada bloque de cada manifiesto es pedir que alguien se lo olvide, y un
+// "- Ninguno -" no se nota hasta que la pagina esta publicada y no tiene jerarquia.
+//
+// Se ponen SOLO cuando el manifiesto no dijo nada y el campo sigue vacio: lo que pide el
+// manifiesto manda siempre, y lo que ya tenia valor no se pisa.
+async function ponerPorDefecto(ctx, { block, def, vars, num, conDefault }) {
+  const { page, onStep } = ctx
+  for (const [key, f] of conDefault) {
+    if (key in (block.fields || {})) continue
+    const selector = resolveSelector(f.sel, vars)
+    if (!(await page.locator(selector).count())) continue
+    if (!esVacio(await leerCampo(page, f, selector))) continue
+    // Un `html_tag` sin titulo no se pone: la etiqueta es del texto, y sin texto no hay
+    // nada que etiquetar. Vale para cualquier campo escrito como "<campo>.<propiedad>":
+    // el dueño es el campo, y si el dueño esta vacio la propiedad sobra.
+    const titular = key.includes('.') ? key.split('.')[0] : null
+    const suyo = titular && def.fields?.[titular]
+    if (suyo?.sel && esVacio(await leerCampo(page, suyo, resolveSelector(suyo.sel, vars)))) continue
+    const ref = `${num}. ${block.type}.${key} (por defecto)`
+    onStep(`     ${key}: "${f.default}" (por defecto)`)
+    ctx.escritos.push(await fillField(page, f, vars, f.default, ref))
+  }
 }
 
 function resolveIn(add, vars) {
@@ -304,6 +336,87 @@ const EN_MEDIO_GENERICO = (wrapper) => `[data-drupal-selector="${wrapper}"] `
   + 'button.paragraphs-features__add-in-between__button:not([data-paragraph-bundle])'
 
 const seVe = async (loc) => (await loc.count()) > 0 && await loc.first().isVisible()
+
+// EN QUE FILA va este bloque.
+//
+// Cuando la lista de un paragraph es OBLIGATORIA, Drupal ABRE el formulario con una fila
+// ya puesta y vacia — al card grid, por ejemplo, le nace un card item de entrada. Si el
+// runner la ignora y agrega la suya al lado, la pagina termina con una card fantasma que
+// nadie cargo y que despues hay que borrar a mano. Asi que primero se usan las que ya
+// estan, y recien despues se agrega.
+//
+// Solo se reusa una fila que cumpla las DOS cosas: ser del mismo bundle que el bloque, y
+// estar vacia. Escribir encima de algo que ya tenia contenido seria pisar trabajo ajeno,
+// que es justo lo que el runner no hace.
+async function reservarFila(ctx, holder, def, type) {
+  const { page, onStep } = ctx
+  // La lista se mira UNA sola vez, antes de agregarle nada: despues de la primera alta ya
+  // no se puede distinguir lo que traia el CMS de lo que puso el runner.
+  if (!ctx.precreadas.has(holder.dsel)) {
+    ctx.precreadas.set(holder.dsel, await filasPrevias(page, holder.dsel))
+  }
+  const cola = ctx.precreadas.get(holder.dsel)
+  const primera = cola[0]
+  const bundle = enGuiones(def.value || type)
+
+  if (primera && primera.vacia && primera.bundle === bundle) {
+    cola.shift()
+    return { delta: primera.delta, reusar: true }
+  }
+  if (primera) {
+    // No se toca y no se vuelve a mirar: si la primera no sirve, reusar una de mas abajo
+    // dejaria igual un hueco en el medio. Se avisa, porque una fila de mas en la pagina
+    // es algo que alguien va a tener que mirar.
+    onStep(`     (la lista ya traia una fila ${primera.bundle ? `"${primera.bundle}"` : 'de tipo desconocido'}`
+      + `${primera.vacia ? ' vacia' : ' con contenido'} en la posicion ${primera.delta}: se deja como esta)`)
+    cola.length = 0
+  }
+  return { delta: await freeDelta(page, holder.dsel), reusar: false }
+}
+
+// Las filas que la lista YA tiene, en orden, con lo unico que hace falta saber de cada
+// una: de que bundle es y si esta vacia.
+async function filasPrevias(page, dselTpl) {
+  const out = []
+  for (let d = 0; d < MAX_DELTA; d++) {
+    const loc = page.locator(rowSelector(resolveSelector(dselTpl, { delta: d }))).first()
+    if (!(await loc.count())) break
+    out.push({ delta: d, ...(await loc.evaluate(mirarFila).catch(() => ({ bundle: null, vacia: false }))) })
+  }
+  return out
+}
+
+// Se ejecuta DENTRO del navegador, asi que va como una funcion sola, sin dependencias.
+//
+// El bundle sale de la clase `paragraph-type--<bundle-en-guiones>` que Drupal le pone a
+// la fila (en el CMS va en el <tr>; el orden de busqueda cubre las dos formas). Se mira
+// la fila propia y unos pocos ancestros a proposito: subiendo de mas se termina leyendo
+// el bundle del paragraph PADRE, que siempre esta ahi.
+const mirarFila = (el) => {
+  const clase = (n) => (n && typeof n.className === 'string' ? n.className : '')
+  let bundle = null
+  const cerca = [el.closest('tr'), el, el.parentElement, el.parentElement?.parentElement]
+  for (const n of cerca) {
+    const m = /paragraph-type--([a-z0-9-]+)/.exec(clase(n))
+    if (m) { bundle = m[1]; break }
+  }
+  // Campos que Drupal trae con valor puesto y que no dicen nada sobre si alguien cargo
+  // contenido: el peso de la fila, el formato de texto, el idioma.
+  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$/
+  let vacia = true
+  const campos = el.querySelectorAll('input[type="text"], input[type="url"], input[type="email"],'
+    + ' input[type="number"], textarea, select')
+  for (const c of campos) {
+    if (TECNICOS.test(c.name || '')) continue
+    const v = String(c.value || '').trim()
+    if (v && v !== '_none') { vacia = false; break }
+  }
+  return { bundle, vacia }
+}
+
+// `ln_c_grid_card_item` -> `ln-c-grid-card-item`, que es como Drupal escribe el bundle en
+// las clases del formulario.
+const enGuiones = (bundle) => String(bundle).replace(/_/g, '-')
 
 // La primera posicion libre de la lista. Corta apenas encuentra un hueco, asi que en
 // una pagina normal son un par de consultas.
