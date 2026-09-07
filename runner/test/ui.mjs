@@ -139,6 +139,26 @@ try {
 
   const b = await (await api2('/api/conectar')).json()
   check(b.sesion === true, 'y se puede volver a abrir despues de cerrarla')
+
+  // Subir las imagenes desde la INTERFAZ, con el mismo navegador que ya esta abierto.
+  // Por terminal no se puede mientras la interfaz corre: el perfil de Chrome es uno solo
+  // y el segundo proceso aborta para no corromperlo. Por eso vive aca.
+  const post = async (ruta, cuerpo) => (await fetch(new URL(ruta, u2.url).href, {
+    method: 'POST',
+    headers: { 'x-token': new URL(u2.url).searchParams.get('t'), 'content-type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+  })).json()
+  await post('/api/subir-imagenes', { solo: 'no-existe-ninguna-asi' })
+  let fin = null
+  for (let i = 0; i < 100 && (!fin || fin.estado === 'corriendo'); i++) {
+    await new Promise((r) => setTimeout(r, 100))
+    fin = await leer().then((e) => e.corrida)
+  }
+  check(fin?.tipo === 'imagenes', `la subida corre desde la interfaz (${fin?.tipo})`)
+  // Sin PNG que coincida, el subidor avisa en vez de reventar: eso prueba que llego
+  // hasta el, no que suba (subir de verdad lo cubre test/media.mjs).
+  check(fin?.estado === 'error' && /No hay ningun PNG/.test(fin.error || ''),
+    `y llega al subidor de verdad (${(fin?.error || '').slice(0, 60)})`)
 } finally {
   await u2.cerrar()
   falso.close()

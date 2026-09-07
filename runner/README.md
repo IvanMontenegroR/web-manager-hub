@@ -128,7 +128,13 @@ volver a subir la que cambio — el INDICE dice cual.
 
 ### Como subirlas
 
-Hay un script que las sube solo, con la misma sesion que usa el runner:
+Desde la **interfaz**, que es lo normal: en "Imagenes de prueba" hay dos botones, *Probar
+con una* y *Subir las 36*. Usa la misma ventana de Chrome que ya esta abierta y el avance
+se ve en vivo.
+
+Por terminal tambien se puede, pero **no con la interfaz abierta**: el perfil de Chrome es
+uno solo y Chrome aborta antes que arriesgarse a corromperlo (si pasa, el error lo explica
+y dice que uses la interfaz).
 
 ```bash
 npm run subir-placeholders

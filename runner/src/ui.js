@@ -26,6 +26,7 @@ import { openBrowser } from './browser.js'
 import { loadManifest, countBlocks, validateManifest } from './manifest.js'
 import { missingTypes } from './mapping.js'
 import { buildPage } from './build.js'
+import { subirPlaceholders } from './media.js'
 import { logRun } from './log.js'
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url))
@@ -86,8 +87,8 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   // Una corrida por vez. El estado vive aca y la pagina lo consulta cada medio segundo:
   // mas simple que un stream y no se pierde nada si la pestaña se recarga.
   let corrida = null
-  const nuevaCorrida = (archivo, save) => (corrida = {
-    archivo, save, estado: 'corriendo', pasos: [], resultado: null, error: null,
+  const nuevaCorrida = (archivo, save, tipo = 'pagina') => (corrida = {
+    archivo, save, tipo, estado: 'corriendo', pasos: [], resultado: null, error: null,
     desde: new Date().toISOString(),
   })
 
@@ -136,6 +137,33 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     }
   }
 
+  // Subir los placeholders desde la interfaz. Va por aca y no por la terminal porque el
+  // perfil de Chrome es UNO: con la ventana de la interfaz abierta, un segundo proceso
+  // no puede usarlo (Chrome lo bloquea y aborta para no corromperlo). Y porque los
+  // content editors no van a abrir una terminal, que es de lo que se trata todo esto.
+  async function subir(solo) {
+    const c = nuevaCorrida(null, false, 'imagenes')
+    if (!(await comprobarSesion({ abrir: true }))) {
+      c.estado = 'error'
+      c.error = 'No hay sesion en Drupal. Conectate primero.'
+      return
+    }
+    const { page } = await navegador()
+    try {
+      const r = await subirPlaceholders({
+        page, mapping, solo: solo || undefined,
+        carpeta: resolve('placeholders'),
+        onStep: (t) => c.pasos.push(t),
+      })
+      c.estado = 'listo'
+      c.resultado = { ...r }
+    } catch (e) {
+      c.foto = await sacarFoto(page).catch(() => null)
+      c.estado = 'error'
+      c.error = e.message
+    }
+  }
+
   const rutas = {
     // Lee el estado CACHEADO: no toca Drupal ni la ventana. La pagina lo consulta cada
     // pocos segundos y tiene que ser inofensivo.
@@ -160,6 +188,11 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
       if (!body?.archivo) throw new Error('Falta el manifiesto.')
       // No se espera: la pagina sigue el avance por /api/corrida.
       correr(body.archivo, !!body.save).catch(() => {})
+      return { ok: true }
+    },
+    'POST /api/subir-imagenes': async (body) => {
+      if (corrida?.estado === 'corriendo') throw new Error('Ya hay algo corriendo.')
+      subir(body?.solo).catch(() => {})
       return { ok: true }
     },
     'POST /api/guardar-manifiesto': async (body) => {
