@@ -431,8 +431,20 @@ async function fillField(page, f, vars, value, ref) {
   if (f.kind === 'select') {
     // Se intenta por VALOR de maquina, que es lo que guarda nuestro catalogo; si esa
     // opcion no existe se prueba por etiqueta antes de darse por vencido.
-    try { await el.selectOption(String(value)) }
-    catch { await el.selectOption({ label: String(value) }) }
+    //
+    // Con esperas CORTAS y a proposito: si la opcion no existe, Playwright reintenta
+    // hasta agotar el minuto y termina diciendo "did not find some options", que no dice
+    // cual se pidio ni cuales habia. Un valor mal escrito en el manifiesto es el error
+    // mas facil de cometer y merece un mensaje que se lea.
+    const puesto = await elegirOpcion(el, String(value))
+    if (!puesto) {
+      const hay = await el.evaluate((s) => [...s.options]
+        .map((o) => (o.text && o.text !== o.value ? `${o.value} ("${o.text}")` : o.value))
+        .filter((v) => v !== '' && v !== '_none')).catch(() => [])
+      throw new Error(`"${value}" no es una opcion de ${ref}. Las que acepta el CMS: `
+        + `${hay.join(', ') || 'ninguna (el desplegable esta vacio)'}. `
+        + 'Corregi el valor en el manifiesto.')
+    }
   } else if (f.kind === 'checkbox') {
     await el.setChecked(!!value)
   } else if (f.kind === 'richtext') {
@@ -515,6 +527,14 @@ async function guardarWidget(ctx, key, vars, ref) {
   // Un widget puede ser enorme (una Media library trae su modal entero). Con el principio
   // alcanza para ver de que clase es y como se abre.
   if (html) ctx.imagenes.push({ ref, html: html.slice(0, 20000) })
+}
+
+// Por valor de maquina y, si no, por etiqueta. Devuelve si pudo.
+async function elegirOpcion(el, valor) {
+  for (const como of [valor, { label: valor }]) {
+    try { await el.selectOption(como, { timeout: 4000 }); return true } catch { /* la otra */ }
+  }
+  return false
 }
 
 // Dos lecturas del mismo campo son "la misma" si dicen lo mismo: los espacios de un

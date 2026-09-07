@@ -233,6 +233,21 @@ try {
   check(!/placeholder-x-desktop-10x10-v2/.test(dom.medio || ''),
     'y elige el nombre EXACTO, no el que empieza igual')
 
+  // Un valor mal escrito en el manifiesto es el error mas facil de cometer. El mensaje
+  // tiene que decir cual se pidio Y cuales acepta el CMS: "did not find some options"
+  // despues de un minuto de reintentos no sirve para nada.
+  const t0 = Date.now()
+  let malSelect = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {}, esperaSubform: 4000,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', fields: { field_c_cardgrid_view_mode: 'no-existe' } }] }) })
+  } catch (e) { malSelect = e.message }
+  const tardo = Date.now() - t0
+  check(/"no-existe" no es una opcion/.test(malSelect) && /grid-cards/.test(malSelect),
+    `un valor que el desplegable no tiene dice cuales acepta (${malSelect.slice(0, 100)})`)
+  check(tardo < 20000, `y lo dice rapido, sin agotar reintentos (${tardo}ms)`)
+
   // La regla de la casa: el runner NO sube imagenes. Si la que pide el manifiesto no
   // esta en la libreria, frena y dice cual — subir por las suyas llenaria la libreria de
   // duplicados que despues no limpia nadie.

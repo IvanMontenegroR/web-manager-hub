@@ -18,7 +18,7 @@
     {
       "type": "banner",
       "fields": {
-        "field_banner_type": "main-hero",
+        "field_banner_type": "main_hero",
         "field_c_advanced_title": "Banner con placeholder",
         "field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
       }
