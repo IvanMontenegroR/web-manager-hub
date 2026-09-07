@@ -9,14 +9,14 @@
   "path": "input[name=\"path[0][alias]\"]",
   "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
   "media": {
-    "_": "Bundle responsive_image, NO image: es el que piden los campos de los componentes, y un medio de ese tipo lleva DOS imagenes adentro (Image Desktop e Image Mobile, las dos obligatorias). Verificado contra el HTML real de /media/add/responsive_image. El formulario cambia entero al subir: el alt y la vista previa los dibuja el AJAX. Por eso `subido`/`subidoMobile` (los hidden fids) son la señal de que cada subida termino, y el alt se busca despues.",
+    "_": "Bundle responsive_image, NO image: es el que piden los campos de los componentes, y un medio de ese tipo lleva DOS imagenes adentro (Image Desktop e Image Mobile, las dos obligatorias). Verificado contra el HTML real de /media/add/responsive_image. El formulario cambia entero al subir: el alt y la vista previa los dibuja el AJAX. Por eso `subido`/`subidoMobile` (los hidden fids) son la señal de que cada subida termino, y los alt se buscan despues. Son DOS -— uno por imagen -— y los dos obligatorios: llenar solo el de desktop hace que Drupal rechace el formulario entero y no se guarde nada.",
     "add": "/media/add/responsive_image",
     "lista": "/admin/content/media?name={nombre}",
     "archivo": "input[name=\"files[field_media_image_0]\"]",
     "subido": "input[name=\"field_media_image[0][fids]\"]",
     "archivoMobile": "input[name=\"files[field_image_mobile_0]\"]",
     "subidoMobile": "input[name=\"field_image_mobile[0][fids]\"]",
-    "alt": "input[name=\"field_media_image[0][alt]\"]",
+    "alt": "input[name$=\"[alt]\"]",
     "nombre": "input[name=\"name[0][value]\"]",
     "guardar": "input[name=\"op\"][value=\"Guardar\"]"
   },

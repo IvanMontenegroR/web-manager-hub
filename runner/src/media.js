@@ -35,10 +35,14 @@ export const MEDIA_POR_DEFECTO = {
   // dato que significa "el archivo YA esta en el servidor", y no depende de que este
   // formulario tenga o no cada campo.
   subido: 'input[name="field_media_image[0][fids]"]',
-  // El alt aparece RECIEN despues de subir, adentro del widget que el AJAX redibuja. Por
-  // eso se busca despues de esperar el `fids` y no antes: antes no existe. Es del campo
-  // de DESKTOP y es obligatorio; el de mobile no lo pide.
-  alt: 'input[name="field_media_image[0][alt]"]',
+  // Los alt aparecen RECIEN despues de subir, adentro del widget que el AJAX redibuja.
+  // Por eso se buscan despues de esperar los `fids` y no antes: antes no existen.
+  //
+  // Son UNO POR IMAGEN y los DOS son obligatorios. Llenar solo el de desktop hacia que
+  // Drupal rechazara el formulario entero y no se guardara ningun medio. Por eso el
+  // selector los toma a todos y se llenan todos: un formulario con tres imagenes
+  // funcionaria igual, sin enumerarlas.
+  alt: 'input[name$="[alt]"]',
   nombre: 'input[name="name[0][value]"]',
   // Gin repite Guardar en su barra pegajosa: hay DOS con el mismo name. Se aprieta el
   // que se ve (mismo problema que los botones de alta de paragraphs).
@@ -122,9 +126,8 @@ async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
   await subirArchivo(page, cfg, cfg.archivo, cfg.subido, join(carpeta, archivo.desktop), nombre, 'desktop')
   await subirArchivo(page, cfg, cfg.archivoMobile, cfg.subidoMobile, join(carpeta, archivo.mobile), nombre, 'mobile')
 
-  // Si este formulario pide alt, se llena; si no lo pide, no se inventa nada.
-  const alt = await siEsta(page, cfg.alt)
-  if (alt) await alt.fill(cfg.alUsar)
+  // Si este formulario pide alt, se llenan TODOS; si no lo pide, no se inventa nada.
+  await llenarAlts(page, cfg)
 
   // El nombre del media es el identificador: se fuerza al del archivo. Drupal lo
   // precarga con el nombre del archivo CON extension, asi que hay que pisarlo.
@@ -155,6 +158,19 @@ async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
       + ' — se puede volver a correr: las que ya estan se saltean.')
   }
   return 'subida'
+}
+
+// Cada imagen tiene su alt y todos son obligatorios. Se llenan los que esten VACIOS: si
+// alguno ya vino con algo, es de alguien y no se pisa.
+async function llenarAlts(page, cfg) {
+  const alts = page.locator(cfg.alt)
+  const n = await alts.count()
+  for (let i = 0; i < n; i++) {
+    const a = alts.nth(i)
+    if (!(await a.isVisible().catch(() => false))) continue
+    if (await a.inputValue().catch(() => '')) continue
+    await a.fill(cfg.alUsar).catch(() => {})
+  }
 }
 
 // Un campo OPCIONAL: si el formulario no lo tiene, se sigue de largo AL INSTANTE. Un

@@ -400,6 +400,7 @@ const MEDIA_FORM = (conAlt = true) => `<!doctype html><html><head><meta charset=
   <input type="file" name="files[field_media_image_0]" id="ar">
   <input type="hidden" name="field_image_mobile[0][fids]" value="">
   <input type="file" name="files[field_image_mobile_0]" id="arm">
+  <div id="widget-mobile"></div>
   <label>Nombre <input type="text" name="name[0][value]" value=""></label>
   <label>Publicado <input type="checkbox" name="status[value]" checked></label>
   <input type="submit" name="op" value="Guardar">
@@ -412,6 +413,13 @@ const CON_ALT = ${conAlt ? 'true' : 'false'}
 document.getElementById('arm').addEventListener('change', () => {
   setTimeout(() => {
     document.querySelector('input[name="field_image_mobile[0][fids]"]').value = '43'
+    // El mobile tiene SU alt, y tambien es obligatorio. Aparece al subir, igual que el
+    // de desktop: llenar uno solo y no el otro es lo que rompia el guardado.
+    if (CON_ALT) {
+      document.getElementById('widget-mobile').innerHTML =
+        '<label>Texto alternativo mobile <input type="text"'
+        + ' name="field_image_mobile[0][alt]" maxlength="125" value=""></label>'
+    }
   }, 300)
 })
 document.getElementById('ar').addEventListener('change', (e) => {
@@ -434,11 +442,18 @@ for (const b of document.querySelectorAll('input[name="op"]')) {
       location.href = '/media/guardar?error=1'
       return
     }
+    const alts = [...document.querySelectorAll('input[name$="[alt]"]')]
+    if (alts.length && alts.some((a) => !a.value.trim())) {
+      location.href = '/media/guardar?error=alt'
+      return
+    }
     const alt = document.querySelector('input[name="field_media_image[0][alt]"]')
+    const altM = document.querySelector('input[name="field_image_mobile[0][alt]"]')
     const n = document.querySelector('input[name="name[0][value]"]').value
     const p = document.querySelector('input[name="status[value]"]').checked ? '1' : '0'
     location.href = '/media/guardar?name=' + encodeURIComponent(n) + '&pub=' + p
       + '&alt=' + encodeURIComponent(alt ? alt.value : '')
+      + '&altm=' + encodeURIComponent(altM ? altM.value : '')
   })
 }
 </script></body></html>`
@@ -454,8 +469,13 @@ export function startFakeDrupal() {
     // El mismo formulario en un sitio que NO pide alt: el subidor no se tiene que colgar.
     if (url === '/media/add/simple') return html(MEDIA_FORM(false))
     if (url === '/media/guardar') {
+      if (q.get('error') === 'alt') {
+        return html('<div class="messages--error">El campo Texto alternativo es obligatorio.</div>')
+      }
       if (q.get('error')) return html('<div class="messages--error">El campo Imagen es obligatorio.</div>')
-      medios.set(q.get('name'), { publicado: q.get('pub') === '1', alt: q.get('alt') || '' })
+      medios.set(q.get('name'), {
+        publicado: q.get('pub') === '1', alt: q.get('alt') || '', altMobile: q.get('altm') || '',
+      })
       return html('<h1>Medio creado</h1>')
     }
     if (url === '/admin/content/media') {

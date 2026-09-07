@@ -71,6 +71,12 @@ try {
   check(Object.values(guardados).every((m) => m.alt === 'Placeholder de prueba'),
     `llena el alt, que Drupal dibuja recien al terminar de subir (${Object.values(guardados)[0]?.alt || 'vacio'})`)
 
+  // El de MOBILE tambien: es otro campo, aparece al subir la segunda imagen y es igual
+  // de obligatorio. Llenar solo el de desktop hacia que Drupal rechazara el formulario
+  // entero y no se guardara ningun medio.
+  check(Object.values(guardados).every((m) => m.altMobile === 'Placeholder de prueba'),
+    `y tambien el alt de la imagen mobile (${Object.values(guardados)[0]?.altMobile || 'vacio'})`)
+
   // Si se apretara Guardar antes de que el AJAX suba el archivo, el formulario de
   // mentira contesta con el error de campo obligatorio y esto se caeria.
   const d = await subirPlaceholders({

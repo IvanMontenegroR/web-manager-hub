@@ -185,6 +185,10 @@ de ese formulario que importan:
   archivo ya esta en el servidor" — y no la aparicion de un campo. Un sitio cuyo
   formulario no pida alt (porque el alt viva en el campo que referencia al medio) tambien
   funciona: si no esta, sigue de largo.
+- **Hay UN alt por imagen y los dos son obligatorios.** El de mobile aparece recien al
+  subir la segunda imagen. Llenar solo el de desktop hace que Drupal rechace el formulario
+  entero y no se guarde ningun medio, sin que se vea bien por que. Por eso el selector los
+  toma a todos (`input[name$="[alt]"]`) y se llenan todos los que esten vacios.
 - **El medio queda publicado**, a diferencia de las paginas. La regla de "siempre
   borrador" es para el contenido; un medio despublicado no se puede elegir de la libreria,
   que es justamente para lo que se sube. Con `"publicar": false` en el mapping se destilda.
