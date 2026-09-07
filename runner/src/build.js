@@ -248,8 +248,7 @@ async function addBlock(ctx, block, num, holder) {
 async function llenarBloque(ctx, { block, def, vars, num }) {
   const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
-  const conDefault = Object.entries(def.fields || {}).filter(([, f]) => f.default != null)
-  if (!campos.length && !conDefault.length) return
+  if (!campos.length) return
 
   // Por las dudas: si "abrir todas" no alcanzo, esta fila trae su propio boton.
   const subform = page.locator(`[data-drupal-selector="${vars.dsel}-subform"]`)
@@ -287,35 +286,6 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(page, f, vars, value, ref))
-  }
-
-  await ponerPorDefecto(ctx, { block, def, vars, num, conDefault })
-}
-
-// Los `default` del mapping. Son los valores que el CMS deja sin elegir y que no dependen
-// de la pagina sino del TIPO de bloque: el nivel del encabezado, por ejemplo — el titulo
-// de un banner es el h1 de la pagina, el de un componente un h2 y el de una card un h3.
-// Repetir eso en cada bloque de cada manifiesto es pedir que alguien se lo olvide, y un
-// "- Ninguno -" no se nota hasta que la pagina esta publicada y no tiene jerarquia.
-//
-// Se ponen SOLO cuando el manifiesto no dijo nada y el campo sigue vacio: lo que pide el
-// manifiesto manda siempre, y lo que ya tenia valor no se pisa.
-async function ponerPorDefecto(ctx, { block, def, vars, num, conDefault }) {
-  const { page, onStep } = ctx
-  for (const [key, f] of conDefault) {
-    if (key in (block.fields || {})) continue
-    const selector = resolveSelector(f.sel, vars)
-    if (!(await page.locator(selector).count())) continue
-    if (!esVacio(await leerCampo(page, f, selector))) continue
-    // Un `html_tag` sin titulo no se pone: la etiqueta es del texto, y sin texto no hay
-    // nada que etiquetar. Vale para cualquier campo escrito como "<campo>.<propiedad>":
-    // el dueño es el campo, y si el dueño esta vacio la propiedad sobra.
-    const titular = key.includes('.') ? key.split('.')[0] : null
-    const suyo = titular && def.fields?.[titular]
-    if (suyo?.sel && esVacio(await leerCampo(page, suyo, resolveSelector(suyo.sel, vars)))) continue
-    const ref = `${num}. ${block.type}.${key} (por defecto)`
-    onStep(`     ${key}: "${f.default}" (por defecto)`)
-    ctx.escritos.push(await fillField(page, f, vars, f.default, ref))
   }
 }
 

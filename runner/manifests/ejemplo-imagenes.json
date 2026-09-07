@@ -1,5 +1,5 @@
 {
-  "_": "Para probar que el runner ELIGE imagenes de la Media library. El valor de un campo de imagen es el NOMBRE del medio, que para los placeholders es el nombre del archivo sin el .png (ver placeholders/INDICE.md). Antes de correr esto hay que haberlos subido: npm run subir-placeholders. Si falta alguno, el runner frena y dice cual — nunca lo sube por su cuenta.",
+  "_": "Para probar que el runner ELIGE imagenes de la Media library. El valor de un campo de imagen es el NOMBRE del medio, que para los placeholders es el nombre del archivo sin el .png (ver placeholders/INDICE.md). Antes de correr esto hay que haberlos subido: npm run subir-placeholders. Si falta alguno, el runner frena y dice cual — nunca lo sube por su cuenta. Los html_tag son de ESTA pagina: aca el h1 es el bloque de texto de arriba, que es el titulo, y el banner queda en h2 porque abre una seccion mas. En otra pagina el banner seria el h1: el nivel lo decide la pagina, no el tipo de bloque.",
   "manifest": 1,
   "page": {
     "title": "Prueba de imagenes",
@@ -11,6 +11,7 @@
       "type": "c_text",
       "fields": {
         "field_c_advanced_title": "Prueba de seleccion de imagenes",
+        "field_c_advanced_title.html_tag": "h1",
         "field_c_text": "Esta pagina existe para comprobar que el runner elige las imagenes de la libreria. Se puede borrar."
       }
     },
@@ -19,6 +20,7 @@
       "fields": {
         "field_banner_type": "main_hero",
         "field_c_advanced_title": "Banner con placeholder",
+        "field_c_advanced_title.html_tag": "h2",
         "field_c_image": "placeholder-banner-main-hero"
       }
     },
@@ -26,13 +28,15 @@
       "type": "ln_c_cardgrid",
       "fields": {
         "field_c_cardgrid_view_mode": "slider-default-card",
-        "field_c_advanced_title": "Cards con imagen"
+        "field_c_advanced_title": "Cards con imagen",
+        "field_c_advanced_title.html_tag": "h2"
       },
       "children": [
         {
           "type": "ln_c_grid_card_item",
           "fields": {
             "field_c_advanced_title": "Card con placeholder",
+            "field_c_advanced_title.html_tag": "h3",
             "field_c_text": "La imagen sale de la libreria, no se sube.",
             "field_c_image": "placeholder-card-grid-slider-default-card"
           }

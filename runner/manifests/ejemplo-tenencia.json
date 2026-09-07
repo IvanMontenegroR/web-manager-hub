@@ -1,5 +1,5 @@
 {
-  "_": "Las imagenes son NOMBRES de medios ya subidos a la libreria (ver placeholders/INDICE.md). La de las cards es la variante SQUARE porque el bloque usa card_grid_default_square: la forma de la card la decide ese estilo, y con el la imagen es apaisada (485x280) y no vertical. Los html_tag de los titulos no se escriben: los pone el mapping (banner h1, componente h2, card h3). Se nombran solo para cambiarlos.",
+  "_": "Las imagenes son NOMBRES de medios ya subidos a la libreria (ver placeholders/INDICE.md). La de las cards es la variante SQUARE porque el bloque usa card_grid_default_square: la forma de la card la decide ese estilo, y con el la imagen es apaisada (485x280) y no vertical. Los html_tag arman el esquema de ESTA pagina: el banner es el h1, cada seccion un h2 y lo que cuelga de una seccion (cards, items del acordeon) un h3. El runner no los pone por su cuenta.",
   "manifest": 1,
   "page": {
     "title": "Tenencia Responsable",
@@ -12,6 +12,7 @@
       "fields": {
         "field_banner_type": "main_hero",
         "field_c_advanced_title": "Tenencia responsable",
+        "field_c_advanced_title.html_tag": "h1",
         "field_c_image": "placeholder-banner-main-hero"
       }
     },
@@ -19,6 +20,7 @@
       "type": "c_text",
       "fields": {
         "field_c_advanced_title": "¿Qué considerar antes de adoptar?",
+        "field_c_advanced_title.html_tag": "h2",
         "field_c_text": "Adoptar es una decisión para toda la vida del animal.",
         "classy.text_align": "text_align_center"
       }
@@ -28,6 +30,7 @@
       "fields": {
         "field_c_cardgrid_view_mode": "slider-default-card",
         "field_c_advanced_title": "Paso 1: ¡Prepara todo para la llegada de tu mejor amigo!",
+        "field_c_advanced_title.html_tag": "h2",
         "classy.card_style_card": "card_grid_default_square"
       },
       "children": [
@@ -35,6 +38,7 @@
           "type": "ln_c_grid_card_item",
           "fields": {
             "field_c_advanced_title": "Un lugar para dormir",
+            "field_c_advanced_title.html_tag": "h3",
             "field_c_text": "Una cama en un rincón tranquilo, lejos del paso.",
             "field_c_image": "placeholder-card-grid-slider-default-card-square"
           }
@@ -43,6 +47,7 @@
           "type": "ln_c_grid_card_item",
           "fields": {
             "field_c_advanced_title": "Comida y agua",
+            "field_c_advanced_title.html_tag": "h3",
             "field_c_text": "Dos bowls, y el alimento que corresponde a su edad.",
             "field_c_image": "placeholder-card-grid-slider-default-card-square"
           }
@@ -51,12 +56,16 @@
     },
     {
       "type": "layout_columns_2",
-      "fields": { "advanced.section_id": "preguntas" },
+      "fields": {
+        "advanced.section_id": "preguntas"
+      },
       "children": [
         {
           "slot": 0,
           "type": "c_text",
-          "fields": { "field_c_text": "Las dudas más frecuentes de quien adopta por primera vez." }
+          "fields": {
+            "field_c_text": "Las dudas más frecuentes de quien adopta por primera vez."
+          }
         },
         {
           "slot": 1,
@@ -66,6 +75,7 @@
               "type": "accordion_item",
               "fields": {
                 "field_c_advanced_title": "¿Cuánto cuesta mantener un perro?",
+                "field_c_advanced_title.html_tag": "h3",
                 "field_c_text": "Depende del tamaño y la edad. Contá alimento, vacunas y control anual."
               }
             }

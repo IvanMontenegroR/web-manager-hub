@@ -57,12 +57,9 @@
 // Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se
 // pone ANTES de escribir, porque el CMS arranca en uno que no admite HTML.
 //
-// `default` es el valor que el runner pone cuando el manifiesto NO menciona ese campo y
-// el CMS lo dejo vacio. Es para lo que depende del TIPO de bloque y no de la pagina: el
-// `html_tag` del titulo, por ejemplo — h1 en el banner, h2 en un componente, h3 en una
-// card. Lo que pide el manifiesto manda siempre; lo que ya tenia valor no se pisa. Un
-// campo escrito como "<campo>.<propiedad>" ademas no se completa si su campo esta vacio:
-// un html_tag sin titulo no etiqueta nada.
+// El mapping NO pone valores por su cuenta: dice DONDE esta cada campo, no que va adentro.
+// Todo lo que se escribe sale del manifiesto, el `html_tag` de un titulo incluido — el
+// nivel de encabezado es una decision de esa pagina, no del tipo de bloque.
 import { readFileSync } from 'node:fs'
 
 export function loadMapping(file) {
