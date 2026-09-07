@@ -257,8 +257,20 @@ try {
       manifest: validateManifest({ manifest: 1, page: { title: 'x' },
         blocks: [{ type: 'ln_c_cardgrid', fields: { field_media: 'no-subi-esta-imagen' } }] }) })
   } catch (e) { sinMedio = e.message }
-  check(/no-subi-esta-imagen/.test(sinMedio) && /subir-placeholders/.test(sinMedio),
-    `frena si la imagen no esta en la libreria, y dice como subirla (${sinMedio.slice(0, 90)})`)
+  check(/no-subi-esta-imagen/.test(sinMedio) && /no se subio/.test(sinMedio),
+    `frena si la imagen no esta en la libreria (${sinMedio.slice(0, 80)})`)
+
+  // Y lo que de verdad hace falta cuando el nombre no coincide: que diga QUE HAY. Un
+  // "no existe" pelado deja a quien lo lee sin saber si el nombre esta mal, si la imagen
+  // no se subio, o si quedo guardada con otra forma.
+  let parecido = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {}, esperaSubform: 4000,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', fields: { field_media: 'placeholder-x-desktop-99x99' } }] }) })
+  } catch (e) { parecido = e.message }
+  check(/placeholder-x-desktop-10x10/.test(parecido),
+    `y cuando el nombre no coincide, lista los que SI estan (${parecido.slice(0, 140)})`)
 
   // Un campo que se lleno bien y despues se vacio (Drupal re-dibuja el formulario en
   // cada alta) NO puede pasar en silencio: la pagina saldria armada y sin contenido.

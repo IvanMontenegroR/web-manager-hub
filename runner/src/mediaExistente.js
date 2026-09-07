@@ -41,19 +41,35 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
   const input = await esperarVisible(page, `${campo} ${c.buscar}`, 15000)
   if (!input) throw new Error(`No aparecio el buscador de medios de ${ref} (${campo} ${c.buscar})`)
 
-  // Tecleado de verdad: el autocompletar de Drupal escucha teclas, no valores.
-  await input.click()
-  await input.fill('')
-  await input.pressSequentially(nombre, { delay: 25 })
+  // Se le pregunta a Drupal DIRECTO, por el mismo endpoint que usa el autocompletar. El
+  // input trae su ruta en `data-autocomplete-path`, con el token y todo. Tres ventajas
+  // sobre teclear y esperar que baje la lista: devuelve el valor exacto que Drupal quiere
+  // ("Nombre (id)"), no depende de que la lista aparezca, y cuando NO hay resultado se
+  // puede decir que SI hay, que es lo unico que sirve para arreglarlo.
+  const opciones = await consultar(page, input, nombre)
+  const exacta = opciones.find((o) => etiqueta(o) === nombre)
 
-  // La lista tarda: es una consulta al servidor por cada tecleo.
-  const opcion = await esperarOpcion(page, c.opciones, nombre, 12000)
-  if (opcion) {
-    await opcion.click()
+  if (exacta) {
+    // El valor de maquina es "Nombre (id)": es lo que Drupal valida al confirmar.
+    await input.fill(String(exacta.value ?? nombre))
+  } else if (opciones === null) {
+    // Sin endpoint (otro widget, otro Drupal): se vuelve a teclear y esperar la lista.
+    await input.click()
+    await input.fill('')
+    await input.pressSequentially(nombre, { delay: 25 })
+    const opcion = await esperarOpcion(page, c.opciones, nombre, 12000)
+    if (opcion) await opcion.click()
+    else await input.fill(nombre)
   } else {
-    // Sin lista, Drupal igual resuelve un nombre EXACTO si es unico. Si no existe, lo
-    // dice el propio formulario al confirmar, y eso se lee abajo.
-    await input.fill(nombre)
+    // Aca esta la respuesta que faltaba: que hay en la libreria que se le parezca.
+    const parecidos = await consultar(page, input, recorte(nombre))
+    const lista = (parecidos || []).map(etiqueta).filter(Boolean).slice(0, 8)
+    throw new Error(`No hay ningun medio llamado "${nombre}" (${ref}). `
+      + (lista.length
+        ? `En la libreria, empezando por "${recorte(nombre)}", hay: ${lista.join(' | ')}. `
+          + 'Si los nombres tienen otra forma, el manifiesto tiene que usar ESA.'
+        : `Tampoco hay nada que empiece con "${recorte(nombre)}": esa imagen no se subio. `
+          + 'Subila desde la interfaz, en "Imagenes de prueba".'))
   }
 
   const ok = await esperarVisible(page, `${campo} ${c.confirmar}`, 10000)
@@ -76,6 +92,35 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
     await page.waitForTimeout(200)
   }
 }
+
+// Le pregunta al endpoint del autocompletar que hay para ese texto. Devuelve la lista, o
+// null si este input no declara endpoint (y entonces hay que teclear a mano).
+// Va por `page.request`, que usa las cookies de la sesion abierta: no navega, asi que no
+// se lleva puesto el formulario a medio armar.
+async function consultar(page, input, texto) {
+  const ruta = await input.getAttribute('data-autocomplete-path').catch(() => null)
+  if (!ruta) return null
+  const url = new URL(ruta, page.url())
+  url.searchParams.set('q', texto)
+  try {
+    const r = await page.request.get(url.href, { headers: { accept: 'application/json' } })
+    if (!r.ok()) return null
+    const j = await r.json()
+    return Array.isArray(j) ? j : []
+  } catch { return null }
+}
+
+// Drupal devuelve `label` con HTML escapado y `value` como "Nombre (id)". El nombre
+// limpio es lo que se compara contra el manifiesto.
+const etiqueta = (o) => String(o?.label ?? o?.value ?? '')
+  .replace(/<[^>]*>/g, '')
+  .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#0?39;/g, "'")
+  .replace(/\s*\(\d+\)\s*$/, '')
+  .trim()
+
+// Un prefijo para buscar parecidos: sin la medida ni la vista del final, que es justo
+// donde suelen estar las diferencias.
+const recorte = (nombre) => nombre.split('-').slice(0, 3).join('-') || nombre
 
 // Lo que el campo muestra ahora. Con el medio puesto, el inline entity form dibuja una
 // fila con su nombre; es la unica forma de comprobar que quedo.

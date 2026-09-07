@@ -16,6 +16,12 @@
 // que el motor sabe agregar, esperar, abrir desplegables, llenar y anidar.
 import { createServer } from 'node:http'
 
+// Los medios que "ya estan subidos" en la libreria de mentira. Los usa el navegador (la
+// lista del autocompletar) y el servidor (el endpoint que consulta el runner), asi que
+// viven aca y se inyectan en la pagina: dos copias se desincronizan.
+const MEDIOS_LIB = ['placeholder-x-desktop-10x10', 'placeholder-x-desktop-10x10-v2',
+  'placeholder-y-mobile-20x20']
+
 const FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear pagina</title>
 <style>body{font:14px system-ui;margin:24px} .js-form-item{margin:8px 0}
 details{margin:8px 0;padding:6px;border:1px solid #ccc} details:not([open]) .js-form-item{display:none}
@@ -215,8 +221,7 @@ function addTo(container, base, dsel, npath, type) {
 function abrirTodas(container) { [...container.children].forEach(desplegar) }
 
 // La libreria de medios de mentira: lo que hay para elegir.
-const MEDIOS = ['placeholder-x-desktop-10x10', 'placeholder-x-desktop-10x10-v2',
-  'placeholder-y-mobile-20x20']
+const MEDIOS = ${JSON.stringify(MEDIOS_LIB)}
 
 function wireIef(scope) {
   scope.querySelectorAll('.ief-add-existing').forEach((b) => {
@@ -229,8 +234,8 @@ function wireIef(scope) {
       setTimeout(() => {
         campo.querySelector('.ief-hueco').innerHTML =
           '<div class="js-form-item"><label>Elemento multimedia</label>'
-          + '<input type="text" class="form-autocomplete" data-drupal-selector="'
-          + dsel + '-form-0-entity-id"></div>'
+          + '<input type="text" class="form-autocomplete" data-autocomplete-path="/ac/media"'
+          + ' data-drupal-selector="' + dsel + '-form-0-entity-id"></div>'
           + '<input type="submit" class="button" data-drupal-selector="'
           + dsel + '-form-0-actions-ief-reference-save" value="Añadir elemento multimedia">'
         const input = campo.querySelector('.form-autocomplete')
@@ -252,7 +257,10 @@ function wireIef(scope) {
         })
         campo.querySelector('[data-drupal-selector$="-ief-reference-save"]')
           .addEventListener('click', () => {
-            const v = input.value.trim()
+            // Drupal acepta "Nombre (id)" — es lo que deja el autocompletar — y tambien
+            // el nombre pelado si es unico. Se saca el id antes de comparar, igual que
+            // hace extractEntityIdFromAutocompleteInput.
+            const v = input.value.trim().replace(/\\s*\\(\\d+\\)$/, '')
             setTimeout(() => {
               if (!MEDIOS.includes(v)) {
                 campo.querySelector('.ief-hueco').innerHTML =
@@ -441,6 +449,14 @@ export function startFakeDrupal() {
       const filas = [...medios.keys()].filter((m) => m.includes(n))
         .map((m) => `<tr><td>${m}</td></tr>`).join('')
       return html(`<table>${filas}</table>`)
+    }
+    // El endpoint del autocompletar de entidades, con la forma que devuelve Drupal.
+    if (url === '/ac/media') {
+      const q = (new URLSearchParams(req.url.split('?')[1] || '')).get('q') || ''
+      const hay = MEDIOS_LIB.filter((m) => m.includes(q))
+        .map((m, i) => ({ value: `${m} (${i + 1})`, label: m }))
+      res.writeHead(200, { 'content-type': 'application/json' })
+      return res.end(JSON.stringify(hay))
     }
     if (url === '/media/estado') {
       res.writeHead(200, { 'content-type': 'application/json' })
