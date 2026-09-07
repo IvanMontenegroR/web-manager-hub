@@ -105,13 +105,14 @@
 
   <div class="card">
     <h2>3. Imagenes de prueba</h2>
-    <p class="meta">Las paginas de prueba usan <b>placeholders</b>: una imagen de relleno por
-      cada medida que pide el CMS. Se suben <b>una sola vez</b> a la Media library y despues
+    <p class="meta">Las paginas de prueba usan <b>placeholders</b>: material de relleno con
+      las medidas que pide cada componente. Son <b>20 medios</b> (cada uno lleva su imagen
+      de desktop y la de mobile). Se suben <b>una sola vez</b> a la Media library y despues
       el runner las elige solo. Volver a tocar el boton no duplica nada: lo que ya esta se
       saltea.</p>
     <div class="acciones" style="margin-top:10px">
       <button id="bSubirUna" class="chico">Probar con una</button>
-      <button id="bSubirTodas" class="chico">Subir las 36</button>
+      <button id="bSubirTodas" class="chico">Subir los 20</button>
     </div>
   </div>
 
@@ -254,14 +255,14 @@ async function correr(archivo, save) {
 }
 
 async function subirImagenes(solo) {
-  const cuantas = solo ? 'una imagen de prueba' : 'las 36 imagenes'
+  const cuantas = solo ? 'un medio de prueba' : 'los 20 medios'
   if (!confirm(`Se van a subir ${cuantas} a la Media library de Drupal. Las que ya estén se saltean. ¿Seguimos?`)) return
   $('cResultado').hidden = true
   try { await api('/api/subir-imagenes', { solo: solo || null }) } catch (e) { alert(e.message) }
   seguir()
 }
 
-$('bSubirUna').addEventListener('click', () => subirImagenes('banner-main-hero-desktop'))
+$('bSubirUna').addEventListener('click', () => subirImagenes('banner-main-hero'))
 $('bSubirTodas').addEventListener('click', () => subirImagenes(null))
 
 let timer = null

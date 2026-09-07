@@ -146,7 +146,7 @@ imagen ahi a la vista. Costo una tanda entera.
 ### Como subirlas
 
 Desde la **interfaz**, que es lo normal: en "Imagenes de prueba" hay dos botones, *Probar
-con una* y *Subir las 36*. Usa la misma ventana de Chrome que ya esta abierta y el avance
+con una* y *Subir los 20*. Usa la misma ventana de Chrome que ya esta abierta y el avance
 se ve en vivo.
 
 Por terminal tambien se puede, pero **no con la interfaz abierta**: el perfil de Chrome es
@@ -160,7 +160,7 @@ npm run subir-placeholders
 Es **idempotente**: antes de cada una busca si ya hay un media con ese nombre y la
 saltea. Se puede cortar y volver a correr las veces que haga falta sin duplicar nada.
 
-Treinta y seis imagenes contra un CMS remoto es un rato largo, y un parpadeo de la red
+Veinte medios (cuarenta subidas) contra un CMS remoto es un rato largo, y un parpadeo de la red
 —cambiar de wifi, la VPN, la maquina que se suspende— alcanzaba para tirar la tanda
 entera. Ahora un corte se **reintenta** (hasta 3 veces, esperando 2s, 4s y 8s) y la tanda
 sigue. Solo se reintenta ante fallas de RED: si Drupal rechaza un archivo o falta un
@@ -171,7 +171,7 @@ Opciones: `--carpeta <dir>`, `--solo <texto>` (sube solo las que contengan ese t
 La primera vez conviene probar con una sola:
 
 ```bash
-npm run subir-placeholders -- --solo banner-main-hero-desktop
+npm run subir-placeholders -- --solo banner-main-hero
 ```
 
 Los selectores estan sacados del HTML real de `/media/add/image` de este sitio y viven en
@@ -189,24 +189,28 @@ de ese formulario que importan:
   borrador" es para el contenido; un medio despublicado no se puede elegir de la libreria,
   que es justamente para lo que se sube. Con `"publicar": false` en el mapping se destilda.
 
-A mano tambien se puede, y en ese caso la regla es la misma: **dejar el nombre del media
-igual al nombre del archivo, sin el `.png`**. Por ejemplo, `placeholder-banner-main-hero-desktop-2100x1050.png` se sube como
-un media llamado:
+A mano tambien se puede, y en ese caso la regla es la misma: **el nombre del medio es el
+del INDICE, sin medida y sin `.png`**. Por ejemplo los dos archivos
+`placeholder-banner-main-hero-desktop-2100x1050.png` y
+`placeholder-banner-main-hero-mobile-526x936.png` van en UN medio `responsive_image`
+llamado:
 
 ```
-placeholder-banner-main-hero-desktop-2100x1050
+placeholder-banner-main-hero
 ```
 
-Ese nombre ES el identificador: es lo que el manifiesto va a escribir y lo que el runner
-va a buscar en la librería. Drupal ya lo propone solo a partir del archivo, asi que en
-general alcanza con no tocarlo. Si se renombra a mano, deja de encontrarse.
+Ese nombre ES el identificador: es lo que el manifiesto escribe y lo que el runner busca
+en la librería. Drupal propone el nombre del archivo, asi que **hay que pisarlo**.
+
+El alt text de estas no importa (son de prueba): cualquier cosa que aclare que son
+placeholders.
 
 ### Como se eligen desde el manifiesto
 
 Un campo de imagen lleva el NOMBRE del medio, nada mas:
 
 ```json
-"field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+"field_c_image": "placeholder-banner-main-hero"
 ```
 
 En este CMS ese campo es un **inline entity form** con dos botones: "Añadir nuevo elemento
@@ -233,7 +237,7 @@ de imagen, asi que por ahora se seleccionan a mano en el CMS. Cuando se haga, el
 manifiesto va a nombrar la imagen asi:
 
 ```json
-"field_c_image": "placeholder-banner-main-hero-desktop-2100x1050"
+"field_c_image": "placeholder-banner-main-hero"
 ```
 
 y el runner va a BUSCAR y SELECCIONAR ese media, nunca subir: si no lo encuentra, frena.
