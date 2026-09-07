@@ -272,6 +272,18 @@ try {
   check(/placeholder-x-desktop-10x10/.test(parecido),
     `y cuando el nombre no coincide, lista los que SI estan (${parecido.slice(0, 140)})`)
 
+  // El caso raro: el buscador lo encuentra y Drupal igual lo rechaza al confirmar. Ahi el
+  // error tiene que contar lo que sabe el runner —- cuantas opciones vinieron, cual
+  // eligio, que quedo escrito -— porque el mensaje de Drupal solo no alcanza.
+  let terco = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {}, esperaSubform: 4000,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'ln_c_cardgrid', fields: { field_media: 'placeholder-terco-desktop-10x10' } }] }) })
+  } catch (e) { terco = e.message }
+  check(/El buscador devolvio 1 opcion/.test(terco) && /en el campo quedo/.test(terco),
+    `si Drupal rechaza uno que el buscador SI encontro, dice que se mando (${terco.slice(0, 150)})`)
+
   // Un campo que se lleno bien y despues se vacio (Drupal re-dibuja el formulario en
   // cada alta) NO puede pasar en silencio: la pagina saldria armada y sin contenido.
   let vaciado = ''

@@ -47,7 +47,8 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
   // ("Nombre (id)"), no depende de que la lista aparezca, y cuando NO hay resultado se
   // puede decir que SI hay, que es lo unico que sirve para arreglarlo.
   const opciones = await consultar(page, input, nombre)
-  const exacta = opciones.find((o) => etiqueta(o) === nombre)
+  const hay = Array.isArray(opciones) ? opciones : []
+  const exacta = hay.find((o) => etiqueta(o) === nombre)
 
   if (exacta) {
     // El valor de maquina es "Nombre (id)": es lo que Drupal valida al confirmar.
@@ -63,14 +64,20 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
   } else {
     // Aca esta la respuesta que faltaba: que hay en la libreria que se le parezca.
     const parecidos = await consultar(page, input, recorte(nombre))
-    const lista = (parecidos || []).map(etiqueta).filter(Boolean).slice(0, 8)
+    const nombres = (parecidos || []).map(etiqueta).filter(Boolean).slice(0, 8)
     throw new Error(`No hay ningun medio llamado "${nombre}" (${ref}). `
-      + (lista.length
-        ? `En la libreria, empezando por "${recorte(nombre)}", hay: ${lista.join(' | ')}. `
+      + (nombres.length
+        ? `En la libreria, empezando por "${recorte(nombre)}", hay: ${nombres.join(' | ')}. `
           + 'Si los nombres tienen otra forma, el manifiesto tiene que usar ESA.'
         : `Tampoco hay nada que empiece con "${recorte(nombre)}": esa imagen no se subio. `
           + 'Subila desde la interfaz, en "Imagenes de prueba".'))
   }
+
+  // Escribir en el autocompletar dispara su propia consulta al servidor. Apretar
+  // Confirmar sin esperarla es encimarle otra peticion, y Drupal contesta "Oops,
+  // something went wrong" — el mismo choque que rompia los botones de agregar.
+  await esperarAjax(page)
+  const enElCampo = await input.inputValue().catch(() => null)
 
   const ok = await esperarVisible(page, `${campo} ${c.confirmar}`, 10000)
   if (!ok) throw new Error(`No encontre el boton que confirma el medio de ${ref} (${c.confirmar})`)
@@ -84,8 +91,14 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
     const queja = await page.locator(`${campo} ${c.error}`).allInnerTexts().catch(() => [])
     const texto = (queja.join(' ') || '').replace(/\s+/g, ' ').trim()
     if (texto) {
-      throw new Error(`Drupal no acepto la imagen "${nombre}" en ${ref}: ${texto.slice(0, 200)}. `
-        + 'Si el medio no existe todavia, subi los placeholders: npm run subir-placeholders')
+      // Lo que sabe el runner va PRIMERO: si Drupal se explaya, el recorte se come su
+      // mensaje y no el nuestro. Y lo que hace falta para entender esto es justamente
+      // que devolvio el buscador y que quedo escrito en el campo.
+      throw new Error(`Drupal no acepto la imagen "${nombre}" en ${ref}. `
+        + `El buscador devolvio ${hay.length} opcion(es)`
+        + (exacta ? `, la exacta era ${JSON.stringify(String(exacta.value))}` : ' y ninguna exacta')
+        + `; en el campo quedo ${JSON.stringify(enElCampo)}. `
+        + `Drupal dice: ${texto.slice(0, 300)}`)
     }
     const puesto = await leerMedia(page, campo)
     if (puesto.includes(nombre) || Date.now() > hasta) return puesto

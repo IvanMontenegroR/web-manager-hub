@@ -20,7 +20,11 @@ import { createServer } from 'node:http'
 // lista del autocompletar) y el servidor (el endpoint que consulta el runner), asi que
 // viven aca y se inyectan en la pagina: dos copias se desincronizan.
 const MEDIOS_LIB = ['placeholder-x-desktop-10x10', 'placeholder-x-desktop-10x10-v2',
-  'placeholder-y-mobile-20x20']
+  'placeholder-y-mobile-20x20',
+  // El caso raro que le paso a Ivan: el buscador SI lo encuentra, pero al confirmar
+  // Drupal dice que no existe. Sirve para probar que el error cuente lo que sabe el
+  // runner (cuantas opciones vinieron, cual eligio, que quedo en el campo).
+  'placeholder-terco-desktop-10x10']
 
 const FORM = `<!doctype html><html><head><meta charset="utf-8"><title>Crear pagina</title>
 <style>body{font:14px system-ui;margin:24px} .js-form-item{margin:8px 0}
@@ -262,7 +266,7 @@ function wireIef(scope) {
             // hace extractEntityIdFromAutocompleteInput.
             const v = input.value.trim().replace(/\\s*\\(\\d+\\)$/, '')
             setTimeout(() => {
-              if (!MEDIOS.includes(v)) {
+              if (!MEDIOS.includes(v) || v.includes('terco')) {
                 campo.querySelector('.ief-hueco').innerHTML =
                   '<div class="form-item--error-message">No hay elementos multimedia que '
                   + 'coincidan con "' + v + '".</div>'
