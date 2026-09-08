@@ -16,11 +16,21 @@
 --     Titulo y el Subtitulo del propio Card Grid ("Optional fields" del CMS): es un solo
 --     paragraph en vez de dos y no quedan dos bloques que se pisan.
 --
---  3. Las cards van en modo Grid Cards (el "Mosaico"). Con DOS cards es el layout que
---     mejor las sostiene — ocupa el ancho completo y alterna imagen y caja — y ademas es
---     el unico de los candidatos que no le pone tope al largo de la descripcion: las
---     cards apaisadas cortan cerca de los 128 caracteres y el texto de Innovacion tiene
---     152, o sea que ahi se veria mochado.
+--  3. Las cards van en Slider Cards Default con el Card - Style Card en Square, o sea
+--     APAISADAS. Lo que decide es que estas cards existen para MANDARTE a otra pagina:
+--     el Mosaico (grid-cards) dibuja imagen, titulo y texto y NADA que diga que la card
+--     es un link, asi que ahi el "Leer mas" desaparecia. Las variantes de carrusel si
+--     marcan la card que tiene link. Y entre ellas la apaisada es la que se puede armar
+--     con las fotos que ya existen: las de arriba son de 500×360 (apaisadas) y la card
+--     vertical pide 822×1230 (retrato), o sea foto nueva.
+--
+--     El precio es que la card apaisada tiene ALTO FIJO y corta la descripcion cerca de
+--     los 128 caracteres (ver CARD_SQUARE_DESC_MAX). Las dos pasaban, asi que se
+--     acortaron; el texto original queda guardado en `notes`.
+--
+--     OJO, para las proximas paginas: NINGUN modo del Card Grid dibuja un boton con
+--     texto. La card entera es el link y se marca con una flecha. El "Texto del enlace"
+--     se carga igual en el CMS, pero no esperes verlo como boton.
 --
 --  4. El CIERRE (h2 + parrafo largo + el grafico del ciclo de vida + boton) es un
 --     `c_image` con el Image position en "Image Bottom": texto arriba, imagen abajo. Es
@@ -47,10 +57,15 @@ values (
   'CARDS — el sitio viejo tiene 3 y la pagina nueva tiene 2.'
   || E'\n· Se sacaron "Las mascotas nos importan" (iba a /purina/purina-en-la-sociedad) y "Calidad, nuestra promesa" (iba a /purina/conoce-purina/calidad).'
   || E'\n· Se agrego "Purina Cuida". El titulo y el texto los escribimos nosotros siguiendo el tono de la pagina: HAY QUE REVISAR EL COPY.'
-  || E'\n· Su boton dice "Leer mas" pero todavia NO tiene destino: falta definir a que pagina apunta.'
+  || E'\n· Su boton dice "Leer mas" pero todavia NO tiene destino: falta definir a que pagina apunta. Hasta que lo tenga, esa card no muestra la flecha de "ir".'
   || E'\n· Su imagen es, por pedido, la misma de la card que se saco (Purina-las-mascotas-nos-importan_0.png).'
+  || E'\n\nLAYOUT — las cards van en Slider Cards Default con el Card - Style Card en Square (apaisadas).'
+  || E'\n· NO es el Mosaico: el Mosaico no dibuja nada que indique que la card lleva a otro lado, y estas dos cards existen justamente para eso.'
+  || E'\n· OJO: en el catalogo nuevo NINGUN modo del Card Grid dibuja un boton con texto. La card ENTERA es el link y se marca con una flecha. El "Leer mas" queda cargado en el CMS (Texto del enlace) pero no se ve como boton.'
+  || E'\n\nCOPY ACORTADO — la card apaisada tiene alto fijo y corta cerca de los 128 caracteres. Las dos descripciones pasaban, asi que se acortaron. El texto ORIGINAL del sitio viejo, por si se quiere volver:'
+  || E'\n· Innovacion (153 car.): "Continuamente nuestros expertos de todo el mundo nos ayudan a crear productos innovadores para tu mascota, una busqueda que representa lo que es Purina®."'
   || E'\n\nIMAGENES — ninguna de las del sitio viejo sirve como esta.'
-  || E'\n· Las de las cards son de 500×360 y el modo Grid Cards pide 760×760 (1:1). Hay que recortarlas y re-entregarlas; no se pueden estirar.'
+  || E'\n· Las de las cards son de 500×360 y la card apaisada pide 485×280 desktop y 335×280 mobile. Es un recorte, no un estiramiento: las fotos que hay alcanzan, hay que re-cortarlas.'
   || E'\n· El grafico del ciclo de vida es de 701×177 y tiene TODO el texto adentro de la imagen: no lo lee Google ni un lector de pantalla, y a ese ancho no aguanta desktop. Habria que re-entregarlo mas grande o rehacerlo como contenido de verdad.'
   || E'\n\nOTROS'
   || E'\n· El hero del sitio viejo es un video de YouTube de fondo (autoplay, sin controles): va cargado como Media del banner (https://www.youtube.com/watch?v=3-COT6aQbPo).'
@@ -77,18 +92,21 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
     'description', 'A nosotros también, por eso te contamos qué es Purina®.',
     'image',       'https://www.youtube.com/watch?v=3-COT6aQbPo')),
 
- -- "¿Que es Purina®?" + las cards, en UN solo bloque.
+ -- "¿Que es Purina®?" + las cards, en UN solo bloque. Apaisadas: el modo de vista dice
+ -- Slider Cards Default y la FORMA la decide el Card - Style Card.
  ('card_grid', 2, jsonb_build_object(
-    'view_mode',  'grid-cards',
-    'title',      '¿Qué es Purina®?',
-    'title_tag',  'h2',
-    'subtitle',   'Somos una compañía dedicada a enriquecer la vida de las mascotas y sus dueños. Descubre qué es Purina® y lo que nos guía.',
+    'view_mode',       'slider-default-card',
+    'card_style_card', 'card_grid_default_square',
+    'title',           '¿Qué es Purina®?',
+    'title_tag',       'h2',
+    'subtitle',        'Somos una compañía dedicada a enriquecer la vida de las mascotas y sus dueños. Descubre qué es Purina® y lo que nos guía.',
     'items', jsonb_build_array(
-      -- La unica card que sobrevive del sitio viejo, tal cual.
+      -- La unica card que sobrevive del sitio viejo. Descripcion acortada para que no la
+      -- corte la card apaisada; el original esta en `notes`.
       jsonb_build_object(
         'title',       'Inspiración para innovar',
         'title_tag',   'h3',
-        'description', 'Continuamente nuestros expertos de todo el mundo nos ayudan a crear productos innovadores para tu mascota, una búsqueda que representa lo que es Purina®.',
+        'description', 'Nuestros expertos de todo el mundo crean productos innovadores para tu mascota. Esa búsqueda es lo que es Purina®.',
         'image',       'https://purina.com.mx/sites/default/files/2022-11/purina-inspiraci%C3%B3n-para-innovar_0.png',
         'cta_label',   'Leer más',
         'cta_url',     '/purina/conoce-purina/innovacion'),
@@ -96,7 +114,7 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
       jsonb_build_object(
         'title',       'Purina Cuida',
         'title_tag',   'h3',
-        'description', 'Cuidar es más que alimentar: acompañamos a las mascotas y a las familias que las quieren en cada etapa de su vida. Descubre cómo cuida Purina®.',
+        'description', 'Cuidar es más que alimentar: acompañamos a las mascotas y a quienes las quieren. Eso también es Purina®.',
         'image',       'https://purina.com.mx/sites/default/files/2022-11/Purina-las-mascotas-nos-importan_0.png',
         'cta_label',   'Leer más')))),
 
