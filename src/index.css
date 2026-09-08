@@ -2108,28 +2108,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* --- Variante VERTICAL (la de Compromiso Purina®): titulo arriba, texto abajo --- */
 .cp-cmt--vert .cp-cmt-body { position: absolute; inset: 24px 28px 26px; display: flex; flex-direction: column; justify-content: space-between; }
 
-/* --- Variante APAISADA de verdad: el Card - Style Card en "Card Grid Default Square".
-   NO es la vertical mas ancha, es OTRA card: la imagen no hace de fondo, va ARRIBA, y el
-   titulo con el texto van ABAJO sobre blanco (asi se ve en el sitio; ver
-   sql/2026_cards_apaisadas_style_card.sql).
-   El cuerpo tiene ALTO FIJO y recorta: es exactamente lo que pasa en produccion con una
-   descripcion larga, asi que el mockup tiene que mostrarlo y no estirarse. Por eso el
-   aviso de largo de CARD_SQUARE_DESC_MAX tiene sentido aca y no en la vertical.
-   La imagen mide 219px de alto = 380 de ancho a la proporcion de 485×280. */
-.cp-cmt--square .cp-cmt-card { flex: 0 0 380px; height: 364px; background: #fff; }
-.cp-cmt--square .cp-cmt-img { position: static; width: 100%; height: 219px; }
-/* La card es blanca, asi que el hueco de la imagen se lleva el gris del placeholder:
-   si no, la card sin imagen cargada no se ve por ningun lado. */
-.cp-cmt--square .cp-cmt-ph { background: #eceff2; }
-.cp-cmt--square .cp-cmt-scrim { display: none; }
-.cp-cmt--square .cp-cmt-body { position: static; padding: 16px 20px; height: 145px; overflow: hidden; }
-.cp-cmt--square .cp-cmt-ttl { color: #111114; font-size: 19px; font-weight: 700; line-height: 1.2; text-shadow: none; margin-bottom: 8px; }
-/* Le deja el lugar a la flecha (34px + 14 de margen) para que no se le monte encima. */
-.cp-cmt--square .cp-cmt-desc { color: #1b252e; font-size: 13.5px; font-weight: 400; line-height: 1.45; text-shadow: none; padding-right: 56px; }
-.cp-cmt--square .cp-cmt-go { width: 34px; height: 34px; right: 14px; bottom: 14px; background: #111114; color: #fff; }
-
-/* --- Variante APAISADA con titulo arriba (Slider cards) --- */
+/* --- Variante APAISADA: titulo arriba y descripcion abajo, las dos SOBRE la imagen,
+   que hace de fondo de toda la card. Es la forma del "Slider cards" y tambien la del
+   Card - Style Card en Square (ver el despacho en ComponentPreview -> card_grid). --- */
 .cp-cmt--widet .cp-cmt-card { flex: 0 0 380px; height: 254px; }
+/* La card es baja y el texto va ENCIMA, asi que el placeholder centrado le caia justo
+   arriba a la descripcion y el cartel de la medida no se leia. Se ancla debajo del
+   titulo en vez de centrarse: el titulo ocupa hasta ~70px (dos lineas) y la descripcion
+   arranca recien pasada la mitad, asi que ahi no lo pisa nada. Esa medida es como el
+   mercado se entera de que imagen entregar. */
+.cp-cmt--widet .cp-cmt-ph { align-content: start; padding-top: 74px; }
 .cp-cmt--widet .cp-cmt-body { position: absolute; inset: 20px 24px 22px; display: flex; flex-direction: column; justify-content: space-between; }
 .cp-cmt--widet .cp-cmt-ttl { font-size: 21px; }
 .cp-cmt--widet .cp-cmt-desc { font-size: 13.5px; font-weight: 600; max-width: 78%; }

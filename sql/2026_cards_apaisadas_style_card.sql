@@ -6,6 +6,12 @@
 -- texto SOBRE la imagen, que hace de fondo de la card. Las de esta pagina no tienen
 -- fondo — la imagen va arriba y el titulo con el texto abajo, sobre blanco.
 --
+-- CORRECCION (posterior): esa ultima frase esta MAL. Se escribio leyendo el formulario
+-- del CMS y no mirando la pagina. En produccion la card apaisada tiene la imagen de
+-- FONDO y el texto ENCIMA — el titulo arriba y la descripcion abajo, los dos en blanco.
+-- El cambio de modo de vista que hace este archivo sigue siendo correcto; lo que estaba
+-- mal era la descripcion de como se ve. El mockup ya la dibuja asi.
+--
 -- Lo que aprendimos y quedo mal modelado hasta ahora: la FORMA de las cards no sale
 -- del modo de vista, sale del **Card - Style Card** (Square = apaisada, Vertical =
 -- vertical). `slider-default-card` dibuja las dos cosas segun ese estilo.
