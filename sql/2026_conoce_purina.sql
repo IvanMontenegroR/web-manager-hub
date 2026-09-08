@@ -1,16 +1,28 @@
 -- "Conoce Purina" (/conoce-purina). PRIMERA pagina traducida del sitio viejo al
--- catalogo nuevo. Ya aplicada (sort_order 10, 4 bloques).
+-- catalogo nuevo. Ya aplicada (sort_order 10, 5 bloques).
 -- Vieja: https://purina.com.mx/purina/conoce-purina
 --
 -- COMO SE TRADUJO. La regla no fue "el componente mas parecido" sino dejar la pagina
 -- nueva lo mejor posible:
 --
 --  1. HERO. El sitio viejo abre con DOS <h1> ("¿A ti te importa de donde viene su
---     alimento?" y "A nosotros tambien, por eso te contamos que es Purina®") y un
---     YouTube con autoplay, sin controles y sin fullscreen — o sea un video de fondo,
---     no un video para mirar. Se arma como UN banner Main Hero: el primer titular es el
---     h1 y el segundo pasa a ser la bajada. Dos h1 en una pagina es un error de SEO que
---     no hay razon para arrastrar.
+--     alimento?" y "A nosotros tambien, por eso te contamos que es Purina®"). Se arma
+--     como UN banner Secondary Hero: el primer titular es el h1 y el segundo pasa a ser
+--     la bajada. Dos h1 en una pagina es un error de SEO que no hay razon para
+--     arrastrar.
+--
+--     Va alineado Banner Left Center, y eso NO es decoracion: en la foto el perro esta a
+--     la DERECHA, asi que el texto tiene que apoyarse a la izquierda para no taparlo. La
+--     alineacion de un banner se decide MIRANDO la imagen.
+--
+--     La imagen del banner NO la tenemos: en el sitio viejo no es un <img>, es un
+--     background-image dentro de un <style> en linea, y esta pagina se leyo antes de que
+--     el extractor supiera leer eso. Queda flageada en `notes`.
+--
+--  1b. EL VIDEO va en su propio bloque DEBAJO del banner (`external_video`), que es donde
+--     esta en la pagina real. Al principio lo habiamos metido como Media del hero porque
+--     el embed viene con autoplay, sin controles y sin fullscreen y eso pinta un video de
+--     fondo; no lo era.
 --
 --  2. "¿Que es Purina®?" NO va como bloque de texto aparte. El h2 y su bajada son el
 --     Titulo y el Subtitulo del propio Card Grid ("Optional fields" del CMS): es un solo
@@ -59,16 +71,19 @@ values (
   || E'\n· Se agrego "Purina Cuida". El titulo y el texto los escribimos nosotros siguiendo el tono de la pagina: HAY QUE REVISAR EL COPY.'
   || E'\n· Su boton dice "Leer mas" pero todavia NO tiene destino: falta definir a que pagina apunta. Hasta que lo tenga, esa card no muestra la flecha de "ir".'
   || E'\n· Su imagen es, por pedido, la misma de la card que se saco (Purina-las-mascotas-nos-importan_0.png).'
-  || E'\n\nLAYOUT — las cards van en Slider Cards Default con el Card - Style Card en Square (apaisadas).'
+  || E'\n\nLAYOUT DE LAS CARDS — Slider Cards Default con el Card - Style Card en Square (apaisadas).'
   || E'\n· NO es el Mosaico: el Mosaico no dibuja nada que indique que la card lleva a otro lado, y estas dos cards existen justamente para eso.'
   || E'\n· OJO: en el catalogo nuevo NINGUN modo del Card Grid dibuja un boton con texto. La card ENTERA es el link y se marca con una flecha. El "Leer mas" queda cargado en el CMS (Texto del enlace) pero no se ve como boton.'
   || E'\n\nCOPY ACORTADO — la card apaisada tiene alto fijo y corta cerca de los 128 caracteres. Las dos descripciones pasaban, asi que se acortaron. El texto ORIGINAL del sitio viejo, por si se quiere volver:'
   || E'\n· Innovacion (153 car.): "Continuamente nuestros expertos de todo el mundo nos ayudan a crear productos innovadores para tu mascota, una busqueda que representa lo que es Purina®."'
-  || E'\n\nIMAGENES — ninguna de las del sitio viejo sirve como esta.'
-  || E'\n· Las de las cards son de 500×360 y la card apaisada pide 485×280 desktop y 335×280 mobile. Es un recorte, no un estiramiento: las fotos que hay alcanzan, hay que re-cortarlas.'
-  || E'\n· El grafico del ciclo de vida es de 701×177 y tiene TODO el texto adentro de la imagen: no lo lee Google ni un lector de pantalla, y a ese ancho no aguanta desktop. Habria que re-entregarlo mas grande o rehacerlo como contenido de verdad.'
+  || E'\n\nBANNER — va como Secondary Hero, alineado Banner Left Center.'
+  || E'\n· La alineacion NO es decorativa: en la foto el perro esta a la DERECHA, asi que el texto tiene que ir a la izquierda para no taparlo.'
+  || E'\n· FALTA LA IMAGEN DEL BANNER y no la tenemos. En el sitio viejo no es un <img>: es un background-image dentro de un <style> en linea, y esta pagina se leyo antes de que el extractor supiera leer eso. Hay que volver a leerla (tools/extraer.mjs ya lo hace) o sacarla a mano del sitio.'
+  || E'\n· Medida del Secondary Hero: 2100×700 desktop (3:1) y 526×526 mobile (1:1).'
+  || E'\n\nVIDEO — el YouTube va en su propio bloque DEBAJO del banner, no como Media del banner. (Primero lo habiamos puesto como fondo del hero por el autoplay sin controles; en la pagina real esta abajo.)'
+  || E'\n\nIMAGENES DE LAS CARDS — las del sitio viejo son de 500×360 y la card apaisada pide 485×280 desktop y 335×280 mobile. Es un recorte, no un estiramiento: las fotos que hay alcanzan, hay que re-cortarlas.'
   || E'\n\nOTROS'
-  || E'\n· El hero del sitio viejo es un video de YouTube de fondo (autoplay, sin controles): va cargado como Media del banner (https://www.youtube.com/watch?v=3-COT6aQbPo).'
+  || E'\n· El grafico del ciclo de vida es de 701×177 y tiene TODO el texto adentro de la imagen: no lo lee Google ni un lector de pantalla, y a ese ancho no aguanta desktop. Habria que re-entregarlo mas grande o rehacerlo como contenido de verdad.'
   || E'\n· Los dos <h1> del sitio viejo se unificaron en uno: el segundo pasa a ser la bajada del banner.'
   || E'\n· Los links que quedaron apuntan todavia a las URLs viejas (/purina/...). Se actualizan cuando esten las nuevas.'
 );
@@ -85,16 +100,21 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
     jsonb_build_object('label', 'Conoce Purina')))),
 
  -- HERO. Los dos titulares del sitio viejo, uno como titulo y el otro como bajada.
+ -- Sin Media: la imagen de fondo del sitio viejo no la tenemos todavia (ver `notes`).
  ('banner', 1, jsonb_build_object(
-    'type',        'main_hero',
-    'title',       '¿A ti te importa de dónde viene su alimento?',
-    'title_tag',   'h1',
-    'description', 'A nosotros también, por eso te contamos qué es Purina®.',
-    'image',       'https://www.youtube.com/watch?v=3-COT6aQbPo')),
+    'type',         'title-description',
+    'title',        '¿A ti te importa de dónde viene su alimento?',
+    'title_tag',    'h1',
+    'description',  'A nosotros también, por eso te contamos qué es Purina®.',
+    'banner_align', 'banner_left_center')),
+
+ -- El video, en su propio bloque debajo del banner.
+ ('external_video', 2, jsonb_build_object(
+    'video_url', 'https://www.youtube.com/watch?v=3-COT6aQbPo')),
 
  -- "¿Que es Purina®?" + las cards, en UN solo bloque. Apaisadas: el modo de vista dice
  -- Slider Cards Default y la FORMA la decide el Card - Style Card.
- ('card_grid', 2, jsonb_build_object(
+ ('card_grid', 3, jsonb_build_object(
     'view_mode',       'slider-default-card',
     'card_style_card', 'card_grid_default_square',
     'title',           '¿Qué es Purina®?',
@@ -120,7 +140,7 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
 
  -- CIERRE: texto arriba, el grafico del ciclo de vida abajo, y el boton en el mismo
  -- bloque. El "Image Bottom" ES ese layout.
- ('content_image', 3, jsonb_build_object(
+ ('content_image', 4, jsonb_build_object(
     'title',          'Conoce el ciclo de vida de un producto con alimento para mascotas',
     'title_tag',      'h2',
     'body',           'Nuestros esfuerzos de sustentabilidad abarcan todo el ciclo de vida de nuestros productos. Esto comprende todo lo que es Purina®, desde el abastecimiento de ingredientes de forma responsable hasta el uso de energía, agua y materias primas de forma más eficiente, la utilización de packaging reciclable optimizando la cantidad de materiales utilizados y el transporte de productos utilizando métodos de alta eficiencia.',

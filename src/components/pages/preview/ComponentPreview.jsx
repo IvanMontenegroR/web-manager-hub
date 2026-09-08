@@ -9,7 +9,7 @@ import { Fragment } from 'react'
 import { parseInline, parseRich } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
-  BG_TOKENS, CARD_GRID_DEFAULT_MODE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
+  BG_TOKENS, CARD_GRID_DEFAULT_MODE, CARD_SQUARE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
   BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_BRAND_HERO,
 } from '../../../data/components'
 
@@ -776,6 +776,12 @@ const RENDERERS = {
     const icon = v === CMT_ICON
     const nums = v === CMT_NUMBERS
     const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
+    // La APAISADA (Card - Style Card en Square) no es una variante del `type`: llega
+    // como bandera desde el Card Grid, porque el modo de vista es el mismo que el de la
+    // vertical y lo unico que las separa es el estilo de card. Solo el Card Grid la
+    // manda; el `commitment_carousel` suelto (deprecado) nunca, asi que lo ya armado no
+    // cambia.
+    const sq = !!c.square
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
     // Banda de color (solo la variante con iconos). Es OPCIONAL, igual que el fondo de
@@ -833,7 +839,7 @@ const RENDERERS = {
       <div
         // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
         // sangre (ver la regla generica en el CSS). Sin fondo no se toca.
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : sq ? 'square' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
@@ -1156,13 +1162,14 @@ const RENDERERS = {
     // propio caen a las cards verticales, que es el layout mas neutro.
     //
     // OJO: `slider-default-card` NO define la forma por si solo. Con el Card - Style
-    // Card en Square las cards son APAISADAS: misma estructura (imagen arriba, titulo y
-    // texto abajo) pero con otra proporcion y otra medida de imagen.
-    // PENDIENTE: la square y la vertical se dibujan igual (imagen arriba, titulo y
-    // texto abajo). Lo que cambia es la PROPORCION de la card, que el mockup todavia no
-    // distingue; la medida de la imagen si sale bien, por `getSpecs`.
+    // Card en Square las cards son APAISADAS, y no es la vertical mas ancha: son otra
+    // card. En la vertical la imagen ES el fondo y el texto va ENCIMA; en la apaisada la
+    // imagen va ARRIBA y el titulo con el texto van ABAJO, sobre blanco, en un cuerpo de
+    // ALTO FIJO — que es lo que corta las descripciones largas en el sitio real (ver
+    // sql/2026_cards_apaisadas_style_card.sql y CARD_SQUARE_DESC_MAX).
     return RENDERERS.commitment_carousel({
       type: CG_TO_CMT[mode] || CMT_VERTICAL,
+      square: mode === 'slider-default-card' && c.card_style_card === CARD_SQUARE,
       dim: getSpecs(getComponent('card_grid'), c)[0]?.desktop,
       title: c.title,
       subtitle: c.subtitle,
