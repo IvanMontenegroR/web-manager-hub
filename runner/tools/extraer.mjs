@@ -21,6 +21,7 @@
 import { readFileSync, writeFileSync, mkdirSync, appendFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { openBrowser } from '../src/browser.js'
+import { ESTRUCTURA } from './estructura.js'
 
 const ESPERA = Number(
   process.argv.find((a) => a.startsWith('--espera='))?.split('=')[1] || 30000)
@@ -138,6 +139,9 @@ try {
       await page.waitForTimeout(600)
       await page.evaluate(() => window.scrollTo(0, 0)).catch(() => {})
       Object.assign(fila, await page.evaluate(LEER))
+      // La ESTRUCTURA: que bloques hay y como estan anidados. Es lo que decide el
+      // componente nuevo — el texto suelto no distingue un acordeon de cinco parrafos.
+      fila.estructura = await page.evaluate(`(${ESTRUCTURA})()`).catch((e) => [{ tipo: 'error', e: String(e.message).slice(0, 90) }])
       if (flag('fotos')) {
         const nombre = url.replace(/^https?:\/\//, '').replace(/[^\w.-]+/g, '_').slice(0, 120)
         fila.foto = `fotos/${nombre}.jpg`
