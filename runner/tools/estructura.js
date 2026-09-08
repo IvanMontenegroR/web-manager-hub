@@ -27,6 +27,11 @@ export const ESTRUCTURA = function () {
   const lim = (s, n) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n || 600)
   const clase = (el) => (el && typeof el.className === 'string' ? el.className : '')
 
+  // Toda direccion de imagen sale ABSOLUTA. En el HTML son relativas ("/card-1.png") y
+  // asi no le sirven a nadie que no este parado en el sitio: el que despues las baja y
+  // las recorta es otro proceso, y una ruta relativa ahi no resuelve a nada.
+  const abs = (u) => { try { return new URL(u, document.baseURI).href } catch { return u || '' } }
+
   // Las imagenes de fondo viven en <style> inline. Se leen las reglas y se separan las que
   // estan dentro de un @media de desktop de las que no, que son las de mobile.
   const FONDOS = {}
@@ -41,7 +46,7 @@ export const ESTRUCTURA = function () {
       const esDesktop = dentro && /@media[^{]*min-width:\s*(7[6-9]\d|[89]\d\d|1\d{3})/.test(
         antes.slice(antes.lastIndexOf('@media')))
       FONDOS[m[1]] = FONDOS[m[1]] || {}
-      FONDOS[m[1]][esDesktop ? 'desktop' : 'mobile'] = img[1]
+      FONDOS[m[1]][esDesktop ? 'desktop' : 'mobile'] = abs(img[1])
     }
   }
   const fondoDe = (el) => {
@@ -52,7 +57,7 @@ export const ESTRUCTURA = function () {
   const img1 = (el) => {
     const i = el.querySelector('img')
     if (!i) return null
-    return { src: i.getAttribute('src') || '', alt: i.getAttribute('alt') || '',
+    return { src: abs(i.getAttribute('src')), alt: i.getAttribute('alt') || '',
              w: i.naturalWidth || 0, h: i.naturalHeight || 0 }
   }
   const cta1 = (el) => {

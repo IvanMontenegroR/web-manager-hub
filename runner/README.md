@@ -247,6 +247,45 @@ manifiesto va a nombrar la imagen asi:
 y el runner va a BUSCAR y SELECCIONAR ese media, nunca subir: si no lo encuentra, frena.
 Subir sola llenaria la librería de duplicados.
 
+## Migrar una pagina del sitio viejo
+
+Antes de armar una pagina en el CMS hay que saber QUE lleva. Esta cadena lo resuelve:
+
+```bash
+npm run extraer  -- urls.txt salida/ --fotos   # 1. leer el sitio viejo
+npm run plan     -- salida/paginas.jsonl planes/   # 2. borrador del plan
+#    ... revisar los planes a mano ...
+npm run imagenes -- planes/ imagenes/          # 3. recortar las fotos a medida
+npm run cargar   -- planes/                    # 4. escribirlo en el hub
+```
+
+**El plan es el archivo que importa.** Armar una pagina tiene dos mitades que no se
+parecen: leer, recortar y escribir es MECANICO y esta todo automatizado; elegir el
+componente, la variante, la alineacion del banner o que copy se acorta es CRITERIO y
+depende de mirar la pagina. `plan.mjs` escribe la parte mecanica y deja anotado en
+`revisar` todo lo que decidio a ciegas — el tipo de banner, la alineacion, una
+descripcion que no entra en la card. Eso se corrige en el JSON, no en el codigo.
+
+Es la misma idea que el manifiesto: **un archivo declara que va, y las herramientas lo
+ejecutan sin opinar.**
+
+Tres cosas que conviene tener presentes:
+
+- **Las medidas salen del catalogo del hub** (`src/data/components.js`, via `getSpecs`),
+  la misma fuente que la matriz de contenido y los placeholders. No hay una segunda lista
+  que se pueda desincronizar.
+- **El recorte lo hace Chrome**, no una libreria de imagenes: en una maquina corporativa
+  instalar `sharp` o ImageMagick es pelearse con el proxy. El navegador ya esta y ya sabe
+  bajar de esa red. Misma decision que en `placeholders.mjs`.
+- **Una foto mas chica que su destino no se agranda en silencio**: queda marcada
+  `ESTIRADA` en el plan y anotada en las notas de la pagina. Agrandar se ve mal y hay que
+  pedirla de nuevo.
+
+`cargar.mjs` es idempotente: la pagina se identifica por `path` + `market`, y si ya
+existe se actualiza y se le reemplazan todos los bloques. Correrlo dos veces no duplica
+nada. Lo que quedo en `revisar` baja a `pages.notes`, que es donde se buscan los
+outliers. Con `--seco` muestra que haria sin escribir.
+
 ## Para la revision de compliance
 
 - **Que hace:** crea nodos nuevos, despublicados, en el CMS, llenando el mismo
@@ -297,6 +336,14 @@ test/fake-drupal.mjs   Drupal de mentira con las formas del real
 test/smoke.mjs         prueba del motor
 test/ui.mjs            prueba del servidor de la interfaz, permisos incluidos
 test/verify-mapping.mjs prueba del mapping contra un volcado del HTML
+tools/extraer.mjs      lee el sitio viejo (texto + estructura + fotos)
+tools/estructura.js    reconoce banner/tabs/acordeon/carrusel/columnas en el HTML viejo
+tools/plan.mjs         borrador del plan: sitio viejo -> componentes del catalogo
+tools/imagenes.mjs     recorta cada imagen a la medida que pide su componente
+tools/cargar.mjs       escribe el plan en el hub (Supabase), idempotente
+planes/                un plan por pagina: donde vive el criterio
+test/sitio-viejo.mjs   sitio viejo de mentira, con sus trampas
+test/pipeline.mjs      prueba la cadena entera contra ese sitio
 ```
 
 ## Como direcciona los campos
