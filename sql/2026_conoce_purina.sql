@@ -1,5 +1,5 @@
 -- "Conoce Purina" (/conoce-purina). PRIMERA pagina traducida del sitio viejo al
--- catalogo nuevo. NO aplicada todavia: correr entera en el SQL editor de Purina-Hub.
+-- catalogo nuevo. Ya aplicada (sort_order 10, 4 bloques).
 -- Vieja: https://purina.com.mx/purina/conoce-purina
 --
 -- COMO SE TRADUJO. La regla no fue "el componente mas parecido" sino dejar la pagina
