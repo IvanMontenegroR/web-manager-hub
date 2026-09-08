@@ -116,6 +116,11 @@ const LEER = () => {
   }
 }
 
+// Cada cuanto avisar. Con 4 URLs y un paso de 10 no se imprime NUNCA: quien lo corre no
+// sabe si esta trabajando o colgado, y con paginas que tardan 90s eso son minutos a
+// ciegas. El paso sale del tamaño de la tanda.
+const PASO = urls.length <= 20 ? 1 : 10
+
 const { ctx, page } = await openBrowser({ profileDir: '.profile', headless: true,
   ...(process.env.RUNNER_CHROME ? { executablePath: process.env.RUNNER_CHROME } : {}) })
 let n = 0, errores = 0
@@ -144,7 +149,10 @@ try {
       errores += 1
     }
     appendFileSync(salida, JSON.stringify(fila) + '\n', 'utf8')
-    if (n % 10 === 0) process.stderr.write(`  ${n}/${urls.length}${errores ? `  (${errores} con error)` : ''}\n`)
+    if (n % PASO === 0 || n === urls.length) {
+      const q = fila.error ? 'error' : fila.status
+      process.stderr.write(`  ${n}/${urls.length}  ${q}  ${url.split('purina.com.mx')[1] || url}\n`)
+    }
     await page.waitForTimeout(PAUSA)
   }
 } finally {
