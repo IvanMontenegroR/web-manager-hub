@@ -22,7 +22,8 @@ import { readFileSync, writeFileSync, mkdirSync, appendFileSync, existsSync } fr
 import { join, resolve } from 'node:path'
 import { openBrowser } from '../src/browser.js'
 
-const ESPERA = 30000
+const ESPERA = Number(
+  process.argv.find((a) => a.startsWith('--espera='))?.split('=')[1] || 30000)
 const PAUSA = 250          // entre paginas: no es una prueba de carga
 
 const args = process.argv.slice(2)
@@ -44,11 +45,20 @@ if (flag('fotos')) mkdirSync(join(resolve(destino), 'fotos'), { recursive: true 
 const salida = join(resolve(destino), 'paginas.jsonl')
 const hechas = new Set()
 if (existsSync(salida)) {
+  let fallaron = 0
   for (const l of readFileSync(salida, 'utf8').split('\n')) {
     if (!l.trim()) continue
-    try { hechas.add(JSON.parse(l).pedida) } catch { /* linea a medias */ }
+    try {
+      const d = JSON.parse(l)
+      // Solo se saltea lo que se LEYO. Una pagina que fallo no esta hecha: si se la diera
+      // por hecha, volver a correr no la reintentaria nunca y el error quedaria para
+      // siempre. Se reintenta y la linea nueva pisa a la vieja al resumir.
+      if (d.error) { fallaron += 1; continue }
+      hechas.add(d.pedida)
+    } catch { /* linea a medias */ }
   }
-  process.stderr.write(`Ya estaban leidas ${hechas.size}; se saltean.\n`)
+  process.stderr.write(`Ya estaban leidas ${hechas.size}; se saltean.`
+    + (fallaron ? ` ${fallaron} habian fallado: se reintentan.` : '') + '\n')
 }
 
 // Corre DENTRO del navegador. Devuelve el contenido de la pagina, sin el cascaron del
@@ -142,7 +152,12 @@ try {
 }
 
 // Un resumen chico al lado, para poder mirar el resultado sin abrir el JSONL.
-const filas = readFileSync(salida, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
+// Si una URL se reintento, quedan dos lineas: vale la ULTIMA, que es la del reintento.
+const porUrl = new Map()
+for (const l of readFileSync(salida, 'utf8').split('\n').filter(Boolean)) {
+  try { const d = JSON.parse(l); porUrl.set(d.pedida, d) } catch { /* linea a medias */ }
+}
+const filas = [...porUrl.values()]
 const esc = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`
 writeFileSync(join(resolve(destino), 'resumen.csv'),
   ['url,status,url final,titulo,palabras,imagenes,formularios,error',
