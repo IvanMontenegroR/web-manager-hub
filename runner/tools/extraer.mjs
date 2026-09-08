@@ -73,7 +73,10 @@ const LEER = () => {
 
   const limpio = (s) => String(s || '').replace(/\s+/g, ' ').trim()
   const bloques = []
-  for (const el of clon.querySelectorAll('h1,h2,h3,h4,p,li,blockquote,figcaption,button,a,td,th')) {
+  // h5 y h6 tambien: en el tema viejo el titulo de una CARD es un `h5.card-title`.
+  // Sin ellos las cards salian con su texto y su boton pero SIN titulo — justo el dato
+  // que dice de que se trata cada una.
+  for (const el of clon.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,blockquote,figcaption,button,a,td,th')) {
     // Un <a> adentro de un <p> ya viene en el texto del <p>: solo interesan los sueltos,
     // que son los que se ven como boton o como item de menu.
     if (el.tagName === 'A' && el.closest('p,li,td,th')) continue
