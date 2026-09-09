@@ -1,0 +1,71 @@
+{
+  "_": "Generado por tools/manifiesto.mjs desde el hub. Las imagenes NO van aca: el runner ELIGE de la Media library, no sube. Ver la lista de pendientes que imprime la herramienta.",
+  "manifest": 1,
+  "page": {
+    "title": "Conoce Purina",
+    "path": "/conoce-purina",
+    "published": false
+  },
+  "blocks": [
+    {
+      "type": "banner",
+      "fields": {
+        "field_banner_type": "title-description",
+        "field_c_advanced_title": "¿A ti te importa de dónde viene su alimento?",
+        "field_c_advanced_title.html_tag": "h1",
+        "field_html": "A nosotros también, por eso te contamos qué es Purina®.",
+        "classy.banner_align": "banner_left_center"
+      }
+    },
+    {
+      "type": "c_externalvideo",
+      "fields": {
+        "field_c_external_video": "https://www.youtube.com/watch?v=3-COT6aQbPo"
+      }
+    },
+    {
+      "type": "ln_c_cardgrid",
+      "fields": {
+        "field_c_advanced_title": "¿Qué es Purina®?",
+        "field_c_advanced_subtitle": "Somos una compañía dedicada a enriquecer la vida de las mascotas y sus dueños. Descubre qué es Purina® y lo que nos guía.",
+        "field_c_advanced_title.html_tag": "h2",
+        "field_c_cardgrid_view_mode": "slider-default-card",
+        "classy.card_style_card": "card_grid_default_square"
+      },
+      "children": [
+        {
+          "type": "ln_c_grid_card_item",
+          "fields": {
+            "field_c_advanced_title": "Inspiración para innovar",
+            "field_c_link.uri": "/purina/conoce-purina/innovacion",
+            "field_c_link.title": "Leer más",
+            "field_c_advanced_title.html_tag": "h3",
+            "field_c_text": "Nuestros expertos de todo el mundo crean productos innovadores para tu mascota. Esa búsqueda es lo que es Purina®."
+          },
+          "slot": 0
+        },
+        {
+          "type": "ln_c_grid_card_item",
+          "fields": {
+            "field_c_advanced_title": "Purina Cuida",
+            "field_c_link.title": "Leer más",
+            "field_c_advanced_title.html_tag": "h3",
+            "field_c_text": "Cuidar es más que alimentar: acompañamos a las mascotas y a quienes las quieren. Eso también es Purina®."
+          },
+          "slot": 0
+        }
+      ]
+    },
+    {
+      "type": "c_image",
+      "fields": {
+        "field_c_text": "Nuestros esfuerzos de sustentabilidad abarcan todo el ciclo de vida de nuestros productos. Esto comprende todo lo que es Purina®, desde el abastecimiento de ingredientes de forma responsable hasta el uso de energía, agua y materias primas de forma más eficiente, la utilización de packaging reciclable optimizando la cantidad de materiales utilizados y el transporte de productos utilizando métodos de alta eficiencia.",
+        "field_c_advanced_title": "Conoce el ciclo de vida de un producto con alimento para mascotas",
+        "field_c_advanced_title.html_tag": "h2",
+        "classy.image_position": "image_bottom",
+        "field_c_link.title": "¿Qué es Purina®?",
+        "field_c_link.uri": "https://purina.com.mx/purina/conoce-purina/historia"
+      }
+    }
+  ]
+}

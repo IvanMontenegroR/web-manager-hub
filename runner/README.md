@@ -257,7 +257,27 @@ npm run plan     -- salida/paginas.jsonl planes/   # 2. borrador del plan
 #    ... revisar los planes a mano ...
 npm run imagenes -- planes/ imagenes/          # 3. recortar las fotos a medida
 npm run cargar   -- planes/                    # 4. escribirlo en el hub
+#    ... revisar la pagina en el builder del hub ...
+npm run manifiesto -- /conoce-purina           # 5. hub -> manifiesto del runner
+npm run build -- --manifest manifests/conoce-purina.json   # 6. armarla en el CMS
 ```
+
+Los pasos 5 y 6 son el puente al CMS. El hub habla en componentes (`card_grid`, `title`)
+y el CMS en paragraphs y machine names (`ln_c_cardgrid`, `field_c_advanced_title`);
+`manifiesto.mjs` traduce, sacando los nombres del MAPPING — que se escribio volcando el
+formulario real, no de memoria. Hace dos cosas que no son cambiar un nombre: las listas
+repetibles del hub (las cards de un Card Grid, los items de un acordeon) se vuelven
+**paragraphs hijos**, y Classy y Avanzado se prefijan solos porque el hub ya usa las
+mismas claves que el mapping.
+
+Cada machine name que emite se **verifica contra el mapping mientras se genera**: uno mal
+escrito frena ahi, con el nombre y el bloque, en vez de aparecer a mitad de camino con el
+navegador abierto y media pagina cargada.
+
+**Las imagenes no van en el manifiesto.** Regla de la casa: el runner ELIGE de la Media
+library, nunca sube. El valor de un campo de imagen en el CMS es el NOMBRE del medio, y
+lo que hay en el hub son URLs. Se omiten y se listan como pendientes; la pagina se arma
+igual, con la estructura y TODO el texto, en borrador.
 
 **El plan es el archivo que importa.** Armar una pagina tiene dos mitades que no se
 parecen: leer, recortar y escribir es MECANICO y esta todo automatizado; elegir el
@@ -341,6 +361,10 @@ tools/estructura.js    reconoce banner/tabs/acordeon/carrusel/columnas en el HTM
 tools/plan.mjs         borrador del plan: sitio viejo -> componentes del catalogo
 tools/imagenes.mjs     recorta cada imagen a la medida que pide su componente
 tools/cargar.mjs       escribe el plan en el hub (Supabase), idempotente
+tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
+tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name
+tools/manifiesto.mjs   genera manifests/<pagina>.json desde el hub
+test/manifiesto.mjs    prueba la traduccion contra el mapping real, sin base ni navegador
 planes/                un plan por pagina: donde vive el criterio
 test/sitio-viejo.mjs   sitio viejo de mentira, con sus trampas
 test/pipeline.mjs      prueba la cadena entera contra ese sitio
