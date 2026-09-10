@@ -117,6 +117,10 @@ export const PARAGRAFOS = {
 // Campos del hub que no viajan al CMS: los consume esta misma traduccion.
 const SOLO_DEL_HUB = new Set(['items', 'ctas', 'tabs'])
 
+// Destino de relleno para un boton que todavia no sabe a donde va. Es un ancla a la
+// misma pagina: el CMS lo acepta y no lleva a ningun lado.
+export const SIN_DESTINO = '#'
+
 // Las claves de Classy y Avanzado salen del CATALOGO, que usa las mismas que el mapping.
 // Asi no hay una segunda lista escrita a mano que se pueda desincronizar.
 const CLASSY = new Set()
@@ -198,6 +202,22 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
       if (resto.length) {
         avisos.push(`${donde}: el bloque tiene ${resto.length} boton/es mas y el mapping direcciona `
           + `uno solo. Hay que agregarlos a mano: ${resto.map((c) => `"${c.label || c.url}"`).join(', ')}`)
+      }
+    }
+
+    // UN LINK CON TEXTO Y SIN DESTINO NO SE PUEDE GUARDAR. Drupal valida el campo entero:
+    // si `title` tiene algo y `uri` esta vacio, el formulario no deja guardar la pagina —
+    // y lo descubris recien al apretar Guardar, con todo cargado.
+    //
+    // Pasa de verdad: una card que sabemos como se llama el boton pero todavia no a donde
+    // va. Se pone "#", que es un ancla a la misma pagina — el CMS lo acepta, no lleva a
+    // ningun lado y se ve en el contenido, asi que despues se encuentra para corregirlo.
+    // Inventar una URL seria peor: quedaria un link roto que parece cargado.
+    for (const base of [def.ctas, def.ctaPlano && 'field_c_link'].filter(Boolean)) {
+      if (fields[`${base}.title`] && !fields[`${base}.uri`]) {
+        poner(`${base}.uri`, SIN_DESTINO)
+        avisos.push(`${donde}: el boton "${fields[`${base}.title`]}" no tiene destino. `
+          + `Se pone "${SIN_DESTINO}" para que el CMS lo acepte — HAY QUE COMPLETARLO.`)
       }
     }
 

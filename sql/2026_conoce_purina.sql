@@ -69,7 +69,7 @@ values (
   'CARDS — el sitio viejo tiene 3 y la pagina nueva tiene 2.'
   || E'\n· Se sacaron "Las mascotas nos importan" (iba a /purina/purina-en-la-sociedad) y "Calidad, nuestra promesa" (iba a /purina/conoce-purina/calidad).'
   || E'\n· Se agrego "Purina Cuida". El titulo y el texto los escribimos nosotros siguiendo el tono de la pagina: HAY QUE REVISAR EL COPY.'
-  || E'\n· Su boton dice "Leer mas" pero todavia NO tiene destino: falta definir a que pagina apunta. Hasta que lo tenga, esa card no muestra la flecha de "ir".'
+  || E'\n· Su boton dice "Leer mas" y su destino quedo en "#" (un ancla a la misma pagina): FALTA DEFINIR a que pagina apunta. No es opcional dejarlo vacio — Drupal valida el enlace entero y con texto y sin destino NO deja guardar la pagina.'
   || E'\n· Su imagen es, por pedido, la misma de la card que se saco (Purina-las-mascotas-nos-importan_0.png).'
   || E'\n\nLAYOUT DE LAS CARDS — Slider Cards Default con el Card - Style Card en Square (apaisadas).'
   || E'\n· NO es el Mosaico: el Mosaico no dibuja nada que indique que la card lleva a otro lado, y estas dos cards existen justamente para eso.'
@@ -136,7 +136,10 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
         'title_tag',   'h3',
         'description', 'Cuidar es más que alimentar: acompañamos a las mascotas y a quienes las quieren. Eso también es Purina®.',
         'image',       'https://purina.com.mx/sites/default/files/2022-11/Purina-las-mascotas-nos-importan_0.png',
-        'cta_label',   'Leer más')))),
+        'cta_label',   'Leer más',
+        -- "#" y no vacio: Drupal valida el enlace ENTERO y con texto y sin destino NO
+        -- deja guardar la pagina. Falta definir a donde va (ver `notes`).
+        'cta_url',     '#')))),
 
  -- CIERRE: texto arriba, el grafico del ciclo de vida abajo, y el boton en el mismo
  -- bloque. El "Image Bottom" ES ese layout.

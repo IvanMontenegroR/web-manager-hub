@@ -48,6 +48,7 @@
           "type": "ln_c_grid_card_item",
           "fields": {
             "field_c_advanced_title": "Purina Cuida",
+            "field_c_link.uri": "#",
             "field_c_link.title": "Leer más",
             "field_c_advanced_title.html_tag": "h3",
             "field_c_text": "Cuidar es más que alimentar: acompañamos a las mascotas y a quienes las quieren. Eso también es Purina®."

@@ -6,7 +6,7 @@
 //   - Classy y Avanzado se prefijan solos, sin una segunda lista escrita a mano;
 //   - las imagenes NO viajan: el runner elige de la Media library, no sube.
 // Y que FRENE ante lo que no sabe, en vez de dejar pasar un manifiesto a medias.
-import { aManifiesto, ErrorDeTraduccion } from '../tools/traducir.js'
+import { aManifiesto, ErrorDeTraduccion, SIN_DESTINO } from '../tools/traducir.js'
 import { loadMapping } from '../src/mapping.js'
 import { validateManifest } from '../src/manifest.js'
 
@@ -32,7 +32,8 @@ const BLOQUES = [
     items: [
       { title: 'Card uno', title_tag: 'h3', description: 'Texto.',
         image: 'https://ejemplo.com/card.png', cta_label: 'Leer mas', cta_url: '/una' },
-      { title: 'Card dos', title_tag: 'h3', description: 'Otro texto.' },
+      // Texto de boton sin destino: el CMS NO deja guardar asi.
+      { title: 'Card dos', title_tag: 'h3', description: 'Otro texto.', cta_label: 'Leer mas' },
     ],
   } },
   { component_key: 'text', content: {
@@ -75,6 +76,13 @@ ok(grid.fields['classy.card_style_card'] === 'card_grid_default_square',
 ok(manifiesto.blocks[2].fields['field_c_link.title'] === 'Uno', 'del bloque de texto viaja el primer boton')
 ok(avisos.some((a) => /boton\/es mas/.test(a)),
   'y se avisa del segundo, que el mapping no puede direccionar — no se pierde en silencio')
+
+// Drupal valida el link ENTERO: texto sin URI no deja guardar la pagina, y te enteras
+// recien al apretar Guardar con todo cargado. Paso de verdad con la card "Purina Cuida".
+ok(grid.children[1].fields['field_c_link.uri'] === SIN_DESTINO,
+  `un boton con texto y sin destino sale con "${SIN_DESTINO}", que el CMS si acepta`)
+ok(avisos.some((a) => /no tiene destino/.test(a)),
+  'y queda avisado, porque hay que completarlo — no es una solucion, es que se pueda guardar')
 
 // TODO machine name emitido tiene que existir en el mapping. Es lo que evita descubrir
 // un nombre mal escrito recien con el navegador abierto.
