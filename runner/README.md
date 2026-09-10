@@ -259,7 +259,7 @@ npm run imagenes -- planes/ imagenes/          # 3. recortar las fotos a medida
 npm run cargar   -- planes/                    # 4. escribirlo en el hub
 #    ... revisar la pagina en el builder del hub ...
 npm run manifiesto -- /conoce-purina           # 5. hub -> manifiesto del runner
-npm run build -- --manifest manifests/conoce-purina.json   # 6. armarla en el CMS
+npm run build -- manifests/conoce-purina.json  # 6. armarla en el CMS (sin --save: ensayo)
 ```
 
 Los pasos 5 y 6 son el puente al CMS. El hub habla en componentes (`card_grid`, `title`)

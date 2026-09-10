@@ -4,7 +4,7 @@
 //   node tools/manifiesto.mjs /conoce-purina --market=MX
 //
 // Y despues, con la sesion ya abierta:
-//   npm run build -- --manifest manifests/conoce-purina.json
+//   npm run build -- manifests/conoce-purina.json
 //
 // Esto es solo la entrada/salida: la traduccion vive en tools/traducir.js, que es una
 // funcion pura y se prueba sin base ni navegador (ver test/manifiesto.mjs).
@@ -70,4 +70,4 @@ if (pendientes.length) {
   }
 }
 process.stderr.write(`\nPara construirla:\n  npm run login\n`
-  + `  npm run build -- --manifest ${archivo.replace(resolve('.') + '/', '')}\n`)
+  + `  npm run build -- ${archivo.replace(resolve('.') + '/', '')}\n`)
