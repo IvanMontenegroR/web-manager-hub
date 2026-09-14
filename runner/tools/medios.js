@@ -15,6 +15,8 @@
 // builder despues de recortar para que el manifiesto pida un nombre que ya no existe.
 // El origen de la imagen no cambia con el orden, asi que el nombre tampoco.
 import { createHash } from 'node:crypto'
+import { getComponent, getSpecs } from '../../src/data/components.js'
+import { PARAGRAFOS } from './paragrafos.js'
 
 const limpio = (s) => String(s || '').toLowerCase()
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -40,4 +42,96 @@ export const origenDe = (v) => (typeof v === 'string' ? v : v?.origen || '')
 export function nombreDeMedio({ slug, componente, campo, origen }) {
   const firma = createHash('sha1').update(String(origen)).digest('hex').slice(0, 6)
   return [slug, limpio(componente), limpio(campoBase(campo)), firma].filter(Boolean).join('-')
+}
+
+// "2100×700px" -> { w, h }. Una spec puede no tener la vista (varias solo traen desktop).
+function medida(txt) {
+  const m = /^(\d+)\s*[×x]\s*(\d+)/.exec(String(txt || '').trim())
+  return m ? { w: Number(m[1]), h: Number(m[2]) } : null
+}
+
+// Los campos de tipo `image` de un componente, incluidos los de adentro de una lista.
+// Salen del CATALOGO, no de una lista escrita a mano: un componente nuevo con una imagen
+// nueva entra solo.
+function camposImagen(def) {
+  const sueltos = [], enLista = []
+  for (const f of (def?.fields || [])) {
+    if (f.type === 'image') sueltos.push(f.key)
+    if (f.type === 'list') {
+      for (const sf of (f.item || [])) if (sf.type === 'image') enLista.push([f.key, sf.key])
+    }
+  }
+  return { sueltos, enLista }
+}
+
+/**
+ * Los MEDIOS de un bloque: uno por campo de imagen (juntando su `_mobile`), con el nombre
+ * que le toca, la medida de cada vista y de donde sale cada archivo.
+ *
+ * Vive ACA y no en el recortador porque el nombre tiene que ser el mismo que pide el
+ * traductor. La imagen de una card se nombra con el paragraph HIJO (`card_grid_item`),
+ * no con el bloque, porque para el CMS esa card ya es su propio paragraph — y es asi
+ * como la pide el manifiesto. Nombrarla con el padre hacia que se recortara y se subiera
+ * con un nombre y se pidiera con otro: el runner frenaba con el navegador abierto por un
+ * medio que no aparecia en la libreria.
+ *
+ * @param {{componente: string, contenido: object}} bloque
+ * @param {string} slug  el de la pagina (ver paginas.js)
+ */
+export function mediosDeBloque(bloque, slug) {
+  const def = getComponent(bloque.componente)
+  if (!def) return []
+  const specs = getSpecs(def, bloque.contenido || {})
+  const objetivo = { desktop: medida(specs[0]?.desktop), mobile: medida(specs[0]?.mobile) }
+
+  // En que paragraph hijo se convierte cada lista. Sale de la MISMA tabla que usa el
+  // traductor, asi que no hay una segunda lista que se pueda desincronizar.
+  const itemDe = (lista) => {
+    const l = PARAGRAFOS[bloque.componente]?.lista
+    return l?.campo === lista ? l.como : bloque.componente
+  }
+
+  const { sueltos, enLista } = camposImagen(def)
+  const campos = []
+  for (const k of sueltos) {
+    campos.push({ contenedor: bloque.contenido, key: k, etiqueta: k, componente: bloque.componente })
+  }
+  for (const [lista, k] of enLista) {
+    ;(bloque.contenido?.[lista] || []).forEach((it, i) => {
+      campos.push({ contenedor: it, key: k, etiqueta: `${lista}${i + 1}-${k}`, componente: itemDe(lista) })
+    })
+  }
+
+  // Se agrupan por campo BASE: `image` y `image_mobile` son el mismo medio. La etiqueta
+  // lleva el numero de item para que dos cards no se pisen entre si.
+  const porMedio = new Map()
+  for (const c of campos) {
+    const clave = campoBase(c.etiqueta)
+    if (!porMedio.has(clave)) porMedio.set(clave, {})
+    porMedio.get(clave)[/_mobile$/.test(c.key) ? 'mobile' : 'desktop'] = c
+  }
+
+  const out = []
+  for (const par of porMedio.values()) {
+    // El origen del medio es el de DESKTOP. Sin el no hay medio: una foto solo de mobile
+    // no se puede subir, porque el campo de desktop es obligatorio.
+    const origen = origenDe(par.desktop?.contenedor?.[par.desktop?.key])
+    if (!origen || !/^https?:/.test(origen)) continue
+    if (!objetivo.desktop) continue   // esa vista no tiene medida declarada: no se inventa
+    out.push({
+      // El campo se nombra PELADO (`image`), sin el `items1-` que solo sirve para agrupar
+      // aca: el traductor tampoco lo tiene, porque para el la card ya es su propio
+      // paragraph.
+      nombre: nombreDeMedio({ slug, componente: par.desktop.componente, campo: par.desktop.key, origen }),
+      etiqueta: campoBase(par.desktop.etiqueta),
+      campo: par.desktop,
+      // Si el hub no trae foto mobile aparte, se recorta la misma.
+      desktop: { origen, ...objetivo.desktop },
+      mobile: objetivo.mobile
+        ? { origen: origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || origen, ...objetivo.mobile }
+        : null,
+      campoMobile: par.mobile || null,
+    })
+  }
+  return out
 }

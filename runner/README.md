@@ -263,6 +263,21 @@ npm run subir-medios -- imagenes/conoce-purina      # 6. las fotos a la Media li
 npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin --save: ensayo)
 ```
 
+**Una pagina armada a mano en el builder empieza en el 3.** No todas vienen del sitio
+viejo: las que se arman directo en el hub no tienen archivo de plan, asi que el recortador
+las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques:
+
+```bash
+npm run imagenes -- --hub=/conoce-purina imagenes/   # 3. recortar, leyendo del hub
+npm run manifiesto   -- /conoce-purina               # 5.
+npm run subir-medios -- imagenes/conoce-purina       # 6.
+npm run build -- manifests/conoce-purina.json        # 7.
+```
+
+En este modo no se escribe nada en el hub: la pagina ya esta armada, y el origen de cada
+foto es lo que el builder muestra en el preview. Lo que iria a las notas del plan (una
+imagen que no alcanza la medida, una que no se pudo bajar) se imprime en pantalla.
+
 Los pasos 5 y 6 son el puente al CMS. El hub habla en componentes (`card_grid`, `title`)
 y el CMS en paragraphs y machine names (`ln_c_cardgrid`, `field_c_advanced_title`);
 `manifiesto.mjs` traduce, sacando los nombres del MAPPING — que se escribio volcando el
@@ -284,6 +299,12 @@ recortar y `traducir.js` al escribir el manifiesto. Si cada una lo calculara por
 se separarian y el runner pediria un medio inexistente, cosa que se descubre recien con el
 navegador abierto. Lleva un hash del ORIGEN de la foto y no el numero de bloque, porque el
 numero cambia si alguien reordena la pagina en el builder y el origen no.
+
+Y se separaron de verdad: la imagen de una card se nombraba con el bloque (`card_grid`) de
+un lado y con el paragraph hijo (`card_grid_item`) del otro, que es lo que la card ES en el
+CMS. Por eso la enumeracion de medios de un bloque vive tambien en `medios.js`, y el test
+corre las dos herramientas sobre la misma pagina y compara los nombres — mirar una sola no
+alcanza para ver que no coinciden.
 
 **Un medio son DOS archivos.** El bundle del CMS es `responsive_image` y lleva Image
 Desktop e Image Mobile adentro, las dos obligatorias. Asi que `image` y `image_mobile` del
@@ -377,7 +398,10 @@ tools/estructura.js    reconoce banner/tabs/acordeon/carrusel/columnas en el HTM
 tools/plan.mjs         borrador del plan: sitio viejo -> componentes del catalogo
 tools/imagenes.mjs     recorta cada imagen a la medida que pide su componente
 tools/cargar.mjs       escribe el plan en el hub (Supabase), idempotente
-tools/medios.js        el nombre de un medio: la UNICA fuente, la comparten dos tools
+tools/medios.js        que medios tiene un bloque y como se llama cada uno: la UNICA
+                       fuente, la comparten el recortador y el traductor
+tools/paragrafos.js    la tabla componente del hub -> paragraph del CMS y sus campos
+tools/paginas.js       el slug de una pagina y la forma de un bloque, iguales en todas
 tools/subir-medios.mjs sube a la Media library las fotos ya recortadas de una pagina
 tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
 tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name

@@ -16,6 +16,7 @@ import { writeFileSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { leerPagina } from './hub.js'
 import { aManifiesto, ErrorDeTraduccion } from './traducir.js'
+import { slugDePagina } from './paginas.js'
 import { loadMapping } from '../src/mapping.js'
 import { validateManifest, countBlocks } from '../src/manifest.js'
 
@@ -47,7 +48,7 @@ try {
 const { manifiesto, avisos, pendientes } = salida
 
 // Se valida con el MISMO validador que usa el runner al construir.
-const slug = path.replace(/^\//, '').replace(/[^\w-]+/g, '-') || 'pagina'
+const slug = slugDePagina(path)
 const archivo = join(resolve('manifests'), `${slug}.json`)
 validateManifest(manifiesto, archivo)
 mkdirSync(resolve('manifests'), { recursive: true })

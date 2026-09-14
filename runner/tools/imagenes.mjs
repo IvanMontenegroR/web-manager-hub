@@ -1,8 +1,15 @@
-// RECORTA las imagenes de un plan a la medida EXACTA que pide el componente donde caen,
-// y deja el indice para subirlas a la Media library.
+// RECORTA las imagenes de una pagina a la medida EXACTA que pide el componente donde
+// caen, y deja el indice para subirlas a la Media library.
 //
 //   node tools/imagenes.mjs planes/ imagenes/          # todos los planes
 //   node tools/imagenes.mjs planes/conoce-purina.json imagenes/
+//   node tools/imagenes.mjs --hub=/conoce-purina imagenes/   # una pagina YA armada en el hub
+//
+// LAS DOS ENTRADAS. Una pagina puede llegar por dos caminos y los dos terminan en el CMS:
+// del sitio viejo (extraer -> plan -> aca) o armada a mano en el builder del hub. La
+// segunda no tiene archivo de plan, asi que se lee derecho de la base con `--hub`. Es el
+// mismo trabajo: lo unico que cambia es de donde salen los bloques. Sin esto, una pagina
+// del hub llegaba al manifiesto pidiendo medios que nadie habia recortado ni subido.
 //
 // POR QUE HACE FALTA. Las imagenes del sitio viejo estan cortadas para el sitio viejo.
 // Una foto de card de 500×360 no es la card apaisada de 485×280 ni la vertical de
@@ -34,83 +41,22 @@
 import { readFileSync, writeFileSync, mkdirSync, statSync, readdirSync, copyFileSync } from 'node:fs'
 import { join, resolve, basename, dirname } from 'node:path'
 import { openBrowser } from '../src/browser.js'
-import { getComponent, getSpecs } from '../../src/data/components.js'
-import { nombreDeMedio, campoBase, origenDe } from './medios.js'
+import { mediosDeBloque, campoBase } from './medios.js'
+import { leerPagina } from './hub.js'
+import { slugDePagina, planDelHub } from './paginas.js'
 
 const args = process.argv.slice(2)
-const [entrada, destino] = args.filter((a) => !a.startsWith('--'))
-if (!entrada || !destino) {
-  process.stderr.write('uso: node tools/imagenes.mjs <planes/ | plan.json> <carpeta-imagenes>\n')
+const hub = args.find((a) => a.startsWith('--hub='))?.split('=')[1]
+const market = args.find((a) => a.startsWith('--market='))?.split('=')[1] || 'MX'
+const [uno, dos] = args.filter((a) => !a.startsWith('--'))
+const entrada = hub ? null : uno
+const destino = hub ? uno : dos
+if ((!entrada && !hub) || !destino) {
+  process.stderr.write('uso: node tools/imagenes.mjs <planes/ | plan.json> <carpeta-imagenes>\n'
+    + '     node tools/imagenes.mjs --hub=<path-de-la-pagina> <carpeta-imagenes> [--market=MX]\n')
   process.exit(2)
 }
 const CALIDAD = Number(args.find((a) => a.startsWith('--calidad='))?.split('=')[1] || 82)
-
-// "2100×700px" -> { w, h }. Una spec puede no tener la vista (varias solo traen desktop).
-function medida(txt) {
-  const m = /^(\d+)\s*[×x]\s*(\d+)/.exec(String(txt || '').trim())
-  return m ? { w: Number(m[1]), h: Number(m[2]) } : null
-}
-
-// Los campos de tipo `image` de un componente, incluidos los de adentro de una lista.
-// Salen del CATALOGO, no de una lista escrita a mano: un componente nuevo con una imagen
-// nueva entra solo.
-function camposImagen(def) {
-  const sueltos = [], enLista = []
-  for (const f of (def?.fields || [])) {
-    if (f.type === 'image') sueltos.push(f.key)
-    if (f.type === 'list') {
-      for (const sf of (f.item || [])) if (sf.type === 'image') enLista.push([f.key, sf.key])
-    }
-  }
-  return { sueltos, enLista }
-}
-
-// Los MEDIOS de un bloque: uno por campo de imagen (juntando su `_mobile`), con la
-// medida que le toca a cada vista y de donde sale cada archivo.
-function mediosDe(bloque, slug) {
-  const def = getComponent(bloque.componente)
-  if (!def) return []
-  const specs = getSpecs(def, bloque.contenido || {})
-  const objetivo = { desktop: medida(specs[0]?.desktop), mobile: medida(specs[0]?.mobile) }
-
-  const { sueltos, enLista } = camposImagen(def)
-  const campos = []
-  for (const k of sueltos) campos.push({ contenedor: bloque.contenido, key: k, etiqueta: k })
-  for (const [lista, k] of enLista) {
-    ;(bloque.contenido?.[lista] || []).forEach((it, i) => {
-      campos.push({ contenedor: it, key: k, etiqueta: `${lista}${i + 1}-${k}` })
-    })
-  }
-
-  // Se agrupan por campo BASE: `image` y `image_mobile` son el mismo medio.
-  const porMedio = new Map()
-  for (const c of campos) {
-    const clave = `${campoBase(c.etiqueta)}`
-    if (!porMedio.has(clave)) porMedio.set(clave, {})
-    porMedio.get(clave)[/_mobile$/.test(c.key) ? 'mobile' : 'desktop'] = c
-  }
-
-  const out = []
-  for (const [clave, par] of porMedio) {
-    // El origen del medio es el de DESKTOP. Sin el no hay medio: una foto solo de mobile
-    // no se puede subir, porque el campo de desktop es obligatorio.
-    const origen = origenDe(par.desktop?.contenedor?.[par.desktop?.key])
-    if (!origen || !/^https?:/.test(origen)) continue
-    if (!objetivo.desktop) continue   // esa vista no tiene medida declarada: no se inventa
-    out.push({
-      nombre: nombreDeMedio({ slug, componente: bloque.componente, campo: clave, origen }),
-      etiqueta: clave,
-      campo: par.desktop,
-      // Si el hub no trae foto mobile aparte, se recorta la misma.
-      desktop: { origen, ...objetivo.desktop },
-      mobile: objetivo.mobile
-        ? { origen: origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || origen, ...objetivo.mobile }
-        : null,
-      campoMobile: par.mobile || null,
-    })
-  }
-  return out
-}
 
 // Recorre el arbol del plan (bloques + hijos).
 function todosLosBloques(plan) {
@@ -121,9 +67,30 @@ function todosLosBloques(plan) {
 }
 
 // ---------------------------------------------------------------------------------
-const planes = statSync(resolve(entrada)).isDirectory()
-  ? readdirSync(resolve(entrada)).filter((f) => f.endsWith('.json')).map((f) => join(resolve(entrada), f))
-  : [resolve(entrada)]
+// Las paginas a recortar, ya con la misma forma vengan de donde vengan. `archivo` en null
+// = vino del hub y no hay plan que actualizar: lo que se anota para revisar se imprime.
+let entradas
+if (hub) {
+  const leido = await leerPagina(hub, market)
+  if (!leido) {
+    process.stderr.write(`No existe la pagina ${hub} [${market}] en el hub.\n`)
+    process.exit(1)
+  }
+  entradas = [{
+    archivo: null,
+    slug: slugDePagina(leido.pagina.path),
+    plan: { pagina: leido.pagina, bloques: leido.bloques.map(planDelHub), revisar: [] },
+  }]
+} else {
+  const planes = statSync(resolve(entrada)).isDirectory()
+    ? readdirSync(resolve(entrada)).filter((f) => f.endsWith('.json')).map((f) => join(resolve(entrada), f))
+    : [resolve(entrada)]
+  entradas = planes.map((archivo) => ({
+    archivo,
+    slug: basename(archivo, '.json'),
+    plan: JSON.parse(readFileSync(archivo, 'utf8')),
+  }))
+}
 
 const { ctx, page } = await openBrowser({ profileDir: '.profile', headless: true,
   ...(process.env.RUNNER_CHROME ? { executablePath: process.env.RUNNER_CHROME } : {}) })
@@ -157,15 +124,13 @@ async function recortar({ origen, w, h, salida }) {
 
 let hechas = 0, estiradas = 0, fallaron = 0
 try {
-  for (const archivo of planes) {
-    const plan = JSON.parse(readFileSync(archivo, 'utf8'))
-    const slug = basename(archivo, '.json')
+  for (const { archivo, slug, plan } of entradas) {
     const carpeta = join(resolve(destino), slug)
     const indice = []
     process.stderr.write(`\n${slug}\n`)
 
     for (const [i, bloque] of todosLosBloques(plan).entries()) {
-      for (const medio of mediosDe(bloque, slug)) {
+      for (const medio of mediosDeBloque(bloque, slug)) {
         const donde = `bloque ${i + 1} (${bloque.componente}) — ${medio.etiqueta}`
         try {
           const dsk = `${medio.nombre}-desktop.jpg`
@@ -223,7 +188,10 @@ try {
       mkdirSync(carpeta, { recursive: true })
       writeFileSync(join(carpeta, 'INDICE.json'), JSON.stringify(indice, null, 2) + '\n', 'utf8')
     }
-    writeFileSync(archivo, JSON.stringify(plan, null, 2) + '\n', 'utf8')
+    // Del hub no se escribe nada: la pagina ya esta armada y el origen de cada foto es lo
+    // que el builder muestra. Lo que habria ido al plan se imprime, que es donde se busca.
+    if (archivo) writeFileSync(archivo, JSON.stringify(plan, null, 2) + '\n', 'utf8')
+    else for (const r of plan.revisar) process.stderr.write(`  ! ${r}\n`)
   }
 } finally {
   await ctx.close()

@@ -8,7 +8,8 @@
 //     library, no sube, y el nombre lo calcula la misma funcion que uso el recortador.
 // Y que FRENE ante lo que no sabe, en vez de dejar pasar un manifiesto a medias.
 import { aManifiesto, ErrorDeTraduccion, SIN_DESTINO } from '../tools/traducir.js'
-import { nombreDeMedio } from '../tools/medios.js'
+import { nombreDeMedio, mediosDeBloque } from '../tools/medios.js'
+import { planDelHub } from '../tools/paginas.js'
 import { loadMapping } from '../src/mapping.js'
 import { validateManifest } from '../src/manifest.js'
 
@@ -89,6 +90,25 @@ ok(grid.children[1].fields['field_c_link.uri'] === SIN_DESTINO,
   `un boton con texto y sin destino sale con "${SIN_DESTINO}", que el CMS si acepta`)
 ok(avisos.some((a) => /no tiene destino/.test(a)),
   'y queda avisado, porque hay que completarlo — no es una solucion, es que se pueda guardar')
+
+// EL CIERRE ENTRE LAS DOS HERRAMIENTAS. El recortador nombra los archivos que sube, y el
+// traductor escribe el nombre que el runner va a BUSCAR en la libreria. Si no calculan
+// igual, el runner frena con el navegador abierto por un medio que no aparece — y eso no
+// lo ve ningun test que mire una sola de las dos. Aca se corren las DOS sobre la misma
+// pagina y se comparan los nombres.
+//
+// Paso de verdad con las cards: el recortador las nombraba con el bloque (`card_grid`) y
+// el traductor con el paragraph hijo (`card_grid_item`), que es lo que son en el CMS.
+const recortados = new Set()
+for (const b of BLOQUES.map(planDelHub)) {
+  for (const m of mediosDeBloque(b, 'prueba')) recortados.add(m.nombre)
+}
+const pedidos = pendientes.map((p) => p.medio)
+const sinRecortar = pedidos.filter((m) => !recortados.has(m))
+ok(pedidos.length >= 2, `el traductor pide ${pedidos.length} medios (banner y card)`)
+ok(recortados.size >= 2, `el recortador nombra ${recortados.size} medios sobre la misma pagina`)
+ok(sinRecortar.length === 0,
+  `todos los medios que pide el traductor los nombra igual el recortador${sinRecortar.length ? ` (no: ${sinRecortar.join(', ')})` : ''}`)
 
 // TODO machine name emitido tiene que existir en el mapping. Es lo que evita descubrir
 // un nombre mal escrito recien con el navegador abierto.
