@@ -67,7 +67,8 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
   // cualquier regla que parsee nombres.
   const indice = join(carpeta, 'INDICE.json')
   if (!existsSync(indice)) {
-    throw new Error(`Falta ${indice}. Se genera con: node tools/placeholders.mjs`)
+    throw new Error(`Falta ${indice}. Lo escribe tools/placeholders.mjs (material de relleno) `
+      + 'o tools/imagenes.mjs (las imagenes recortadas de una pagina).')
   }
   const archivos = JSON.parse(readFileSync(indice, 'utf8'))
     .map((g) => ({ nombre: g.nombre, desktop: g.desktop.archivo, mobile: g.mobile.archivo }))
@@ -127,7 +128,7 @@ async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
   await subirArchivo(page, cfg, cfg.archivoMobile, cfg.subidoMobile, join(carpeta, archivo.mobile), nombre, 'mobile')
 
   // Si este formulario pide alt, se llenan TODOS; si no lo pide, no se inventa nada.
-  await llenarAlts(page, cfg)
+  await llenarAlts(page, cfg, archivo.alt)
 
   // El nombre del media es el identificador: se fuerza al del archivo. Drupal lo
   // precarga con el nombre del archivo CON extension, asi que hay que pisarlo.
@@ -162,14 +163,19 @@ async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
 
 // Cada imagen tiene su alt y todos son obligatorios. Se llenan los que esten VACIOS: si
 // alguno ya vino con algo, es de alguien y no se pisa.
-async function llenarAlts(page, cfg) {
+// El alt de ESTE medio. Los placeholders no tienen uno propio y usan el generico del
+// mapping; un medio de verdad trae el suyo en el indice. Si no lo trae, se deja una marca
+// que se pueda buscar: el alt lo carga SEO, y un campo vacio en un formulario obligatorio
+// no deja guardar, pero un alt inventado es peor que uno que se nota que falta.
+async function llenarAlts(page, cfg, alt) {
+  const texto = String(alt || '').trim() || cfg.alUsar
   const alts = page.locator(cfg.alt)
   const n = await alts.count()
   for (let i = 0; i < n; i++) {
     const a = alts.nth(i)
     if (!(await a.isVisible().catch(() => false))) continue
     if (await a.inputValue().catch(() => '')) continue
-    await a.fill(cfg.alUsar).catch(() => {})
+    await a.fill(texto).catch(() => {})
   }
 }
 

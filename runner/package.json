@@ -21,7 +21,8 @@
     "plan": "node tools/plan.mjs",
     "imagenes": "node tools/imagenes.mjs",
     "cargar": "node tools/cargar.mjs",
-    "manifiesto": "node tools/manifiesto.mjs"
+    "manifiesto": "node tools/manifiesto.mjs",
+    "subir-medios": "node tools/subir-medios.mjs"
   },
   "dependencies": {
     "playwright-core": "1.49.1"

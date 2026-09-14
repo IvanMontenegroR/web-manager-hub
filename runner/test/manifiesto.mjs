@@ -4,9 +4,11 @@
 // el mapping real, y que las tres traducciones que no son cambiar un nombre esten bien:
 //   - las cards de un Card Grid (campo repetible en el hub) se vuelven paragraphs hijos;
 //   - Classy y Avanzado se prefijan solos, sin una segunda lista escrita a mano;
-//   - las imagenes NO viajan: el runner elige de la Media library, no sube.
+//   - las imagenes viajan por NOMBRE de medio, no por URL: el runner elige de la Media
+//     library, no sube, y el nombre lo calcula la misma funcion que uso el recortador.
 // Y que FRENE ante lo que no sabe, en vez de dejar pasar un manifiesto a medias.
 import { aManifiesto, ErrorDeTraduccion, SIN_DESTINO } from '../tools/traducir.js'
+import { nombreDeMedio } from '../tools/medios.js'
 import { loadMapping } from '../src/mapping.js'
 import { validateManifest } from '../src/manifest.js'
 
@@ -60,9 +62,13 @@ ok(banner.fields.field_html === 'La bajada.',
 ok(banner.fields['classy.banner_align'] === 'banner_left_center',
   'la alineacion se prefijo sola como classy., sin una lista escrita a mano')
 ok(!JSON.stringify(banner.fields).includes('ejemplo.com'),
-  'la imagen NO viaja en el manifiesto: el runner elige de la libreria, no sube')
-ok(pendientes.some((p) => p.url.includes('foto.png')),
-  'pero queda listada como pendiente de subir a la Media library')
+  'la URL de la imagen NO viaja al CMS')
+ok(banner.fields.field_c_image === nombreDeMedio({ slug: 'prueba', componente: 'banner', campo: 'image', origen: 'https://ejemplo.com/foto.png' }),
+  `viaja el NOMBRE del medio, calculado igual que en el recortador (${banner.fields.field_c_image})`)
+ok(!('field_c_image' in Object.fromEntries(Object.entries(banner.fields).filter(([k]) => k.includes('mobile')))),
+  'y el mobile NO va aparte: en el CMS es UNA entidad con las dos imagenes adentro')
+ok(pendientes.some((p) => p.url.includes('foto.png') && p.medio),
+  'y queda listado como pendiente, para poder avisar si todavia no se subio')
 
 const grid = manifiesto.blocks[1]
 ok(grid.children?.length === 2, `las 2 cards se volvieron paragraphs hijos (fueron ${grid.children?.length})`)

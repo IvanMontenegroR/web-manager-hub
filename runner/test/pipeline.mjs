@@ -10,12 +10,13 @@
 //   - las imagenes quedan en la medida EXACTA que pide el componente;
 //   - una foto mas chica que su destino se marca ESTIRADA en vez de pasar de largo;
 //   - una descripcion mas larga que la que muestra la card apaisada queda flageada.
-import { mkdtempSync, rmSync, readFileSync, writeFileSync, readdirSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execFile } from 'node:child_process'
 import { servirSitioViejo } from './sitio-viejo.mjs'
 import { openBrowser } from '../src/browser.js'
+import { nombreDeMedio } from '../tools/medios.js'
 
 // El sitio de mentira se sirve en 127.0.0.1. Si la maquina tiene un proxy configurado
 // por entorno (una corporativa lo tiene, y este contenedor tambien), Chrome manda hasta
@@ -98,6 +99,22 @@ try {
   ok(grid2.contenido.items[0].image?.a === '485×280', `la card apaisada pide 485×280 (quedo ${grid2.contenido.items[0].image?.a})`)
   ok(grid2.contenido.items[1].image?.modo === 'ESTIRADA', 'la foto de 300×200 NO alcanza para 485×280 y se marco ESTIRADA')
   ok(plan2.revisar.some((r) => /ESTIRADA/.test(r)), 'y quedo anotado en las notas de la pagina, que es donde se busca')
+
+  // El INDICE es el contrato con el subidor: dice que DOS archivos forman cada medio.
+  const slug = readdirSync(imgs)[0]
+  const indice = JSON.parse(readFileSync(join(imgs, slug, 'INDICE.json'), 'utf8'))
+  ok(indice.length >= 3, `el INDICE.json lista los medios de la pagina (${indice.length})`)
+  ok(indice.every((m) => m.nombre && m.desktop?.archivo && m.mobile?.archivo),
+    'y cada medio trae sus DOS archivos: en el CMS un responsive_image lleva desktop y mobile, los dos obligatorios')
+  ok(indice.every((m) => existsSync(join(imgs, slug, m.desktop.archivo)) && existsSync(join(imgs, slug, m.mobile.archivo))),
+    'los dos archivos de cada medio existen en disco')
+
+  // El nombre lo calculan DOS herramientas por separado. Si no coinciden, el runner pide
+  // un medio que no existe, y eso se descubre recien con el navegador abierto.
+  const esperado = nombreDeMedio({ slug, componente: 'banner', campo: 'image', origen: b2.contenido.image.origen })
+  ok(b2.contenido.image.medio === esperado,
+    'el nombre del medio que escribio el recortador es el mismo que calcula el traductor')
+  ok(indice.some((m) => m.nombre === esperado), 'y es el que quedo en el INDICE')
 
   // La medida se verifica en el ARCHIVO, no en lo que dice el plan: es lo unico que
   // prueba que el recorte se hizo de verdad.

@@ -258,8 +258,9 @@ npm run plan     -- salida/paginas.jsonl planes/   # 2. borrador del plan
 npm run imagenes -- planes/ imagenes/          # 3. recortar las fotos a medida
 npm run cargar   -- planes/                    # 4. escribirlo en el hub
 #    ... revisar la pagina en el builder del hub ...
-npm run manifiesto -- /conoce-purina           # 5. hub -> manifiesto del runner
-npm run build -- manifests/conoce-purina.json  # 6. armarla en el CMS (sin --save: ensayo)
+npm run manifiesto   -- /conoce-purina              # 5. hub -> manifiesto del runner
+npm run subir-medios -- imagenes/conoce-purina      # 6. las fotos a la Media library
+npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin --save: ensayo)
 ```
 
 Los pasos 5 y 6 son el puente al CMS. El hub habla en componentes (`card_grid`, `title`)
@@ -274,10 +275,25 @@ Cada machine name que emite se **verifica contra el mapping mientras se genera**
 escrito frena ahi, con el nombre y el bloque, en vez de aparecer a mitad de camino con el
 navegador abierto y media pagina cargada.
 
-**Las imagenes no van en el manifiesto.** Regla de la casa: el runner ELIGE de la Media
-library, nunca sube. El valor de un campo de imagen en el CMS es el NOMBRE del medio, y
-lo que hay en el hub son URLs. Se omiten y se listan como pendientes; la pagina se arma
-igual, con la estructura y TODO el texto, en borrador.
+**Las imagenes van por NOMBRE, y se suben en un paso aparte.** El runner sigue sin subir
+nada mientras construye: ELIGE de la Media library, y el valor de un campo de imagen en el
+CMS es el NOMBRE del medio. Por eso el paso 6 va ANTES del 7.
+
+Ese nombre lo calcula `tools/medios.js`, y lo usan las DOS herramientas: `imagenes.mjs` al
+recortar y `traducir.js` al escribir el manifiesto. Si cada una lo calculara por su cuenta
+se separarian y el runner pediria un medio inexistente, cosa que se descubre recien con el
+navegador abierto. Lleva un hash del ORIGEN de la foto y no el numero de bloque, porque el
+numero cambia si alguien reordena la pagina en el builder y el origen no.
+
+**Un medio son DOS archivos.** El bundle del CMS es `responsive_image` y lleva Image
+Desktop e Image Mobile adentro, las dos obligatorias. Asi que `image` y `image_mobile` del
+hub no son dos medios: son uno. Cuando el hub no trae foto mobile aparte, se recorta la
+MISMA foto a la medida de mobile; solo si el catalogo no declara medida mobile se repite
+el archivo de desktop, porque no hay de donde sacar otra.
+
+La subida va separada del armado a proposito: si falla a la mitad no queda una pagina a
+medio construir con la mitad de las fotos. Y es idempotente, asi que reintentar no duplica
+nada — un medio que ya existe se saltea.
 
 **El plan es el archivo que importa.** Armar una pagina tiene dos mitades que no se
 parecen: leer, recortar y escribir es MECANICO y esta todo automatizado; elegir el
@@ -361,6 +377,8 @@ tools/estructura.js    reconoce banner/tabs/acordeon/carrusel/columnas en el HTM
 tools/plan.mjs         borrador del plan: sitio viejo -> componentes del catalogo
 tools/imagenes.mjs     recorta cada imagen a la medida que pide su componente
 tools/cargar.mjs       escribe el plan en el hub (Supabase), idempotente
+tools/medios.js        el nombre de un medio: la UNICA fuente, la comparten dos tools
+tools/subir-medios.mjs sube a la Media library las fotos ya recortadas de una pagina
 tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
 tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name
 tools/manifiesto.mjs   genera manifests/<pagina>.json desde el hub

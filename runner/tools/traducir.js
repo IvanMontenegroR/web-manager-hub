@@ -19,15 +19,22 @@
 //   CLASSY y AVANZADO son mecanicos: el hub ya usa las MISMAS claves que el mapping
 //   (`background_color`, `card_style_card`...), asi que van con el prefijo y listo.
 //
-// LAS IMAGENES NO VAN. Regla de la casa: el runner ELIGE de la Media library, nunca sube.
-// El valor de un campo de imagen en el CMS es el NOMBRE del medio, y lo que hay en el hub
-// son URLs. Se omiten y se devuelven como pendientes; la pagina se arma igual, con la
-// estructura y TODO el texto, en borrador.
+// LAS IMAGENES VAN POR NOMBRE. El runner ELIGE de la Media library, no sube: el valor de
+// un campo de imagen en el CMS es el NOMBRE del medio. Ese nombre se calcula con la misma
+// funcion que uso `imagenes.mjs` al recortarlas (ver tools/medios.js), asi que las dos
+// herramientas no se pueden separar.
+//
+// Un medio son DOS archivos (Image Desktop e Image Mobile) pero UNA entidad, asi que
+// `image` y `image_mobile` del hub apuntan al mismo nombre y al CMS va uno solo.
+//
+// Los medios se devuelven ademas como `pendientes`, para poder avisar si todavia no se
+// subieron: si falta uno, el runner frena al no encontrarlo en la libreria.
 //
 // FRENA ante lo que no sabe: un componente sin traduccion, un campo cargado que no sabe
 // donde poner, o un machine name que el mapping no tiene. Un manifiesto a medias que
 // parece completo es peor que uno que no se genero.
 import { getComponent, G_CLASSY, G_ADV } from '../../src/data/components.js'
+import { nombreDeMedio, campoBase, origenDe } from './medios.js'
 
 const T = {
   titulo: { title: 'field_c_advanced_title', title_tag: 'field_c_advanced_title.html_tag' },
@@ -136,10 +143,6 @@ const vacio = (v) => v === undefined || v === null || v === '' ||
   (Array.isArray(v) && !v.length) ||
   (typeof v === 'object' && !Array.isArray(v) && !Object.keys(v).length)
 
-// Una imagen del hub es una URL, o el objeto que deja imagenes.mjs. Para esto son lo
-// mismo: ninguna de las dos es un NOMBRE de medio, que es lo unico que el CMS acepta.
-const urlDe = (v) => (typeof v === 'string' ? v : v?.origen || '')
-
 export class ErrorDeTraduccion extends Error {}
 
 /**
@@ -148,6 +151,8 @@ export class ErrorDeTraduccion extends Error {}
  * @param {{fields: object}} porTipo  mapping.paragraphs.types, para verificar los nombres
  */
 export function aManifiesto(pagina, bloques, porTipo = null) {
+  // El slug es el de la pagina, el mismo que nombra el plan y la carpeta de imagenes.
+  const slug = String(pagina.path || '').replace(/^\//, '').replace(/[^\w-]+/g, '-') || 'pagina'
   const pendientes = []
   const avisos = []
   const frenar = (msg) => { throw new ErrorDeTraduccion(msg) }
@@ -180,9 +185,16 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
       if (def.campos[k]) { poner(def.campos[k], v); continue }
       if (def.ctaPlano?.[k]) { poner(def.ctaPlano[k], v); continue }
       if (def.media && k in def.media) {
-        const url = urlDe(v)
-        if (url) pendientes.push({ donde, campo: k, destino: def.media[k], url })
-        continue   // nunca va al manifiesto: el runner elige de la libreria, no sube
+        const url = origenDe(v)
+        // `def.media[k]` en null = ese campo del hub no tiene campo propio en el CMS
+        // (el mobile vive dentro del mismo medio que el desktop). Se registra igual como
+        // pendiente, pero no se escribe dos veces.
+        if (url && def.media[k]) {
+          const medio = nombreDeMedio({ slug, componente, campo: k, origen: url })
+          poner(def.media[k], medio)
+          pendientes.push({ donde, campo: campoBase(k), medio, url })
+        }
+        continue
       }
       if (SOLO_DEL_HUB.has(k)) continue
       if (CLASSY.has(k)) { poner(`classy.${k}`, v); continue }
