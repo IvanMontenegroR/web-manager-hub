@@ -117,7 +117,11 @@ export function mediosDeBloque(bloque, slug) {
     // no se puede subir, porque el campo de desktop es obligatorio.
     const origen = origenDe(par.desktop?.contenedor?.[par.desktop?.key])
     if (!origen || !/^https?:/.test(origen)) continue
-    if (!objetivo.desktop) continue   // esa vista no tiene medida declarada: no se inventa
+    // SIN MEDIDA DECLARADA no se inventa una, pero tampoco se saltea el medio: se sube la
+    // foto TAL CUAL. Saltearlo dejaba al traductor pidiendo un medio que nadie producia, y
+    // la pagina no se podia armar nunca. Hay componentes cuyas medidas todavia no sabemos
+    // (el Imagen con Image position "image_bottom", por ejemplo): que no sepamos a cuanto
+    // recortarla no es razon para que la imagen no llegue al CMS.
     out.push({
       // El campo se nombra PELADO (`image`), sin el `items1-` que solo sirve para agrupar
       // aca: el traductor tampoco lo tiene, porque para el la card ya es su propio
@@ -126,7 +130,8 @@ export function mediosDeBloque(bloque, slug) {
       etiqueta: campoBase(par.desktop.etiqueta),
       campo: par.desktop,
       // Si el hub no trae foto mobile aparte, se recorta la misma.
-      desktop: { origen, ...objetivo.desktop },
+      // `w`/`h` en null = sin medida: se sube el original sin tocarlo.
+      desktop: { origen, ...(objetivo.desktop || { w: null, h: null }) },
       mobile: objetivo.mobile
         ? { origen: origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || origen, ...objetivo.mobile }
         : null,

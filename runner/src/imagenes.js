@@ -18,7 +18,34 @@
 // funcion que usa la matriz de contenido y el placeholder del mockup.
 import { writeFileSync, mkdirSync, statSync, copyFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
+import { request } from 'playwright-core'
 import { mediosDeBloque, campoBase } from '../tools/medios.js'
+
+// La red de una empresa suele INSPECCIONAR TLS: un proxy se pone en el medio y firma los
+// certificados con su propia CA. Windows confia en esa CA (por eso Chrome navega bien),
+// pero Playwright no usa el almacen de Windows, usa el suyo — y la descarga se cae con
+// "self-signed certificate in certificate chain".
+//
+// La salida limpia es darle la CA de la empresa: se exporta del almacen de Windows y se
+// apunta `NODE_EXTRA_CA_CERTS` al archivo. Cuando esa variable esta puesta no se hace nada
+// especial, que es como tiene que ser.
+//
+// Sin ella, se REINTENTA sin validar el certificado, avisando fuerte, y SOLO para esto:
+// bajar imagenes publicas del sitio viejo para recortarlas. Es una descarga anonima, sin
+// cookies y sin credenciales, y los bytes se ven despues en la captura. La sesion de
+// Drupal NO pasa por aca: sigue con su contexto, que valida como siempre. La alternativa
+// era que el runner no funcionara en la unica maquina donde tiene que funcionar.
+const ES_DE_CERTIFICADO = /self[- ]signed certificate|unable to verify|CERT_|certificate chain/i
+
+
+// El tamaño natural de una imagen, preguntandoselo al navegador.
+async function medidaDe(page, data) {
+  return await page.evaluate(async (d) => {
+    const i = new Image()
+    await new Promise((ok) => { i.onload = ok; i.onerror = ok; i.src = d })
+    return { w: i.naturalWidth, h: i.naturalHeight }
+  }, data)
+}
 
 // Recorre el arbol de la pagina (bloques + hijos).
 function todosLosBloques(plan) {
@@ -48,17 +75,45 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
   // Pestaña propia, y se cierra pase lo que pase: si queda abierta, la proxima corrida
   // hereda una ventana con una imagen gigante adentro.
   const page = await ctx.newPage()
+  // El que se usa para bajar: arranca siendo el de la sesion, que valida el certificado.
+  // Si la red mete su CA en el medio, se cambia UNA vez por uno que no valida y se avisa.
+  let bajar = ctx.request
+  let relajado = null
+  const bajarBytes = async (origen) => {
+    try {
+      return await bajar.get(origen, { timeout: 30000 })
+    } catch (e) {
+      if (!ES_DE_CERTIFICADO.test(e.message) || relajado) throw e
+      onStep('  ! La red de la empresa inspecciona TLS y Playwright no confia en su '
+        + 'certificado. Se bajan las imagenes SIN validarlo — son fotos publicas del sitio '
+        + 'viejo, sin cookies ni credenciales. Para evitarlo, exporta la CA de la empresa y '
+        + 'poné NODE_EXTRA_CA_CERTS apuntando al archivo.')
+      relajado = await request.newContext({ ignoreHTTPSErrors: true })
+      bajar = relajado
+      return await bajar.get(origen, { timeout: 30000 })
+    }
+  }
+
   try {
     // Baja los bytes con el contexto del navegador (misma red, mismas cookies, mismo
     // proxy) y los dibuja como data: URI. Cargar la imagen por su URL en un <img> y
     // pasarla por canvas no sirve: sin cabeceras CORS el canvas queda "tainted" y no se
     // puede exportar.
     const recortar = async ({ origen, w, h, salida }) => {
-      const res = await ctx.request.get(origen, { timeout: 30000 })
+      const res = await bajarBytes(origen)
       if (!res.ok()) throw new Error(`HTTP ${res.status()}`)
       const buf = await res.body()
       const mime = res.headers()['content-type'] || 'image/jpeg'
       const data = `data:${mime};base64,${buf.toString('base64')}`
+
+      // SIN MEDIDA a la que recortar, se guarda el archivo tal cual: ni se re-encoda ni se
+      // toca. Es mejor que la del sitio viejo llegue entera a que no llegue.
+      if (!w || !h) {
+        mkdirSync(dirname(salida), { recursive: true })
+        writeFileSync(salida, buf)
+        const nat = await medidaDe(page, data)
+        return { nat, escala: 1, sinMedida: true }
+      }
 
       await page.setViewportSize({ width: w, height: h })
       await page.setContent(
@@ -81,14 +136,15 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
       for (const medio of mediosDeBloque(bloque, slug)) {
         const donde = `bloque ${i + 1} (${bloque.componente}) — ${medio.etiqueta}`
         try {
-          const dsk = `${medio.nombre}-desktop.jpg`
+          const ext = medio.desktop.w ? 'jpg' : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.desktop.origen)?.[1] || 'jpg').toLowerCase()
+          const dsk = `${medio.nombre}-desktop.${ext}`
           const r = await recortar({ ...medio.desktop, salida: join(carpeta, dsk) })
           const estirada = r.escala > 1.001
           if (estirada) estiradas += 1
 
           // El archivo de MOBILE. Si el catalogo no declara medida mobile se repite el de
           // desktop: el campo es obligatorio en el CMS y no hay de donde sacar otra.
-          const mob = `${medio.nombre}-mobile.jpg`
+          const mob = `${medio.nombre}-mobile.${ext}`
           if (medio.mobile) await recortar({ ...medio.mobile, salida: join(carpeta, mob) })
           else copyFileSync(join(carpeta, dsk), join(carpeta, mob))
 
@@ -98,8 +154,8 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
             medio: medio.nombre,
             archivo: join(slug, dsk),
             de: `${r.nat.w}×${r.nat.h}`,
-            a: `${medio.desktop.w}×${medio.desktop.h}`,
-            modo: estirada ? 'ESTIRADA' : 'recorte',
+            a: r.sinMedida ? `${r.nat.w}×${r.nat.h}` : `${medio.desktop.w}×${medio.desktop.h}`,
+            modo: r.sinMedida ? 'original' : (estirada ? 'ESTIRADA' : 'recorte'),
             kb,
           }
           medio.campo.contenedor[medio.campo.key] = registro
@@ -120,7 +176,8 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
           }
           hechas += 1
           onStep(`  ${estirada ? '!' : '·'} ${medio.nombre}  ${r.nat.w}×${r.nat.h} -> `
-            + `${medio.desktop.w}×${medio.desktop.h}`
+            + (r.sinMedida ? 'sin cambios (el catalogo no declara medida para este componente)'
+              : `${medio.desktop.w}×${medio.desktop.h}`)
             + `${medio.mobile ? ` + ${medio.mobile.w}×${medio.mobile.h}` : ' (mobile repite desktop)'}  ${kb}kb`)
         } catch (e) {
           fallaron += 1
@@ -131,6 +188,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
     }
   } finally {
     await page.close().catch(() => {})
+    if (relajado) await relajado.dispose().catch(() => {})
   }
 
   // El INDICE es el contrato con el subidor: dice que DOS archivos forman cada medio y
