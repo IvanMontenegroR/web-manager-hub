@@ -72,7 +72,10 @@ export async function elegirMedia({ page, campo, nombre, cfg, ref }) {
         ? `En la libreria, empezando por "${recorte(nombre)}", hay: ${nombres.join(' | ')}. `
           + 'Si los nombres tienen otra forma, el manifiesto tiene que usar ESA.'
         : `Tampoco hay nada que empiece con "${recorte(nombre)}": esa imagen no se subio. `
-          + 'Subila desde la interfaz, en "Imagenes de prueba".'))
+          + 'Los medios de una pagina los recorta y sube la propia corrida, antes de abrir '
+          + 'Drupal — si falta, mira los pasos de ARRIBA: ahi va a estar la foto que no se '
+          + 'pudo bajar. (El boton "Imagenes de prueba" es otra cosa: sube los placeholders '
+          + 'genericos, no las fotos de esta pagina.)'))
   }
 
   // Escribir en el autocompletar dispara su propia consulta al servidor. Apretar

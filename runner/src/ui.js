@@ -235,10 +235,35 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     }
 
     // 3. Traducir a manifiesto y dejarlo en disco, que es lo que se arma.
-    const { manifiesto, avisos } = aManifiesto(leido.pagina, leido.bloques, mapping.paragraphs?.types)
+    const { manifiesto, avisos, pendientes } = aManifiesto(
+      leido.pagina, leido.bloques, mapping.paragraphs?.types)
     for (const a of avisos) onStep(`  · ${a}`)
+
+    // 3b. LO QUE SE PIDE CONTRA LO QUE HAY. El manifiesto pide medios por nombre y el
+    // recorte acaba de producirlos: los dos salen de los mismos datos, asi que si no
+    // coinciden algo fallo en el medio — casi siempre una foto que no se pudo bajar.
+    //
+    // Se comprueba ACA y no en el formulario. Sin esto, el runner abria Drupal, armaba
+    // media pagina y recien al llegar al banner decia "no hay ningun medio llamado...",
+    // que suena a que falta subirlo cuando en realidad nunca se recorto. El motivo de
+    // verdad ya lo sabemos en este punto y es lo unico que sirve para arreglarlo.
+    const producidos = new Set(rec.indice.map((m) => m.nombre))
+    const faltan = pendientes.filter((p) => !producidos.has(p.medio))
+    if (faltan.length) {
+      const porQue = rec.notas.length
+        ? `\nLo que fallo al recortar:\n  · ${rec.notas.join('\n  · ')}`
+        : '\nEl recorte no dio ningun error, asi que el problema esta en el nombre del medio, '
+          + 'no en la foto.'
+      throw new Error(
+        `El manifiesto pide ${pendientes.length} medio/s y el recorte produjo ${producidos.size}. `
+        + `Falta${faltan.length === 1 ? '' : 'n'}:\n  · ${faltan.map((f) => `${f.medio}  (${f.url})`).join('\n  · ')}`
+        + porQue
+        + '\nNo se abre Drupal: armar la pagina sin esas imagenes seria dejarla a medias.')
+    }
+
     writeFileSync(resolve(archivo), JSON.stringify(manifiesto, null, 2) + '\n', 'utf8')
-    onStep(`Manifiesto al dia: ${countBlocks(manifiesto.blocks)} paragraph/s.`)
+    onStep(`Manifiesto al dia: ${countBlocks(manifiesto.blocks)} paragraph/s, `
+      + `${pendientes.length} medio/s listos.`)
     return manifiesto
   }
 
