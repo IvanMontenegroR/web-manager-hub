@@ -124,9 +124,14 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     try {
       const res = await buildPage({ page, mapping, manifest: m, save, onStep: (s) => c.pasos.push(s) })
       const widgets = guardarWidgets(res.imagenes)
-      logRun({ manifest: archivo, title: m.page.title, ...res, imagenes: undefined, widgets })
+      // CUALES quedaron sin tocar. Sin los nombres, el aviso dice "los campos de imagen" y
+      // uno busca un problema con las fotos — cuando el que sobra puede ser otro campo con
+      // widget de archivo (paso con el video externo, que en el mapping figura como
+      // imagen). El nombre del campo es lo unico que hace falta para saber cual mirar.
+      const sinTocar = (res.imagenes || []).map((i) => i.ref)
+      logRun({ manifest: archivo, title: m.page.title, ...res, imagenes: undefined, widgets, sinTocar })
       c.estado = 'listo'
-      c.resultado = { ...res, imagenes: undefined, widgets, titulo: m.page.title }
+      c.resultado = { ...res, imagenes: undefined, widgets, sinTocar, titulo: m.page.title }
     } catch (e) {
       // Una foto de como quedo la pantalla: es lo que hace falta para entender un error
       // contra el CMS, y quien lo corre no tiene por que saber mirar el DOM.
