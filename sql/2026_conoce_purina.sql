@@ -78,7 +78,8 @@ values (
   || E'\n· Innovacion (153 car.): "Continuamente nuestros expertos de todo el mundo nos ayudan a crear productos innovadores para tu mascota, una busqueda que representa lo que es Purina®."'
   || E'\n\nBANNER — va como Secondary Hero, alineado Banner Left Center.'
   || E'\n· La alineacion NO es decorativa: en la foto el perro esta a la DERECHA, asi que el texto tiene que ir a la izquierda para no taparlo.'
-  || E'\n· FALTA LA IMAGEN DEL BANNER y no la tenemos. En el sitio viejo no es un <img>: es un background-image dentro de un <style> en linea, y esta pagina se leyo antes de que el extractor supiera leer eso. Hay que volver a leerla (tools/extraer.mjs ya lo hace) o sacarla a mano del sitio.'
+  || E'\n· La imagen del banner sale del sitio viejo: Banner_Best_Life_desktop.jpg (1920×540) y Banner_Best_Life_mobile.jpg (800×1200). No es un <img>, es un background-image dentro de un <style> en linea; por eso no salio en la primera lectura.'
+  || E'\n· LA DE DESKTOP NO ALCANZA: el Secondary Hero pide 2100×700 y la que hay es de 1920×540. Se sube ESTIRADA. Hay que pedirla de nuevo o re-cortarla mas grande; la de mobile si alcanza.'
   || E'\n· Medida del Secondary Hero: 2100×700 desktop (3:1) y 526×526 mobile (1:1).'
   || E'\n\nVIDEO — el YouTube va en su propio bloque DEBAJO del banner, no como Media del banner. (Primero lo habiamos puesto como fondo del hero por el autoplay sin controles; en la pagina real esta abajo.)'
   || E'\n\nIMAGENES DE LAS CARDS — las del sitio viejo son de 500×360 y la card apaisada pide 485×280 desktop y 335×280 mobile. Es un recorte, no un estiramiento: las fotos que hay alcanzan, hay que re-cortarlas.'
@@ -100,12 +101,16 @@ select p.id, x.k, null, null, x.so, x.c from p, (values
     jsonb_build_object('label', 'Conoce Purina')))),
 
  -- HERO. Los dos titulares del sitio viejo, uno como titulo y el otro como bajada.
- -- Sin Media: la imagen de fondo del sitio viejo no la tenemos todavia (ver `notes`).
+ -- La Media sale del `background-image` del <style> en linea del sitio viejo (mobile en la
+ -- regla de afuera, desktop adentro del @media). Se guarda el archivo ORIGINAL, no el
+ -- derivado `styles/webp/...?itok=...` que sirve la pagina. Ver 2026_conoce_purina_banner.sql.
  ('banner', 1, jsonb_build_object(
     'type',         'title-description',
     'title',        '¿A ti te importa de dónde viene su alimento?',
     'title_tag',    'h1',
     'description',  'A nosotros también, por eso te contamos qué es Purina®.',
+    'image',        'https://purina.com.mx/sites/default/files/2022-11/Banner_Best_Life_desktop.jpg',
+    'image_mobile', 'https://purina.com.mx/sites/default/files/2022-11/Banner_Best_Life_mobile.jpg',
     'banner_align', 'banner_left_center')),
 
  -- El video, en su propio bloque debajo del banner.
