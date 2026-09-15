@@ -27,7 +27,16 @@ import { loadManifest, countBlocks, validateManifest } from './manifest.js'
 import { missingTypes } from './mapping.js'
 import { buildPage } from './build.js'
 import { subirPlaceholders } from './media.js'
+import { recortarPagina } from './imagenes.js'
+import { leerPagina } from '../tools/hub.js'
+import { aManifiesto } from '../tools/traducir.js'
+import { slugDePagina, planDelHub } from '../tools/paginas.js'
 import { logRun } from './log.js'
+
+// El alt que se le pone a una foto que no trae uno propio. Es una marca BUSCABLE en la
+// Media library, no un alt inventado: un texto plausible parece cargado y no lo corrige
+// nadie. Mismo valor que usa `tools/subir-medios.mjs`.
+const ALT_DE_RESERVA = 'Alt Placeholder'
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url))
 const APP = join(AQUI, 'ui', 'app.html')
@@ -110,18 +119,32 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     })
   }
 
+  // LA CADENA ENTERA, no solo el ultimo paso.
+  //
+  // La interfaz armaba la pagina a partir del archivo de manifiesto y nada mas: no lo
+  // regeneraba desde el hub, no recortaba y no subia. Eso hacia que dependiera de que
+  // alguien hubiera corrido tres comandos antes, en orden, y que el archivo estuviera al
+  // dia — y cuando no lo estaba no fallaba nada, simplemente se armaba una pagina con
+  // datos viejos. Paso con Conoce Purina: el manifiesto no pedia ninguna imagen y el
+  // banner quedo vacio sin un solo error.
+  //
+  // Va todo aca y no llamando a las herramientas como procesos aparte porque Chrome no
+  // deja abrir el mismo perfil dos veces: el navegador de la interfaz es EL navegador.
   async function correr(archivo, save) {
-    const m = loadManifest(archivo)
-    const falta = missingTypes(mapping, m.blocks)
-    if (falta.length) throw new Error(`El mapping no conoce: ${falta.join(', ')}`)
     const c = nuevaCorrida(archivo, save)
     if (!(await comprobarSesion({ abrir: true }))) {
       c.estado = 'error'
       c.error = 'No hay sesion en Drupal. Conectate primero.'
       return
     }
-    const { page } = await navegador()
+    const { ctx, page } = await navegador()
+    // Fuera del try: el catch necesita el titulo para el registro, y si el manifiesto
+    // todavia no se leyo no hay titulo que poner.
+    let m = null
     try {
+      m = await alDia({ archivo, ctx, onStep: (s) => c.pasos.push(s) })
+      const falta = missingTypes(mapping, m.blocks)
+      if (falta.length) throw new Error(`El mapping no conoce: ${falta.join(', ')}`)
       const res = await buildPage({ page, mapping, manifest: m, save, onStep: (s) => c.pasos.push(s) })
       const widgets = guardarWidgets(res.imagenes)
       // CUALES quedaron sin tocar. Sin los nombres, el aviso dice "los campos de imagen" y
@@ -136,10 +159,66 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
       // Una foto de como quedo la pantalla: es lo que hace falta para entender un error
       // contra el CMS, y quien lo corre no tiene por que saber mirar el DOM.
       c.foto = await sacarFoto(page).catch(() => null)
-      logRun({ manifest: archivo, title: m.page.title, error: e.message, foto: c.foto })
+      logRun({ manifest: archivo, title: m?.page?.title, error: e.message, foto: c.foto })
       c.estado = 'error'
       c.error = e.message
     }
+  }
+
+  // Deja el manifiesto AL DIA antes de armar: lo regenera desde el hub, recorta las fotos
+  // y las sube a la Media library. Es la cadena de `npm run publicar` metida adentro de
+  // la interfaz, para que sean la misma cosa y no dos caminos que se desincronizan.
+  //
+  // Si la pagina NO esta en el hub (un manifiesto escrito a mano, o pegado), se usa el
+  // archivo tal cual y se dice. No es un error: el hub es *uno* de los generadores de
+  // manifiestos, no el unico.
+  async function alDia({ archivo, ctx, onStep }) {
+    const previo = loadManifest(archivo)
+    const path = previo.page?.path
+    if (!path) {
+      onStep('El manifiesto no dice de que pagina del hub sale: se usa tal cual.')
+      return previo
+    }
+
+    let leido = null
+    try {
+      leido = await leerPagina(path, previo.page?.market || 'MX')
+    } catch (e) {
+      onStep(`No se pudo leer el hub (${String(e.message).slice(0, 80)}): se usa el manifiesto que hay.`)
+      return previo
+    }
+    if (!leido) {
+      onStep(`La pagina ${path} no esta en el hub: se usa el manifiesto que hay.`)
+      return previo
+    }
+
+    // 1. Recortar. Va ANTES de traducir porque el traductor pide los medios por nombre y
+    // ese nombre lo calculan las dos partes con la misma funcion (ver tools/medios.js).
+    const slug = slugDePagina(leido.pagina.path)
+    onStep(`Leyendo ${path} del hub y recortando sus imagenes…`)
+    const plan = { pagina: leido.pagina, bloques: leido.bloques.map(planDelHub), revisar: [] }
+    const rec = await recortarPagina({ ctx, plan, slug, destino: 'imagenes', onStep })
+    for (const n of rec.notas) onStep(`  ! ${n}`)
+
+    // 2. Subir los medios recortados. Idempotente: los que ya estan se saltean.
+    if (rec.indice.length) {
+      onStep(`Subiendo ${rec.indice.length} medio/s a la Media library…`)
+      const { page } = await navegador()
+      const r = await subirPlaceholders({
+        page, mapping, carpeta: rec.carpeta, alUsar: ALT_DE_RESERVA, onStep,
+      })
+      onStep(`${r.subidos} subido/s, ${r.salteados} ya estaban.`)
+      if (r.sinAlt?.length) {
+        onStep(`OJO: ${r.sinAlt.length} medio/s quedaron con el alt "${r.alUsado}" — hay que completarlo.`)
+      }
+    }
+
+    // 3. Traducir a manifiesto y dejarlo en disco, que es lo que se arma.
+    const { manifiesto, avisos } = aManifiesto(leido.pagina, leido.bloques, mapping.paragraphs?.types)
+    for (const a of avisos) onStep(`  · ${a}`)
+    writeFileSync(resolve(archivo), JSON.stringify(manifiesto, null, 2) + '\n', 'utf8')
+    onStep(`Manifiesto al dia: ${countBlocks(manifiesto.blocks)} paragraph/s.`)
+    return manifiesto
   }
 
   // Subir los placeholders desde la interfaz. Va por aca y no por la terminal porque el

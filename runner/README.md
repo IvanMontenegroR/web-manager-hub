@@ -76,9 +76,12 @@ Los tres pasos de la pantalla:
    bloques tiene y su ruta. Un manifiesto que pida un paragraph que el mapping todavia no
    conoce aparece bloqueado y dice cual falta, en vez de fallar a mitad de camino. Tambien
    se puede pegar un manifiesto que te haya dado el hub y queda guardado en esa carpeta.
-3. **Dos botones.** *Probar sin guardar* llena el formulario para que lo mires y **no crea
-   nada** en el CMS. *Crear borrador* lo guarda despublicado y te da el link para revisar,
-   subir las imagenes y publicar. Los pasos se ven en vivo mientras corre.
+3. **Dos botones.** Los dos corren la CADENA ENTERA: regeneran el manifiesto desde el hub,
+   recortan las imagenes, las suben a la Media library y arman la pagina. *Probar sin
+   guardar* llena el formulario para que lo mires y **no crea la pagina** en el CMS (los
+   medios si se suben: son reutilizables y hacen falta para que el formulario se llene de
+   verdad). *Crear borrador* ademas la guarda despublicada y te da el link. Los pasos se
+   ven en vivo mientras corre.
 
 ### Por terminal
 
@@ -118,11 +121,12 @@ npm run verify -- mapping/purina-latam.json form.html
 - **Frena ante la duda.** Un campo que el mapping no conoce, o que no aparece en el
   formulario, es un ERROR y corta la corrida. Una pagina a medio armar es peor que una
   que no se armo. Si corta antes de `--save`, no quedo nada en el CMS.
-- **Las imagenes se ELIGEN, nunca se suben.** El manifiesto pone el NOMBRE de un medio y
-  el runner lo busca en la Media library y lo referencia. Si no esta, FRENA y dice cual
-  falta. Subir por su cuenta llenaria la libreria de duplicados — un medio de Drupal se
-  reutiliza — y despues no los limpia nadie. Para subir esta `npm run subir-placeholders`,
-  que es otra cosa y se corre a proposito.
+- **Las imagenes se BUSCAN antes de crearse.** El manifiesto pone el NOMBRE de un medio y
+  el runner lo busca en la Media library y lo referencia. Un medio de Drupal se reutiliza,
+  asi que crear uno por pagina llenaria la libreria de duplicados que despues no limpia
+  nadie. Lo que SI se sube es lo que no puede estar de antes: las fotos recortadas de la
+  pagina, en su propio paso (`subir-medios`) y de forma idempotente — las que ya estan se
+  saltean. Mientras CONSTRUYE, el runner sigue sin subir: elige.
 
 ## Placeholders
 
@@ -287,7 +291,14 @@ npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin 
 viejo: las que se arman directo en el hub no tienen archivo de plan, asi que el recortador
 las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques.
 
-Y del 3 al 7 es UN comando, que corre los pasos en orden y frena en el primero que falle:
+**Desde la INTERFAZ es un boton.** `npm run ui` y "Crear borrador": la interfaz corre la
+cadena entera — regenera el manifiesto desde el hub, recorta, sube los medios y arma la
+pagina. Antes solo hacia el ultimo paso, asi que dependia de que alguien hubiera corrido
+tres comandos antes, en orden; y cuando el manifiesto estaba viejo no fallaba nada, se
+armaba una pagina con datos de otra epoca.
+
+Y desde la terminal es UN comando, que corre los mismos pasos y frena en el primero que
+falle:
 
 ```bash
 npm run publicar -- /conoce-purina            # ENSAYO: no guarda nada

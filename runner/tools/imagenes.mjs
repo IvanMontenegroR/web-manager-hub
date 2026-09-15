@@ -38,10 +38,10 @@
 //                "a": "485×280", "modo": "recorte", "kb": 84 }
 // El `origen` se conserva a proposito: es lo que el hub muestra en el preview, y es la
 // unica forma de volver atras si el recorte salio mal.
-import { readFileSync, writeFileSync, mkdirSync, statSync, readdirSync, copyFileSync } from 'node:fs'
-import { join, resolve, basename, dirname } from 'node:path'
+import { readFileSync, writeFileSync, statSync, readdirSync } from 'node:fs'
+import { join, resolve, basename } from 'node:path'
 import { openBrowser } from '../src/browser.js'
-import { mediosDeBloque, campoBase } from './medios.js'
+import { recortarPagina } from '../src/imagenes.js'
 import { leerPagina } from './hub.js'
 import { slugDePagina, planDelHub } from './paginas.js'
 
@@ -57,14 +57,6 @@ if ((!entrada && !hub) || !destino) {
   process.exit(2)
 }
 const CALIDAD = Number(args.find((a) => a.startsWith('--calidad='))?.split('=')[1] || 82)
-
-// Recorre el arbol del plan (bloques + hijos).
-function todosLosBloques(plan) {
-  const out = []
-  const rec = (arr) => { for (const b of (arr || [])) { out.push(b); rec(b.hijos) } }
-  rec(plan.bloques)
-  return out
-}
 
 // ---------------------------------------------------------------------------------
 // Las paginas a recortar, ya con la misma forma vengan de donde vengan. `archivo` en null
@@ -92,106 +84,24 @@ if (hub) {
   }))
 }
 
-const { ctx, page } = await openBrowser({ profileDir: '.profile', headless: true,
+const { ctx } = await openBrowser({ profileDir: '.profile', headless: true,
   ...(process.env.RUNNER_CHROME ? { executablePath: process.env.RUNNER_CHROME } : {}) })
-
-// Baja los bytes con el contexto del navegador (misma red, mismas cookies, mismo proxy) y
-// los dibuja como data: URI. Cargar la imagen por su URL en un <img> y pasarla por canvas
-// no sirve: sin cabeceras CORS el canvas queda "tainted" y no se puede exportar.
-async function recortar({ origen, w, h, salida }) {
-  const res = await ctx.request.get(origen, { timeout: 30000 })
-  if (!res.ok()) throw new Error(`HTTP ${res.status()}`)
-  const buf = await res.body()
-  const mime = res.headers()['content-type'] || 'image/jpeg'
-  const data = `data:${mime};base64,${buf.toString('base64')}`
-
-  await page.setViewportSize({ width: w, height: h })
-  await page.setContent(
-    `<style>html,body{margin:0}
-     #c{width:${w}px;height:${h}px;overflow:hidden}
-     img{width:100%;height:100%;object-fit:cover;display:block}</style>
-     <div id="c"><img src="${data}"></div>`, { waitUntil: 'load' })
-  // El tamaño NATURAL sale del navegador, no de la extraccion: es el unico dato que dice
-  // si esto es un recorte o un estiramiento.
-  const nat = await page.evaluate(() => {
-    const i = document.querySelector('img')
-    return { w: i.naturalWidth, h: i.naturalHeight }
-  })
-  mkdirSync(dirname(salida), { recursive: true })
-  await page.locator('#c').screenshot({ path: salida, type: 'jpeg', quality: CALIDAD })
-  return { nat, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)) }
-}
 
 let hechas = 0, estiradas = 0, fallaron = 0
 try {
   for (const { archivo, slug, plan } of entradas) {
-    const carpeta = join(resolve(destino), slug)
-    const indice = []
     process.stderr.write(`\n${slug}\n`)
+    const r = await recortarPagina({
+      ctx, plan, slug, destino, calidad: CALIDAD,
+      onStep: (s) => process.stderr.write(s + '\n'),
+    })
+    hechas += r.hechas; estiradas += r.estiradas; fallaron += r.fallaron
+    if (!r.indice.length) process.stderr.write('  (sin imagenes)\n')
 
-    for (const [i, bloque] of todosLosBloques(plan).entries()) {
-      for (const medio of mediosDeBloque(bloque, slug)) {
-        const donde = `bloque ${i + 1} (${bloque.componente}) — ${medio.etiqueta}`
-        try {
-          const dsk = `${medio.nombre}-desktop.jpg`
-          const r = await recortar({ ...medio.desktop, salida: join(carpeta, dsk) })
-          const estirada = r.escala > 1.001
-          if (estirada) estiradas += 1
-
-          // El archivo de MOBILE. Si el catalogo no declara medida mobile se repite el de
-          // desktop: el campo es obligatorio en el CMS y no hay de donde sacar otra.
-          let mob = `${medio.nombre}-mobile.jpg`
-          if (medio.mobile) {
-            await recortar({ ...medio.mobile, salida: join(carpeta, mob) })
-          } else {
-            copyFileSync(join(carpeta, dsk), join(carpeta, mob))
-          }
-
-          const kb = Math.round(statSync(join(carpeta, dsk)).size / 1024)
-          const registro = {
-            origen: medio.desktop.origen,
-            medio: medio.nombre,
-            archivo: join(slug, dsk),
-            de: `${r.nat.w}×${r.nat.h}`,
-            a: `${medio.desktop.w}×${medio.desktop.h}`,
-            modo: estirada ? 'ESTIRADA' : 'recorte',
-            kb,
-          }
-          medio.campo.contenedor[medio.campo.key] = registro
-          // El campo de mobile del hub queda apuntando al mismo medio: en el CMS es UNA
-          // sola entidad con las dos imagenes adentro.
-          if (medio.campoMobile) {
-            medio.campoMobile.contenedor[medio.campoMobile.key] = { ...registro, archivo: join(slug, mob) }
-          }
-          indice.push({
-            nombre: medio.nombre, desktop: { archivo: dsk }, mobile: { archivo: mob },
-            alt: medio.campo.contenedor[`${campoBase(medio.campo.key)}_alt`] || '',
-          })
-
-          if (estirada) {
-            plan.revisar.push(`IMAGEN ESTIRADA: ${donde} es de ${r.nat.w}×${r.nat.h} y hace falta `
-              + `${medio.desktop.w}×${medio.desktop.h}. No alcanza: hay que pedirla de nuevo, agrandarla se ve mal.`)
-          }
-          hechas += 1
-          process.stderr.write(`  ${estirada ? '!' : '·'} ${medio.nombre}  ${r.nat.w}×${r.nat.h} -> `
-            + `${medio.desktop.w}×${medio.desktop.h}${medio.mobile ? ` + ${medio.mobile.w}×${medio.mobile.h}` : ' (mobile repite desktop)'}  ${kb}kb\n`)
-        } catch (e) {
-          fallaron += 1
-          plan.revisar.push(`IMAGEN que no se pudo bajar: ${medio.desktop.origen} (${String(e.message).slice(0, 80)})`)
-          process.stderr.write(`  x ${medio.nombre}  ${String(e.message).slice(0, 60)}\n`)
-        }
-      }
-    }
-
-    if (!indice.length) process.stderr.write('  (sin imagenes)\n')
-    else {
-      mkdirSync(carpeta, { recursive: true })
-      writeFileSync(join(carpeta, 'INDICE.json'), JSON.stringify(indice, null, 2) + '\n', 'utf8')
-    }
     // Del hub no se escribe nada: la pagina ya esta armada y el origen de cada foto es lo
     // que el builder muestra. Lo que habria ido al plan se imprime, que es donde se busca.
     if (archivo) writeFileSync(archivo, JSON.stringify(plan, null, 2) + '\n', 'utf8')
-    else for (const r of plan.revisar) process.stderr.write(`  ! ${r}\n`)
+    else for (const n of r.notas) process.stderr.write(`  ! ${n}\n`)
   }
 } finally {
   await ctx.close()
