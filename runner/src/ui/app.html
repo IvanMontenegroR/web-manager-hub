@@ -92,7 +92,7 @@
 
   <div class="card">
     <h2>2. Paginas para armar</h2>
-    <div id="lista" class="cargando">Buscando manifiestos…</div>
+    <div id="lista" class="cargando">Buscando paginas…</div>
     <details style="margin-top:14px">
       <summary>Agregar una pagina pegando su manifiesto</summary>
       <p class="meta" style="margin:10px 0">Pega acá el JSON que te dio el hub y queda guardado
@@ -167,16 +167,44 @@ function pintarSesion(e) {
 
 function pintarLista(e) {
   const cont = $('lista')
-  if (!e.manifiestos.length) {
+  const hub = e.hub || { lista: [], error: null }
+  if (!e.manifiestos.length && !hub.lista.length) {
     cont.className = 'meta'
-    cont.textContent = 'No hay ningun manifiesto en la carpeta manifests.'
+    cont.textContent = hub.error
+      ? `No hay manifiestos en la carpeta, y el hub no se pudo leer: ${hub.error}`
+      : 'No hay ninguna pagina en el hub ni ningun manifiesto en la carpeta.'
     return
   }
   cont.className = ''
   // Sin sesion los botones estan grises: hay que decir por que, no dejarlo adivinar.
   const sinSesion = e.sesion === true ? '' :
     '<div class="nota aviso">Para armar paginas, primero conectate con Drupal ahi arriba.</div>'
-  cont.innerHTML = sinSesion + e.manifiestos.map((m) => {
+
+  // LAS PAGINAS DEL HUB van primero: son la fuente. Un manifiesto es un artefacto que se
+  // regenera en cada corrida, y una pagina recien creada en el builder todavia no tiene
+  // archivo — listar solo archivos la dejaba invisible.
+  const delHub = hub.lista.map((p) => {
+    const bloqueado = e.sesion !== true
+    const id = `${p.path}|${p.market || ''}`
+    return `<div class="pagina">
+      <div class="tit">${esc(p.name || p.path)}</div>
+      <div class="meta">Del hub${p.market ? ' · ' + esc(p.market) : ''}
+        · <code>${esc(p.path)}</code>${p.status ? ' · ' + esc(p.status) : ''}</div>
+      <div class="acciones">
+        <button data-h="${esc(id)}" data-s="0" ${bloqueado ? 'disabled' : ''}>Probar sin guardar</button>
+        <button class="primario" data-h="${esc(id)}" data-s="1" ${bloqueado ? 'disabled' : ''}>Crear borrador</button>
+      </div>
+      <div class="meta" style="margin-top:8px">Se lee del hub, se recortan y suben las
+        imagenes, y se arma. Probar <b>no crea la pagina</b>; los medios si se suben,
+        porque son reutilizables y sin ellos el formulario no se llena de verdad.</div>
+    </div>`
+  }).join('')
+
+  const avisoHub = hub.error
+    ? `<div class="nota aviso">No se pudo leer el hub: ${esc(hub.error)}. Abajo van los
+       manifiestos que haya en la carpeta.</div>` : ''
+
+  cont.innerHTML = sinSesion + avisoHub + delHub + e.manifiestos.map((m) => {
     if (m.error) return `<div class="pagina"><div class="tit">${esc(m.nombre)}</div>
       <div class="nota mal">No se pudo leer: ${esc(m.error)}</div></div>`
     const bloqueado = m.falta.length > 0 || e.sesion !== true
@@ -197,6 +225,10 @@ function pintarLista(e) {
   }).join('')
   cont.querySelectorAll('button[data-a]').forEach((b) => b.addEventListener('click', () => {
     correr(b.dataset.a, b.dataset.s === '1')
+  }))
+  cont.querySelectorAll('button[data-h]').forEach((b) => b.addEventListener('click', () => {
+    const [path, market] = b.dataset.h.split('|')
+    correrPagina(path, market, b.dataset.s === '1')
   }))
 }
 
@@ -252,11 +284,16 @@ function pintarCorrida(c) {
         <p class="meta" style="margin-top:8px">En Drupal no quedo nada.</p>${widgets}</div>`
 }
 
-async function correr(archivo, save) {
-  if (save && !confirm('Se va a crear la pagina en Drupal, despublicada. ¿Seguimos?')) return
+async function correr(archivo, save) { await arrancar({ archivo, save }) }
+
+// Armar una pagina DEL HUB: no hay archivo, se identifica por su ruta y su mercado.
+async function correrPagina(path, market, save) { await arrancar({ path, market, save }) }
+
+async function arrancar(cuerpo) {
+  if (cuerpo.save && !confirm('Se va a crear la pagina en Drupal, despublicada. ¿Seguimos?')) return
   $('cResultado').hidden = true
-  document.querySelectorAll('button[data-a]').forEach((b) => (b.disabled = true))
-  try { await api('/api/build', { archivo, save }) } catch (e) { alert(e.message) }
+  document.querySelectorAll('button[data-a], button[data-h]').forEach((b) => (b.disabled = true))
+  try { await api('/api/build', cuerpo) } catch (e) { alert(e.message) }
   seguir()
 }
 

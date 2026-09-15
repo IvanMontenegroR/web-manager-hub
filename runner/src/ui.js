@@ -28,7 +28,7 @@ import { missingTypes } from './mapping.js'
 import { buildPage } from './build.js'
 import { subirPlaceholders } from './media.js'
 import { recortarPagina } from './imagenes.js'
-import { leerPagina } from '../tools/hub.js'
+import { leerPagina, listarPaginas, credenciales } from '../tools/hub.js'
 import { aManifiesto } from '../tools/traducir.js'
 import { slugDePagina, planDelHub } from '../tools/paginas.js'
 import { logRun } from './log.js'
@@ -101,6 +101,21 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     desde: new Date().toISOString(),
   })
 
+  // Las paginas DEL HUB, que es de donde salen de verdad. Se cachean un rato porque la
+  // pantalla pregunta el estado cada pocos segundos y esto va por red.
+  let cachePaginas = { cuando: 0, lista: [], error: null }
+  async function paginasDelHub() {
+    if (!credenciales().url) return { lista: [], error: 'Sin credenciales del hub (falta el .env).' }
+    if (Date.now() - cachePaginas.cuando < 30000) return cachePaginas
+    try {
+      const filas = await listarPaginas()
+      cachePaginas = { cuando: Date.now(), lista: filas, error: null }
+    } catch (e) {
+      cachePaginas = { cuando: Date.now(), lista: [], error: String(e.message).slice(0, 200) }
+    }
+    return cachePaginas
+  }
+
   function manifiestos() {
     const dir = resolve(manifestDir)
     if (!existsSync(dir)) return []
@@ -130,8 +145,8 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   //
   // Va todo aca y no llamando a las herramientas como procesos aparte porque Chrome no
   // deja abrir el mismo perfil dos veces: el navegador de la interfaz es EL navegador.
-  async function correr(archivo, save) {
-    const c = nuevaCorrida(archivo, save)
+  async function correr(archivo, save, desdeElHub = null) {
+    const c = nuevaCorrida(archivo || desdeElHub?.path, save)
     if (!(await comprobarSesion({ abrir: true }))) {
       c.estado = 'error'
       c.error = 'No hay sesion en Drupal. Conectate primero.'
@@ -142,7 +157,7 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     // todavia no se leyo no hay titulo que poner.
     let m = null
     try {
-      m = await alDia({ archivo, ctx, onStep: (s) => c.pasos.push(s) })
+      m = await alDia({ archivo, desdeElHub, ctx, onStep: (s) => c.pasos.push(s) })
       const falta = missingTypes(mapping, m.blocks)
       if (falta.length) throw new Error(`El mapping no conoce: ${falta.join(', ')}`)
       const res = await buildPage({ page, mapping, manifest: m, save, onStep: (s) => c.pasos.push(s) })
@@ -172,22 +187,28 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
   // Si la pagina NO esta en el hub (un manifiesto escrito a mano, o pegado), se usa el
   // archivo tal cual y se dice. No es un error: el hub es *uno* de los generadores de
   // manifiestos, no el unico.
-  async function alDia({ archivo, ctx, onStep }) {
-    const previo = loadManifest(archivo)
-    const path = previo.page?.path
+  async function alDia({ archivo, desdeElHub, ctx, onStep }) {
+    // Dos entradas: una pagina elegida del hub (no hay archivo todavia) o un manifiesto
+    // que ya existe en disco, del que se saca de que pagina salio.
+    const previo = archivo && existsSync(resolve(archivo)) ? loadManifest(archivo) : null
+    const path = desdeElHub?.path || previo?.page?.path
+    const market = desdeElHub?.market || previo?.page?.market || 'MX'
     if (!path) {
       onStep('El manifiesto no dice de que pagina del hub sale: se usa tal cual.')
       return previo
     }
+    if (!archivo) archivo = join(resolve(manifestDir), `${slugDePagina(path)}.json`)
 
     let leido = null
     try {
-      leido = await leerPagina(path, previo.page?.market || 'MX')
+      leido = await leerPagina(path, market)
     } catch (e) {
+      if (!previo) throw new Error(`No se pudo leer ${path} del hub: ${e.message}`)
       onStep(`No se pudo leer el hub (${String(e.message).slice(0, 80)}): se usa el manifiesto que hay.`)
       return previo
     }
     if (!leido) {
+      if (!previo) throw new Error(`La pagina ${path} [${market}] no esta en el hub.`)
       onStep(`La pagina ${path} no esta en el hub: se usa el manifiesto que hay.`)
       return previo
     }
@@ -254,6 +275,7 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     'GET /api/estado': async () => ({
       sitio: mapping.site, mapping: basename(mappingFile),
       sesion, navegador: vivo(), manifiestos: manifiestos(), corrida,
+      hub: await paginasDelHub(),
     }),
     'GET /api/corrida': async () => corrida,
     // Abre la ventana y comprueba. Si el perfil ya tenia la sesion de la vez pasada,
@@ -269,9 +291,11 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     'POST /api/sesion': async () => ({ sesion: await comprobarSesion({ abrir: true }) }),
     'POST /api/build': async (body) => {
       if (corrida?.estado === 'corriendo') throw new Error('Ya hay una pagina armandose.')
-      if (!body?.archivo) throw new Error('Falta el manifiesto.')
+      // Se puede pedir por PAGINA DEL HUB (lo normal) o por archivo de manifiesto.
+      const delHub = body?.path ? { path: body.path, market: body.market } : null
+      if (!delHub && !body?.archivo) throw new Error('Falta la pagina o el manifiesto.')
       // No se espera: la pagina sigue el avance por /api/corrida.
-      correr(body.archivo, !!body.save).catch(() => {})
+      correr(body.archivo || null, !!body.save, delHub).catch(() => {})
       return { ok: true }
     },
     'POST /api/subir-imagenes': async (body) => {

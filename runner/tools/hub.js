@@ -46,6 +46,14 @@ export async function api(ruta, opciones = {}) {
   return txt ? JSON.parse(txt) : null
 }
 
+// Las paginas del hub, para elegir una sin saber como se llama su archivo. La interfaz
+// listaba los manifiestos que hubiera en disco, y eso es al reves: el manifiesto es un
+// artefacto que se genera, el hub es la fuente. Una pagina recien creada en el builder no
+// tenia archivo y por lo tanto no se veia en el runner.
+export async function listarPaginas() {
+  return await api('pages?select=path,name,market,status&order=market,sort_order')
+}
+
 // Una pagina del hub con sus componentes, ya armada como ARBOL (los hijos adentro de su
 // padre, ordenados por slot y despues por su orden dentro del slot).
 export async function leerPagina(path, market = 'MX') {
