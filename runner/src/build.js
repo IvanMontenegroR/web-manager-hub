@@ -9,14 +9,16 @@
 //     pagina a medio armar es peor que una que no se armo.
 //   - Las IMAGENES se ELIGEN de la Media library por su nombre, nunca se suben. Si la
 //     que pide el manifiesto no esta, frena y dice cual falta.
-import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath } from './mapping.js'
+import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath, KINDS_SIN_SELECTOR } from './mapping.js'
 import { esperarAjax, esperarVisible } from './esperas.js'
 import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
 import { elegirMedia, leerMedia } from './mediaExistente.js'
 import { elegirDeLaLibreria, leerSeleccion } from './mediaLibrary.js'
 
 // Los que el runner todavia NO sabe tocar. `media` salio de la lista: ese si se elige.
-const IMAGE_KINDS = new Set(['image', 'file'])
+// La lista vive en el mapping porque es la misma que decide que campo puede no declarar
+// selector — son la misma idea dicha dos veces si se escriben aparte.
+const IMAGE_KINDS = KINDS_SIN_SELECTOR
 const MAX_DELTA = 100
 // Cuantas veces se vuelve a intentar un alta que fallo POR EL SERVIDOR.
 const REINTENTOS = 3

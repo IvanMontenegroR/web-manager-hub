@@ -52,8 +52,11 @@
 // elige con `"slot": 0`. Un slot puede declarar `max`: cuantos componentes entran ahi
 // (una pestaña lleva UNO solo). Pasarse frena la corrida.
 //
-// `kind` de un campo: text (default) | richtext | select | checkbox | media (se elige de
-// la libreria) | image (se saltea).
+// `kind` de un campo: text (default) | richtext | select | checkbox |
+// media (inline entity form: se elige de la libreria por NOMBRE) |
+// mediaLibrary (el modal con grilla: se elige por URL, y si no esta se crea) |
+// image / file (se saltean: el runner no sabe llenarlos, solo guarda su HTML para
+// aprender como es el widget).
 // Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se
 // pone ANTES de escribir, porque el CMS arranca en uno que no admite HTML.
 //
@@ -61,6 +64,12 @@
 // Todo lo que se escribe sale del manifiesto, el `html_tag` de un titulo incluido — el
 // nivel de encabezado es una decision de esa pagina, no del tipo de bloque.
 import { readFileSync } from 'node:fs'
+
+// Los DOS kinds que no tienen selector porque el runner no los llena: guarda el HTML del
+// widget y sigue. Cualquier otro TIENE que declarar `sel` — un campo sin selector se
+// descubria recien en mitad de la corrida, con Drupal abierto y la pagina a medio armar,
+// diciendo "no encontre el campo (undefined)". Eso es lo que paso con el video externo.
+export const KINDS_SIN_SELECTOR = new Set(['image', 'file'])
 
 export function loadMapping(file) {
   let m
@@ -76,6 +85,22 @@ export function loadMapping(file) {
   if (!m.paragraphs?.dsel) err('falta "paragraphs.dsel"')
   if (!m.paragraphs?.add?.mode) err('falta "paragraphs.add.mode"')
   m.paragraphs.types = m.paragraphs.types || {}
+
+  // Se revisa TODO el mapping, no solo los tipos que esta pagina usa: un campo sin
+  // selector es un error de escritura y conviene verlo al cargar, no dentro de tres
+  // semanas cuando alguien arme la primera pagina que lo lleve.
+  const sinSel = []
+  for (const [tipo, def] of Object.entries(m.paragraphs.types)) {
+    for (const [key, f] of Object.entries(def.fields || {})) {
+      if (!f || KINDS_SIN_SELECTOR.has(f.kind)) continue
+      if (!f.sel) sinSel.push(`${tipo}.${key}${f.kind ? ` (kind "${f.kind}")` : ''}`)
+    }
+  }
+  if (sinSel.length) {
+    err(`estos campos no declaran "sel" y su kind lo necesita: ${sinSel.join(', ')}. `
+      + `Los unicos kinds que pueden no tenerlo son ${[...KINDS_SIN_SELECTOR].join(' y ')}, `
+      + 'que el runner no llena.')
+  }
   return m
 }
 

@@ -9,8 +9,13 @@
 //
 // Las URLs de ejemplo salieron de la libreria REAL de Purina: el mismo video esta cargado
 // como `youtu.be/...` y como `youtube.com/watch?v=...`, y por eso se compara el ID.
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { idDeVideo, mismoVideo, urlsDeLaFila } from '../src/mediaLibrary.js'
+import { loadMapping, resolveSelector } from '../src/mapping.js'
 
+const TMP = join(tmpdir(), `mapping-sin-sel-${process.pid}.json`)
 let fallas = 0
 const ok = (cond, que) => {
   process.stdout.write(`${cond ? '  ok  ' : '  FALLA '}${que}\n`)
@@ -47,6 +52,28 @@ ok(urls.includes('https://youtu.be/3-COT6aQbPo'),
 ok(urls.some((u) => mismoVideo(u, 'https://www.youtube.com/watch?v=3-COT6aQbPo')),
   'y esa fila empareja con lo que pide el hub, que es todo el punto')
 ok(urlsDeLaFila('<div>sin videos</div>').length === 0, 'una fila sin video no inventa URLs')
+
+// EL CAMPO. Emparejar bien no sirve de nada si el runner no encuentra donde poner el
+// video: la corrida de Conoce Purina llego hasta aca y freno con "No encontre el campo
+// (undefined)" porque el mapping declaraba el kind y se olvidaba del selector. Un campo
+// sin `sel` es un error del mapping y tiene que verse al CARGARLO, no con Drupal abierto y
+// la pagina a medio armar.
+const M = loadMapping('mapping/purina-latam.json')
+const video = M.paragraphs.types.c_externalvideo.fields.field_c_external_video
+ok(video.kind === 'mediaLibrary', 'el video externo es un media library widget, no un inline entity form')
+const campo = resolveSelector(video.sel, { dsel: resolveSelector(M.paragraphs.dsel, { delta: 1 }) })
+ok(campo === '[data-drupal-selector="edit-field-ln-n-components-1-subform-field-c-external-video-wrapper"]',
+  `el selector del campo resuelve al wrapper del widget (${campo})`)
+
+// Y el motivo de fondo: que ningun otro campo se quede sin selector sin que nadie se entere.
+const roto = JSON.parse(readFileSync('mapping/purina-latam.json', 'utf8'))
+delete roto.paragraphs.types.c_externalvideo.fields.field_c_external_video.sel
+writeFileSync(TMP, JSON.stringify(roto))
+let freno = ''
+try { loadMapping(TMP) } catch (e) { freno = e.message }
+unlinkSync(TMP)
+ok(/field_c_external_video/.test(freno) && /sel/.test(freno),
+  `cargar un mapping con un campo sin "sel" frena y dice cual (${freno.slice(0, 90) || 'no freno'})`)
 
 process.stdout.write(fallas ? `\n${fallas} falla/s\n` : '\nTodo bien.\n')
 process.exit(fallas ? 1 : 0)

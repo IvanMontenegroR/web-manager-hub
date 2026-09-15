@@ -13,6 +13,7 @@
 // token CSRF de la sesion, rutas internas y nombres de usuario. Los .html estan en el
 // .gitignore por eso.
 import { readFileSync } from 'node:fs'
+import { KINDS_SIN_SELECTOR as SIN_SELECTOR } from '../src/mapping.js'
 
 const [mapFile, htmlFile] = process.argv.slice(2)
 if (!mapFile || !htmlFile) {
@@ -102,7 +103,7 @@ for (const { bundle, v } of positions()) {
   if (!def) { fail(`el mapping no conoce "${bundle}", que esta en el volcado`); continue }
   vistos.add(bundle)
   for (const [key, f] of Object.entries(def.fields || {})) {
-    if (f.kind === 'image') continue          // no se automatizan: no tienen campo
+    if (SIN_SELECTOR.has(f.kind)) continue    // no se automatizan: no tienen selector
     chk(res(f.sel, v), `${bundle}.${key}`)
     if (f.format) chk(res(f.format.sel, v), `${bundle}.${key} (formato)`)
   }

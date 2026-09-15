@@ -104,7 +104,8 @@
           },
           "field_c_external_video": {
             "kind": "mediaLibrary",
-            "note": "Media library widget (modal con grilla), NO inline entity form. Se elige por URL: el nombre del medio lo pone YouTube. El runner no lo crea."
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-external-video-wrapper\"]",
+            "note": "Media library widget (modal con grilla), NO inline entity form. Se elige por URL: el nombre del medio lo pone YouTube. El selector apunta al WRAPPER del widget (el div con field--widget-media-library-widget), que es lo unico que envuelve a la vez el boton que abre el modal y el contenedor de la seleccion. El fieldset de adentro repite el mismo data-drupal-selector que su div interno, asi que apuntarle ahi devolveria dos elementos para el mismo campo."
           }
         }
       },

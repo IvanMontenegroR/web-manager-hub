@@ -260,16 +260,30 @@ y armarla a mano es pedir que se rompa.
 El alt text de estas no importa (son de prueba): cualquier cosa que aclare que son
 placeholders.
 
-**Elegirlas desde el manifiesto todavia no esta hecho**: hoy el runner saltea los campos
-de imagen, asi que por ahora se seleccionan a mano en el CMS. Cuando se haga, el
-manifiesto va a nombrar la imagen asi:
+### El otro widget: la Media library
 
-```json
-"field_c_image": "placeholder-banner-main-hero"
-```
+En este CMS **conviven dos widgets de medios** y no son variantes del mismo: se distinguen
+por la clase del campo.
 
-y el runner va a BUSCAR y SELECCIONAR ese media, nunca subir: si no lo encuentra, frena.
-Subir sola llenaria la librería de duplicados.
+| clase del campo | widget | quien lo usa | como se elige |
+|---|---|---|---|
+| `field--widget-inline-entity-form-complex` | autocompletar | las imagenes (`field_c_image`) | por NOMBRE del medio |
+| `field--widget-media-library-widget` | modal con grilla | el video (`field_c_external_video`) | por URL |
+
+El video se elige por URL y no por nombre porque el nombre lo pone YouTube (*"A ti te
+importa de donde viene su alimento"*) y el hub no lo tiene ni tiene por que; lo que el hub
+tiene es la URL. Se compara el ID del video, no la cadena entera: el mismo video puede
+estar guardado como `youtu.be/XXX` o como `youtube.com/watch?v=XXX`. Y si no esta, **se
+crea**: un video no tiene archivo que subir, crearlo es pegar la URL en el modal. Es la
+unica excepcion a "el runner no crea medios", y esta porque la alternativa era dejar la
+pagina a medio armar.
+
+Cada uno se declara en el mapping con su `kind` — `media` y `mediaLibrary` — y **los dos
+necesitan `sel`**, apuntando al wrapper que envuelve a la vez el boton que abre el selector
+y el lugar donde queda lo elegido. Los unicos `kind` que pueden no declararlo son `image` y
+`file`, que el runner no llena. Un campo que se olvide el selector **frena al cargar el
+mapping**, con su nombre: antes se descubria a mitad de corrida, con Drupal abierto y la
+pagina a medio armar, diciendo `No encontre el campo (undefined)`.
 
 ## Migrar una pagina del sitio viejo
 
