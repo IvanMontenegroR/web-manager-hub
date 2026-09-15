@@ -605,7 +605,9 @@ async function ponerDeLaLibreria(ctx, f, vars, url, ref) {
   if (!(await page.locator(campo).count())) {
     throw new Error(`No encontre el campo de video ${ref} (${campo})`)
   }
-  const puesto = await elegirDeLaLibreria({ page, campo, url, cfg: mapping.mediaLibrary, ref })
+  const puesto = await elegirDeLaLibreria({
+    page, campo, url, cfg: mapping.mediaLibrary, ref, onStep: ctx.onStep,
+  })
   // Un modal que se cerro sin enganchar nada deja el campo igual de vacio que antes, sin
   // decir nada: la verificacion es lo unico que lo distingue de haber funcionado.
   if (!puesto) {

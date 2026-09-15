@@ -10,3 +10,13 @@ dump*.json
 # Solo los de la RAIZ, que es donde se guardan: la interfaz vive en src/ui/ y si va.
 /*.html
 form*.txt
+
+# Los manifiestos son ARTEFACTOS: los genera `npm run manifiesto` desde el hub, que es la
+# fuente de verdad. Versionarlos hace que un `git pull` pise el recien generado con uno
+# viejo, y la pagina se arma con datos de otra epoca sin que nada avise. Paso con Conoce
+# Purina: el manifiesto del repo no pedia ninguna imagen.
+# Los `ejemplo-*` SI van: son fixtures, no salen del hub.
+manifests/*.json
+!manifests/ejemplo-*.json
+# Imagenes recortadas: tambien se generan, y pesan.
+imagenes/

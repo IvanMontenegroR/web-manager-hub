@@ -10,11 +10,15 @@
 // video de YouTube. El runner los trataba igual — ninguno de los dos, en realidad: el
 // video caia en "campos que no se como llenar" y quedaba vacio.
 //
-// NO CREA MEDIOS, igual que el otro. El modal ofrece un formulario "Agregar External
-// Video a traves de URL" que crearia uno al vuelo, y esta a proposito sin usar: un medio
-// de Drupal se REUTILIZA, y crear uno por pagina llena la libreria de duplicados que
-// despues no limpia nadie. En la libreria de Purina ya hay TRES del mismo video. Si el
-// que pide el manifiesto no esta, frena y dice cual falta.
+// BUSCA, Y SI NO ESTA LO CREA. La regla de la casa es que el runner arme la pagina de
+// punta a punta y no deje nada pendiente para hacer a mano. Pero buscar primero no es
+// opcional: un medio de Drupal se REUTILIZA, y crear uno por pagina llena la libreria de
+// duplicados que despues no limpia nadie — de un solo video de Purina ya hay TRES. Asi
+// que se busca, y crear es el camino de excepcion, no el primero.
+//
+// Esto es distinto de las IMAGENES, que se suben en su propio paso (`subir-medios`) antes
+// de construir. Un video no tiene archivo que subir: es una URL, y crearlo es pegar esa
+// URL en el formulario del modal. Por eso aca si se puede hacer en el momento.
 //
 // SE BUSCA POR URL, NO POR NOMBRE. El buscador del modal filtra por NOMBRE, y el nombre de
 // un video lo pone YouTube ("A ti te importa de donde viene su alimento"): el hub no lo
@@ -33,6 +37,12 @@ export const MEDIA_LIBRARY = {
   // checkbox a mano no dispara su JS y el boton de insertar no se habilita.
   elegir: '.js-click-to-select-trigger',
   insertar: '.media-library-select',
+  // El alta por URL: el campo, el boton que le pregunta a YouTube, y el que guarda.
+  // Guardar vive en el pie del dialogo porque el del form viene con display:none.
+  url: 'input[name="url"]',
+  agregar: '.media-library-add-form-oembed-submit',
+  nombre: 'input[name="media[0][fields][name][0][value]"]',
+  guardar: '.ui-dialog-buttonpane button.button--primary',
   // Lo que queda en el campo cuando el medio ya esta puesto.
   puesto: '.js-media-library-selection',
   vacio: '.media-library-widget-empty-text',
@@ -73,7 +83,42 @@ export function urlsDeLaFila(html) {
   return out
 }
 
-export async function elegirDeLaLibreria({ page, campo, url, cfg, ref }) {
+// Crea el medio pegando la URL en el formulario del modal. Drupal le pregunta a YouTube
+// por oembed y vuelve con los campos ya llenos — el nombre incluido, que es el titulo del
+// video. Ese nombre se deja como viene: es el que el editor va a reconocer en la libreria,
+// y ponerle uno nuestro solo lo haria mas dificil de encontrar.
+async function crearDesdeUrl({ page, c, url, ref }) {
+  const input = await esperarVisible(page, `${c.modal} ${c.url}`, 10000)
+  if (!input) {
+    throw new Error(`El video ${url} no esta en la libreria y el modal de ${ref} no tiene `
+      + `el campo para agregarlo por URL (${c.url}). Habria que crearlo a mano en el CMS.`)
+  }
+  await input.fill(url)
+
+  const agregar = await esperarVisible(page, `${c.modal} ${c.agregar}`, 10000)
+  if (!agregar) throw new Error(`No encontre el boton "Agregar" del modal de ${ref} (${c.agregar})`)
+  await agregar.click()
+  await esperarAjax(page)
+
+  // La señal de que YouTube contesto: el formulario del medio, con el nombre ya puesto.
+  // Sin esperarla, Guardar se aprieta sobre un formulario que todavia no existe.
+  const nombre = await esperarVisible(page, `${c.modal} ${c.nombre}`, 30000)
+  if (!nombre) {
+    const queja = await page.locator(`${c.modal} .messages--error, ${c.modal} .form-item--error-message`)
+      .allInnerTexts().catch(() => [])
+    throw new Error(`Pegue ${url} en el modal de ${ref} pero el CMS no devolvio el `
+      + 'formulario del medio. '
+      + (queja.length ? `Dice: ${queja.join(' | ').replace(/\s+/g, ' ').slice(0, 200)}` : 'No dijo nada.')
+      + ' Puede ser que el proveedor no este permitido (solo YouTube y Vimeo).')
+  }
+
+  const guardar = await esperarVisible(page, `${c.modal} ${c.guardar}`, 10000)
+  if (!guardar) throw new Error(`No encontre el boton de guardar del modal de ${ref} (${c.guardar})`)
+  await guardar.click()
+  await esperarAjax(page)
+}
+
+export async function elegirDeLaLibreria({ page, campo, url, cfg, ref, onStep = () => {} }) {
   const c = { ...MEDIA_LIBRARY, ...(cfg || {}) }
 
   const abrir = await esperarVisible(page, `${campo} ${c.abrir}`, 10000)
@@ -101,24 +146,24 @@ export async function elegirDeLaLibreria({ page, campo, url, cfg, ref }) {
     }
 
     if (!elegida) {
-      // Lo unico que sirve para arreglarlo: que se pide, cuantos se miraron, y que el
-      // runner no lo va a crear solo.
-      throw new Error(`No hay ningun medio con el video ${url} en la libreria (${ref}). `
-        + `Se miraron ${n} de la primera pagina, los mas recientes primero`
-        + (vistas.length ? ` (por ejemplo: ${vistas.slice(0, 3).join(' | ')})` : '')
-        + '. El runner NO crea medios: crealo a mano en el CMS (el modal tiene "Agregar '
-        + 'External Video a traves de URL") y volve a correr. Si YA existe pero esta mas '
-        + 'atras en la grilla, no lo veo desde aca.')
+      // No esta en la grilla: se crea pegando la URL, que es lo que haria una persona.
+      // Se avisa, porque un medio nuevo es algo que queda en la libreria para siempre.
+      onStep(`     el video no estaba en la libreria (${n} miradas): lo creo desde la URL`)
+      await crearDesdeUrl({ page, c, url, ref })
+    } else {
+      await elegida.locator(c.elegir).first().click()
     }
 
-    await elegida.locator(c.elegir).first().click()
     // El boton de insertar del pie del dialogo es el que Drupal habilita; el que esta
-    // adentro del form viene con display:none.
+    // adentro del form viene con display:none. Despues de crear, el modal a veces ya
+    // inserta solo: si el boton no esta, no es un error.
     const insertar = await esperarVisible(page, `${c.modal} ${c.insertar}:visible`, 10000)
-      || await esperarVisible(page, `${c.modal} ${c.insertar}`, 5000)
-    if (!insertar) throw new Error(`No encontre el boton "Insertar seleccionado" de ${ref}`)
-    await insertar.click()
-    await esperarAjax(page)
+    if (insertar) {
+      await insertar.click()
+      await esperarAjax(page)
+    } else if (elegida) {
+      throw new Error(`No encontre el boton "Insertar seleccionado" de ${ref}`)
+    }
   } finally {
     // Si algo fallo con el modal abierto, la pagina queda tapada y el resto de la corrida
     // no puede tocar nada. Se cierra siempre.

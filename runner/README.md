@@ -14,6 +14,26 @@ manifiesto.json  +  mapping.json  ->  page-runner  ->  borrador en Drupal
                      ESE Drupal
 ```
 
+## La regla: de punta a punta
+
+El runner tiene que dejar la pagina **armada del todo**, no armada a medias con una lista
+de cosas para hacer a mano. Si algo se puede automatizar, se automatiza: las imagenes se
+recortan y se suben, el video se busca y si no esta se crea. Un "esto lo completas vos
+despues" es un paso que alguien se va a olvidar, y una pagina a medio armar es peor que
+una que no se armo.
+
+Tiene dos limites, y no son excepciones a la regla sino la forma de cumplirla:
+
+**Buscar antes de crear.** Un medio de Drupal se REUTILIZA: el mismo se referencia desde
+cuantos paragraphs haga falta. Crear uno por pagina llena la libreria de duplicados que
+despues no limpia nadie — de un solo video de Purina ya hay tres. Asi que primero se busca,
+y crear es el camino de excepcion.
+
+**Frenar en vez de inventar.** Automatico no es adivinar. Si falta un dato que el runner no
+puede sacar de ningun lado, frena y dice cual: un valor inventado se ve igual que uno
+cargado, y nadie lo corrige. Lo que si hace es dejar marcas que se puedan BUSCAR (el alt
+`Alt Placeholder`, el link `#`) cuando el CMS exige un valor y no hay ninguno.
+
 ## Por que esta partido en dos
 
 El **manifiesto** describe la pagina sin saber nada de Drupal: que paragraphs, en que
