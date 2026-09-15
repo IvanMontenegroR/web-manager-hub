@@ -52,7 +52,7 @@ const mapping = loadMapping(opt('mapping') || 'mapping/purina-latam.json')
 // encontrar despues — pero en ESTE CMS el alt es obligatorio y Drupal no guarda el medio:
 // la corrida frena diciendo exactamente eso. Queda la opcion para poder comprobarlo
 // contra el CMS en vez de confiar en una nota.
-const ALT_PENDIENTE = 'PENDIENTE - cargar alt'
+const ALT_PENDIENTE = 'Alt Placeholder'
 const altDeReserva = () => (opt('sin-alt') ? '' : (opt('alt') || ALT_PENDIENTE))
 
 let ctx, page
