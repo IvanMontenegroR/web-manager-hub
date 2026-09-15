@@ -65,7 +65,10 @@ export const MEDIA_POR_DEFECTO = {
  *   tiene que decir que falta cargarlo.
  */
 export async function subirPlaceholders({ page, mapping, carpeta, solo, alUsar, onStep = () => {} }) {
-  const cfg = { ...MEDIA_POR_DEFECTO, ...(mapping.media || {}), ...(alUsar ? { alUsar } : {}) }
+  // `alUsar` en cadena VACIA no es lo mismo que no pasarlo: es pedir que el alt quede
+  // vacio. Por eso se compara con undefined y no por verdadero/falso.
+  const cfg = { ...MEDIA_POR_DEFECTO, ...(mapping.media || {}),
+    ...(alUsar !== undefined ? { alUsar } : {}) }
   const url = (r) => new URL(r, mapping.site.replace(/\/+$/, '') + '/').href
 
   if (!existsSync(carpeta)) throw new Error(`No existe la carpeta ${carpeta}`)
@@ -171,21 +174,30 @@ async function unaImagen({ page, cfg, url, carpeta, archivo, nombre }) {
 
   const quejas = await page.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
   if (quejas.length) {
-    throw new Error(`Drupal rechazo "${nombre}": `
-      + quejas.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 300)
-      + ' — se puede volver a correr: las que ya estan se saltean.')
+    const texto = quejas.join(' | ').replace(/\s+/g, ' ').trim()
+    // El caso que se puede resolver leyendo: se pidio dejar el alt vacio y el CMS lo
+    // exige. Es lo unico que hace falta saber para volver a intentar bien.
+    const esAlt = /alternativ|\balt\b/i.test(texto) && !String(cfg.alUsar || '').trim()
+    throw new Error(`Drupal rechazo "${nombre}": ${texto.slice(0, 300)}`
+      + (esAlt
+        ? ' — se subio con el alt VACIO (--sin-alt) y este CMS lo exige: sin alt no guarda '
+          + 'el medio. Volve a correr sin --sin-alt.'
+        : ' — se puede volver a correr: las que ya estan se saltean.'))
   }
   return 'subida'
 }
 
-// Cada imagen tiene su alt y todos son obligatorios. Se llenan los que esten VACIOS: si
-// alguno ya vino con algo, es de alguien y no se pisa.
-// El alt de ESTE medio. Los placeholders no tienen uno propio y usan el generico del
-// mapping; un medio de verdad trae el suyo en el indice. Si no lo trae, se deja una marca
-// que se pueda buscar: el alt lo carga SEO, y un campo vacio en un formulario obligatorio
-// no deja guardar, pero un alt inventado es peor que uno que se nota que falta.
+// El alt de ESTE medio, en las dos imagenes. Se llenan los que esten VACIOS: si alguno ya
+// vino con algo, es de alguien y no se pisa.
+//
+// El medio trae el suyo en el indice; si no lo trae se usa el de reserva, que lo decide
+// quien llama. Un `alUsar` VACIO significa "dejalos vacios a proposito" y se respeta: es
+// una decision de quien llama, no un descuido. En este CMS el campo es obligatorio y
+// Drupal va a rechazar el medio, pero eso se responde con el error de Drupal en la mano y
+// no con una suposicion nuestra.
 async function llenarAlts(page, cfg, alt) {
   const texto = String(alt || '').trim() || cfg.alUsar
+  if (!String(texto || '').trim()) return
   const alts = page.locator(cfg.alt)
   const n = await alts.count()
   for (let i = 0; i < n; i++) {

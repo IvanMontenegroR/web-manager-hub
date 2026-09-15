@@ -20,28 +20,40 @@ import { subirPlaceholders } from '../src/media.js'
 
 // Una pasada sola: lo que empieza con `--` es una opcion y se lleva el valor que sigue;
 // lo demas es posicional. Mucho mas simple que adivinar despues cual valor era de quien.
+// Las BANDERAS son las que no llevan valor: si no estuvieran declaradas se comerian el
+// argumento de al lado, que es de otro.
+const BANDERAS = new Set(['sin-alt'])
 const opciones = {}
 const sueltos = []
 for (let i = 2; i < process.argv.length; i++) {
   const a = process.argv[i]
-  if (a.startsWith('--')) opciones[a.slice(2)] = process.argv[++i]
-  else sueltos.push(a)
+  if (!a.startsWith('--')) { sueltos.push(a); continue }
+  const n = a.slice(2)
+  opciones[n] = BANDERAS.has(n) ? true : process.argv[++i]
 }
 const opt = (n) => opciones[n]
 const [carpeta] = sueltos
 if (!carpeta) {
-  process.stderr.write('uso: node tools/subir-medios.mjs <carpeta-de-la-pagina> [--solo <texto>]\n')
+  process.stderr.write('uso: node tools/subir-medios.mjs <carpeta-de-la-pagina> '
+    + '[--solo <texto>] [--alt <texto> | --sin-alt]\n')
   process.exit(2)
 }
 
 const mapping = loadMapping(opt('mapping') || 'mapping/purina-latam.json')
 
-// Drupal EXIGE el alt: vacio no deja guardar el medio. Y el alt de una foto de una pagina
-// real no lo escribe el mercado, lo carga SEO (por eso en la matriz de contenido es un
-// campo de la hoja CMS y no de la de Contenido). Asi que casi siempre va a faltar y algo
-// hay que poner: se pone lo que ES — que falta — en vez de un texto que parezca cargado.
-// Se puede pisar con --alt "...".
+// EL ALT DE RESERVA. El alt de una foto de una pagina real no lo escribe el mercado, lo
+// carga SEO (por eso en la matriz de contenido es un campo de la hoja CMS y no de la de
+// Contenido). Asi que casi siempre va a faltar y hay que decidir que se pone.
+//
+// Se pone una marca que se pueda BUSCAR en la Media library, no un alt inventado: un
+// texto plausible parece cargado y no lo corrige nadie. Se puede cambiar con --alt "...".
+//
+// `--sin-alt` los deja vacios. Es lo que uno querria — un campo vacio es lo mas facil de
+// encontrar despues — pero en ESTE CMS el alt es obligatorio y Drupal no guarda el medio:
+// la corrida frena diciendo exactamente eso. Queda la opcion para poder comprobarlo
+// contra el CMS en vez de confiar en una nota.
 const ALT_PENDIENTE = 'PENDIENTE - cargar alt'
+const altDeReserva = () => (opt('sin-alt') ? '' : (opt('alt') || ALT_PENDIENTE))
 
 let ctx, page
 try {
@@ -56,15 +68,17 @@ try {
     // Estas son fotos de una pagina DE VERDAD, no material de relleno: el alt de
     // reserva no puede decir "Placeholder de prueba", que viaja al sitio publico y
     // parece cargado. Dice lo que es — que falta — y se puede buscar en la libreria.
-    alUsar: opt('alt') || ALT_PENDIENTE,
+    alUsar: altDeReserva(),
     onStep: (s) => process.stdout.write(s + '\n'),
   })
   process.stdout.write(`\n${r.subidos} subido/s, ${r.salteados} ya estaban, de ${r.total}.\n`)
   // El alt lo carga SEO, no el mercado, asi que casi siempre va a faltar. No frena, pero
   // no puede pasar callado: es lo que lee Google y un lector de pantalla.
   if (r.sinAlt?.length) {
-    process.stdout.write(`\n${r.sinAlt.length} medio/s quedaron con el alt de reserva `
-      + `("${r.alUsado}"), porque el hub no trae uno propio:\n`)
+    process.stdout.write(`\n${r.sinAlt.length} medio/s subieron sin alt propio `
+      + (String(r.alUsado || '').trim()
+        ? `y quedaron con "${r.alUsado}", que se puede buscar en la Media library:\n`
+        : 'y quedaron VACIOS, como se pidio con --sin-alt:\n'))
     for (const n of r.sinAlt) process.stdout.write(`  · ${n}\n`)
     process.stdout.write('Hay que completarlos en la Media library antes de publicar la pagina.\n')
   }

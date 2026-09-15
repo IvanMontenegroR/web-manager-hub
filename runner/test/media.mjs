@@ -103,6 +103,23 @@ try {
   check(conAlt.sinAlt?.join() === 'medio-sin-alt',
     `y se avisa cual quedo con el de reserva, para completarlo (${conAlt.sinAlt?.join() || 'ninguno'})`)
 
+  // DEJARLOS VACIOS a proposito (--sin-alt). Es lo que uno querria para encontrarlos
+  // despues, pero en ESTE CMS el alt es obligatorio: Drupal no guarda el medio. Se
+  // respeta el pedido — no se llena nada a escondidas — y se frena con el error de Drupal
+  // en la mano, diciendo que fue por el alt vacio. Que sea un error legible es lo que
+  // permite decidir; que el runner lo rellenara solo esconderia el dato.
+  let mensaje = ''
+  try {
+    await subirPlaceholders({
+      page, mapping, onStep: () => {}, alUsar: '',
+      carpeta: carpetaCon('medio-alt-vacio'),
+    })
+  } catch (e) { mensaje = e.message }
+  check(/obligatorio|required/i.test(mensaje),
+    `con --sin-alt el CMS rechaza el medio y se dice por que (${mensaje.slice(0, 60) || 'no fallo'})`)
+  check(/--sin-alt/.test(mensaje),
+    'y el mensaje nombra la opcion que lo causo, que es lo unico que hace falta para volver a intentar')
+
   // Si se apretara Guardar antes de que el AJAX suba el archivo, el formulario de
   // mentira contesta con el error de campo obligatorio y esto se caeria.
   const d = await subirPlaceholders({
