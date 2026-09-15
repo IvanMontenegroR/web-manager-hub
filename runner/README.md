@@ -280,8 +280,21 @@ pagina a medio armar.
 
 ### La portada del video ("Video thumb")
 
-Es OPCIONAL: sin portada cargada, el sitio muestra la del propio YouTube. Si el hub la
-trae, el runner la recorta y la sube **solo**.
+**Sin ese campo el CMS deja el video con el cuadro vacio.** No cae solo a la portada de
+YouTube, asi que dejarlo sin cargar no es una opcion — y nadie lo carga a mano. Por eso el
+runner **la baja de YouTube y la sube solo**, y el campo queda como una forma de pasarle
+otra si se quiere, no como un dato que haya que juntar.
+
+De YouTube se prueban dos, en orden: `maxresdefault` (1280×720, 16:9 de verdad) y, si ese
+video no lo tiene — YouTube contesta 404 para los viejos o subidos en baja —, `hqdefault`,
+que existe siempre pero es 4:3 **con bandas negras**. Por eso se recorta a 16:9: es lo que
+se las saca. **No se agranda**: 1280 de ancho contra los 2784 que pide el CMS suena a poco,
+pero estirar un JPG no agrega un solo pixel de informacion — pesa mas y se ve peor. Una
+portada cargada a mano SI va a la medida del CMS.
+
+`sddefault` y `mqdefault` no entran: el primero tiene las mismas bandas sin ser mucho mas
+grande, y el segundo (320×180) es chico para una portada a lo ancho. Vimeo tampoco: su
+miniatura no esta en una URL predecible, hay que preguntarle a su API.
 
 No es un medio. Es un campo **del medio del video**, que se sube en el mismo formulario
 donde se pega la URL — tal cual lo cuenta el playbook del CMS: *"Inform the video URL and
@@ -292,10 +305,14 @@ seleccionado"*. De ahi salen tres cosas que no son obvias:
   entidad `responsive_image` propia dejaria en la libreria un medio que nadie referencia.
   Se recorta con las demas pero queda fuera del `INDICE.json`, y el manifiesto la nombra
   por **ruta de archivo** (`imagenes/<slug>/...`) en vez de por nombre de libreria.
-- **Solo se puede poner al CREAR el medio.** Si el video ya estaba en la libreria, el
-  runner lo reutiliza y **no le toca la portada**: es un campo suyo, y cambiarla la
-  cambiaria en todas las paginas que referencian ese video. Lo avisa en los pasos; si hay
-  que cambiarla, va a mano en el CMS, una vez.
+- **Si el medio ya existe, se completa pero no se pisa.** Un video de la libreria se
+  REUTILIZA entre paginas, asi que cambiarle una portada ya cargada seria decidir por todas
+  ellas. Pero llenar un campo VACIO no es pisar nada, y dejarlo vacio es justo el problema.
+  Asi que cuando el video ya estaba, el runner entra a su ficha (`/admin/content/media`,
+  buscandolo por el nombre que mostraba la grilla) y le pone la portada **solo si no tiene
+  ninguna**. Va en **otra pestaña** — en la principal esta el formulario del nodo a medio
+  armar — y **no frena la corrida**: si no puede, lo dice y sigue, porque el video ya quedo
+  puesto en la pagina.
 - **El alt se llena.** Con portada, en este CMS el alt es obligatorio: si el hub no trae
   uno, va `Alt Placeholder`, la misma marca buscable que usa el subidor de fotos.
 

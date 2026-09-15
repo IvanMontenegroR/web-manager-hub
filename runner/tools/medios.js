@@ -16,6 +16,7 @@
 // El origen de la imagen no cambia con el orden, asi que el nombre tampoco.
 import { createHash } from 'node:crypto'
 import { getComponent, getSpecs } from '../../src/data/components.js'
+import { portadasDeVideo } from '../src/mediaLibrary.js'
 import { PARAGRAFOS } from './paragrafos.js'
 
 const limpio = (s) => String(s || '').toLowerCase()
@@ -80,7 +81,9 @@ function camposImagen(def) {
  * que conserva su extension.
  */
 export const archivoDe = (arch) => {
-  const ext = arch.w
+  // Si hay algo que recortar — una medida fija o una proporcion — el resultado sale del
+  // navegador y es JPG. Solo cuando no se toca nada conserva la extension del original.
+  const ext = (arch.w || arch.ratio)
     ? 'jpg'
     : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(arch.origen)?.[1] || 'jpg').toLowerCase()
   return `${arch.nombre}.${ext}`
@@ -104,9 +107,35 @@ export function archivosDeBloque(bloque, slug) {
   const out = []
   for (const f of (def?.fields || [])) {
     if (f.type !== 'image' || !f.insideMedia) continue
-    const origen = origenDe(bloque.contenido?.[f.key])
+
+    // Lo cargado manda. Si no hay nada y el campo declara de donde DERIVARLA, se saca de
+    // ahi: hoy es la portada del video, que sale del propio link de YouTube. Sin esto el
+    // CMS deja el video con el cuadro vacio — no cae solo a la de YouTube —, asi que la
+    // alternativa no era "una portada peor", era "ninguna".
+    const cargada = origenDe(bloque.contenido?.[f.key])
+    const derivadas = cargada || !f.derivedFrom
+      ? []
+      : portadasDeVideo(origenDe(bloque.contenido?.[f.derivedFrom]))
+    const origen = cargada || derivadas[0]
     if (!origen || !/^https?:/.test(origen)) continue
+    // A QUE MEDIDA se recorta. Una portada CARGADA va a la del CMS. Una DERIVADA se
+    // recorta a 16:9 y no se agranda: se queda en el tamaño que da YouTube. El recorte
+    // esta para sacarle las bandas negras al `hqdefault`, que es 4:3. Estirar 1280 de
+    // ancho hasta los 2784 que pide el CMS no agrega un solo pixel de informacion: pesa
+    // mas y se ve peor.
+    const objetivo = derivadas.length
+      ? { w: null, h: null, ratio: 16 / 9 }
+      : (medida(f.size) || { w: null, h: null })
+
     out.push({
+      ...objetivo,
+      origen,
+      // De donde se baja. Con una portada derivada son VARIAS en orden de preferencia:
+      // `maxresdefault` no existe para todos los videos y hay que caer al siguiente.
+      // El nombre del archivo sale igual del `origen`, que es el primero de la lista y no
+      // cambia: si dependiera de cual funciono, los dos procesos podrian no coincidir.
+      alternativas: derivadas.length ? derivadas : [origen],
+      derivada: !!derivadas.length,
       // Se nombra con la MISMA funcion que un medio: no queda en la libreria, pero el
       // nombre tiene que ser estable entre el recorte y el armado, que es exactamente el
       // problema que esa funcion resuelve.
@@ -116,10 +145,6 @@ export function archivosDeBloque(bloque, slug) {
       // De que medio es esta imagen: el campo del hub que lo crea (`video_url`).
       deCampo: f.insideMedia,
       alt: bloque.contenido?.[`${f.key}_alt`] || '',
-      // `w`/`h` en null = sin medida declarada: se sube el original sin tocarlo, igual
-      // que cualquier otra imagen cuya medida todavia no sabemos.
-      ...(medida(f.size) || { w: null, h: null }),
-      origen,
     })
   }
   return out

@@ -12,7 +12,7 @@
 import { readFileSync, writeFileSync, unlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { idDeVideo, mismoVideo, urlsDeLaFila } from '../src/mediaLibrary.js'
+import { idDeVideo, mismoVideo, urlsDeLaFila, portadasDeVideo } from '../src/mediaLibrary.js'
 import { loadMapping, resolveSelector } from '../src/mapping.js'
 
 const TMP = join(tmpdir(), `mapping-sin-sel-${process.pid}.json`)
@@ -52,6 +52,21 @@ ok(urls.includes('https://youtu.be/3-COT6aQbPo'),
 ok(urls.some((u) => mismoVideo(u, 'https://www.youtube.com/watch?v=3-COT6aQbPo')),
   'y esa fila empareja con lo que pide el hub, que es todo el punto')
 ok(urlsDeLaFila('<div>sin videos</div>').length === 0, 'una fila sin video no inventa URLs')
+
+// LA PORTADA QUE PUBLICA YOUTUBE. Sin ella el CMS deja el video con el cuadro vacio, asi
+// que se baja sola. Son DOS URLs en orden y no una: `maxresdefault` no existe para todos
+// los videos (YouTube contesta 404 y hay que caer al siguiente), y la primera es ademas la
+// que NOMBRA el archivo, asi que no puede depender de cual termino funcionando.
+const portadas = portadasDeVideo('https://www.youtube.com/watch?v=3-COT6aQbPo')
+ok(portadas[0] === 'https://img.youtube.com/vi/3-COT6aQbPo/maxresdefault.jpg',
+  'la primera es maxresdefault, que es 1280×720 y 16:9 de verdad')
+ok(portadas[1] === 'https://img.youtube.com/vi/3-COT6aQbPo/hqdefault.jpg',
+  'y la de respaldo es hqdefault, la unica que existe SIEMPRE')
+ok(portadasDeVideo('https://youtu.be/3-COT6aQbPo')[0] === portadas[0],
+  'la URL corta y la larga dan la MISMA portada: el archivo se llama igual venga como venga el link')
+ok(!portadasDeVideo('https://vimeo.com/76979871').length,
+  'Vimeo no da portada: su miniatura no esta en una URL predecible y no se inventa una')
+ok(!portadasDeVideo('https://ejemplo.com/video.mp4').length, 'y un MP4 suelto tampoco')
 
 // EL CAMPO. Emparejar bien no sirve de nada si el runner no encuentra donde poner el
 // video: la corrida de Conoce Purina llego hasta aca y freno con "No encontre el campo

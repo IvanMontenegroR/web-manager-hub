@@ -469,14 +469,19 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   generico y no muestran medida, porque no sabemos como se ven. Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
-  El **Video externo** (`c_externalvideo`) lleva el link y una **portada opcional** (el "Video thumb" del
-  CMS, 2784px de ancho segun el playbook, 16:9 por el hueco que ocupa). Sin portada cargada el sitio
-  muestra la de YouTube, y el preview del builder hace lo mismo. La portada NO es un medio: es un campo
-  DEL medio del video, que se sube en el mismo formulario donde se pega la URL. Por eso el campo se
-  declara `insideMedia: 'video_url'` en el catalogo — la marca que le dice al runner que no le arme una
-  entidad propia (seria un duplicado en la libreria que nadie referencia) y que la suba adentro del otro.
-  Solo se puede poner al CREAR el medio: si el video ya estaba en la libreria se reutiliza y la portada
-  no se toca, porque es un campo suyo y la comparten todas las paginas que lo usan.
+  El **Video externo** (`c_externalvideo`) lleva el link y una **portada** (el "Video thumb" del CMS,
+  2784px de ancho segun el playbook, 16:9 por el hueco que ocupa). **Sin ese campo el sitio deja el video
+  con el cuadro vacio**: NO cae solo a la miniatura de YouTube. Como nadie la carga a mano, el runner la
+  BAJA de YouTube (`derivedFrom: 'video_url'`): prueba `maxresdefault` (1280×720) y cae a `hqdefault` si
+  ese video no lo tiene, recortando a 16:9 para sacarle las bandas negras del 4:3. Una derivada no se
+  agranda hasta los 2784 — estirar un JPG no agrega informacion —; una cargada a mano si va a esa medida
+  y manda sobre la derivada. La portada NO es un medio: es un campo DEL medio del video, que se sube en el
+  mismo formulario donde se pega la URL. Por eso el campo se declara `insideMedia: 'video_url'` en el
+  catalogo — la marca que le dice al runner que no le arme una entidad propia (seria un duplicado en la
+  libreria que nadie referencia) y que la suba adentro del otro. Si el video YA estaba en la libreria se
+  reutiliza y el runner entra a su ficha a completarle la portada **solo si no tiene ninguna**: llenar un
+  campo vacio no es pisar la eleccion de nadie, pero cambiar una portada cargada si lo seria — un medio lo
+  comparten todas las paginas que lo referencian.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.

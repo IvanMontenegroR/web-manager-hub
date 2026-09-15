@@ -1060,7 +1060,7 @@ export const COMPONENTS = [
     key: 'external_video',
     name: 'Video externo',
     category: 'Contenido',
-    help: 'Video embebido a lo ancho (YouTube o MP4): título y subtítulo opcionales arriba, y el video con el botón de play encima. La portada es opcional: sin cargar, el sitio usa la del propio YouTube.',
+    help: 'Video embebido a lo ancho (YouTube o MP4): título y subtítulo opcionales arriba, y el video con el botón de play encima. La portada no hace falta cargarla: el runner baja la de YouTube en la mejor calidad que haya. Cargá una solo si querés otra.',
     fields: [
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'External Video' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
@@ -1070,9 +1070,14 @@ export const COMPONENTS = [
       // que se sube adentro del mismo formulario donde se pega la URL (ver el playbook:
       // "Upload the thumb image and click on Guardar"). Por eso lleva `insideMedia`, que
       // le dice al runner de que medio es y que no le arme una entidad aparte.
-      // Es OPCIONAL: sin portada cargada el sitio muestra la de YouTube.
+      //
+      // SIN ESTE CAMPO EL SITIO NO MUESTRA NADA: el video queda con el cuadro vacio. No
+      // cae solo a la portada de YouTube, asi que dejarlo vacio no es una opcion — por eso
+      // `derivedFrom` le dice al runner de donde sacarla cuando nadie la carga: del propio
+      // link del video. Sigue siendo opcional para el mercado, que puede cargar otra y
+      // entonces manda la suya.
       { key: 'thumb', label: 'Portada del video (opcional)', cmsLabel: 'Video thumb', type: 'image',
-        insideMedia: 'video_url', size: '2784×1566px' },
+        insideMedia: 'video_url', derivedFrom: 'video_url', size: '2784×1566px' },
       { key: 'thumb_alt', label: 'Alt text', cmsLabel: 'Texto alternativo', type: 'text', cms: true },
     ],
     specs: [

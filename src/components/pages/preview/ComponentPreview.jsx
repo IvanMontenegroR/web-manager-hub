@@ -112,10 +112,11 @@ export function youtubeThumb(url) {
 }
 
 // Que mostrar en el cuadro del video. Manda la PORTADA cargada (el "Video thumb" del
-// CMS): si esta, es la que se ve en el sitio. Sin ella, el thumbnail de YouTube o el
-// propio MP4 (su primer frame) — que es lo que el sitio usa cuando no se carga ninguna.
-// Con un link que no es ninguna de las dos cosas devuelve null, para que se vea el
-// placeholder en vez de una imagen rota.
+// CMS); sin ella, la de YouTube o el primer frame del MP4.
+//
+// El sitio NO cae solo a la de YouTube: sin ese campo cargado deja el cuadro vacio. Lo que
+// hace que el preview no mienta es que el runner baja esa misma portada y la sube al medio
+// del video, asi que lo que se ve aca es lo que va a quedar publicado.
 function videoPreview(url, thumb) {
   return (thumb && String(thumb).trim()) || youtubeThumb(url) || (isVideo(url) ? url : null)
 }
@@ -1062,9 +1063,8 @@ const RENDERERS = {
         </div>
       )}
       <div className="cp-vid-frame">
-        {/* La portada es OPCIONAL: si se carga, es la que se ve. Si no, el sitio usa el
-            thumbnail del propio YouTube; un MP4 muestra su primer frame. Por eso el
-            cuadro casi nunca queda vacio y no se pide la medida a los gritos. */}
+        {/* La portada casi nunca se carga a mano: la baja el runner de YouTube. Por eso el
+            cuadro rara vez queda vacio, y la medida no se pide a los gritos. */}
         <Img src={videoPreview(c.video_url, c.thumb)} aspect="16/9" dim="2784×1566px" className="cp-vid-img" />
         <span className="cp-vid-play" aria-hidden="true">
           <Play size={26} />

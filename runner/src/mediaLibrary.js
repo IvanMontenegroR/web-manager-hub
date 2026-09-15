@@ -63,6 +63,10 @@ export const MEDIA_LIBRARY = {
   // Lo que queda en el campo cuando el medio ya esta puesto.
   puesto: '.js-media-library-selection',
   vacio: '.media-library-widget-empty-text',
+  // El nombre que muestra cada fila de la grilla. Es lo unico que identifica al medio
+  // desde afuera, y con el se lo vuelve a encontrar en el listado de administracion para
+  // completarle la portada cuando el medio ya existia.
+  nombreFila: '.media-library-item__name',
 }
 
 /**
@@ -77,6 +81,37 @@ export function idDeVideo(url) {
   if (m) return m[1]
   const v = /vimeo\.com\/(?:video\/)?(\d{6,})/.exec(s)
   return v ? v[1] : null
+}
+
+/**
+ * La PORTADA que publica YouTube para un video, en la mejor calidad que haya.
+ *
+ * Devuelve una LISTA en orden de preferencia, y no una sola URL, porque `maxresdefault`
+ * no existe siempre: YouTube lo genera a partir del master y los videos viejos o subidos
+ * en baja no lo tienen. Ahi contesta 404 y hay que bajar el siguiente.
+ *
+ *   maxresdefault  1280×720   16:9 de verdad. Lo mejor que da YouTube.
+ *   hqdefault       480×360   existe SIEMPRE, pero es 4:3 CON BANDAS NEGRAS arriba y
+ *                             abajo. Por eso el recorte va a 16:9: las saca.
+ *
+ * `sddefault` y `mqdefault` quedan afuera a proposito: el primero tiene las mismas bandas
+ * que hqdefault sin ser mucho mas grande, y el segundo (320×180) es demasiado chico para
+ * una portada a lo ancho.
+ *
+ * El PRIMERO de la lista es ademas el que nombra el archivo, asi que no cambia aunque la
+ * descarga termine cayendo al segundo: los dos procesos que calculan ese nombre no se
+ * hablan y tienen que llegar al mismo resultado.
+ *
+ * Vimeo no entra: su portada no esta en una URL predecible, hay que preguntarle a su API.
+ * Devuelve lista vacia y el runner sigue sin portada, que es lo que hace hoy.
+ */
+export function portadasDeVideo(url) {
+  const id = idDeVideo(url)
+  if (!id || !/youtu/i.test(String(url))) return []
+  return [
+    `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
+    `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+  ]
 }
 
 // Dos URLs son el mismo video si coinciden sus IDs; y si de alguna no se saca ID, se
@@ -114,6 +149,15 @@ export function urlsDeLaFila(html) {
 async function subirPortada({ page, c, thumb, ref, onStep }) {
   const ruta = resolve(thumb.archivo)
   if (!existsSync(ruta)) {
+    // Una portada DERIVADA la bajo el runner de YouTube: si no esta, casi siempre es que
+    // YouTube no contesto. El video se crea igual y se avisa — frenar la pagina entera por
+    // una imagen que nadie cargo seria desproporcionado. Una que cargo alguien SI frena:
+    // eso es un dato de la pagina que se estaria perdiendo en silencio.
+    if (thumb.derivada) {
+      onStep(`     (no esta la portada bajada de YouTube (${thumb.archivo}): el video se `
+        + 'crea sin ella y en el sitio queda el cuadro vacio)')
+      return
+    }
     throw new Error(`La portada del video de ${ref} no esta en disco (${ruta}). `
       + 'La recorta el paso de imagenes: si ese paso no corrio o fallo, mira sus pasos.')
   }
@@ -202,6 +246,9 @@ export async function elegirDeLaLibreria({ page, campo, url, thumb, cfg, ref, on
   const modal = await esperarVisible(page, c.modal, 20000)
   if (!modal) throw new Error(`No se abrio el modal de la Media library de ${ref} (${c.modal})`)
 
+  // El nombre del medio cuando YA existia. Sirve para ir a completarle la portada
+  // despues, con el modal ya cerrado.
+  let yaEstaba = ''
   try {
     const filas = page.locator(`${c.modal} ${c.fila}`)
     const n = await filas.count()
@@ -220,15 +267,9 @@ export async function elegirDeLaLibreria({ page, campo, url, thumb, cfg, ref, on
       onStep(`     el video no estaba en la libreria (${n} miradas): lo creo desde la URL`)
       await crearDesdeUrl({ page, c, url, thumb, ref, onStep })
     } else {
-      // LA PORTADA NO SE PISA. El medio ya existe y se REUTILIZA: la portada es un campo
-      // suyo, asi que cambiarla acá la cambiaria en todas las paginas que lo referencian,
-      // y esta corrida no tiene forma de saber cuales son ni si alguien la eligio a
-      // proposito. Se avisa y se sigue: el video queda bien puesto, que es lo pedido.
-      if (thumb) {
-        onStep('     (el video ya estaba en la libreria: se reutiliza y NO se le toca la '
-          + 'portada — es un campo del medio y cambiarla afectaria a las demas paginas que '
-          + 'lo usan. Si hay que cambiarla, va a mano en el CMS, una vez.)')
-      }
+      // El nombre se lee ANTES de insertar: despues el modal se cierra y la grilla no
+      // existe mas. Es con lo que se vuelve a encontrar el medio para completarlo.
+      yaEstaba = (await elegida.locator(c.nombreFila).first().innerText().catch(() => '')).trim()
       await elegida.locator(c.elegir).first().click()
     }
 
@@ -249,7 +290,106 @@ export async function elegirDeLaLibreria({ page, campo, url, thumb, cfg, ref, on
     if (abierto) await page.locator(`${c.modal} .ui-dialog-titlebar-close`).first().click().catch(() => {})
   }
 
+  // El medio YA EXISTIA, asi que la portada no se pudo poner al crearlo. Se va a
+  // completarla a su ficha, en otra pestaña — pero solo si no tiene ninguna.
+  if (thumb && yaEstaba) {
+    await completarPortada({ page, c, nombre: yaEstaba, thumb, ref, onStep })
+  }
+
   return await leerSeleccion(page, campo, c)
+}
+
+/**
+ * Le pone la portada a un medio que YA EXISTE, entrando a su ficha.
+ *
+ * SOLO SI NO TIENE NINGUNA. Llenar un campo vacio no es lo mismo que pisar lo que alguien
+ * eligio: un medio se comparte entre todas las paginas que lo referencian, asi que
+ * cambiarle una portada cargada seria decidir por ellas. Dejarlo vacio, en cambio, deja el
+ * video sin nada — que es el problema que esto viene a resolver.
+ *
+ * VA EN OTRA PESTAÑA. En la principal esta el formulario del nodo a medio armar: navegar
+ * ahi se lo lleva puesto y hay que empezar de cero.
+ *
+ * Y NO FRENA LA CORRIDA. El video ya quedo puesto en la pagina, que es lo que se pidio; si
+ * no se le puede completar la portada, se dice y se sigue. Frenar por esto seria tirar
+ * abajo una pagina entera por un campo de otra entidad.
+ */
+async function completarPortada({ page, c, nombre, thumb, ref, onStep }) {
+  const cfg = c.medio || {}
+  const lista = cfg.lista || '/admin/content/media?name={nombre}'
+  if (!existsSync(resolve(thumb.archivo))) {
+    onStep(`     (el video ya estaba en la libreria pero la portada no esta en disco `
+      + `(${thumb.archivo}): mira los pasos del recorte)`)
+    return
+  }
+  const tab = await page.context().newPage()
+  try {
+    const destino = new URL(lista.replace('{nombre}', encodeURIComponent(nombre)), page.url())
+    await tab.goto(destino.href, { waitUntil: 'domcontentloaded' })
+
+    // El link de editar de la fila que se llama EXACTAMENTE asi. Exacto porque un nombre
+    // puede ser prefijo de otro, y editar el medio equivocado se descubre tarde.
+    const links = tab.locator('a[href*="/media/"][href*="/edit"]')
+    const cuantos = await links.count()
+    let editar = null
+    for (let i = 0; i < cuantos; i++) {
+      const fila = links.nth(i).locator('xpath=ancestor::tr[1]')
+      const txt = (await fila.innerText().catch(() => '')).replace(/\s+/g, ' ')
+      if (txt.includes(nombre)) { editar = await links.nth(i).getAttribute('href'); break }
+    }
+    if (!editar) {
+      onStep(`     (el video ya estaba en la libreria y no encontre su ficha para ponerle `
+        + `portada: buscá "${nombre}" en Contenido > Media y subila a mano)`)
+      return
+    }
+
+    await tab.goto(new URL(editar, tab.url()).href, { waitUntil: 'domcontentloaded' })
+
+    // ¿Ya tiene una? El `fids` con valor significa que hay un archivo cargado.
+    const fids = tab.locator(cfg.subido || 'input[name="field_media_image[0][fids]"]').first()
+    const tiene = await fids.inputValue().catch(() => '')
+    if (tiene && tiene !== '0') {
+      onStep('     (el video ya estaba en la libreria y ya tiene su propia portada: no se toca)')
+      return
+    }
+
+    const campo = tab.locator(cfg.archivo || 'input[name="files[field_media_image_0]"]').first()
+    if (!(await campo.count())) {
+      onStep(`     (la ficha del video no tiene campo de portada: subila a mano en "${nombre}")`)
+      return
+    }
+    onStep(`     el video ya estaba en la libreria y sin portada: se la pongo (${thumb.archivo})`)
+    await campo.setInputFiles(resolve(thumb.archivo))
+    await tab.waitForFunction((s) => {
+      const el = document.querySelector(s)
+      return !!(el && el.value && el.value !== '0')
+    }, cfg.subido || 'input[name="field_media_image[0][fids]"]', { timeout: 120000 })
+    await esperarAjax(tab)
+
+    const alt = await esperarVisible(tab, cfg.alt || 'input[name$="[alt]"]', 10000)
+    if (alt) await alt.fill(String(thumb.alt || '').trim() || ALT_DE_RESERVA)
+
+    const guardar = await esperarVisible(tab, cfg.guardar || 'input[name="op"][value="Guardar"]', 10000)
+    if (!guardar) {
+      onStep('     (subi la portada pero no encontre el boton de guardar de la ficha: '
+        + 'quedo SIN guardar, hay que entrar a mano)')
+      return
+    }
+    await guardar.click()
+    await tab.waitForLoadState('domcontentloaded')
+
+    const quejas = await tab.locator('.messages--error, .messages.error').allInnerTexts().catch(() => [])
+    if (quejas.length) {
+      onStep(`     (el CMS rechazo la portada: ${quejas.join(' | ').replace(/\s+/g, ' ').slice(0, 160)})`)
+    } else {
+      onStep('     portada puesta en el medio del video')
+    }
+  } catch (e) {
+    onStep(`     (no pude completarle la portada al video de ${ref}: `
+      + `${String(e.message).slice(0, 120)}. El video quedo puesto igual.)`)
+  } finally {
+    await tab.close().catch(() => {})
+  }
 }
 
 // Que quedo en el campo. El widget reemplaza el "No se han seleccionado elementos media."

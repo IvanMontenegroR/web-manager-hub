@@ -104,12 +104,34 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
     // proxy) y los dibuja como data: URI. Cargar la imagen por su URL en un <img> y
     // pasarla por canvas no sirve: sin cabeceras CORS el canvas queda "tainted" y no se
     // puede exportar.
-    const recortar = async ({ origen, w, h, salida }) => {
-      const res = await bajarBytes(origen)
-      if (!res.ok()) throw new Error(`HTTP ${res.status()}`)
+    const recortar = async ({ origen, w, h, salida, ratio, alternativas }) => {
+      // Se prueban las fuentes EN ORDEN y vale la primera que conteste bien. Con una sola
+      // (el caso normal) esto es exactamente lo de antes. Con varias es la portada de
+      // YouTube: `maxresdefault` no existe para todos los videos y contesta 404, y ahi hay
+      // que bajar el siguiente en vez de quedarse sin portada.
+      const fuentes = alternativas?.length ? alternativas : [origen]
+      let res = null
+      const fallos = []
+      for (const fuente of fuentes) {
+        const r = await bajarBytes(fuente).catch((e) => { fallos.push(`${fuente}: ${e.message}`); return null })
+        if (r && r.ok()) { res = r; break }
+        if (r) fallos.push(`${fuente}: HTTP ${r.status()}`)
+      }
+      if (!res) throw new Error(fallos.join(' | ') || 'no se pudo bajar')
       const buf = await res.body()
       const mime = res.headers()['content-type'] || 'image/jpeg'
       const data = `data:${mime};base64,${buf.toString('base64')}`
+
+      // A PROPORCION, sin medida fija: se recorta al rectangulo mas grande con esa forma
+      // que ENTRE en la imagen. Nunca agranda — solo saca lo que sobra. Es lo que le quita
+      // las bandas negras al `hqdefault` de YouTube, que es 4:3 con el video 16:9 adentro.
+      if (ratio && !w && !h) {
+        const nat = await medidaDe(page, data)
+        if (!nat.w || !nat.h) throw new Error('no se pudo leer la medida de la imagen')
+        const anchoManda = nat.w / nat.h > ratio
+        w = anchoManda ? Math.round(nat.h * ratio) : nat.w
+        h = anchoManda ? nat.h : Math.round(nat.w / ratio)
+      }
 
       // SIN MEDIDA a la que recortar, se guarda el archivo tal cual: ni se re-encoda ni se
       // toca. Es mejor que la del sitio viejo llegue entera a que no llegue.
@@ -117,7 +139,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
         mkdirSync(dirname(salida), { recursive: true })
         writeFileSync(salida, buf)
         const nat = await medidaDe(page, data)
-        return { nat, escala: 1, sinMedida: true }
+        return { nat, w: nat.w, h: nat.h, escala: 1, sinMedida: true }
       }
 
       await page.setViewportSize({ width: w, height: h })
@@ -134,7 +156,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
       })
       mkdirSync(dirname(salida), { recursive: true })
       await page.locator('#c').screenshot({ path: salida, type: 'jpeg', quality: calidad })
-      return { nat, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)) }
+      return { nat, w, h, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)) }
     }
 
     for (const [i, bloque] of todosLosBloques(plan).entries()) {
@@ -198,8 +220,14 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
         const donde = `bloque ${i + 1} (${bloque.componente}) — ${arch.etiqueta}`
         try {
           const nombre = archivoDe(arch)
-          const r = await recortar({ origen: arch.origen, w: arch.w, h: arch.h, salida: join(carpeta, nombre) })
-          const estirada = r.escala > 1.001
+          const r = await recortar({
+            origen: arch.origen, w: arch.w, h: arch.h, ratio: arch.ratio,
+            alternativas: arch.alternativas, salida: join(carpeta, nombre),
+          })
+          // Una portada DERIVADA no se agranda nunca (se recorta a proporcion), asi que no
+          // puede salir estirada. Y aunque sea mas chica que lo que pide el CMS, no es una
+          // nota para revisar: no hay a quien pedirle una mejor, es la que publica YouTube.
+          const estirada = !arch.derivada && r.escala > 1.001
           if (estirada) estiradas += 1
           hechas += 1
           archivos.push({
@@ -211,7 +239,8 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
               + `${arch.w}×${arch.h}. No alcanza: hay que pedirla de nuevo, agrandarla se ve mal.`)
           }
           onStep(`  ${estirada ? '!' : '·'} ${arch.nombre}  ${r.nat.w}×${r.nat.h} -> `
-            + (r.sinMedida ? 'sin cambios (el catalogo no declara medida para este campo)' : `${arch.w}×${arch.h}`)
+            + (r.sinMedida ? 'sin cambios (el catalogo no declara medida para este campo)' : `${r.w}×${r.h}`)
+            + (arch.derivada ? '  (portada bajada de YouTube, recortada a 16:9)' : '')
             + '  (va adentro del medio del video, no a la libreria)')
         } catch (e) {
           fallaron += 1

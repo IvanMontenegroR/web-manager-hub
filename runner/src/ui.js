@@ -262,14 +262,25 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     // este, antes de abrir Drupal.
     const portadas = []
     const mirar = (bs) => (bs || []).forEach((b) => {
-      for (const v of Object.values(b.fields || {})) if (v?.thumb?.archivo) portadas.push(v.thumb.archivo)
+      for (const v of Object.values(b.fields || {})) if (v?.thumb?.archivo) portadas.push(v)
       mirar(b.children)
     })
     mirar(manifiesto.blocks)
-    const sinArchivo = portadas.filter((p) => !existsSync(resolve(p)))
-    if (sinArchivo.length) {
-      throw new Error(`El manifiesto pide ${sinArchivo.length} portada/s de video que el `
-        + `recorte no dejo en disco:\n  · ${sinArchivo.join('\n  · ')}`
+    const sinArchivo = portadas.filter((v) => !existsSync(resolve(v.thumb.archivo)))
+
+    // Una portada DERIVADA la consiguio el runner solo (la bajo de YouTube). Si no esta,
+    // casi siempre es que YouTube no contesto, y tirar abajo la pagina entera por eso seria
+    // desproporcionado: se saca del manifiesto, se avisa fuerte y el video se arma igual.
+    // Una portada que CARGO alguien es otra cosa — es un dato de la pagina — y ahi si frena.
+    for (const v of sinArchivo.filter((x) => x.thumb.derivada)) {
+      onStep(`OJO: no se pudo bajar la portada de YouTube de ${v.url}. El video se arma sin `
+        + 'portada y en el sitio va a quedar el cuadro vacio; se puede reintentar despues.')
+      delete v.thumb
+    }
+    const frenan = sinArchivo.filter((v) => v.thumb)
+    if (frenan.length) {
+      throw new Error(`El manifiesto pide ${frenan.length} portada/s de video que el `
+        + `recorte no dejo en disco:\n  · ${frenan.map((v) => v.thumb.archivo).join('\n  · ')}`
         + (rec.notas.length ? `\nLo que fallo al recortar:\n  · ${rec.notas.join('\n  · ')}` : '')
         + '\nNo se abre Drupal: el video se crea UNA vez y sin portada se queda sin ella.')
     }
@@ -277,7 +288,8 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
     writeFileSync(resolve(archivo), JSON.stringify(manifiesto, null, 2) + '\n', 'utf8')
     onStep(`Manifiesto al dia: ${countBlocks(manifiesto.blocks)} paragraph/s, `
       + `${pendientes.length} medio/s listos`
-      + (portadas.length ? `, ${portadas.length} portada/s de video` : '') + '.')
+      + (portadas.some((v) => v.thumb) ? `, ${portadas.filter((v) => v.thumb).length} portada/s de video` : '')
+      + '.')
     return manifiesto
   }
 

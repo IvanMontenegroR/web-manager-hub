@@ -145,6 +145,41 @@ ok(!pendientes.some((p) => p.url.includes('portada.png')),
     'una portada sin link de video avisa en vez de perderse callada')
 }
 
+// SIN PORTADA CARGADA SE BAJA LA DE YOUTUBE. Es el caso normal — nadie carga una — y sin
+// ella el CMS deja el video con el cuadro vacio. El mercado sigue pudiendo cargar la suya,
+// y entonces manda la suya.
+{
+  const soloElLink = [{ component_key: 'external_video', content: {
+    video_url: 'https://www.youtube.com/watch?v=3-COT6aQbPo',
+  } }]
+  const r = aManifiesto(PAGINA, soloElLink, tipos)
+  const campo = r.manifiesto.blocks[0].fields.field_c_external_video
+  ok(!!campo?.thumb?.archivo, 'un video sin portada cargada igual viaja con una')
+  const [auto] = archivosDeBloque(planDelHub(soloElLink[0]), 'prueba')
+  ok(auto.origen === 'https://img.youtube.com/vi/3-COT6aQbPo/maxresdefault.jpg',
+    'que sale de YouTube en la mejor calidad que publica')
+  ok(auto.alternativas.length === 2 && auto.derivada,
+    'con su respaldo por si ese video no tiene maxresdefault')
+  ok(auto.w === null && auto.ratio === 16 / 9,
+    'y se recorta a 16:9 sin agrandarla: estirar 1280 hasta 2784 no agrega informacion')
+  ok(campo.thumb.archivo === rutaDeImagen('prueba', archivoDe(auto)),
+    'y la ruta sigue siendo la misma que escribe el recortador')
+  // Viaja marcada porque manda una decision: si YouTube no contesta, una portada que el
+  // runner se consiguio solo no puede tirar abajo la pagina entera.
+  ok(campo.thumb.derivada === true, 'y va marcada como derivada, no como un dato de la pagina')
+
+  // Lo cargado a mano gana: la derivada es un relleno, no una imposicion.
+  const conLaSuya = [{ component_key: 'external_video', content: {
+    video_url: 'https://www.youtube.com/watch?v=3-COT6aQbPo',
+    thumb: 'https://ejemplo.com/la-mia.png',
+  } }]
+  const [propia] = archivosDeBloque(planDelHub(conLaSuya[0]), 'prueba')
+  ok(propia.origen === 'https://ejemplo.com/la-mia.png' && !propia.derivada,
+    'si el mercado carga una portada, manda la suya y no se baja nada')
+  ok(propia.w === 2784 && propia.h === 1566,
+    `y esa si va a la medida que pide el CMS (${propia.w}×${propia.h})`)
+}
+
 // TODO machine name emitido tiene que existir en el mapping. Es lo que evita descubrir
 // un nombre mal escrito recien con el navegador abierto.
 let malos = 0

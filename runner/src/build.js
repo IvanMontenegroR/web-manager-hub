@@ -612,7 +612,11 @@ async function ponerDeLaLibreria(ctx, f, vars, { url, thumb }, ref) {
     throw new Error(`No encontre el campo de video ${ref} (${campo})`)
   }
   const puesto = await elegirDeLaLibreria({
-    page, campo, url, thumb, cfg: mapping.mediaLibrary, ref, onStep: ctx.onStep,
+    page, campo, url, thumb, ref, onStep: ctx.onStep,
+    // `medio` son los selectores de la FICHA de un medio (los mismos que usa el subidor de
+    // fotos): hacen falta para completarle la portada a un video que ya estaba en la
+    // libreria, que se edita en su propia pagina y no en el modal.
+    cfg: { ...mapping.mediaLibrary, medio: mapping.media },
   })
   // Un modal que se cerro sin enganchar nada deja el campo igual de vacio que antes, sin
   // decir nada: la verificacion es lo unico que lo distingue de haber funcionado.

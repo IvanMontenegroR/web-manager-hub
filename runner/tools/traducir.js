@@ -153,7 +153,14 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
       }
       fields[campo] = {
         url: fields[campo],
-        thumb: { archivo: rutaDeImagen(slug, archivoDe(arch)), alt: arch.alt },
+        thumb: {
+          archivo: rutaDeImagen(slug, archivoDe(arch)),
+          alt: arch.alt,
+          // `derivada` = no la cargo nadie, la bajo el runner de YouTube. Importa para
+          // decidir que hacer si el archivo no esta: una portada que el runner se consiguio
+          // solo no puede frenar la pagina entera, y una que cargo el mercado si.
+          ...(arch.derivada ? { derivada: true } : {}),
+        },
       }
     }
 
