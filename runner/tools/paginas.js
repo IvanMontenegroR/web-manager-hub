@@ -13,6 +13,13 @@
 export const slugDePagina = (path) =>
   String(path || '').replace(/^\//, '').replace(/[^\w-]+/g, '-') || 'pagina'
 
+// DONDE CAEN LAS FOTOS RECORTADAS. `imagenes/<slug>/`, y estaba escrito a mano en cada
+// herramienta. Importa ahora que el manifiesto NOMBRA un archivo de esa carpeta (la
+// portada del video, que se sube durante el armado): si el que recorta y el que arma no
+// coinciden, el armado busca un archivo que no existe.
+export const CARPETA_IMAGENES = 'imagenes'
+export const rutaDeImagen = (slug, archivo) => `${CARPETA_IMAGENES}/${slug}/${archivo}`
+
 export const planDelHub = (bloque) => ({
   componente: bloque.component_key,
   contenido: bloque.content || {},

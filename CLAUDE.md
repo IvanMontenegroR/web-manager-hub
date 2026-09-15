@@ -469,6 +469,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   generico y no muestran medida, porque no sabemos como se ven. Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
+  El **Video externo** (`c_externalvideo`) lleva el link y una **portada opcional** (el "Video thumb" del
+  CMS, 2784px de ancho segun el playbook, 16:9 por el hueco que ocupa). Sin portada cargada el sitio
+  muestra la de YouTube, y el preview del builder hace lo mismo. La portada NO es un medio: es un campo
+  DEL medio del video, que se sube en el mismo formulario donde se pega la URL. Por eso el campo se
+  declara `insideMedia: 'video_url'` en el catalogo — la marca que le dice al runner que no le arme una
+  entidad propia (seria un duplicado en la libreria que nadie referencia) y que la suba adentro del otro.
+  Solo se puede poner al CREAR el medio: si el video ya estaba en la libreria se reutiliza y la portada
+  no se toca, porque es un campo suyo y la comparten todas las paginas que lo usan.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.

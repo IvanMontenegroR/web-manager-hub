@@ -53,15 +53,76 @@ function medida(txt) {
 // Los campos de tipo `image` de un componente, incluidos los de adentro de una lista.
 // Salen del CATALOGO, no de una lista escrita a mano: un componente nuevo con una imagen
 // nueva entra solo.
+//
+// Los que declaran `insideMedia` quedan AFUERA: esos no son un medio, son un campo de
+// OTRO medio (la portada del video vive adentro del medio del video). Enumerarlos aca les
+// armaria una entidad `responsive_image` propia que nadie referencia — un duplicado en la
+// libreria que despues no limpia nadie. Van por `archivosDeBloque`.
 function camposImagen(def) {
   const sueltos = [], enLista = []
   for (const f of (def?.fields || [])) {
-    if (f.type === 'image') sueltos.push(f.key)
+    if (f.type === 'image' && !f.insideMedia) sueltos.push(f.key)
     if (f.type === 'list') {
-      for (const sf of (f.item || [])) if (sf.type === 'image') enLista.push([f.key, sf.key])
+      for (const sf of (f.item || [])) if (sf.type === 'image' && !sf.insideMedia) enLista.push([f.key, sf.key])
     }
   }
   return { sueltos, enLista }
+}
+
+/**
+ * El nombre del ARCHIVO recortado de una de esas imagenes. Lo usan los DOS lados —
+ * `imagenes.js` al escribirlo y `traducir.js` al nombrarlo en el manifiesto —, que corren
+ * en procesos distintos y no se pasan nada: la unica forma de que coincidan es que la
+ * regla este escrita una sola vez. Es el mismo error que ya nos costo una corrida con las
+ * fotos de las cards.
+ *
+ * Con medida declarada el recorte sale JPG; sin medida se sube el original tal cual, asi
+ * que conserva su extension.
+ */
+export const archivoDe = (arch) => {
+  const ext = arch.w
+    ? 'jpg'
+    : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(arch.origen)?.[1] || 'jpg').toLowerCase()
+  return `${arch.nombre}.${ext}`
+}
+
+/**
+ * Los ARCHIVOS de un bloque: las imagenes que NO son un medio propio sino un campo de
+ * otro medio. Hoy hay una sola — la portada del video (`thumb`), que en el CMS se sube
+ * adentro del formulario donde se pega la URL del video.
+ *
+ * Se recortan como cualquier otra pero NO van al INDICE: `subir-medios` sube medios, y
+ * esto no lo es. El que la sube es el propio armado, en el momento de crear el video.
+ *
+ * La medida sale del campo (`size`) y no de `getSpecs`, porque las specs de un componente
+ * son una lista y el recortador usa la primera para todas sus imagenes: con dos medidas
+ * distintas en el mismo bloque (el video y su portada) haria falta decir cual es cual, y
+ * decirlo en el campo es decirlo una sola vez.
+ */
+export function archivosDeBloque(bloque, slug) {
+  const def = getComponent(bloque.componente)
+  const out = []
+  for (const f of (def?.fields || [])) {
+    if (f.type !== 'image' || !f.insideMedia) continue
+    const origen = origenDe(bloque.contenido?.[f.key])
+    if (!origen || !/^https?:/.test(origen)) continue
+    out.push({
+      // Se nombra con la MISMA funcion que un medio: no queda en la libreria, pero el
+      // nombre tiene que ser estable entre el recorte y el armado, que es exactamente el
+      // problema que esa funcion resuelve.
+      nombre: nombreDeMedio({ slug, componente: bloque.componente, campo: f.key, origen }),
+      key: f.key,
+      etiqueta: f.key,
+      // De que medio es esta imagen: el campo del hub que lo crea (`video_url`).
+      deCampo: f.insideMedia,
+      alt: bloque.contenido?.[`${f.key}_alt`] || '',
+      // `w`/`h` en null = sin medida declarada: se sube el original sin tocarlo, igual
+      // que cualquier otra imagen cuya medida todavia no sabemos.
+      ...(medida(f.size) || { w: null, h: null }),
+      origen,
+    })
+  }
+  return out
 }
 
 /**

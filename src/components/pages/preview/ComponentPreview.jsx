@@ -111,11 +111,13 @@ export function youtubeThumb(url) {
   return m ? `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` : null
 }
 
-// Que mostrar en el cuadro del video: el thumbnail de YouTube, o el propio MP4 (su
-// primer frame). Con un link que no es ninguna de las dos cosas devuelve null, para
-// que se vea el placeholder en vez de una imagen rota.
-function videoPreview(url) {
-  return youtubeThumb(url) || (isVideo(url) ? url : null)
+// Que mostrar en el cuadro del video. Manda la PORTADA cargada (el "Video thumb" del
+// CMS): si esta, es la que se ve en el sitio. Sin ella, el thumbnail de YouTube o el
+// propio MP4 (su primer frame) — que es lo que el sitio usa cuando no se carga ninguna.
+// Con un link que no es ninguna de las dos cosas devuelve null, para que se vea el
+// placeholder en vez de una imagen rota.
+function videoPreview(url, thumb) {
+  return (thumb && String(thumb).trim()) || youtubeThumb(url) || (isVideo(url) ? url : null)
 }
 
 const T = (v, fallback) => (v && String(v).trim() ? v : fallback)
@@ -1060,9 +1062,10 @@ const RENDERERS = {
         </div>
       )}
       <div className="cp-vid-frame">
-        {/* La portada NO se carga a mano: si el link es de YouTube se usa su propio
-            thumbnail, igual que en el sitio. Un MP4 muestra su primer frame. */}
-        <Img src={videoPreview(c.video_url)} aspect="16/9" dim="Preview del video" className="cp-vid-img" />
+        {/* La portada es OPCIONAL: si se carga, es la que se ve. Si no, el sitio usa el
+            thumbnail del propio YouTube; un MP4 muestra su primer frame. Por eso el
+            cuadro casi nunca queda vacio y no se pide la medida a los gritos. */}
+        <Img src={videoPreview(c.video_url, c.thumb)} aspect="16/9" dim="2784×1566px" className="cp-vid-img" />
         <span className="cp-vid-play" aria-hidden="true">
           <Play size={26} />
         </span>

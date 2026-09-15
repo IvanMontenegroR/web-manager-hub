@@ -34,8 +34,8 @@
 // donde poner, o un machine name que el mapping no tiene. Un manifiesto a medias que
 // parece completo es peor que uno que no se genero.
 import { getComponent, G_CLASSY, G_ADV } from '../../src/data/components.js'
-import { nombreDeMedio, campoBase, origenDe } from './medios.js'
-import { slugDePagina } from './paginas.js'
+import { nombreDeMedio, campoBase, origenDe, archivosDeBloque, archivoDe } from './medios.js'
+import { slugDePagina, rutaDeImagen } from './paginas.js'
 import { PARAGRAFOS } from './paragrafos.js'
 
 // Campos del hub que no viajan al CMS: los consume esta misma traduccion.
@@ -49,11 +49,18 @@ export const SIN_DESTINO = '#'
 // Asi no hay una segunda lista escrita a mano que se pueda desincronizar.
 const CLASSY = new Set()
 const AVANZADO = new Set()
+// Los campos que son una imagen ADENTRO de otro medio (la portada del video). No tienen
+// campo propio en el paragraph: viajan pegados al campo que crea ese medio, y por eso el
+// recorrido de arriba los saltea en vez de frenar por no saber donde ponerlos.
+const DENTRO_DE_UN_MEDIO = new Map()
 for (const componente of Object.keys(PARAGRAFOS)) {
+  const suyos = new Set()
   for (const f of (getComponent(componente)?.fields || [])) {
     if (f.group === G_CLASSY) CLASSY.add(f.key)
     if (f.group === G_ADV) AVANZADO.add(f.key)
+    if (f.insideMedia) { suyos.add(f.key); suyos.add(`${f.key}_alt`) }
   }
+  if (suyos.size) DENTRO_DE_UN_MEDIO.set(componente, suyos)
 }
 
 const vacio = (v) => v === undefined || v === null || v === '' ||
@@ -114,10 +121,40 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
         continue
       }
       if (SOLO_DEL_HUB.has(k)) continue
+      // La portada del video y su alt se consumen mas abajo, cuando ya se sabe que el
+      // campo del video quedo puesto: van pegados a el, no a un campo propio.
+      if (DENTRO_DE_UN_MEDIO.get(componente)?.has(k)) continue
       if (CLASSY.has(k)) { poner(`classy.${k}`, v); continue }
       if (AVANZADO.has(k)) { poner(`advanced.${k}`, v); continue }
       frenar(`el campo "${k}" de ${donde} (${componente}) tiene valor `
         + `${JSON.stringify(v).slice(0, 60)} y no se a que campo del CMS corresponde.`)
+    }
+
+    // LA PORTADA DEL VIDEO. No es un medio: es un campo del medio del video, que se sube
+    // adentro del mismo formulario donde se pega la URL. Por eso no va a un campo del
+    // paragraph sino PEGADA al del video, y el valor de ese campo deja de ser una URL
+    // pelada para ser `{ url, thumb }`.
+    //
+    // Va con la RUTA del archivo recortado, no con un nombre de la libreria: el que la
+    // sube es el armado, en el momento de crear el medio. El nombre lo calcula la misma
+    // funcion que uso el recortador (`archivoDe`), asi que los dos procesos coinciden.
+    for (const arch of archivosDeBloque({ componente, contenido }, slug)) {
+      const campo = def.campos?.[arch.deCampo]
+      if (!campo) {
+        frenar(`${donde}: hay una "${arch.key}" cargada que va adentro del medio de `
+          + `"${arch.deCampo}", pero ese campo no esta en la tabla de traducir.js.`)
+      }
+      // Sin el link del video no hay medio que crear, y entonces no hay donde meter la
+      // portada. Se avisa en vez de inventar: es un bloque a medio cargar en el hub.
+      if (!fields[campo]) {
+        avisos.push(`${donde}: hay portada cargada pero el video no tiene link, asi que la `
+          + 'portada no se puede subir. Cargá el link en el hub y volvé a generar.')
+        continue
+      }
+      fields[campo] = {
+        url: fields[campo],
+        thumb: { archivo: rutaDeImagen(slug, archivoDe(arch)), alt: arch.alt },
+      }
     }
 
     // `field_c_link` es multivaluado en el CMS, pero el mapping direcciona UNO. Se manda

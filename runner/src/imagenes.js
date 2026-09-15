@@ -19,7 +19,7 @@
 import { writeFileSync, mkdirSync, statSync, copyFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { request } from 'playwright-core'
-import { mediosDeBloque, campoBase } from '../tools/medios.js'
+import { mediosDeBloque, archivosDeBloque, archivoDe, campoBase } from '../tools/medios.js'
 
 // La red de una empresa suele INSPECCIONAR TLS: un proxy se pone en el medio y firma los
 // certificados con su propia CA. Windows confia en esa CA (por eso Chrome navega bien),
@@ -64,11 +64,16 @@ function todosLosBloques(plan) {
  * @param {object} o.plan     `{ pagina, bloques, revisar }` (ver tools/paginas.js)
  * @param {string} o.slug     nombra la carpeta y va adelante del nombre de cada medio
  * @param {string} o.destino  carpeta madre; los archivos van a `<destino>/<slug>/`
- * @returns {Promise<{indice, hechas, estiradas, fallaron, notas}>}
+ * @returns {Promise<{indice, archivos, hechas, estiradas, fallaron, notas, carpeta}>}
+ *   `indice` son los MEDIOS (lo que sube `subir-medios`); `archivos`, las imagenes que no
+ *   son un medio sino un campo de otro medio (la portada del video), que sube el armado.
  */
 export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, onStep = () => {} }) {
   const carpeta = join(resolve(destino), slug)
   const indice = []
+  // Las imagenes que NO son un medio: van aparte del INDICE a proposito, porque el INDICE
+  // es el contrato con `subir-medios` y esto no se sube por ahi.
+  const archivos = []
   const notas = []
   let hechas = 0, estiradas = 0, fallaron = 0
 
@@ -185,6 +190,35 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
           onStep(`  x ${medio.nombre}  ${String(e.message).slice(0, 60)}`)
         }
       }
+
+      // Las que NO son un medio propio sino un campo de otro medio: hoy la portada del
+      // video. Se recortan igual, pero NO van al INDICE — el que las sube es el armado,
+      // adentro del formulario donde crea el video, no `subir-medios`.
+      for (const arch of archivosDeBloque(bloque, slug)) {
+        const donde = `bloque ${i + 1} (${bloque.componente}) — ${arch.etiqueta}`
+        try {
+          const nombre = archivoDe(arch)
+          const r = await recortar({ origen: arch.origen, w: arch.w, h: arch.h, salida: join(carpeta, nombre) })
+          const estirada = r.escala > 1.001
+          if (estirada) estiradas += 1
+          hechas += 1
+          archivos.push({
+            nombre: arch.nombre, archivo: join(slug, nombre), key: arch.key,
+            deCampo: arch.deCampo, alt: arch.alt,
+          })
+          if (estirada) {
+            notas.push(`IMAGEN ESTIRADA: ${donde} es de ${r.nat.w}×${r.nat.h} y hace falta `
+              + `${arch.w}×${arch.h}. No alcanza: hay que pedirla de nuevo, agrandarla se ve mal.`)
+          }
+          onStep(`  ${estirada ? '!' : '·'} ${arch.nombre}  ${r.nat.w}×${r.nat.h} -> `
+            + (r.sinMedida ? 'sin cambios (el catalogo no declara medida para este campo)' : `${arch.w}×${arch.h}`)
+            + '  (va adentro del medio del video, no a la libreria)')
+        } catch (e) {
+          fallaron += 1
+          notas.push(`IMAGEN que no se pudo bajar: ${arch.origen} (${String(e.message).slice(0, 80)})`)
+          onStep(`  x ${arch.nombre}  ${String(e.message).slice(0, 60)}`)
+        }
+      }
     }
   } finally {
     await page.close().catch(() => {})
@@ -200,5 +234,5 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
   }
   if (plan.revisar) plan.revisar.push(...notas)
 
-  return { indice, hechas, estiradas, fallaron, notas, carpeta }
+  return { indice, archivos, hechas, estiradas, fallaron, notas, carpeta }
 }

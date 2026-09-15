@@ -289,8 +289,12 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     // El OTRO widget de medios: el modal con grilla. Lo usa el video externo. Se elige por
     // URL porque el nombre del medio lo pone YouTube y el hub no lo tiene.
     if (f.kind === 'mediaLibrary') {
-      onStep(`     video "${key}": buscando ${value} en la Media library`)
-      ctx.escritos.push(await ponerDeLaLibreria(ctx, f, vars, String(value), ref))
+      // El valor puede ser la URL pelada o `{ url, thumb }`: la portada viaja pegada al
+      // video porque en el CMS es un campo de SU medio, no un campo del paragraph.
+      const v = (value && typeof value === 'object') ? value : { url: String(value) }
+      onStep(`     video "${key}": buscando ${v.url} en la Media library`
+        + (v.thumb ? ' (con portada)' : ''))
+      ctx.escritos.push(await ponerDeLaLibreria(ctx, f, vars, v, ref))
       continue
     }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
@@ -601,14 +605,14 @@ async function ponerMedia(ctx, f, vars, nombre, ref) {
 
 // Elige un medio del modal con grilla (Media library). Igual que `ponerMedia`, no crea
 // nada: si el video que pide el manifiesto no esta en la libreria, frena.
-async function ponerDeLaLibreria(ctx, f, vars, url, ref) {
+async function ponerDeLaLibreria(ctx, f, vars, { url, thumb }, ref) {
   const { page, mapping } = ctx
   const campo = resolveSelector(f.sel, vars)
   if (!(await page.locator(campo).count())) {
     throw new Error(`No encontre el campo de video ${ref} (${campo})`)
   }
   const puesto = await elegirDeLaLibreria({
-    page, campo, url, cfg: mapping.mediaLibrary, ref, onStep: ctx.onStep,
+    page, campo, url, thumb, cfg: mapping.mediaLibrary, ref, onStep: ctx.onStep,
   })
   // Un modal que se cerro sin enganchar nada deja el campo igual de vacio que antes, sin
   // decir nada: la verificacion es lo unico que lo distingue de haber funcionado.

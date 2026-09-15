@@ -11,6 +11,16 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { esperarAjax, esperarVisible } from './esperas.js'
 
+// EL ALT que se le pone a una foto que no trae uno propio. Es una marca BUSCABLE en la
+// Media library, no un alt inventado: un texto plausible parece cargado y no lo corrige
+// nadie.
+//
+// Vive aca porque lo usan TRES: el subidor de fotos, la interfaz y el modal que crea el
+// video con su portada. Estaba copiado en cada uno, y el dia que alguien cambie el texto
+// en uno solo, la mitad de las fotos quedan marcadas de una forma y la otra mitad de otra
+// — que es exactamente lo que rompe poder buscarlas.
+export const ALT_DE_RESERVA = 'Alt Placeholder'
+
 // Los selectores salen del HTML REAL de /media/add/image de este sitio, no de un Drupal
 // generico. Si en otro sitio son distintos se corrigen en el mapping bajo "media", sin
 // tocar el codigo.

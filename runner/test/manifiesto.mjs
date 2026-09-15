@@ -8,8 +8,8 @@
 //     library, no sube, y el nombre lo calcula la misma funcion que uso el recortador.
 // Y que FRENE ante lo que no sabe, en vez de dejar pasar un manifiesto a medias.
 import { aManifiesto, ErrorDeTraduccion, SIN_DESTINO } from '../tools/traducir.js'
-import { nombreDeMedio, mediosDeBloque } from '../tools/medios.js'
-import { planDelHub } from '../tools/paginas.js'
+import { nombreDeMedio, mediosDeBloque, archivosDeBloque, archivoDe } from '../tools/medios.js'
+import { planDelHub, rutaDeImagen } from '../tools/paginas.js'
 import { loadMapping } from '../src/mapping.js'
 import { validateManifest } from '../src/manifest.js'
 
@@ -43,6 +43,11 @@ const BLOQUES = [
     body: 'Cuerpo del bloque.', title: 'Con dos botones', title_tag: 'h2',
     ctas: [{ label: 'Uno', url: '/uno' }, { label: 'Dos', url: '/dos' }],
   } },
+  // El video con su PORTADA: la portada no es un medio, es un campo del medio del video.
+  { component_key: 'external_video', content: {
+    title: 'Mira el video', video_url: 'https://www.youtube.com/watch?v=3-COT6aQbPo',
+    thumb: 'https://ejemplo.com/portada.png', thumb_alt: 'Un gato comiendo',
+  } },
 ]
 
 const { manifiesto, avisos, pendientes } = aManifiesto(PAGINA, BLOQUES, tipos)
@@ -54,8 +59,8 @@ ok(manifiesto.page.published === false, 'la pagina sale como BORRADOR (regla de 
 const tiposEmitidos = manifiesto.blocks.map((b) => b.type)
 ok(!tiposEmitidos.includes('breadcrumb'), 'el breadcrumb no viaja al CMS')
 ok(avisos.some((a) => /breadcrumb/.test(a)), 'y se avisa que se omitio, en vez de desaparecer callado')
-ok(tiposEmitidos.join() === 'banner,ln_c_cardgrid,c_text',
-  `los otros tres se tradujeron a sus paragraphs (fueron ${tiposEmitidos.join()})`)
+ok(tiposEmitidos.join() === 'banner,ln_c_cardgrid,c_text,c_externalvideo',
+  `los otros cuatro se tradujeron a sus paragraphs (fueron ${tiposEmitidos.join()})`)
 
 const banner = manifiesto.blocks[0]
 ok(banner.fields.field_html === 'La bajada.',
@@ -109,6 +114,36 @@ ok(pedidos.length >= 2, `el traductor pide ${pedidos.length} medios (banner y ca
 ok(recortados.size >= 2, `el recortador nombra ${recortados.size} medios sobre la misma pagina`)
 ok(sinRecortar.length === 0,
   `todos los medios que pide el traductor los nombra igual el recortador${sinRecortar.length ? ` (no: ${sinRecortar.join(', ')})` : ''}`)
+
+// LA PORTADA DEL VIDEO. No es un medio: es un campo del MEDIO del video, que se sube
+// adentro del mismo formulario donde se pega la URL. Asi que no viaja por nombre de
+// libreria sino por RUTA del archivo recortado, pegada al campo del video — y no tiene
+// que aparecer ni en los pendientes ni entre los medios que el recortador nombra, porque
+// `subir-medios` no la sube.
+const video = manifiesto.blocks[3]
+const campoVideo = video.fields.field_c_external_video
+ok(campoVideo?.url === 'https://www.youtube.com/watch?v=3-COT6aQbPo',
+  'el link del video sigue siendo el link del video')
+ok(campoVideo?.thumb?.alt === 'Un gato comiendo', 'y se lleva el alt de la portada, que en este CMS es obligatorio')
+
+const bloqueVideo = planDelHub(BLOQUES[4])
+const [portada] = archivosDeBloque(bloqueVideo, 'prueba')
+ok(campoVideo?.thumb?.archivo === rutaDeImagen('prueba', archivoDe(portada)),
+  `la ruta que pide el manifiesto es la MISMA que escribe el recortador (${campoVideo?.thumb?.archivo})`)
+ok(portada.w === 2784 && portada.h === 1566,
+  `la portada se recorta a la medida del playbook del CMS (${portada.w}×${portada.h})`)
+ok(!mediosDeBloque(bloqueVideo, 'prueba').length,
+  'y NO se enumera como medio: seria una entidad de la libreria que nadie referencia')
+ok(!pendientes.some((p) => p.url.includes('portada.png')),
+  'ni queda como pendiente de subir: la sube el armado, no subir-medios')
+
+// Sin link del video no hay medio que crear, asi que la portada no tiene donde ir.
+{
+  const solaLaPortada = [{ component_key: 'external_video', content: { thumb: 'https://ejemplo.com/portada.png' } }]
+  const r = aManifiesto(PAGINA, solaLaPortada, tipos)
+  ok(r.avisos.some((a) => /portada/.test(a)),
+    'una portada sin link de video avisa en vez de perderse callada')
+}
 
 // TODO machine name emitido tiene que existir en el mapping. Es lo que evita descubrir
 // un nombre mal escrito recien con el navegador abierto.

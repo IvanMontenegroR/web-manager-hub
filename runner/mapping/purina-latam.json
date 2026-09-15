@@ -28,6 +28,12 @@
     "confirmar": "[data-drupal-selector$=\"-ief-reference-save\"]",
     "error": ".form-item--error-message, .messages--error"
   },
+  "mediaLibrary": {
+    "_": "El OTRO widget de medios: el modal con grilla. Lo usa el video externo. Se elige por URL (el nombre del medio lo pone YouTube) y, si no esta, se crea pegando la URL. La PORTADA (\"Video thumb\") se sube en ese mismo formulario, entre pegar la URL y guardar: es un ARCHIVO del medio del video, no una referencia a otro medio, por eso el name es el del form anidado adentro del modal. Solo se puede poner al CREAR el medio: si el video ya estaba en la libreria se reutiliza y no se le toca la portada, porque es un campo suyo y lo comparten todas las paginas que lo referencian.",
+    "thumb": "input[name=\"files[media_0_fields_field_media_image_0]\"]",
+    "thumbListo": "input[name=\"media[0][fields][field_media_image][0][fids]\"]",
+    "thumbAlt": "input[name^=\"media[0][fields][field_media_image]\"][name$=\"[alt]\"]"
+  },
   "paragraphs": {
     "dsel": "edit-field-ln-n-components-{delta}",
     "base": "field_ln_n_components[{delta}][subform]",

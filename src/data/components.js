@@ -1060,15 +1060,27 @@ export const COMPONENTS = [
     key: 'external_video',
     name: 'Video externo',
     category: 'Contenido',
-    help: 'Video embebido a lo ancho (YouTube o MP4): título y subtítulo opcionales arriba, y el video con el botón de play encima. El preview NO se carga a mano: sale del propio YouTube.',
+    help: 'Video embebido a lo ancho (YouTube o MP4): título y subtítulo opcionales arriba, y el video con el botón de play encima. La portada es opcional: sin cargar, el sitio usa la del propio YouTube.',
     fields: [
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'External Video' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
       { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'textarea' },
       { key: 'video_url', label: 'Link del video (YouTube o MP4)', type: 'url' },
+      // El "Video thumb" del CMS. NO es un medio propio: es un campo del MEDIO del video,
+      // que se sube adentro del mismo formulario donde se pega la URL (ver el playbook:
+      // "Upload the thumb image and click on Guardar"). Por eso lleva `insideMedia`, que
+      // le dice al runner de que medio es y que no le arme una entidad aparte.
+      // Es OPCIONAL: sin portada cargada el sitio muestra la de YouTube.
+      { key: 'thumb', label: 'Portada del video (opcional)', cmsLabel: 'Video thumb', type: 'image',
+        insideMedia: 'video_url', size: '2784×1566px' },
+      { key: 'thumb_alt', label: 'Alt text', cmsLabel: 'Texto alternativo', type: 'text', cms: true },
     ],
     specs: [
       { label: 'Video', ratio: 'Desktop 16:9 - Mobile 16:9', max: '2-4MB', format: 'MP4 / YouTube' },
+      // El ancho sale del playbook del CMS ("size width = 2784 px"); el alto, del 16:9 del
+      // propio video, que es el hueco que la portada ocupa. No hay un tercer numero que
+      // inventar.
+      { label: 'Portada del video (opcional)', ratio: 'Desktop 16:9', desktop: '2784×1566px', max: '500kb', format: 'JPG / PNG' },
     ],
   },
   {

@@ -278,6 +278,32 @@ crea**: un video no tiene archivo que subir, crearlo es pegar la URL en el modal
 unica excepcion a "el runner no crea medios", y esta porque la alternativa era dejar la
 pagina a medio armar.
 
+### La portada del video ("Video thumb")
+
+Es OPCIONAL: sin portada cargada, el sitio muestra la del propio YouTube. Si el hub la
+trae, el runner la recorta y la sube **solo**.
+
+No es un medio. Es un campo **del medio del video**, que se sube en el mismo formulario
+donde se pega la URL — tal cual lo cuenta el playbook del CMS: *"Inform the video URL and
+click on agregar → Upload the thumb image and click on Guardar → Click on Insertar
+seleccionado"*. De ahi salen tres cosas que no son obvias:
+
+- **No pasa por `subir-medios`.** Ese paso sube MEDIOS, y esto no lo es: armarle una
+  entidad `responsive_image` propia dejaria en la libreria un medio que nadie referencia.
+  Se recorta con las demas pero queda fuera del `INDICE.json`, y el manifiesto la nombra
+  por **ruta de archivo** (`imagenes/<slug>/...`) en vez de por nombre de libreria.
+- **Solo se puede poner al CREAR el medio.** Si el video ya estaba en la libreria, el
+  runner lo reutiliza y **no le toca la portada**: es un campo suyo, y cambiarla la
+  cambiaria en todas las paginas que referencian ese video. Lo avisa en los pasos; si hay
+  que cambiarla, va a mano en el CMS, una vez.
+- **El alt se llena.** Con portada, en este CMS el alt es obligatorio: si el hub no trae
+  uno, va `Alt Placeholder`, la misma marca buscable que usa el subidor de fotos.
+
+En el catalogo del hub el campo se declara con `insideMedia: 'video_url'` — "esta imagen
+es un campo del medio que crea *ese* campo" — y con su propia `size`. Eso es lo que hace
+que el recortador la saque de la lista de medios y el traductor la pegue al campo del
+video, que deja de valer una URL pelada para valer `{ url, thumb }`.
+
 Cada uno se declara en el mapping con su `kind` — `media` y `mediaLibrary` — y **los dos
 necesitan `sel`**, apuntando al wrapper que envuelve a la vez el boton que abre el selector
 y el lugar donde queda lo elegido. Los unicos `kind` que pueden no declararlo son `image` y

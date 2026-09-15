@@ -26,17 +26,12 @@ import { openBrowser } from './browser.js'
 import { loadManifest, countBlocks, validateManifest } from './manifest.js'
 import { missingTypes } from './mapping.js'
 import { buildPage } from './build.js'
-import { subirPlaceholders } from './media.js'
+import { subirPlaceholders, ALT_DE_RESERVA } from './media.js'
 import { recortarPagina } from './imagenes.js'
 import { leerPagina, listarPaginas, credenciales } from '../tools/hub.js'
 import { aManifiesto } from '../tools/traducir.js'
 import { slugDePagina, planDelHub } from '../tools/paginas.js'
 import { logRun } from './log.js'
-
-// El alt que se le pone a una foto que no trae uno propio. Es una marca BUSCABLE en la
-// Media library, no un alt inventado: un texto plausible parece cargado y no lo corrige
-// nadie. Mismo valor que usa `tools/subir-medios.mjs`.
-const ALT_DE_RESERVA = 'Alt Placeholder'
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url))
 const APP = join(AQUI, 'ui', 'app.html')
@@ -261,9 +256,28 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
         + '\nNo se abre Drupal: armar la pagina sin esas imagenes seria dejarla a medias.')
     }
 
+    // 3c. Y LAS PORTADAS. La del video no es un medio — es un campo del medio del video —,
+    // asi que no entra en la cuenta de arriba: el manifiesto la nombra por ARCHIVO y el
+    // que la sube es el armado. Se comprueba lo mismo por el mismo motivo: que el archivo
+    // este, antes de abrir Drupal.
+    const portadas = []
+    const mirar = (bs) => (bs || []).forEach((b) => {
+      for (const v of Object.values(b.fields || {})) if (v?.thumb?.archivo) portadas.push(v.thumb.archivo)
+      mirar(b.children)
+    })
+    mirar(manifiesto.blocks)
+    const sinArchivo = portadas.filter((p) => !existsSync(resolve(p)))
+    if (sinArchivo.length) {
+      throw new Error(`El manifiesto pide ${sinArchivo.length} portada/s de video que el `
+        + `recorte no dejo en disco:\n  · ${sinArchivo.join('\n  · ')}`
+        + (rec.notas.length ? `\nLo que fallo al recortar:\n  · ${rec.notas.join('\n  · ')}` : '')
+        + '\nNo se abre Drupal: el video se crea UNA vez y sin portada se queda sin ella.')
+    }
+
     writeFileSync(resolve(archivo), JSON.stringify(manifiesto, null, 2) + '\n', 'utf8')
     onStep(`Manifiesto al dia: ${countBlocks(manifiesto.blocks)} paragraph/s, `
-      + `${pendientes.length} medio/s listos.`)
+      + `${pendientes.length} medio/s listos`
+      + (portadas.length ? `, ${portadas.length} portada/s de video` : '') + '.')
     return manifiesto
   }
 

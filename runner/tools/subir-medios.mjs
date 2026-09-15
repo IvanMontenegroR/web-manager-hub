@@ -16,7 +16,7 @@
 import { resolve } from 'node:path'
 import { openBrowser } from '../src/browser.js'
 import { loadMapping } from '../src/mapping.js'
-import { subirPlaceholders } from '../src/media.js'
+import { subirPlaceholders, ALT_DE_RESERVA } from '../src/media.js'
 
 // Una pasada sola: lo que empieza con `--` es una opcion y se lleva el valor que sigue;
 // lo demas es posicional. Mucho mas simple que adivinar despues cual valor era de quien.
@@ -52,8 +52,7 @@ const mapping = loadMapping(opt('mapping') || 'mapping/purina-latam.json')
 // encontrar despues — pero en ESTE CMS el alt es obligatorio y Drupal no guarda el medio:
 // la corrida frena diciendo exactamente eso. Queda la opcion para poder comprobarlo
 // contra el CMS en vez de confiar en una nota.
-const ALT_PENDIENTE = 'Alt Placeholder'
-const altDeReserva = () => (opt('sin-alt') ? '' : (opt('alt') || ALT_PENDIENTE))
+const altDeReserva = () => (opt('sin-alt') ? '' : (opt('alt') || ALT_DE_RESERVA))
 
 let ctx, page
 try {

@@ -26,7 +26,15 @@
 // compara el ID del video, no la cadena entera, porque la misma pagina puede estar
 // guardada como `youtu.be/XXX` o como `youtube.com/watch?v=XXX` y son el mismo video.
 // Cada fila de la grilla trae su URL adentro del iframe de oembed.
+//
+// LA PORTADA ("Video thumb") va adentro de ese mismo formulario: es un campo del MEDIO
+// del video, no un medio aparte. Es opcional — sin ella el sitio muestra la de YouTube —
+// y solo se puede poner al CREAR: un medio que ya existe se reutiliza, y pisarle la
+// portada se la cambiaria a todas las paginas que lo referencian.
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { esperarAjax, esperarVisible } from './esperas.js'
+import { ALT_DE_RESERVA } from './media.js'
 
 // Sacados del HTML real del modal. Se pueden pisar desde el mapping en "mediaLibrary".
 export const MEDIA_LIBRARY = {
@@ -42,6 +50,15 @@ export const MEDIA_LIBRARY = {
   url: 'input[name="url"]',
   agregar: '.media-library-add-form-oembed-submit',
   nombre: 'input[name="media[0][fields][name][0][value]"]',
+  // La PORTADA ("Video thumb"): un archivo que se sube en el mismo formulario, no una
+  // referencia a otro medio. El `name` lleva la ruta del form anidado adentro del modal
+  // (`media[0][fields][field_media_image]` -> `media_0_fields_field_media_image_0`).
+  // El alt va por sufijo, como en el otro subidor: el `name` completo cambia con la ruta.
+  thumb: 'input[name="files[media_0_fields_field_media_image_0]"]',
+  thumbAlt: 'input[name^="media[0][fields][field_media_image]"][name$="[alt]"]',
+  // El hidden que Drupal llena cuando la subida TERMINA. Es la señal de que ya se puede
+  // buscar el alt: antes de eso el campo todavia no existe en el DOM.
+  thumbListo: 'input[name="media[0][fields][field_media_image][0][fids]"]',
   guardar: '.ui-dialog-buttonpane button.button--primary',
   // Lo que queda en el campo cuando el medio ya esta puesto.
   puesto: '.js-media-library-selection',
@@ -83,11 +100,60 @@ export function urlsDeLaFila(html) {
   return out
 }
 
+/**
+ * La PORTADA del video ("Video thumb"): un archivo que se sube en el mismo formulario del
+ * medio, entre pegar la URL y guardar — tal cual lo cuenta el playbook del CMS.
+ *
+ * Es OPCIONAL de verdad: sin portada cargada el sitio muestra la de YouTube, asi que no
+ * tener una no es un dato que falte. Y si el formulario de este sitio no trae el campo, se
+ * sigue de largo avisando en vez de frenar: el video se crea igual, que es lo que importa.
+ *
+ * El alt SI se llena cuando hay portada: en este CMS es obligatorio y, sin texto, Drupal
+ * rechaza el medio entero.
+ */
+async function subirPortada({ page, c, thumb, ref, onStep }) {
+  const ruta = resolve(thumb.archivo)
+  if (!existsSync(ruta)) {
+    throw new Error(`La portada del video de ${ref} no esta en disco (${ruta}). `
+      + 'La recorta el paso de imagenes: si ese paso no corrio o fallo, mira sus pasos.')
+  }
+
+  const file = page.locator(`${c.modal} ${c.thumb}`).first()
+  if (!(await file.count())) {
+    onStep(`     (el formulario del medio no tiene campo de portada (${c.thumb}): el video `
+      + 'se crea sin ella y el sitio va a mostrar la de YouTube)')
+    return
+  }
+
+  onStep(`     subiendo la portada del video (${thumb.archivo})`)
+  await file.setInputFiles(ruta)
+  // Drupal sube por AJAX apenas cambia el input; el `fids` es lo unico que dice que el
+  // archivo YA esta en el servidor. Escribir el alt antes es escribir sobre un campo que
+  // el AJAX va a redibujar.
+  await page.waitForFunction((s) => {
+    const el = document.querySelector(s)
+    return !!(el && el.value && el.value !== '0')
+  }, `${c.modal} ${c.thumbListo}`, { timeout: 120000 }).catch(() => {
+    throw new Error(`Drupal no termino de subir la portada del video de ${ref} `
+      + `(${c.thumbListo} sigue vacio). Puede ser el archivo (medida o peso) o el servidor.`)
+  })
+  await esperarAjax(page)
+
+  const alt = String(thumb.alt || '').trim() || ALT_DE_RESERVA
+  const campoAlt = await esperarVisible(page, `${c.modal} ${c.thumbAlt}`, 10000)
+  if (campoAlt) await campoAlt.fill(alt)
+  else onStep(`     (la portada subio pero no encontre su alt (${c.thumbAlt}); si el CMS lo `
+    + 'exige, va a quejarse al guardar)')
+}
+
 // Crea el medio pegando la URL en el formulario del modal. Drupal le pregunta a YouTube
 // por oembed y vuelve con los campos ya llenos — el nombre incluido, que es el titulo del
 // video. Ese nombre se deja como viene: es el que el editor va a reconocer en la libreria,
 // y ponerle uno nuestro solo lo haria mas dificil de encontrar.
-async function crearDesdeUrl({ page, c, url, ref }) {
+//
+// Es tambien el UNICO momento en que se puede poner la portada: despues el medio ya
+// existe y es de todas las paginas que lo referencian.
+async function crearDesdeUrl({ page, c, url, thumb, ref, onStep = () => {} }) {
   const input = await esperarVisible(page, `${c.modal} ${c.url}`, 10000)
   if (!input) {
     throw new Error(`El video ${url} no esta en la libreria y el modal de ${ref} no tiene `
@@ -112,13 +178,16 @@ async function crearDesdeUrl({ page, c, url, ref }) {
       + ' Puede ser que el proveedor no este permitido (solo YouTube y Vimeo).')
   }
 
+  // La portada va ANTES de guardar: es un campo mas de este mismo formulario.
+  if (thumb) await subirPortada({ page, c, thumb, ref, onStep })
+
   const guardar = await esperarVisible(page, `${c.modal} ${c.guardar}`, 10000)
   if (!guardar) throw new Error(`No encontre el boton de guardar del modal de ${ref} (${c.guardar})`)
   await guardar.click()
   await esperarAjax(page)
 }
 
-export async function elegirDeLaLibreria({ page, campo, url, cfg, ref, onStep = () => {} }) {
+export async function elegirDeLaLibreria({ page, campo, url, thumb, cfg, ref, onStep = () => {} }) {
   const c = { ...MEDIA_LIBRARY, ...(cfg || {}) }
 
   const abrir = await esperarVisible(page, `${campo} ${c.abrir}`, 10000)
@@ -149,8 +218,17 @@ export async function elegirDeLaLibreria({ page, campo, url, cfg, ref, onStep = 
       // No esta en la grilla: se crea pegando la URL, que es lo que haria una persona.
       // Se avisa, porque un medio nuevo es algo que queda en la libreria para siempre.
       onStep(`     el video no estaba en la libreria (${n} miradas): lo creo desde la URL`)
-      await crearDesdeUrl({ page, c, url, ref })
+      await crearDesdeUrl({ page, c, url, thumb, ref, onStep })
     } else {
+      // LA PORTADA NO SE PISA. El medio ya existe y se REUTILIZA: la portada es un campo
+      // suyo, asi que cambiarla acá la cambiaria en todas las paginas que lo referencian,
+      // y esta corrida no tiene forma de saber cuales son ni si alguien la eligio a
+      // proposito. Se avisa y se sigue: el video queda bien puesto, que es lo pedido.
+      if (thumb) {
+        onStep('     (el video ya estaba en la libreria: se reutiliza y NO se le toca la '
+          + 'portada — es un campo del medio y cambiarla afectaria a las demas paginas que '
+          + 'lo usan. Si hay que cambiarla, va a mano en el CMS, una vez.)')
+      }
       await elegida.locator(c.elegir).first().click()
     }
 
