@@ -65,6 +65,18 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
     return next
   })
 
+  // Las notas de una pagina son los OUTLIERS: todo lo que no es un espejo del sitio viejo.
+  // Son largas a proposito — es donde se busca despues por que algo quedo como quedo — pero
+  // en la lista tapan las demas paginas. Se muestran recortadas a dos lineas y se abren
+  // una por una. NO se recuerda cual estaba abierta: es una mirada al pasar, como los
+  // demas popovers transitorios.
+  const [notasAbiertas, setNotasAbiertas] = useState(() => new Set())
+  const verNotas = (id) => setNotasAbiertas((s) => {
+    const next = new Set(s)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+
   async function load() {
     setState('loading')
     const { data, error, tableMissing } = await fetchPages()
@@ -221,7 +233,16 @@ export default function PagesTracker({ onBack, onOpenBuilder }) {
                       <div className="page-main" onClick={() => onOpenBuilder?.(p)} title="Abrir el builder">
                         <div className="page-name">{p.name}</div>
                         {p.path && <div className="page-path">{p.path}</div>}
-                        {p.notes && <div className="page-notes">{p.notes}</div>}
+                        {p.notes && (
+                          // El click abre el builder en toda la fila, asi que el de las
+                          // notas se corta aca: abrir las notas no es abrir la pagina.
+                          <div className="page-notas" onClick={(e) => e.stopPropagation()}>
+                            <div className={`page-notes${notasAbiertas.has(p.id) ? '' : ' corta'}`}>{p.notes}</div>
+                            <button className="page-notes-mas" onClick={() => verNotas(p.id)}>
+                              {notasAbiertas.has(p.id) ? 'Ocultar notas' : 'Ver notas'}
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <button className="btn btn-sm page-build" onClick={() => onOpenBuilder?.(p)}><Layers size={13} /> Armar</button>
                       <select
