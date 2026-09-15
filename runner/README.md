@@ -265,18 +265,38 @@ npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin 
 
 **Una pagina armada a mano en el builder empieza en el 3.** No todas vienen del sitio
 viejo: las que se arman directo en el hub no tienen archivo de plan, asi que el recortador
-las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques:
+las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques.
+
+Y del 3 al 7 es UN comando, que corre los pasos en orden y frena en el primero que falle:
 
 ```bash
-npm run imagenes -- --hub=/conoce-purina imagenes/   # 3. recortar, leyendo del hub
-npm run manifiesto   -- /conoce-purina               # 5.
-npm run subir-medios -- imagenes/conoce-purina       # 6.
-npm run build -- manifests/conoce-purina.json        # 7.
+npm run publicar -- /conoce-purina            # ENSAYO: no guarda nada
+npm run publicar -- /conoce-purina --save     # de verdad
+npm run publicar -- /conoce-purina --desde=3  # retomar donde freno
 ```
 
-En este modo no se escribe nada en el hub: la pagina ya esta armada, y el origen de cada
-foto es lo que el builder muestra en el preview. Lo que iria a las notas del plan (una
-imagen que no alcanza la medida, una que no se pudo bajar) se imprime en pantalla.
+Los pasos siguen existiendo sueltos para cuando hay que rehacer uno solo:
+
+```bash
+npm run imagenes -- --hub=/conoce-purina imagenes/   # recortar, leyendo del hub
+npm run manifiesto   -- /conoce-purina
+npm run subir-medios -- imagenes/conoce-purina
+npm run build -- manifests/conoce-purina.json
+```
+
+Leyendo del hub no se escribe nada en la base: la pagina ya esta armada, y el origen de
+cada foto es lo que el builder muestra en el preview. Lo que iria a las notas del plan
+(una imagen que no alcanza la medida, una que no se pudo bajar) se imprime en pantalla.
+
+**El ensayo es el default, tambien aca.** Sin `--save` el ultimo paso arma la pagina en el
+formulario y la deja abierta para mirarla, sin guardar. Y el `--save` solo se lo lleva ese
+paso: los otros tres no tienen nada que guardar. Hay un test que lo comprueba, porque si
+se invierte, una corrida de prueba publica en el CMS.
+
+Que la cadena sea un comando no junta los pasos: siguen siendo cuatro procesos, en orden,
+y si uno falla los siguientes no corren. Subir va antes de armar porque el runner ELIGE
+las fotos de la libreria en vez de subirlas mientras construye; y van separados para que
+una subida a medias no deje ademas una pagina a medio armar.
 
 Los pasos 5 y 6 son el puente al CMS. El hub habla en componentes (`card_grid`, `title`)
 y el CMS en paragraphs y machine names (`ln_c_cardgrid`, `field_c_advanced_title`);
@@ -403,6 +423,8 @@ tools/medios.js        que medios tiene un bloque y como se llama cada uno: la U
 tools/paragrafos.js    la tabla componente del hub -> paragraph del CMS y sus campos
 tools/paginas.js       el slug de una pagina y la forma de un bloque, iguales en todas
 tools/subir-medios.mjs sube a la Media library las fotos ya recortadas de una pagina
+tools/publicar.mjs     la cadena entera de una pagina del hub al CMS, en un comando
+tools/publicar.js      que pasos son y en que orden (puro, se prueba sin navegador)
 tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
 tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name
 tools/manifiesto.mjs   genera manifests/<pagina>.json desde el hub
