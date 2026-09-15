@@ -103,8 +103,8 @@
             "kind": "select"
           },
           "field_c_external_video": {
-            "kind": "image",
-            "note": "Media library: el editor la elige a mano."
+            "kind": "mediaLibrary",
+            "note": "Media library widget (modal con grilla), NO inline entity form. Se elige por URL: el nombre del medio lo pone YouTube. El runner no lo crea."
           }
         }
       },

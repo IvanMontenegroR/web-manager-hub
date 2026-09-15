@@ -13,6 +13,7 @@ import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listP
 import { esperarAjax, esperarVisible } from './esperas.js'
 import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
 import { elegirMedia, leerMedia } from './mediaExistente.js'
+import { elegirDeLaLibreria, leerSeleccion } from './mediaLibrary.js'
 
 // Los que el runner todavia NO sabe tocar. `media` salio de la lista: ese si se elige.
 const IMAGE_KINDS = new Set(['image', 'file'])
@@ -281,6 +282,13 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     if (f.kind === 'media') {
       onStep(`     imagen "${key}": eligiendo "${value}" de la libreria`)
       ctx.escritos.push(await ponerMedia(ctx, f, vars, String(value), ref))
+      continue
+    }
+    // El OTRO widget de medios: el modal con grilla. Lo usa el video externo. Se elige por
+    // URL porque el nombre del medio lo pone YouTube y el hub no lo tiene.
+    if (f.kind === 'mediaLibrary') {
+      onStep(`     video "${key}": buscando ${value} en la Media library`)
+      ctx.escritos.push(await ponerDeLaLibreria(ctx, f, vars, String(value), ref))
       continue
     }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
@@ -589,6 +597,23 @@ async function ponerMedia(ctx, f, vars, nombre, ref) {
   return { selector: campo, f, ref, valor: nombre, puesto: r.texto }
 }
 
+// Elige un medio del modal con grilla (Media library). Igual que `ponerMedia`, no crea
+// nada: si el video que pide el manifiesto no esta en la libreria, frena.
+async function ponerDeLaLibreria(ctx, f, vars, url, ref) {
+  const { page, mapping } = ctx
+  const campo = resolveSelector(f.sel, vars)
+  if (!(await page.locator(campo).count())) {
+    throw new Error(`No encontre el campo de video ${ref} (${campo})`)
+  }
+  const puesto = await elegirDeLaLibreria({ page, campo, url, cfg: mapping.mediaLibrary, ref })
+  // Un modal que se cerro sin enganchar nada deja el campo igual de vacio que antes, sin
+  // decir nada: la verificacion es lo unico que lo distingue de haber funcionado.
+  if (!puesto) {
+    throw new Error(`Elegi el video ${url} en ${ref} pero el campo quedo vacio.`)
+  }
+  return { selector: campo, f, ref, valor: url, puesto }
+}
+
 // Se guarda el HTML del widget de cada campo de IMAGEN. El runner todavia no sabe
 // elegirlas, y para enseñarle hace falta ver como es ese widget en ESTE sitio: no es lo
 // mismo una Media library (un modal con buscador) que un inline entity form (un
@@ -654,6 +679,7 @@ async function loQueQuedo(page, f, selector, el) {
     // Un medio no tiene "valor": lo que hay es la fila que dibuja el inline entity form
     // con el nombre del medio adentro.
     if (f.kind === 'media') return await leerMedia(page, selector)
+    if (f.kind === 'mediaLibrary') return await leerSeleccion(page, selector)
     return await el.inputValue()
   } catch { return null }
 }
