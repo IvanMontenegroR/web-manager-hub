@@ -24,13 +24,16 @@ const PNG = Buffer.from(
 // Cada medio son DOS archivos y un INDICE que dice cuales: es lo que genera
 // tools/placeholders.mjs y lo que lee el subidor.
 const temporales = []
+// Un nombre suelto es un medio sin alt propio; `{ nombre, alt }` es uno que si lo trae.
 const carpetaCon = (...nombres) => {
   const d = mkdtempSync(join(tmpdir(), 'ph-'))
-  const indice = nombres.map((n) => {
+  const indice = nombres.map((x) => {
+    const { nombre: n, alt } = typeof x === 'string' ? { nombre: x } : x
     writeFileSync(join(d, `${n}-desktop-10x10.png`), PNG)
     writeFileSync(join(d, `${n}-mobile-5x5.png`), PNG)
     return {
       nombre: n,
+      ...(alt ? { alt } : {}),
       desktop: { archivo: `${n}-desktop-10x10.png`, w: 10, h: 10 },
       mobile: { archivo: `${n}-mobile-5x5.png`, w: 5, h: 5 },
     }
@@ -76,6 +79,29 @@ try {
   // entero y no se guardara ningun medio.
   check(Object.values(guardados).every((m) => m.altMobile === 'Placeholder de prueba'),
     `y tambien el alt de la imagen mobile (${Object.values(guardados)[0]?.altMobile || 'vacio'})`)
+
+  // EL ALT DE CADA MEDIO. El del INDICE tiene que LLEGAR: se perdia en el camino — la
+  // lista que arma el subidor no lo copiaba — y entonces TODA foto se subia con el alt de
+  // reserva. Eso viaja al sitio publico y lo lee Google y un lector de pantalla, asi que
+  // no se ve en ningun log: se ve en el sitio, meses despues.
+  //
+  // Y el de reserva lo decide quien llama: no es lo mismo material de relleno que las
+  // fotos de una pagina de verdad, donde tiene que decir que FALTA en vez de parecer
+  // cargado.
+  const conAlt = await subirPlaceholders({
+    page, mapping, onStep: () => {}, alUsar: 'FALTA EL ALT',
+    carpeta: carpetaCon({ nombre: 'medio-con-alt', alt: 'Un perro en el pasto' }, 'medio-sin-alt'),
+  })
+  check(conAlt.subidos === 2, `subio los dos (${conAlt.subidos})`)
+  const g2 = await (await fetch(`${mapping.site}/media/estado`)).json()
+  check(g2['medio-con-alt']?.alt === 'Un perro en el pasto',
+    `el medio con alt propio se lo lleva puesto (${g2['medio-con-alt']?.alt || 'vacio'})`)
+  check(g2['medio-con-alt']?.altMobile === 'Un perro en el pasto',
+    'y el mobile tambien: es el mismo medio')
+  check(g2['medio-sin-alt']?.alt === 'FALTA EL ALT',
+    `el que no trae alt usa el de reserva que paso quien llamo (${g2['medio-sin-alt']?.alt || 'vacio'})`)
+  check(conAlt.sinAlt?.join() === 'medio-sin-alt',
+    `y se avisa cual quedo con el de reserva, para completarlo (${conAlt.sinAlt?.join() || 'ninguno'})`)
 
   // Si se apretara Guardar antes de que el AJAX suba el archivo, el formulario de
   // mentira contesta con el error de campo obligatorio y esto se caeria.

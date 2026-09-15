@@ -57,8 +57,15 @@ export const MEDIA_POR_DEFECTO = {
   publicar: null,
 }
 
-export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep = () => {} }) {
-  const cfg = { ...MEDIA_POR_DEFECTO, ...(mapping.media || {}) }
+/**
+ * @param {string} [alUsar]  el alt que se pone cuando el medio no trae uno propio. Lo
+ *   decide QUIEN llama, porque no es lo mismo material de relleno que las fotos de una
+ *   pagina de verdad: el alt viaja al sitio publico, lo lee Google y un lector de
+ *   pantalla. El de los placeholders puede decir que es de prueba; el de una pagina real
+ *   tiene que decir que falta cargarlo.
+ */
+export async function subirPlaceholders({ page, mapping, carpeta, solo, alUsar, onStep = () => {} }) {
+  const cfg = { ...MEDIA_POR_DEFECTO, ...(mapping.media || {}), ...(alUsar ? { alUsar } : {}) }
   const url = (r) => new URL(r, mapping.site.replace(/\/+$/, '') + '/').href
 
   if (!existsSync(carpeta)) throw new Error(`No existe la carpeta ${carpeta}`)
@@ -71,7 +78,9 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
       + 'o tools/imagenes.mjs (las imagenes recortadas de una pagina).')
   }
   const archivos = JSON.parse(readFileSync(indice, 'utf8'))
-    .map((g) => ({ nombre: g.nombre, desktop: g.desktop.archivo, mobile: g.mobile.archivo }))
+    // El `alt` viaja: es el del medio, y si se pierde aca todas las fotos terminan con el
+    // alt de relleno. Se perdia justamente por no estar en esta lista.
+    .map((g) => ({ nombre: g.nombre, desktop: g.desktop.archivo, mobile: g.mobile.archivo, alt: g.alt }))
     .filter((g) => !solo || g.nombre.includes(solo))
   if (!archivos.length) {
     throw new Error(solo ? `Ningun placeholder contiene "${solo}"` : `No hay placeholders en ${carpeta}`)
@@ -84,6 +93,10 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
 
   let subidos = 0
   let salteados = 0
+  // Los que se subieron SIN alt propio y se llevaron el de relleno. No es motivo para
+  // frenar — el alt es obligatorio en Drupal y algo hay que poner — pero si para decirlo:
+  // ese texto va al sitio publico y no lo escribio nadie.
+  const sinAlt = []
   onStep(`${archivos.length} imagenes para subir a ${mapping.site}`)
 
   for (const archivo of archivos) {
@@ -91,9 +104,13 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, onStep =
     const r = await conReintentos(() => unaImagen({ page, cfg, url, carpeta, archivo, nombre }),
       { onStep, nombre })
     if (r === 'salteada') { salteados += 1; onStep(`  =  ${nombre} (ya estaba)`) }
-    else { subidos += 1; onStep(`  +  ${nombre}`) }
+    else {
+      subidos += 1
+      if (!String(archivo.alt || '').trim()) sinAlt.push(nombre)
+      onStep(`  +  ${nombre}`)
+    }
   }
-  return { subidos, salteados, total: archivos.length }
+  return { subidos, salteados, total: archivos.length, sinAlt, alUsado: cfg.alUsar }
 }
 
 // Treinta y seis imagenes seguidas contra un CMS remoto es un rato largo, y basta un

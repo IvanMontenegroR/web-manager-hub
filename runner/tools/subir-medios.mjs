@@ -36,6 +36,13 @@ if (!carpeta) {
 
 const mapping = loadMapping(opt('mapping') || 'mapping/purina-latam.json')
 
+// Drupal EXIGE el alt: vacio no deja guardar el medio. Y el alt de una foto de una pagina
+// real no lo escribe el mercado, lo carga SEO (por eso en la matriz de contenido es un
+// campo de la hoja CMS y no de la de Contenido). Asi que casi siempre va a faltar y algo
+// hay que poner: se pone lo que ES — que falta — en vez de un texto que parezca cargado.
+// Se puede pisar con --alt "...".
+const ALT_PENDIENTE = 'PENDIENTE - cargar alt'
+
 let ctx, page
 try {
   ;({ ctx, page } = await openBrowser({
@@ -46,10 +53,22 @@ try {
   }))
   const r = await subirPlaceholders({
     page, mapping, carpeta: resolve(carpeta), solo: opt('solo'),
+    // Estas son fotos de una pagina DE VERDAD, no material de relleno: el alt de
+    // reserva no puede decir "Placeholder de prueba", que viaja al sitio publico y
+    // parece cargado. Dice lo que es — que falta — y se puede buscar en la libreria.
+    alUsar: opt('alt') || ALT_PENDIENTE,
     onStep: (s) => process.stdout.write(s + '\n'),
   })
   process.stdout.write(`\n${r.subidos} subido/s, ${r.salteados} ya estaban, de ${r.total}.\n`)
-  process.stdout.write('Siguiente: armar la pagina con\n  npm run build -- manifests/<pagina>.json\n')
+  // El alt lo carga SEO, no el mercado, asi que casi siempre va a faltar. No frena, pero
+  // no puede pasar callado: es lo que lee Google y un lector de pantalla.
+  if (r.sinAlt?.length) {
+    process.stdout.write(`\n${r.sinAlt.length} medio/s quedaron con el alt de reserva `
+      + `("${r.alUsado}"), porque el hub no trae uno propio:\n`)
+    for (const n of r.sinAlt) process.stdout.write(`  · ${n}\n`)
+    process.stdout.write('Hay que completarlos en la Media library antes de publicar la pagina.\n')
+  }
+  process.stdout.write('\nSiguiente: armar la pagina con\n  npm run build -- manifests/<pagina>.json\n')
 } finally {
   if (ctx) await ctx.close()
 }
