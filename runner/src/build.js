@@ -299,7 +299,7 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
-    ctx.escritos.push(await fillField(page, f, vars, value, ref))
+    ctx.escritos.push(await fillField(ctx, f, vars, value, ref))
   }
 }
 
@@ -504,7 +504,51 @@ async function tildar(loc, valor) {
   await loc.setChecked(!!valor)
 }
 
-async function fillField(page, f, vars, value, ref) {
+/**
+ * EL FORMATO DE TEXTO de un campo de cuerpo. Deja elegido el PRIMERO de la lista de
+ * preferencia que este desplegable ofrezca de verdad, y devuelve cual quedo.
+ *
+ * Es una preferencia y no un valor fijo porque los campos no ofrecen los mismos formatos:
+ * uno puede tener "Purina Markdown" y otro no. Antes el mapping pedia `rich_text` a secas
+ * y, si no estaba, se quedaba callado con el que hubiera — que en este CMS arranca en
+ * "Email HTML".
+ *
+ * POR QUE MARKDOWN PRIMERO. El texto del hub viaja en notacion markdown (`**negrita**`,
+ * `[texto](link)`): eso es lo que escribe el mercado en la matriz de contenido. Con un
+ * formato HTML esos asteriscos entran LITERALES y se ven asi en el sitio. Con el formato
+ * markdown son negrita de verdad. O sea que no es una preferencia de estilo: es que el
+ * texto llegue como se escribio.
+ */
+async function elegirFormato(page, selector, cfg, ref, onStep) {
+  const preferidos = cfg?.preferidos || []
+  const sel = page.locator(selector).first()
+  if (!(await sel.count())) return null
+
+  const hay = await sel.evaluate((s) => [...s.options].map((o) => o.value)).catch(() => [])
+  const elegido = preferidos.find((p) => hay.includes(p))
+  const actual = await sel.inputValue().catch(() => null)
+
+  if (!elegido) {
+    onStep?.(`     (${ref}: el CMS no ofrece ninguno de los formatos preferidos `
+      + `(${preferidos.join(', ')}); queda "${actual}". Las que ofrece: ${hay.join(', ')})`)
+    return actual
+  }
+  // Solo se toca si hace falta: cada cambio destruye el editor y monta otro, y un
+  // remonte de gusto es una ventana mas para que algo salga mal.
+  if (actual === elegido) return elegido
+  try {
+    await sel.selectOption(elegido)
+    return elegido
+  } catch {
+    onStep?.(`     (${ref}: no pude poner el formato "${elegido}"; queda "${actual}")`)
+    return actual
+  }
+}
+
+// Recibe el `ctx` entero — y no solo la pagina — porque el formato de texto es una regla
+// del SITIO, no del campo: vive en el mapping y hay que poder leerla desde aca.
+async function fillField(ctx, f, vars, value, ref) {
+  const { page } = ctx
   const selector = resolveSelector(f.sel, vars)
   const total = await page.locator(selector).count()
   if (!total) throw new Error(`No encontre el campo ${ref} (${selector})`)
@@ -547,19 +591,15 @@ async function fillField(page, f, vars, value, ref) {
   } else if (f.kind === 'richtext') {
     // El formato de texto va PRIMERO: el CMS arranca en uno que no admite HTML, y
     // cambiarlo con contenido ya cargado dispara el aviso de Drupal de que se pierde.
-    if (f.format) {
-      const fmt = page.locator(resolveSelector(f.format.sel, vars)).first()
-      // Solo se toca si hace falta: cada cambio destruye el editor y monta otro, y un
-      // remonte de gusto es una ventana mas para que algo salga mal.
-      if (await fmt.count() && (await fmt.inputValue().catch(() => null)) !== f.format.value) {
-        try { await fmt.selectOption(f.format.value) } catch { /* ese formato no esta: se deja el que haya */ }
-      }
-    }
+    const elegido = f.format
+      ? await elegirFormato(page, resolveSelector(f.format.sel, vars), ctx.mapping.formatoTexto, ref, ctx.onStep)
+      : null
     // Cambiar el formato DESTRUYE el editor y monta otro, y eso no es una peticion de
     // Drupal: `esperarAjax` no lo ve. Escribir en el medio del cambio es escribirle al
     // editor que se esta muriendo — el texto se ve un instante y despues no esta.
-    await esperarEditor(page, el, { formato: f.format?.value })
-    const r = await escribirRich(page, el, String(value))
+    await esperarEditor(page, el, { formato: elegido })
+    const plano = !!(ctx.mapping.formatoTexto?.planos || []).includes(elegido)
+    const r = await escribirRich(page, el, String(value), { plano })
     rutaRich = r.via
     if (!r.via) {
       throw new Error(`No pude escribir ${ref}: ${r.intentos.join('; ')}. `

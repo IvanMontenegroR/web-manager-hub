@@ -343,7 +343,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Ese "vacio" NO es una celda en blanco: es la opcion que el editor tiene que dejar elegida, porque el
      formulario puede venir con otra puesta. Por eso en la hoja CMS baja en NEGRO como cualquier valor
      (`emptyIsOption`), y el gris italico queda para lo que si esta vacio (un texto sin cargar, `—`).
-     `BG_COLORS` son los 39 tokens reales y `CMS_ICONS` los ~130 iconos, los dos sacados del formulario.
+     `BG_COLORS` son los 39 tokens reales y `CMS_ICONS` los **133** iconos, los dos sacados del formulario.
+     Los iconos se DIBUJAN con el sprite real del sitio (`src/data/cmsIcons.js`, generado por
+     `scripts/iconos-del-cms.mjs` desde `/themes/custom/purina/Content/img/sprite.svg`), no con
+     equivalentes de lucide: antes la mitad del set caia a una patita o a un punto neutro y el mercado veia
+     en la matriz un icono que no es el que el sitio dibuja. Se guardan como el CONTENIDO de cada simbolo
+     y no se usa `<use href="#...">` porque html2canvas no lo resuelve y saldrian en blanco justo en el
+     Excel. Casi todos pintan con `currentColor`, asi que toman el color del bloque. La ETIQUETA es la que
+     muestra Drupal (`iconLabel`): por defecto el nombre prettificado (`add_a_photo` → "Add a photo") y
+     `CMS_ICON_LABELS` tiene las ~22 que ademas estan traducidas (`search` → "Buscar"), que son las que no
+     se pueden deducir. `CMS_ICON_OPTIONS` es la lista `{value,label}` que usan el form y el Excel: se
+     guarda el nombre de maquina, se muestra la etiqueta.
   3. **Export a Excel** (`src/lib/exportPage.js`, usa `html2canvas`): **DOS hojas espejadas**. La hoja
      **Contenido** es para el mercado (solo lo que carga: los `cms:true` no aparecen) y la hoja **CMS** es
      la guia del content editor: mismo orden que el formulario de Drupal, con las etiquetas EXACTAS
@@ -445,6 +455,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   xlsx el hipervinculo es por CELDA, no por pedazo de texto, asi que el link de verdad baja ademas a su
   propia fila. La hoja CMS no repite el formato: sus celdas son formulas a la hoja
   Contenido, y una formula devuelve texto.
+  **FORMATO DE TEXTO**: cada campo de cuerpo tiene en Drupal un desplegable "Formato de texto", y en este
+  CMS arranca en **Email HTML**. La regla del sitio vive en el mapping del runner (`formatoTexto`, una sola
+  vez y no por campo): se deja elegido el PRIMERO de `preferidos` que ese desplegable ofrezca —
+  **`purina_markdown` primero**, despues `rich_text` y `full_html`. No es una preferencia de estilo: el
+  texto del hub viaja en notacion markdown (`**negrita**`, `[texto](link)`), asi que con un formato HTML
+  esos asteriscos entran LITERALES y se ven asi en el sitio. Los formatos de `planos` toman texto tal cual,
+  y ahi el cuerpo NO se envuelve en `<p>` — en markdown esas etiquetas son basura visible. Los campos no
+  ofrecen todos los mismos formatos, por eso es una lista y no un valor fijo.
   El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
   opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es
   multivaluado) con destino, rel y ARIA label.

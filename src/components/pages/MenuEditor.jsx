@@ -3,7 +3,7 @@ import {
   ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown, Save, Database, Copy, Check,
   FileSpreadsheet, RotateCw,
 } from 'lucide-react'
-import { CMS_ICONS } from '../../data/components'
+import { CMS_ICON_OPTIONS } from '../../data/components'
 import { DEFAULT_MENU, MENU_LAYOUTS, menuIconFor } from '../../data/siteMenu'
 import { fetchSiteMenu, saveSiteMenu, SETUP_SQL } from '../../lib/menuDb'
 import { PAGE_MARKETS, PAGE_MARKET_LABEL } from '../../lib/pagesDb'
@@ -37,15 +37,21 @@ function RowTools({ i, n, on }) {
   )
 }
 
-// Select de icono del CMS, con el dibujo al lado para no elegir a ciegas.
+// Select de icono del CMS, con el dibujo al lado para no elegir a ciegas. El dibujo es el
+// del sitio, y la etiqueta la que muestra Drupal: asi se elige por lo mismo que se ve alla.
 function IconPick({ value, onChange }) {
-  const C = menuIconFor(value)
+  const ico = menuIconFor(value)
   return (
     <span className="mn-icon">
-      <span className="mn-icon-pv"><C size={16} strokeWidth={2} /></span>
+      <span className="mn-icon-pv">
+        {ico && (
+          <svg width={16} height={16} viewBox={ico.viewBox} aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: ico.inner }} />
+        )}
+      </span>
       <select className="control" value={value || ''} onChange={(e) => onChange(e.target.value)}>
         <option value="">- Sin icono -</option>
-        {CMS_ICONS.map((ic) => <option key={ic} value={ic}>{ic}</option>)}
+        {CMS_ICON_OPTIONS.map((ic) => <option key={ic.value} value={ic.value}>{ic.label}</option>)}
       </select>
     </span>
   )

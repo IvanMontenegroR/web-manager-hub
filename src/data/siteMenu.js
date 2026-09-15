@@ -16,37 +16,21 @@
 // header: dos menus pueden mostrar tarjetas distintas. Son 0, 1 o 2 — si un menu no
 // tiene ninguna, ese menu ocupa todo el ancho.
 
-import {
-  PawPrint, Bone, Cat, Dog, Newspaper, MessagesSquare, MessageCircle,
-  Store, Stethoscope, House, Users, CircleHelp, Mail, Handshake, BadgeCheck,
-  HeartHandshake, Dna, Search, Star, Heart, Phone, MapPin, ShoppingCart, Circle,
-} from 'lucide-react'
+import { CMS_ICON_SVG } from './cmsIcons'
 
 export const MENU_LAYOUTS = [
   { value: 'boxes', label: 'Cajas con título (Alimento, Marcas)' },
   { value: 'links', label: 'Lista de links con icono (Servicios, Conoce Purina)' },
 ]
 
-// Los iconos del sitio son el set del CMS (`CMS_ICONS`): lo que se GUARDA es esa clave.
-// Aca se dibujan aproximados con lucide, y solo los que sabemos a que corresponden —
-// mismo criterio que `BG_TOKENS` con los colores: los que no estan mapeados caen a un
-// generico en vez de mostrar un icono inventado.
-const ICON_BY_CMS_KEY = {
-  paw: PawPrint, 'paw-solid': PawPrint, pet_supplies: Bone, beef: Bone,
-  cat: Cat, 'cat-ai': Cat, dog: Dog, 'dog-ai': Dog,
-  newsmode: Newspaper, article: Newspaper, forum: MessagesSquare, chat: MessagesSquare,
-  groups: Users, adocao: HeartHandshake, handshake: Handshake, genetics: Dna,
-  storefront: Store, health_cross: Stethoscope, stethoscope: Stethoscope,
-  hotel: House, family_home: House, whatsapp: MessageCircle, call: Phone,
-  history: Users, help: CircleHelp, mail: Mail, verified: BadgeCheck,
-  workspace_premium: BadgeCheck, search: Search, star: Star, heart: Heart,
-  pin_drop: MapPin, my_location: MapPin, add_shopping_cart: ShoppingCart,
-}
-
-// Componente del icono para una clave del CMS. Sin mapeo, un punto neutro: se ve que
-// hay un icono ahi sin afirmar cual.
+// Los iconos del sitio son el set del CMS (`CMS_ICONS`) y lo que se GUARDA es esa clave.
+// El DIBUJO sale del sprite real del sitio (`cmsIcons.js`), asi que el mockup del header
+// muestra el icono de verdad. Antes se aproximaban con lucide y solo los que sabiamos:
+// el resto caia a un punto neutro, y en un megamenu de doce links eso era casi todo.
+//
+// Devuelve el simbolo o null; lo dibuja `SiteHeader`, que es quien sabe de que tamaño.
 export function menuIconFor(key) {
-  return ICON_BY_CMS_KEY[key] || Circle
+  return CMS_ICON_SVG[key] || null
 }
 
 const L = (label, icon) => (icon ? { label, url: '', icon } : { label, url: '' })

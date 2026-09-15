@@ -14,9 +14,18 @@ const PETCLUB = (import.meta.env.BASE_URL || '/') + 'petclub-logo.png'
 // `items` viene de `site_menu`, y cada menu trae adentro sus submenus y sus tarjetas.
 // Sin nada cargado cae al menu de referencia, asi el builder nunca se queda sin header.
 
+// El icono del CMS, dibujado con el SVG real del sitio. Sin icono cargado (o con uno que
+// el sprite no tiene) no se dibuja nada: un icono inventado confunde mas que el hueco.
 function Icon({ name, size = 17 }) {
-  const C = menuIconFor(name)
-  return <C size={size} strokeWidth={2} />
+  const ico = menuIconFor(name)
+  if (!ico) return null
+  return (
+    <svg
+      width={size} height={size} viewBox={ico.viewBox}
+      aria-hidden="true" focusable="false"
+      dangerouslySetInnerHTML={{ __html: ico.inner }}
+    />
+  )
 }
 
 // Las tarjetas son de CADA menu: se dibujan las del menu abierto, no unas del header.

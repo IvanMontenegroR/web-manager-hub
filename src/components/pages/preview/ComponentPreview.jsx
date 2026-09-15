@@ -1,10 +1,5 @@
-import {
-  ImageIcon, Dog, Cat, PawPrint, ChevronDown, Play, ArrowRight,
-  Heart, Handshake, Stethoscope, HeartPulse, ShoppingCart, Store, Users, User, UserPlus,
-  Home, Mail, Phone, MessageCircle, Search, Settings, Share2, Download, Star, BadgeCheck,
-  Check, Calendar, Clock, MapPin, Globe, HelpCircle, FileText, Percent, Beef, Apple,
-  Cookie, Zap, Dna, Facebook, Instagram, Linkedin, Youtube,
-} from 'lucide-react'
+import { ImageIcon, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
+import { CMS_ICON_SVG } from '../../../data/cmsIcons'
 import { Fragment } from 'react'
 import { parseInline, parseRich } from '../../../lib/richText'
 import {
@@ -180,31 +175,28 @@ function readableOn(bg, preferred) {
   return relLuminance(rgb) > 0.45 ? '#111114' : '#ffffff'
 }
 
-// Equivalencias entre el set de iconos del CMS (CMS_ICONS) y los de lucide que tenemos.
-// Lo que no esta mapeado cae a la patita: el nombre exacto igual viaja al Excel, que es
-// lo que el editor necesita para elegirlo en Drupal.
-const ICON_MAP = {
-  cat: Cat, 'cat-ai': Cat, dog: Dog, 'dog-ai': Dog, paw: PawPrint, 'paw-solid': PawPrint,
-  heart: Heart, handshake: Handshake, stethoscope: Stethoscope, health_cross: HeartPulse,
-  pet_supplies: ShoppingCart, add_shopping_cart: ShoppingCart, storefront: Store,
-  groups: Users, person: User, person_add: UserPlus, family_home: Home,
-  mail: Mail, call: Phone, chat: MessageCircle, chat_bubble: MessageCircle, forum: MessageCircle,
-  search: Search, 'search-ai': Search, settings: Settings, share: Share2, download: Download,
-  star: Star, 'star-1': Star, 'star-void': Star, verified: BadgeCheck, check: Check, done_all: Check,
-  calendar_month: Calendar, calendar_add_on: Calendar, history: Clock,
-  pin_drop: MapPin, my_location: MapPin, language: Globe, help: HelpCircle,
-  play_circle: Play, article: FileText, download_2: Download, percent_discount: Percent,
-  beef: Beef, apple: Apple, cookie: Cookie, bolt: Zap, genetics: Dna,
-  facebook: Facebook, instagram: Instagram, linkedin: Linkedin, youtube: Youtube,
-}
-// Icono decorativo. Acepta tanto el nombre del CMS (cat, dog, paw...) como los viejos
-// en español (pata / gato / perro), que siguen guardados en las paginas ya armadas.
-function FeatureIcon({ name, size = 26 }) {
-  const Ico = ICON_MAP[String(name || '').toLowerCase()]
-  if (Ico) return <Ico size={size} />
-  if (/gato|cat/i.test(name)) return <Cat size={size} />
-  if (/perro|dog/i.test(name)) return <Dog size={size} />
-  return <PawPrint size={size} />
+// Icono decorativo. Es el del SITIO, no uno parecido: sale del sprite real del CMS
+// (`src/data/cmsIcons.js`). Antes se mapeaba a mano contra lucide y lo no mapeado caia a
+// una patita, asi que la mitad del set se veia igual — y en la matriz de contenido el
+// mercado veia una patita donde el sitio dibuja otra cosa.
+//
+// Acepta tambien los nombres viejos en español (pata / gato / perro), que siguen
+// guardados en las paginas armadas antes de que el catalogo usara los del CMS.
+const VIEJOS = { pata: 'paw', gato: 'cat', perro: 'dog', corazon: 'heart', estrella: 'star' }
+
+export function FeatureIcon({ name, size = 26 }) {
+  const key = String(name || '').toLowerCase()
+  const ico = CMS_ICON_SVG[key] || CMS_ICON_SVG[VIEJOS[key]]
+  // Sin icono cargado (o con uno que el sprite no tiene) va la patita, que es lo que ya
+  // hacia: un hueco no dice nada y el nombre igual viaja al Excel.
+  if (!ico) return <PawPrint size={size} />
+  return (
+    <svg
+      width={size} height={size} viewBox={ico.viewBox}
+      aria-hidden="true" focusable="false"
+      dangerouslySetInnerHTML={{ __html: ico.inner }}
+    />
+  )
 }
 
 // "Banner Align Content" (opcion del CMS) -> posicion horizontal + vertical.
@@ -552,8 +544,8 @@ const RENDERERS = {
                   <Img src={card.image} aspect="4/3" dim="822×616px" className="cp-brandc-img" />
                   {!noIcons && (
                     <div className="cp-brandc-pets">
-                      {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><Dog size={15} /></span>}
-                      {/gato/i.test(pets) && <span className="cp-brandc-pet"><Cat size={15} /></span>}
+                      {/perro|perro \+ gato/i.test(pets) && <span className="cp-brandc-pet"><FeatureIcon name="dog" size={15} /></span>}
+                      {/gato/i.test(pets) && <span className="cp-brandc-pet"><FeatureIcon name="cat" size={15} /></span>}
                     </div>
                   )}
                 </div>
@@ -656,8 +648,8 @@ const RENDERERS = {
   // Selector de especie "Quién manda en tu casa": titulo + subtitulo y pastillas
   // (avatar circular + label) para elegir Gato / Perro.
   species_selector: (c) => {
-    // Estatico: Gato / Perro con los iconos de gato y perro (reusa Cat / Dog).
-    const opts = [{ label: 'Gato', Icon: Cat }, { label: 'Perro', Icon: Dog }]
+    // Estatico: Gato / Perro, con los iconos que el propio CMS trae para eso.
+    const opts = [{ label: 'Gato', icon: 'cat' }, { label: 'Perro', icon: 'dog' }]
     return (
       <div className="cp-species">
         <div className="cp-species-title">{T(c.title, 'Quién manda en tu casa')}</div>
@@ -665,7 +657,7 @@ const RENDERERS = {
         <div className="cp-species-opts">
           {opts.map((o) => (
             <div key={o.label} className="cp-species-opt">
-              <span className="cp-species-av"><o.Icon size={26} /></span>
+              <span className="cp-species-av"><FeatureIcon name={o.icon} size={26} /></span>
               <span className="cp-species-label">{o.label}</span>
             </div>
           ))}

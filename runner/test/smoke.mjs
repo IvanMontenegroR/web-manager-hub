@@ -48,6 +48,13 @@ const mapping = (site) => ({
   pathauto: 'input[name="path[0][pathauto]"]',
   path: 'input[name="path[0][alias]"]',
   save: 'input[name="op"][value="Guardar"]:visible',
+  // La regla del sitio: se usa el PRIMERO que el desplegable ofrezca. El formulario de
+  // mentira ofrece solo Email HTML y Rich text, asi que aca se prueba la CAIDA; que el
+  // markdown gane cuando esta se prueba aparte, con ?markdown=1.
+  formatoTexto: {
+    preferidos: ['purina_markdown', 'rich_text'],
+    planos: ['purina_markdown'],
+  },
   paragraphs: {
     dsel: 'edit-field-components-{delta}',
     base: 'field_components[{delta}][subform]',
@@ -67,7 +74,7 @@ const mapping = (site) => ({
         fields: {
           field_c_text: {
             sel: 'textarea[name="{base}[field_c_text][0][value]"]', kind: 'richtext',
-            format: { sel: 'select[name="{base}[field_c_text][0][format]"]', value: 'rich_text' },
+            format: { sel: 'select[name="{base}[field_c_text][0][format]"]' },
           },
           field_c_advanced_title: { sel: 'input[name="{base}[field_c_advanced_title][0][value]"]' },
           'field_c_advanced_title.html_tag': { sel: 'select[name="{base}[field_c_advanced_title][0][html_tag]"]', kind: 'select' },
@@ -185,7 +192,10 @@ try {
   check(dom.oops === 0, `espero el AJAX del desplegable antes de agregar (${dom.oops} "Oops")`)
   check(pasos.some((p) => /Reintento/.test(p)),
     'reintento el alta que el servidor corto con 504, en vez de frenar la corrida')
-  check(dom.formato === 'rich_text', `cambio el formato de texto (${dom.formato})`)
+  // Este formulario NO ofrece Purina Markdown, asi que cae al siguiente de la lista. Lo
+  // que importa es que no se quede en "Email HTML", que es con el que arranca.
+  check(dom.formato === 'rich_text',
+    `sin Purina Markdown en el desplegable, cae al siguiente preferido (${dom.formato})`)
   check(dom.texto === 'Cuerpo del bloque de texto.', 'rich text en el editable de CKEditor')
   check(dom.tituloTexto === '¿Que considerar antes de adoptar?', 'titulo adentro de Optional fields')
   check(dom.tag === 'h2', 'select por valor de maquina (h2)')
@@ -331,6 +341,26 @@ try {
   } catch (e) { cambiado = e.message }
   check(/1\. c_text\.field_c_advanced_title decia .* y ahora dice "otra cosa"/.test(cambiado),
     `y tambien si quedo con otro valor, no solo si quedo vacio (${cambiado.slice(0, 120)})`)
+
+  // CUANDO EL CMS SI OFRECE PURINA MARKDOWN, gana. Es la regla de la casa, y no es una
+  // preferencia de estilo: el texto del hub viaja en notacion markdown (`**negrita**`),
+  // asi que con un formato HTML esos asteriscos entran literales y se ven en el sitio.
+  // Y por lo mismo el cuerpo va CRUDO: envolverlo en <p> seria basura visible.
+  {
+    const mMd = mapping(site)
+    mMd.nodeAdd = '/node/add/page?markdown=1'
+    await buildPage({ page, mapping: mMd, save: false, onStep: () => {}, esperaSubform: 4000,
+      manifest: validateManifest({ manifest: 1, page: { title: 'x' },
+        blocks: [{ type: 'c_text', fields: { field_c_text: 'Con **negrita** adentro.' } }] }) })
+    const md = await page.evaluate((B) => ({
+      formato: document.querySelector(`select[name="${B}[0][subform][field_c_text][0][format]"]`)?.value,
+      cuerpo: document.querySelector('.ck-editor__editable')?.innerHTML ?? '',
+    }), 'field_components')
+    check(md.formato === 'purina_markdown',
+      `con Purina Markdown en el desplegable, lo elige (${md.formato})`)
+    check(!/<p>/i.test(md.cuerpo) && /\*\*negrita\*\*/.test(md.cuerpo),
+      `y el cuerpo va CRUDO, sin envolverlo en <p> (${md.cuerpo.slice(0, 60)})`)
+  }
 
   // Una ranura con tope (la pestaña) no acepta un segundo componente.
   let tope = false

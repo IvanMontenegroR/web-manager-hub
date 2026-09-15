@@ -50,8 +50,9 @@ export const BG_TOKENS = {
 
 // Set de iconos del CMS, tal cual el select de Drupal. El VALOR es lo que identifica
 // al icono, asi que es lo que se guarda y lo que baja al Excel: el editor elige ese
-// mismo nombre en el formulario. En el mockup se dibuja el equivalente que tengamos
-// (ver FeatureIcon en ComponentPreview) y el resto cae a un icono generico.
+// mismo nombre en el formulario. El DIBUJO sale del sprite real del sitio
+// (`src/data/cmsIcons.js`, generado con `scripts/iconos-del-cms.mjs`), asi que el mockup
+// muestra el icono de verdad y no uno parecido.
 export const CMS_ICONS = [
   'action_key', 'add_2', 'add_a_photo', 'add_comment', 'add_link', 'add_location_alt',
   'add_photo_alternate', 'add_shopping_cart', 'adocao', 'ai', 'apple', 'arming_countdown',
@@ -77,6 +78,37 @@ export const CMS_ICONS = [
   'verified', 'video_camera_back_add', 'visibility_off', 'whatsapp', 'workspace_premium',
   'x', 'youtube',
 ]
+
+// La ETIQUETA que el editor ve en el desplegable de Drupal. Por defecto es el nombre
+// prettificado (`add_a_photo` -> "Add a photo"), que es lo que hace Drupal solo; aca van
+// SOLO las que ademas estan traducidas, que son las que no se pueden deducir. Salieron
+// del desplegable real.
+//
+// Importa porque es como el editor las busca: si la matriz de contenido dice "search" y
+// el CMS dice "Buscar", hay que traducir de la cabeza en el unico momento en que no
+// conviene.
+const CMS_ICON_LABELS = {
+  add_link: 'Añadir enlace', article: 'Artículo', aspect_ratio: 'Relación de aspecto',
+  attachment: 'Adjunto', browse: 'Explorar', close: 'Cerrar', delete: 'Eliminar',
+  download: 'Descargar', female: 'Femenino', filter: 'Filtro', forum: 'Foro',
+  groups: 'Grupos', help: 'Ayuda', history: 'Historial', language: 'Idioma',
+  logout: 'Cerrar sesión', mail: 'Correo', male: 'Masculino', search: 'Buscar',
+  settings: 'Configuración', share: 'Compartir', star: 'Estrella',
+}
+
+// `add_a_photo` -> "Add a photo". Los guiones se respetan (`arrow-down` -> "Arrow-down"),
+// que es lo que hace Drupal.
+const prettyIcon = (n) => {
+  const s = String(n).replaceAll('_', ' ')
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+export const iconLabel = (n) => CMS_ICON_LABELS[n] || prettyIcon(n)
+
+// Las opciones del desplegable: se GUARDA el nombre de maquina y se muestra/exporta la
+// etiqueta, igual que cualquier otro select del CMS. Asi la matriz de contenido dice
+// "Buscar" — que es lo que el editor va a leer en Drupal — y no `search`.
+export const CMS_ICON_OPTIONS = CMS_ICONS.map((value) => ({ value, label: iconLabel(value) }))
 
 // ---- Content: Card Grid --------------------------------------------------------
 // UN solo paragraph del CMS (`ln_c_cardgrid`) del que salen todas estas variantes: el
@@ -273,7 +305,7 @@ const EMPTY_LABELS = new Map([
   [BANNER_ALIGNS, TOKEN_DEFAULT], [IMAGE_POSITIONS, TOKEN_DEFAULT], [IMAGE_STYLES, TOKEN_DEFAULT],
   [HTML_TAGS, '- Ninguno -'], [LINK_TARGETS, '- Ninguno -'],
   [TITLE_SIZES, '- Ninguno -'], [SUBTITLE_SIZES, '- Ninguno -'],
-  [CMS_ICONS, '- Select an icon -'],
+  [CMS_ICON_OPTIONS, '- Select an icon -'],
   [PET_VISIBILITY, 'Vista genérica (todas)'],
 ])
 export function emptyLabelFor(field) {
@@ -901,7 +933,7 @@ export const COMPONENTS = [
         // defecto es h3 y no "- Ninguno -": es lo que hay que poner en el CMS salvo que
         // se elija otra cosa a proposito.
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
-        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICONS, hideTypes: CARD_GRID_IMAGE_MODES },
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS, hideTypes: CARD_GRID_IMAGE_MODES },
         // Solo las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX): las
         // verticales son altas y el texto tiene lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',

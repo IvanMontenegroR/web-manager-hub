@@ -81,11 +81,16 @@ export async function esperarEditor(page, ta, opciones = {}) {
 // prueba la siguiente en vez de dar el campo por escrito: un cuerpo vacio no se nota
 // hasta que alguien abre la pagina en el sitio.
 // Devuelve { via, intentos } — `via` null significa que ninguna funciono.
-export async function escribirRich(page, ta, valor) {
+//
+// `plano` = el formato de texto toma TEXTO TAL CUAL (los markdown del CMS). Ahi el cuerpo
+// no se envuelve en `<p>`: en un campo markdown esas etiquetas son basura VISIBLE, no
+// formato. Las otras rutas ya escriben crudo, asi que esto solo cambia la del editor.
+export async function escribirRich(page, ta, valor, opciones = {}) {
+  const { plano = false } = opciones
   const intentos = []
   for (const via of RUTAS) {
     if (via === 'editor-tarde') await esperarEditor(page, ta, { ms: 8000 })
-    const pudo = await porRuta(page, ta, String(valor), via === 'editor-tarde' ? 'editor' : via)
+    const pudo = await porRuta(page, ta, String(valor), via === 'editor-tarde' ? 'editor' : via, plano)
     if (!pudo) { intentos.push(`${via}: no disponible`); continue }
     const leido = await leerRich(page, ta)
     if (leido) return { via, intentos }
@@ -94,7 +99,7 @@ export async function escribirRich(page, ta, valor) {
   return { via: null, intentos }
 }
 
-async function porRuta(page, ta, valor, via) {
+async function porRuta(page, ta, valor, via, plano = false) {
   if (via === 'editor') {
     return ta.evaluate((el, h) => {
       const ed = window.__runnerCk(el)
@@ -106,7 +111,7 @@ async function porRuta(page, ta, valor, via) {
         if (typeof ed.updateSourceElement === 'function') ed.updateSourceElement()
         return true
       } catch { return false }
-    }, aHtml(valor)).catch(() => false)
+    }, plano ? valor : aHtml(valor)).catch(() => false)
   }
 
   if (via === 'tecleado') {

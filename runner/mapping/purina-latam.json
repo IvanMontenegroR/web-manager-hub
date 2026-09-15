@@ -20,6 +20,11 @@
     "nombre": "input[name=\"name[0][value]\"]",
     "guardar": "input[name=\"op\"][value=\"Guardar\"]"
   },
+  "formatoTexto": {
+    "_": "El FORMATO de los campos de cuerpo, para todo el sitio: se deja elegido el primero de `preferidos` que ese desplegable ofrezca. Purina Markdown va primero porque el texto del hub viaja en notacion markdown (**negrita**, [texto](link)) — con un formato HTML esos asteriscos entran literales y se ven asi en el sitio. `planos` son los formatos que toman TEXTO tal cual: ahi el cuerpo NO se envuelve en <p>, que en markdown seria basura visible. Los valores de maquina salen del HTML real del desplegable: Email HTML, Full Html, Purina Forum Markdown, Purina Markdown, Rich text.",
+    "preferidos": ["purina_markdown", "rich_text", "full_html"],
+    "planos": ["purina_markdown", "purina_forum_markdown"]
+  },
   "mediaExistente": {
     "_": "Como se ELIGE un medio ya subido. Sacado del HTML real: el campo de imagen es un inline entity form con dos botones, y el runner usa SOLO el de \"existente\" — crear medios no es cosa suya. Los selectores van por sufijo del data-drupal-selector y acotados al fieldset del campo, porque el name completo del boton lleva adentro toda la ruta del paragraph (ief-field_ln_n_components-1-subform-...) y armarla a mano es pedir que se rompa.",
     "abrir": "[data-drupal-selector$=\"-actions-ief-add-existing\"]",
@@ -161,8 +166,7 @@
             "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
             }
           },
           "advanced.enable_visibility_control": {
@@ -278,8 +282,7 @@
             "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
             }
           },
           "advanced.enable_visibility_control": {
@@ -349,8 +352,7 @@
             "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
             }
           },
           "field_c_advanced_title": {
@@ -747,8 +749,7 @@
             "sel": "textarea[name=\"{base}[field_html][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_html][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_html][0][format]\"]"
             }
           },
           "field_c_link.uri": {
@@ -830,8 +831,7 @@
             "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
             }
           },
           "field_show_ia_icon": {
@@ -918,8 +918,7 @@
             "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
             "kind": "richtext",
             "format": {
-              "sel": "select[name=\"{base}[field_c_text][0][format]\"]",
-              "value": "rich_text"
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
             }
           },
           "advanced.enable_visibility_control": {

@@ -523,7 +523,16 @@ export function startFakeDrupal() {
       return res.end(JSON.stringify(Object.fromEntries(medios)))
     }
     if (url === '/user') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Ivan</h1>') }
-    if (url === '/node/add/page' || url.startsWith('/node/add/page')) { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(FORM) }
+    if (url === '/node/add/page' || url.startsWith('/node/add/page')) {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      // Con ?markdown=1 el desplegable de formato ofrece ADEMAS "Purina Markdown". Es el
+      // caso del CMS real: no todos los campos lo ofrecen, y cuando esta hay que usarlo.
+      return res.end(q.has('markdown')
+        ? FORM.replaceAll('<option value="rich_text">Rich text</option>',
+          '<option value="rich_text">Rich text</option>'
+          + '<option value="purina_markdown">Purina Markdown</option>')
+        : FORM)
+    }
     if (url === '/node/123') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end('<h1>Guardado</h1>') }
     if (url === '/boom') { res.writeHead(504); return res.end('gateway timeout') }
     res.writeHead(404); res.end('no')
