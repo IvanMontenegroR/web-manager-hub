@@ -133,7 +133,7 @@ export default function SiteHeader({ items, forceOpen = null }) {
         <div className="cp-header-actions">
           <span className="cp-header-search"><Search size={18} strokeWidth={2.5} /></span>
           <span className="cp-header-petclub">
-            Participa de{' '}
+            Únete a{' '}
             {petErr
               ? <b>Pet&nbsp;Club</b>
               : <img className="cp-header-petclub-img" src={PETCLUB} alt="Pet Club" onError={() => setPetErr(true)} />}

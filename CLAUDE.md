@@ -530,9 +530,18 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   columnas, por FILAS: el 1 y el 2 son la primera fila) — y sus propias **tarjetas** (`promos`,
   0/1/2; sin ninguna el menu ocupa todo el ancho). Las tarjetas son de CADA menu, no del header:
   la columna `promos` de la tabla es legado y ya no se escribe, pero `withPromos` la baja a cada
-  item al leer, asi una fila sin migrar sigue funcionando. Los iconos son claves de `CMS_ICONS`;
-  el mockup las dibuja aproximadas con lucide mapeando SOLO las que sabemos (`menuIconFor`), igual
-  que `BG_TOKENS` con los colores. El export va en su PROPIO Excel (`src/lib/exportMenu.js`): el
+  item al leer, asi una fila sin migrar sigue funcionando. Los iconos son claves de `CMS_ICONS` y el
+  mockup los dibuja con el SVG real del sitio (`menuIconFor` devuelve el simbolo de `cmsIcons.js`, o
+  null si esa clave no esta: se deja el hueco en vez de inventar uno).
+  `DEFAULT_MENU` ES el menu real de **Mexico**, el que completo el mercado en la matriz, y ademas es
+  con lo que se siembra un mercado nuevo (los cinco menus principales son los mismos en todos).
+  `sql/2026_menu_mx.sql` lo carga en la base y se GENERA desde ese mismo `DEFAULT_MENU`, asi lo que
+  queda en `site_menu` y lo que dibuja el mockup no se pueden separar. Detalles que son decisiones y
+  no descuidos: **Alimento** lleva TRES cajas (la etapa de vida va partida por especie, porque perros
+  y gatos tienen etapas distintas) y por eso va SIN tarjetas — con tres cajas mas dos tarjetas el
+  megamenu queda apretado; **Conoce Purina®** tampoco lleva tarjetas; "Yo Reciclo" queda SIN icono
+  porque en el set del CMS no hay ninguno de reciclaje; y todas las URLs van vacias porque la matriz
+  vino sin ellas. El export va en su PROPIO Excel (`src/lib/exportMenu.js`): el
   menu es uno por mercado, metido en la matriz de cada pagina el mismo bloque se repetiria en
   todos los archivos. Lleva el indice de menus principales y una seccion por cada uno con sus
   submenus y sus tarjetas, y **al lado de cada seccion la imagen de ese megamenu abierto**: se

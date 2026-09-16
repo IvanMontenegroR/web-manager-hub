@@ -40,55 +40,84 @@ const L = (label, icon) => (icon ? { label, url: '', icon } : { label, url: '' }
 // OJO: en el sitio real la primera dice "Tittle banner" con doble T y su bajada es
 // texto de relleno ("Elementum lectus purus..."). Se siembra tal cual: el mockup muestra
 // lo que hay, no lo que deberia decir.
-export const DEFAULT_PROMOS = [
-  { title: 'Tittle banner', text: 'Elementum lectus purus at suspendisse habitasse adouoa kolaq.', image: '', url: '' },
-  { title: 'Newsletter Purina®', text: 'Suscríbete para recibir el mejor contenido para ti y para tu mascota.', image: '', url: '' },
-]
+// Las tarjetas de la derecha. NO son del header: son de CADA menu, y hay menus que no
+// llevan ninguna. Cuando un menu no tiene, ocupa todo el ancho.
+//
+// Dos se repiten en varios menus con la MISMA bajada, asi que se declaran una vez. Se
+// clonan al usarlas (`P`): si los menus compartieran la referencia, editar las de Marcas
+// cambiaria las de Servicios, que es justo lo que este modelo evita.
+const EXPERTO = (bajada) => ({
+  title: 'Pregunta a un experto', text: bajada, image: '', url: '',
+})
+const CLUB = () => ({
+  title: 'Consejos para cuidar a tu mascota',
+  text: 'Únete a Club Purina® y recibe recomendaciones, novedades y contenido personalizado.',
+  image: '', url: '',
+})
+const P = (...tarjetas) => tarjetas.map((x) => ({ ...x }))
 
-// `promos` va DENTRO de cada menu. Se clona con `map` y no se comparte la referencia:
-// si los cinco apuntaran al mismo array, editar las tarjetas de Alimento cambiaria las
-// de Marcas, que es justo lo que este modelo evita.
-const P = () => DEFAULT_PROMOS.map((x) => ({ ...x }))
-
+// EL MENU REAL DE MEXICO, tal cual la matriz que completo el mercado. Es ademas con lo
+// que se siembra un mercado nuevo: se copia y se edita, que es mas rapido que empezar de
+// cero — los cinco menus principales son los mismos en todos los mercados.
+//
+// Las URLs van VACIAS a proposito: la matriz vino sin ellas. El menu no funciona hasta
+// que se carguen, y un destino inventado es peor que uno vacio.
 export const DEFAULT_MENU = [
   {
     label: 'Alimento',
     layout: 'boxes',
-    search: { label: 'Buscar alimento', placeholder: 'Escribe tus dudas aquí...' },
+    search: {
+      label: 'Encuentra su alimento ideal',
+      placeholder: 'Cuéntanos qué necesita tu mascota…',
+    },
+    // TRES cajas: la etapa de vida va partida POR ESPECIE (perros y gatos tienen etapas
+    // distintas — cachorro/gatito). Por eso este menu NO lleva tarjetas: con tres cajas
+    // mas las dos tarjetas, el megamenu queda apretado.
     groups: [
-      { title: 'Etapa de vida', icon: 'paw', links: [L('Cachorros'), L('Gatitos'), L('Adultos'), L('Senior')] },
-      { title: 'Tipo de alimento', icon: 'pet_supplies', links: [L('Seco'), L('Húmedo'), L('Snacks'), L('Suplementos')] },
+      { title: 'Perros', icon: 'dog', links: [L('Cachorro'), L('Adulto'), L('Senior')] },
+      { title: 'Gatos', icon: 'cat', links: [L('Gatito'), L('Adulto'), L('Senior')] },
+      { title: 'Tipo de alimento', icon: 'pet_supplies', links: [
+        L('Alimento Seco'), L('Alimento Húmedo'), L('Premios y Snacks'), L('Suplementos'),
+      ] },
     ],
-    more: { label: 'Conocer productos', url: '' },
-    promos: P(),
+    more: { label: 'Ver productos', url: '' },
+    promos: [],
   },
   {
     label: 'Marcas',
     layout: 'boxes',
     groups: [
-      { title: 'Gatos', icon: 'cat', links: [L('Pro Plan®'), L('Felix®'), L('Cat Chow®'), L('Fancy Feast®')] },
-      { title: 'Perros', icon: 'dog', links: [L('Pro Plan®'), L('Dog Chow®'), L('Beneful®'), L('Purina One®')] },
+      { title: 'Para Gatos', icon: 'cat', links: [
+        L('Pro Plan®'), L('Felix®'), L('Cat Chow®'), L('Fancy Feast®'),
+      ] },
+      { title: 'Para Perros', icon: 'dog', links: [
+        L('Pro Plan®'), L('Dog Chow®'), L('Beneful®'), L('Purina One®'),
+      ] },
     ],
     more: { label: 'Ver todas', url: '' },
-    promos: P(),
+    promos: P(EXPERTO('Recibe asesoría personalizada y encuentra el alimento adecuado para tu mascota.'), CLUB()),
   },
   {
     label: 'Red Purina®',
     layout: 'links',
     links: [L('Lo más leído', 'newsmode'), L('Comunidad Purina®', 'forum')],
-    promos: P(),
+    promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
   {
     label: 'Servicios',
     layout: 'links',
     // El orden es el de LECTURA (por filas): el sitio los pone en dos columnas, asi que
     // 1 y 2 son la primera fila, 3 y 4 la segunda, etc.
+    //
+    // "Yo Reciclo" va SIN icono: en el set del CMS no hay ninguno de reciclaje, y poner
+    // uno parecido seria elegir mal por el mercado. Cuando exista, se carga.
     links: [
-      L('Yo adopto', 'adocao'), L('Vetline', 'health_cross'),
-      L('Breeders', 'genetics'), L('Hospedaje', 'hotel'),
-      L('Tiendas', 'storefront'), L('WhatsApp', 'whatsapp'),
+      L('Adopta una mascota', 'adocao'), L('Contacta a un experto', 'chat'),
+      L('Conoce nuestro programa de Breeders', 'genetics'),
+      L('Encuentra dónde dejar a tu mascota', 'hotel'),
+      L('Tiendas', 'storefront'), L('Yo Reciclo'),
     ],
-    promos: P(),
+    promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
   {
     label: 'Conoce Purina®',
@@ -99,6 +128,7 @@ export const DEFAULT_MENU = [
       L('Profesionales', 'stethoscope'), L('Contacto', 'mail'),
       L('Club Purina®', 'workspace_premium'),
     ],
-    promos: P(),
+    // Sin tarjetas: la matriz dice "Sin tarjeta" en las dos.
+    promos: [],
   },
 ]
