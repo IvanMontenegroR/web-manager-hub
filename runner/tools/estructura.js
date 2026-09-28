@@ -25,6 +25,14 @@
 
 export const ESTRUCTURA = function () {
   const lim = (s, n) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n || 600)
+  // El texto de un nodo SIN lo que hay en <style>/<script> adentro: los carruseles del sitio
+  // viejo meten su CSS inline dentro del slide y textContent lo devolvia como si fuera copy.
+  const txt = (el) => {
+    if (!el) return ''
+    const c = el.cloneNode(true)
+    c.querySelectorAll('style, script, noscript').forEach((x) => x.remove())
+    return c.textContent || ''
+  }
   const clase = (el) => (el && typeof el.className === 'string' ? el.className : '')
 
   // Toda direccion de imagen sale ABSOLUTA. En el HTML son relativas ("/card-1.png") y
@@ -60,6 +68,55 @@ export const ESTRUCTURA = function () {
     return { src: abs(i.getAttribute('src')), alt: i.getAttribute('alt') || '',
              w: i.naturalWidth || 0, h: i.naturalHeight || 0 }
   }
+  // El cuerpo con su FORMATO, en la notacion que usa el hub (src/lib/richText.js):
+  // **negrita**, _cursiva_, [texto](link), "- " / "1. " para listas, linea en blanco entre
+  // parrafos. Con solo textContent se perdian las negritas, los links y las listas.
+  const md = (root) => {
+    const inl = (n) => {
+      if (n.nodeType === 3) return n.textContent.replace(/\s+/g, ' ')
+      if (n.nodeType !== 1) return ''
+      const t = n.tagName
+      if (t === 'STYLE' || t === 'SCRIPT') return ''
+      if (t === 'BR') return '\n'
+      const dentro = [...n.childNodes].map(inl).join('')
+      const limpio = dentro.trim()
+      if (!limpio) return dentro
+      // El espacio que habia adentro de la marca se devuelve AFUERA: "<b>suave </b>hecha"
+      // tiene que quedar "**suave** hecha", no "**suave**hecha".
+      const a0 = /^\s*/.exec(dentro)[0] ? ' ' : '', a1 = /\s*$/.exec(dentro)[0] ? ' ' : ''
+      if (t === 'STRONG' || t === 'B') return `${a0}**${limpio}**${a1}`
+      if (t === 'EM' || t === 'I') return `${a0}_${limpio}_${a1}`
+      if (t === 'A') {
+        const h = n.getAttribute('href') || ''
+        return h && !/^(#|javascript:)/.test(h) ? `${a0}[${limpio}](${abs(h)})${a1}` : dentro
+      }
+      return dentro
+    }
+    const partes = []
+    const bloque = (n) => {
+      for (const ch of n.childNodes) {
+        if (ch.nodeType === 3) { if (ch.textContent.trim()) partes.push(ch.textContent.trim()); continue }
+        if (ch.nodeType !== 1) continue
+        const t = ch.tagName
+        if (t === 'STYLE' || t === 'SCRIPT') continue
+        if (t === 'UL' || t === 'OL') {
+          const items = [...ch.children].filter((li) => li.tagName === 'LI')
+            .map((li, i) => (t === 'OL' ? `${i + 1}. ` : '- ') + inl(li).replace(/\s+/g, ' ').trim())
+          if (items.length) partes.push(items.join('\n'))
+          continue
+        }
+        if (/^(P|H[1-6]|BLOCKQUOTE)$/.test(t) || (t === 'DIV' && !ch.querySelector('p,ul,ol,div'))) {
+          const l = inl(ch).replace(/[ \t]+/g, ' ').replace(/ ?\n ?/g, '\n').trim()
+          if (l) partes.push(l)
+          continue
+        }
+        bloque(ch)
+      }
+    }
+    bloque(root)
+    return partes.join('\n\n').replace(/ {2,}/g, ' ').trim().slice(0, 6000)
+  }
+  const esBoton = (a) => a && a.tagName === 'A' && /\b(button-nestle-[\w-]+|btn)\b/.test(clase(a))
   const cta1 = (el) => {
     const a = el.querySelector('a.button-nestle-positive, a.btn, .card-body--buttons a')
     return a ? { texto: lim(a.textContent, 80), href: a.getAttribute('href') || '' } : null
@@ -98,11 +155,17 @@ export const ESTRUCTURA = function () {
       if (tag === 'STYLE' || tag === 'SCRIPT' || tag === 'NOSCRIPT') continue
 
       // --- BANNER (imagen de fondo + texto encima)
-      if (el.classList.contains('banner') && el.querySelector('h1,h2')) {
+      // Tambien los que NO traen titulo: son banners con el texto QUEMADO en la imagen
+      // (la foto dice "Alimento y Nutricion 0-6 meses"). Antes se exigia un h1/h2 y esos
+      // banners se perdian enteros, justo el primer bloque de la pagina.
+      if (el.classList.contains('banner') && (el.querySelector('h1,h2') || fondoDe(el))) {
         const f = fondoDe(el)
         const b = { tipo: 'banner',
                     titulo: lim(el.querySelector('h1,h2')?.textContent, 200),
                     texto: [...el.querySelectorAll('p')].map((p) => lim(p.textContent, 500)).filter(Boolean) }
+        if (!b.titulo && !b.texto.length) b.texto_en_imagen = true
+        const bots = [...el.querySelectorAll('a')].filter(esBoton)
+        if (bots.length) b.botones = bots.map((a) => ({ texto: lim(a.textContent, 80), href: abs(a.getAttribute('href') || '') }))
         if (f) b.fondo = f
         const st = estilo(el); if (st?.texto) b.color_texto = st.texto
         bloques.push(b); visto.add(el); continue
@@ -146,7 +209,7 @@ export const ESTRUCTURA = function () {
       if (/\bslick-slider\b/.test(c)) {
         const slides = [...el.querySelectorAll('.slick-slide')]
           .filter((s) => !/\bslick-cloned\b/.test(clase(s)))
-          .map((s) => (s.querySelector('.card') ? card(s.querySelector('.card')) : { texto: lim(s.textContent, 400) }))
+          .map((s) => (s.querySelector('.card') ? card(s.querySelector('.card')) : { texto: lim(txt(s), 400) }))
         const porFila = /items-(\d+)/.exec(c)
         bloques.push({ tipo: 'carrusel', porFila: porFila ? Number(porFila[1]) : null, slides })
         visto.add(el); continue
@@ -175,9 +238,18 @@ export const ESTRUCTURA = function () {
       // --- TEXTO con formato (wysiwyg): trae sus colores
       if (/\bwysiwyg\b/.test(c)) {
         const b = { tipo: 'texto', html: (el.innerHTML || '').replace(/\s+/g, ' ').trim().slice(0, 3000),
-                    plano: lim(el.textContent, 1200) }
+                    plano: lim(txt(el), 1200), md: md(el) }
+        const bots = [...el.querySelectorAll('a')].filter(esBoton)
+        if (bots.length) b.botones = bots.map((a) => ({ texto: lim(a.textContent, 80), href: abs(a.getAttribute('href') || '') }))
         const st = estilo(el); if (st) b.estilo = st
         if (b.plano) bloques.push(b)
+        visto.add(el); continue
+      }
+
+      // --- BOTON suelto (fuera de una card o un texto): "JUGAR AHORA", "Volver al home".
+      // Antes se perdian todos; son CTAs de verdad y en el CMS van como Link de un bloque.
+      if (esBoton(el) && !el.closest('.card')) {
+        bloques.push({ tipo: 'boton', texto: lim(el.textContent, 80), href: abs(el.getAttribute('href') || '') })
         visto.add(el); continue
       }
 
