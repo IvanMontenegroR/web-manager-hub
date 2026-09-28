@@ -37,7 +37,7 @@ const BRAND_THEMES = {
 
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
-export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Purina']
 
 // ===== Categorias =====
 // El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es
