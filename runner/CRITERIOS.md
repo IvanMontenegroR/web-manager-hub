@@ -60,6 +60,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **No queda ninguna banda vacia.** Si al sacar el texto de una imagen queda un espacio que en el
   sitio viejo era para ese texto, el texto vuelve a ese lugar (o la imagen se recorta al contenido
   y el texto va al lado). Origen: MX, ronda 5 (banda "SIN colorantes" de Gran Comienzo).
+  Si ese lugar es oscuro, el texto vuelve EN la banda como Banner, alineado del lado libre (Sabrosobres
+  "¡Una combinacion irresistible!", Nutricion Reforzada "¡Adios a la monotonia!"). Si es claro, la
+  imagen se recorta y el texto va al lado.
+- **Una banda decorativa a todo el ancho (un plato chico sobre textura) va a sangre con el texto
+  aparte**, como en el sitio viejo; en media columna el contenido queda chiquito. Origen: MX, ronda 5
+  (bodegones de Longevidad y Nutricion Reforzada).
+- **Un marco pensado para fundirse con el fondo de la pagina vieja se recorta**: en la pagina nueva
+  se ve como un recuadro. Origen: MX, ronda 5 (banner "Oli" de Longevidad).
 
 ## Heroes y banners
 
@@ -70,6 +78,16 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   y Donde comprar (La nutricion mas avanzada) pasaron a Secondary Hero. Origen: MX, ronda 5.
 - El titulo del Secondary Hero no tiene tope de ancho (confirmado con la captura del CMS en el
   playbook): un titulo largo cruza la foto. Se cuenta con eso al encuadrar.
+- **Un banner sin imagen no va**: dibuja un recuadro vacio. Si la pagina vieja no tenia hero (legales,
+  estudios), el titulo es un bloque de texto centrado. Origen: MX, ronda 5 (Cookies, Terminos,
+  Estudio de esperanza de vida).
+- **Hero de fondo claro y SIN letras metidas: texto a la izquierda y la foto al lado** (texto con
+  imagen, la foto recortada al contenido), que es como estaba en el sitio viejo. Con el titulo del
+  banner (blanco) no se lee, y con la imagen entera abajo queda media imagen vacia. Origen: MX,
+  ronda 5 (Vet Diets, Ingredientes).
+- **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
+  Perros quedan como Imagen con el banner viejo (su decision de la ronda 4), aunque borrando el slogan
+  del key visual el titulo entraria en la franja.
 
 ## Productos
 
@@ -118,6 +136,16 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   el texto al lado), porque ningun componente pone texto oscuro sobre una imagen (banda "SIN
   colorantes" de Gran Comienzo).
 - Etiqueta del CTA de Donde comprar: "Buscar veterinaria".
+- Hero de Nutricion Reforzada con el texto en el banner, debajo del logo del key visual (el titulo
+  repite el logo, igual que en Gran Comienzo).
+
+## Preguntas abiertas (no se aplican hasta que el usuario responda)
+
+- Curvas de transicion pensadas para empalmar con la seccion de abajo del sitio viejo (la V blanca
+  al pie del hero de LiveClear sobre la pagina oscura de Pro Plan, y las curvas de Cat Chow y Dog
+  Chow FAQ): ¿se recortan o son parte del estilo?
+- Foto del Dr. Satyaraj en Alergenos del gato: en texto con imagen ocupa media pantalla (en el
+  sitio viejo era un avatar de ~150px). ¿Columna chica (layout 25/75) o se deja?
 - Titulos de carrusel: cuando el bloque de texto traia bajada, se une al titulo si agrega un beneficio
   (Longevidad, Snacks, Purina One gatos) y se saca si repite el titulo o es un slogan (Pro Plan
   "Alimento humedo", Gran Comienzo, Purina One perros). Titulos en mayusculas del sitio viejo pasan a
