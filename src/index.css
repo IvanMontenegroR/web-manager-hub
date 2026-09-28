@@ -2464,6 +2464,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-bc-link:hover { color: #e91c24; }
 .cp-bc-current { color: #000; }
 .cp-bc-sep { color: #797777; }
+/* Marca con fondo oscuro (Pro Plan): el breadcrumb negro sobre negro no se lee. */
+.pb-page--dark .cp-bc-link { color: #bdbdbd; }
+.pb-page--dark .cp-bc-current { color: #fff; }
+.pb-page--dark .cp-bc-sep { color: #8a8a8a; }
 
 /* ===== Footer global (site footer) ===== */
 .pb-footer-host { margin-top: 6px; overflow-x: auto; overflow-y: hidden; box-shadow: var(--shadow-sm); }
