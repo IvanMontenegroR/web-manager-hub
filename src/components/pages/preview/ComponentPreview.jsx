@@ -10,6 +10,8 @@ import {
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
 // Los que faltan estan pendientes de mapear con el CMS.
+// Variante solo del preview (no es un tipo del viejo carrusel de compromiso).
+const CMT_SIMPLE = 'simple'
 const CG_TO_CMT = {
   'slider-default-card': CMT_VERTICAL,
   'slider-card-icons-square': CMT_ICON,
@@ -17,6 +19,10 @@ const CG_TO_CMT = {
   // apaisada (CMT_WIDE_BOTTOM) apila las dos abajo y no la usa ningun modo del CMS.
   'slider-background-default-card': CMT_WIDE_TOP,
   'cards-numbers': CMT_NUMBERS,
+  // Solo imagen + titulo (playbook, "Cards simple"): la foto cuadrada con esquinas redondeadas
+  // y el titulo DEBAJO, en el color del texto de la pagina. No lleva descripcion. Caia a las
+  // verticales y el titulo quedaba blanco encima de la foto: ilegible sobre fotos claras.
+  'cards-simple': CMT_SIMPLE,
 }
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
@@ -796,6 +802,7 @@ const RENDERERS = {
     const v = c.type || CMT_VERTICAL
     const icon = v === CMT_ICON
     const nums = v === CMT_NUMBERS
+    const simple = v === CMT_SIMPLE
     const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
@@ -854,7 +861,7 @@ const RENDERERS = {
       <div
         // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
         // sangre (ver la regla generica en el CSS). Sin fondo no se toca.
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : simple ? 'simple' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
@@ -880,7 +887,7 @@ const RENDERERS = {
                   {it.image
                     ? <MediaEl className="cp-cmt-img" src={it.image} />
                     : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">{dim}</span></div>}
-                  <div className="cp-cmt-scrim" />
+                  {!simple && <div className="cp-cmt-scrim" />}
                 </>
               )}
               <div className="cp-cmt-body">
@@ -889,7 +896,7 @@ const RENDERERS = {
                 {(it.title || !(it.description || it.image)) && (
                   <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
                 )}
-                {(it.description || !(it.title || it.image)) && (
+                {!simple && (it.description || !(it.title || it.image)) && (
                   <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
                 )}
               </div>

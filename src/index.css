@@ -2197,6 +2197,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt--nums .cp-cmt-desc { color: #1b252e; font-size: 13.5px; font-weight: 400; line-height: 1.5; text-shadow: none; margin-top: 12px; }
 .cp-cmt--nums .cp-cmt-go { box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
 
+/* --- Variante SIMPLE (Cards simple: solo imagen + titulo). Referencia: playbook del CMS,
+   comp-image59/60. Foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color
+   del texto de la pagina (oscuro sobre blanco, claro en las paginas de marca oscuras). La
+   card no tiene fondo ni alto fijo; la foto si, porque html2canvas no resuelve aspect-ratio. --- */
+.cp-cmt--simple .cp-cmt-card { flex: 0 0 360px; height: auto; background: none; border-radius: 0; overflow: visible; }
+.cp-cmt--simple .cp-cmt-img { position: static; display: block; width: 100%; height: 360px; border-radius: 14px; }
+.cp-cmt--simple .cp-cmt-body { position: static; margin-top: 14px; }
+.cp-cmt--simple .cp-cmt-ttl { color: inherit; font-size: 18px; font-weight: 500; line-height: 1.3; text-shadow: none; }
+.cp-cmt--simple .cp-cmt-go { display: none; }
+
 /* ===== Bloque 50/50 (titulo + texto | texto o desplegable) ===== */
 /* padding 26px 30px = mismo spacing interno que el resto de los bloques de contenido. */
 .cp-half { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; padding: 26px 30px; }

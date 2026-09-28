@@ -325,6 +325,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Los dos checkbox `Show ...` salieron del formulario real y estan cargados como campos del CMS, pero
      **que dibujan en el sitio esta PENDIENTE**: el mockup todavia no los pinta. Cuando se sepa, se agrega
      al render y se saca esta nota.
+     El modo **Cards simple** (`cards-simple`, "only image + title") tiene mockup propio (`CMT_SIMPLE`):
+     foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color del texto de la pagina, sin
+     descripcion (asi lo muestra el playbook del CMS, comp-image59/60). Antes caia a las verticales y el
+     titulo quedaba blanco encima de la foto: ilegible sobre fotos claras (los ingredientes).
      La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
