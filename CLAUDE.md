@@ -266,6 +266,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
      variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
      todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
+     La otra cosa que sangra es una IMAGEN: el `c_image` con **Image Style = Full Width**
+     (`bg_position_full_width`, Classy) va de borde a borde (`.cp-cimg--full`, que tambien lleva
+     `.cp-bleed`, asi hereda el pegado al footer). Ahi la imagen va sin padding ni redondeo y solo el
+     texto vuelve al gutter. Para que ademas no deje aire contra el footer se carga
+     `spacing = space_py_0`.
      El breakout va en el `.pb-block` (tiene `overflow:hidden`, adentro se recortaria) y apunta al render
      PROPIO del bloque (`> .cp-render > .cp-bleed`), asi un texto con fondo metido en una columna de un
      layout no hace sangrar al contenedor. `--bleed-x` es el padding lateral propio de cada bloque, para
@@ -380,6 +385,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      los bloques anidados se capturen SIN el chrome del builder (barra de edicion y boton de agregar).
      Todo esto para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
+     La excepcion son las posiciones SIN medida en el catalogo (`text_image` y el `c_image` fuera de
+     "Image Background Box"): ahi va el archivo original entero, asi que el mockup lo dibuja en su
+     proporcion (`<Img natural>` = `height: auto` del `<img>`, que html2canvas si resuelve). Con un alto
+     fijo y cover recortaba justo lo que en el sitio se ve (un perro sin patas, un circulo cortado).
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).

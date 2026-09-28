@@ -86,8 +86,14 @@ function MediaEl({ src, className = '', style }) {
   return <img className={className} src={src} alt="" style={style} />
 }
 
-function Img({ src, h = 160, aspect, dim, className = '' }) {
-  const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' } : { height: h }
+// `natural`: con imagen cargada va en su proporcion, sin recortar (el `h` queda solo para
+// el placeholder). Es para las posiciones que NO tienen medida en el catalogo: ahi va el
+// archivo original entero, y un alto fijo con cover le cortaria justo lo que se ve en el
+// sitio. Es alto automatico de un <img>, no la propiedad aspect-ratio: html2canvas lo
+// resuelve bien.
+function Img({ src, h = 160, aspect, natural, dim, className = '' }) {
+  const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' }
+    : natural && src ? { width: '100%', height: 'auto' } : { height: h }
   if (src) return <MediaEl className={`cp-img ${className}`} src={src} style={style} />
   return (
     <div className={`cp-img cp-img-ph ${className}`} style={style}>
@@ -448,10 +454,14 @@ const RENDERERS = {
         ))}
       </div>
     )
+    // Image Style "Full Width" (Classy): la imagen va de borde a borde y el texto sigue en
+    // el container. Es el mismo breakout que un bloque con fondo (`cp-bleed`): lo que se ve
+    // cortarse contra el gutter es la imagen.
+    const full = c.image_style === 'bg_position_full_width' && !!c.image
     return (
-      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}`}>
+      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}${full ? ' cp-cimg--full cp-bleed' : ''}`}>
         {bottom && txt}
-        <Img src={c.image} h={340} />
+        <Img src={c.image} h={340} natural />
         {!bottom && txt}
       </div>
     )
@@ -461,7 +471,7 @@ const RENDERERS = {
     const right = /derecha/i.test(c.image_position)
     return (
       <div className={`cp-block cp-ti ${right ? 'rev' : ''}`}>
-        <div className="cp-ti-img"><Img src={c.image} h={220} /></div>
+        <div className="cp-ti-img"><Img src={c.image} h={220} natural /></div>
         <div className="cp-ti-txt">
           <div className="cp-h2">{T(c.title, 'Titulo')}</div>
           <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>

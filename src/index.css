@@ -2043,6 +2043,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    deja una franja blanca que en el sitio no existe. Se come el padding de abajo del
    container (56px). */
 .pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed):last-child { margin-bottom: -56px; }
+/* Imagen con Image Style "Full Width": lo que sangra es la IMAGEN, no un fondo. El bloque
+   no lleva padding (la imagen va de borde a borde) y solo el texto vuelve al gutter. */
+.cp-cimg--full .cp-img { border-radius: 0; }
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-bleed.cp-cimg--full { padding-inline: 0; }
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-cimg--full > .cp-cimg-txt { padding-inline: 60px; }
 
 .pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
 /* Carrusel de servicios: FULL BLEED (0 del borde del container). */
