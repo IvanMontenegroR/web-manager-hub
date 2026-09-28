@@ -863,8 +863,14 @@ const RENDERERS = {
                 </>
               )}
               <div className="cp-cmt-body">
-                <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
-                <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
+                {/* Titulo y descripcion son opcionales por separado (una card de solo
+                    imagen + titulo no lleva texto): el relleno va solo en la card vacia. */}
+                {(it.title || !(it.description || it.image)) && (
+                  <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
+                )}
+                {(it.description || !(it.title || it.image)) && (
+                  <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
+                )}
               </div>
               {/* La flecha aparece cuando la card tiene link cargado. */}
               {it.url && <span className="cp-cmt-go" aria-hidden="true"><ArrowRight size={18} /></span>}
@@ -1143,8 +1149,8 @@ const RENDERERS = {
                 <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
               </div>,
               <div key={`b${i}`} className="cp-mosaic-box" style={{ background: acc }}>
-                <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>
-                <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>
+                {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>}
+                {(it.description || !it.title) && <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>}
               </div>,
             ])}
           </div>
