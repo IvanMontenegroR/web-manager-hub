@@ -838,6 +838,10 @@ export const COMPONENTS = [
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
+      // Avanzado, como en todo paragraph (el Section ID hace falta: hay cards que anclan a un
+      // carrusel). Sin el trio "See more": el carrusel ya tiene su boton "Ver todos" con keys
+      // propias, y `see_more_url` chocaria con la del boton.
+      ...advanced().filter((f) => !f.key.startsWith('see_more')),
     ],
     // Imagen izquierda opcional: mismo tamaño en desktop y mobile (por eso sin link
     // mobile). La spec solo aplica si la imagen izquierda esta activada.

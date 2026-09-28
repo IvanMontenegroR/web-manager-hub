@@ -473,8 +473,10 @@ const RENDERERS = {
       <div className={`cp-block cp-ti ${right ? 'rev' : ''}`}>
         <div className="cp-ti-img"><Img src={c.image} h={220} natural /></div>
         <div className="cp-ti-txt">
-          <div className="cp-h2">{T(c.title, 'Titulo')}</div>
-          <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>
+          {/* El relleno es solo para el bloque vacio: con titulo y sin cuerpo (o al reves) no
+              se inventa la otra mitad, igual que en el bloque de Texto. */}
+          {(c.title || !c.body) && <div className="cp-h2">{T(c.title, 'Titulo')}</div>}
+          {(c.body || !c.title) && <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>}
           {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
         </div>
       </div>

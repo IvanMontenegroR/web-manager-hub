@@ -98,4 +98,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 ## Pendientes de confirmar (decisiones tomadas por el que migra, sin respuesta todavia)
 
 - Titulos partidos para que el texto no tape al sujeto (Donde comprar: "Donde comprar" + el resto a
-  la bajada).
+  la bajada; Gran Comienzo: "Dog Chow® Gran Comienzo®" + "Croquetas para cachorros." a la bajada).
+- Estirar el degrade oscuro que YA trae el key visual para correr el sujeto y dejarle lugar al texto
+  (hero de Gran Comienzo, 84px). No es inventar imagen: es el mismo borde liso.
+- Una banda cuya mitad era para texto HTML pasa a texto con imagen (la mitad con contenido recortada,
+  el texto al lado), porque ningun componente pone texto oscuro sobre una imagen (banda "SIN
+  colorantes" de Gran Comienzo).
+- Etiqueta del CTA de Donde comprar: "Buscar veterinaria".
+- Titulos de carrusel: cuando el bloque de texto traia bajada, se une al titulo si agrega un beneficio
+  (Longevidad, Snacks, Purina One gatos) y se saca si repite el titulo o es un slogan (Pro Plan
+  "Alimento humedo", Gran Comienzo, Purina One perros). Titulos en mayusculas del sitio viejo pasan a
+  minuscula como el resto ("OPTI TECNOLOGIAS PARA PERROS" -> "Opti Tecnologias para perros").
