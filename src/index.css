@@ -1530,6 +1530,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-center { text-align: center; }
 .cp-h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; margin: 6px 0; }
 .cp-h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+/* h1 de un bloque de contenido = titulo de la pagina (ver hClass). */
+.cp-hpage { font-size: 38px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.12; margin-bottom: 10px; }
 .cp-sub { font-size: 14px; color: #545c67; margin-bottom: 14px; }
 .cp-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--purina); }
 .cp-p { font-size: 14px; line-height: 1.6; color: #3a424e; margin: 6px 0; }
@@ -1583,6 +1585,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cimg--bottom .cp-img { border-radius: 14px; }
 .cp-cimg-txt > :last-child { margin-bottom: 0; }
 .cp-img { width: 100%; object-fit: cover; display: block; background: #e5e9f0; }
+/* Imagen en su proporcion (original entero): sin el gris de carga detras, que en un PNG
+   transparente se veia como un recuadro que en el sitio no existe. */
+.cp-img.cp-img--nat { background: transparent; }
 .cp-img-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aab2bd; }
 /* Dimension recomendada dentro del placeholder de imagen. */
 .cp-ph-dim { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: #97a0ab; }

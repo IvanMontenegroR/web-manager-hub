@@ -389,6 +389,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      "Image Background Box"): ahi va el archivo original entero, asi que el mockup lo dibuja en su
      proporcion (`<Img natural>` = `height: auto` del `<img>`, que html2canvas si resuelve). Con un alto
      fijo y cover recortaba justo lo que en el sitio se ve (un perro sin patas, un circulo cortado).
+     El "Image Background Box" tambien va en su proporcion: su imagen sale a la medida del catalogo
+     (2088×1044, 2:1), y con alto fijo se recortaba a ~3:1 y se perdian claims y badges del borde.
+     Una imagen en su proporcion no lleva el gris de carga detras (`.cp-img--nat`): en un PNG
+     transparente se veia como un recuadro que en el sitio no existe.
+     El titulo de un bloque de contenido (Texto, texto con imagen, Imagen) con HTML tag **h1** se dibuja
+     como titulo de pagina (`hClass` -> `.cp-hpage`): pasa cuando no hay hero (paginas legales) o el hero
+     es texto al lado de la foto, y con el estilo de un h2 quedaba mas chico que las secciones.
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).

@@ -94,7 +94,7 @@ function MediaEl({ src, className = '', style }) {
 function Img({ src, h = 160, aspect, natural, dim, className = '' }) {
   const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' }
     : natural && src ? { width: '100%', height: 'auto' } : { height: h }
-  if (src) return <MediaEl className={`cp-img ${className}`} src={src} style={style} />
+  if (src) return <MediaEl className={`cp-img${natural ? ' cp-img--nat' : ''} ${className}`} src={src} style={style} />
   return (
     <div className={`cp-img cp-img-ph ${className}`} style={style}>
       <ImageIcon size={22} />
@@ -102,6 +102,12 @@ function Img({ src, h = 160, aspect, natural, dim, className = '' }) {
     </div>
   )
 }
+
+// El titulo de un bloque de contenido con HTML tag h1 es el titulo de la PAGINA (pasa cuando
+// no hay hero: una pagina legal, un hero de texto al lado de la foto). En el sitio un h1 se
+// ve como h1; con la clase de un h2 el titulo de la pagina quedaba mas chico que las
+// secciones y las cards de abajo.
+const hClass = (c) => (c.title_tag === 'h1' ? 'cp-hpage' : 'cp-h2')
 
 // ID de un video de YouTube a partir de cualquiera de sus formas de link
 // (watch?v=, youtu.be/, /embed/, /shorts/). null si no es de YouTube.
@@ -365,7 +371,7 @@ const RENDERERS = {
         className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg' : ''}${bg && !isBoxed(c) ? ' cp-bleed' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
-        {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.title && <div className={hClass(c)}>{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         {/* El cuerpo es opcional: un bloque que es solo titulo (cabecera de una seccion)
             o solo boton no tiene que mostrar texto de relleno. El placeholder queda para
@@ -432,7 +438,10 @@ const RENDERERS = {
     if (bgBox) {
       return (
         <div className="cp-block cp-fib">
-          <Img src={c.image} h={420} dim="2088×1044px" className="cp-fib-img" />
+          {/* La imagen sale a la medida del catalogo (2088×1044, 2:1): en su proporcion se ve
+              entera, como en el sitio. Con alto fijo se recortaba a ~3:1 y se perdian claims,
+              badges y productos del borde. */}
+          <Img src={c.image} h={420} natural dim="2088×1044px" className="cp-fib-img" />
           {hasText && (
             <div className="cp-fib-card">
               {c.title && <div className="cp-fib-title">{c.title}</div>}
@@ -446,7 +455,7 @@ const RENDERERS = {
     }
     const txt = hasText && (
       <div className={bottom ? 'cp-cimg-txt' : 'cp-cimg-box'}>
-        {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.title && <div className={hClass(c)}>{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         {c.body && <Rich className="cp-p">{c.body}</Rich>}
         {ctas.map((b, i) => (
@@ -475,7 +484,7 @@ const RENDERERS = {
         <div className="cp-ti-txt">
           {/* El relleno es solo para el bloque vacio: con titulo y sin cuerpo (o al reves) no
               se inventa la otra mitad, igual que en el bloque de Texto. */}
-          {(c.title || !c.body) && <div className="cp-h2">{T(c.title, 'Titulo')}</div>}
+          {(c.title || !c.body) && <div className={hClass(c)}>{T(c.title, 'Titulo')}</div>}
           {(c.body || !c.title) && <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>}
           {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
         </div>
