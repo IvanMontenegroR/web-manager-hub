@@ -529,6 +529,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
   bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+- **Criterios de migracion** (`runner/CRITERIOS.md`): las decisiones del Websites Expert al revisar
+  paginas migradas del sitio viejo (medidas, heroes, contraste, carrusel de productos, iconos, CTAs...),
+  cada una con el caso que la origino. Se lee ANTES de traducir o corregir una pagina, y cada decision
+  nueva se anota ahi en el momento, no al final de la ronda.
 - **Menu del sitio** (`site_menu`, `src/lib/menuDb.js`, `src/components/pages/MenuEditor.jsx`):
   el header (`purina:header-main`) es config GLOBAL **por mercado**, no contenido de una pagina,
   asi que se edita en su propia pantalla (boton "Menú del sitio" en el tracker de paginas) y no
