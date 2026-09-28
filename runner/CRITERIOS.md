@@ -19,6 +19,9 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   copy esta pidiendo, un icono que no dice nada, una banda que quedo vacia. Origen: MX, ronda 5
   ("donde comprar se nota que tiene que llevar un cta, ese es el tipo de decisiones que quiero que
   tomes tambien").
+- **Los "decidir si..." no se dejan como pendiente**: si la decision sale de estos criterios, se toma
+  y se anota lo que se decidio. Al usuario le llega solo lo que de verdad no se puede decidir sin el
+  (un dato del negocio, un copy nuevo, un asset que no existe).
 - El runner deja todo en borrador; nunca publica. Las paginas editadas a mano en el Hub no se pisan.
 
 ## Alcance
@@ -94,6 +97,16 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Si el copy invita a una accion, lleva CTA.** "Donde comprar", "Registrate", "Encuentra..." sin
   boton es un bloque que no lleva a ningun lado. El destino sale de `urlmap.json` (sitio viejo ->
   sitio nuevo). Origen: MX, ronda 5 (Donde comprar -> /donde-comprar).
+  Un enunciado no es una invitacion: "Una manera para manejar las alergias" no pide boton, y menos a
+  un producto que la pagina nunca nombra.
+- **Un texto que manda a un boton que no existe ("Haga clic en COMPRAR AHORA") o a contactar sin
+  camino se resuelve con un link dentro del texto** (`[texto](url)`), sin reescribir el copy.
+- **La etiqueta del boton dice a donde lleva**, en tipo oracion: nada de "Aqui" ni "HAZ CLICK AQUI".
+- **En un carrusel donde todas las cards llevan link, la que no lo tiene y tiene tema con pagina
+  propia se linkea.** Cards que en el sitio viejo iban todas a la misma pagina (porque no existian las
+  otras) van cada una a su tema.
+- **Paginas gemelas (gatos/perros, FAQ de dos marcas) quedan iguales**: mismo icono, misma etiqueta,
+  mismo destino para lo mismo.
 
 ## Pendientes de confirmar (decisiones tomadas por el que migra, sin respuesta todavia)
 
