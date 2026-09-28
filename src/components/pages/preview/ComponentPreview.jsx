@@ -361,10 +361,15 @@ const RENDERERS = {
       >
         {c.title && <div className="cp-h2">{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
-        <div className={two ? 'cp-cols-2' : ''}>
-          <Rich className="cp-p">{T(c.body, 'Texto del bloque...')}</Rich>
-          {two && <p className="cp-p">&nbsp;</p>}
-        </div>
+        {/* El cuerpo es opcional: un bloque que es solo titulo (cabecera de una seccion)
+            o solo boton no tiene que mostrar texto de relleno. El placeholder queda para
+            el bloque recien agregado, que todavia no tiene nada. */}
+        {(c.body || !(c.title || c.subtitle || ctaList(c).length)) && (
+          <div className={two ? 'cp-cols-2' : ''}>
+            <Rich className="cp-p">{T(c.body, 'Texto del bloque...')}</Rich>
+            {two && <p className="cp-p">&nbsp;</p>}
+          </div>
+        )}
         {/* El CTA es repetible: se dibujan todos los cargados. */}
         {ctaList(c).map((b, i) => (
           <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
