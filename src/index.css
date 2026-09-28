@@ -1901,8 +1901,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    rgba(0,0,0,.3) uniforme, contenido CENTRADO, titulo fs-display-sm (3rem),
    descripcion body-lg, CTA .btn-primary (pill rojo). */
 .cp-hero { position: relative; height: 420px; border-radius: 16px; overflow: hidden; }
-/* Secondary Hero: banda mas ancha/baja (ratio 3:1), redondeada como el hero. */
-.cp-hero--wide { height: 280px; }
+/* Secondary Hero: banda mas ancha/baja (ratio 3:1), redondeada como el hero. Alto FIJO
+   (html2canvas resuelve mal aspect-ratio) calculado para dar 3:1 al ancho de captura
+   (1180px). Con los 280px de antes quedaba en 4:1 o mas y el preview le cortaba arriba
+   y abajo a una imagen que el CMS muestra entera (2100x700). */
+.cp-hero--wide { height: 393px; }
 .cp-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cp-hero-ph { background: linear-gradient(120deg, #5b6b7a 0%, #33414e 60%, #26313b 100%); }
 .cp-hero-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); }
