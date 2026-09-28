@@ -68,6 +68,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   (bodegones de Longevidad y Nutricion Reforzada).
 - **Un marco pensado para fundirse con el fondo de la pagina vieja se recorta**: en la pagina nueva
   se ve como un recuadro. Origen: MX, ronda 5 (banner "Oli" de Longevidad).
+- **Los avisos legales metidos en una imagen no se borran** (la linea de marcas registradas al pie de
+  una infografia), aunque esten en ingles: los decide Legal.
 
 ## Heroes y banners
 
@@ -109,6 +111,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Origen: MX, ronda 5 (Vet Diets, 2 cards).
 - **Cada card con icono lleva un icono distinto y que diga algo de su contenido.** Nunca el mismo icono
   repetido en todas. Origen: MX, ronda 5 ("¿Por que es mejor la carne fresca?", cuatro checks).
+  Se eligen MIRANDO el dibujo del sprite, no por el nombre: `apple` es el logo de Apple Inc., no una
+  fruta, y `ai` es el glifo de la IA del sitio. Si el sitio viejo tenia un dibujo parecido (el perro
+  para la flora intestinal en la linea Dog Chow), se respeta, y el mismo beneficio lleva el mismo icono
+  en las paginas de la misma linea.
+- **La card con icono tiene alto fijo y corta la descripcion a tres lineas.** Un texto que no entra no
+  se recorta: si son preguntas y respuestas va a un acordeon; si no, se reparten las mismas palabras
+  entre titulo y descripcion para que entren.
+- **Un texto metido en la foto de una card queda debajo de la descripcion**: se recorta la foto sin
+  ese rotulo o la card pasa a columnas con Imagen (texto arriba, foto entera abajo).
 
 ## CTAs y links
 
@@ -120,6 +131,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un texto que manda a un boton que no existe ("Haga clic en COMPRAR AHORA") o a contactar sin
   camino se resuelve con un link dentro del texto** (`[texto](url)`), sin reescribir el copy.
 - **La etiqueta del boton dice a donde lleva**, en tipo oracion: nada de "Aqui" ni "HAZ CLICK AQUI".
+  En un boton suelto (banner, slide, bloque de texto o de imagen) nombra el destino ("Conoce Pro Plan®
+  Perros", "Ver productos Dog Chow®") y el mismo destino lleva la misma etiqueta en todo el sitio. En
+  la card de un carrusel alcanza "Ver más": el titulo de la card ya dice el tema.
+- **Todo carrusel de productos lleva su "Ver todos" con destino** (el listado de la marca; Campeón,
+  que no tiene, al listado general). Sin URL el boton no lleva a ningun lado.
 - **En un carrusel donde todas las cards llevan link, la que no lo tiene y tiene tema con pagina
   propia se linkea.** Cards que en el sitio viejo iban todas a la misma pagina (porque no existian las
   otras) van cada una a su tema.
@@ -146,6 +162,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Chow FAQ): ¿se recortan o son parte del estilo?
 - Foto del Dr. Satyaraj en Alergenos del gato: en texto con imagen ocupa media pantalla (en el
   sitio viejo era un avatar de ~150px). ¿Columna chica (layout 25/75) o se deja?
+- FAQ de marca (Dog Chow, Cat Chow, Beneful, Dentalife): ¿cierran con el carrusel de productos de la
+  marca, como la FAQ de LiveClear cierra con su producto?
 - Titulos de carrusel: cuando el bloque de texto traia bajada, se une al titulo si agrega un beneficio
   (Longevidad, Snacks, Purina One gatos) y se saca si repite el titulo o es un slogan (Pro Plan
   "Alimento humedo", Gran Comienzo, Purina One perros). Titulos en mayusculas del sitio viejo pasan a
