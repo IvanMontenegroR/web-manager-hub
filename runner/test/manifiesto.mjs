@@ -194,6 +194,52 @@ function countFields(bs) {
   return bs.reduce((n, b) => n + Object.keys(b.fields || {}).length + countFields(b.children || []), 0)
 }
 
+// TEXTO + IMAGEN. La posicion de la imagen es un select nuestro (Izquierda / Derecha) y en
+// el CMS es un select de Classy cuyos valores de maquina salen del formulario real. La
+// equivalencia vive en el mapping (`opciones` del campo); sin ella, frena.
+{
+  const bloque = { component_key: 'text_image', content: {
+    title: 'Testimonio real', title_tag: 'h3', body: 'Un texto.',
+    image: 'https://ejemplo.com/testimonio.jpg', image_position: 'Derecha',
+    cta_label: 'Ver mas', cta_url: '/mas',
+  } }
+  const campoPos = 'classy.dsu_c_sideimagetext_image_position'
+  const sinOpciones = !tipos.c_sideimagetext.fields[campoPos].opciones
+
+  if (sinOpciones) {
+    try { aManifiesto(PAGINA, [bloque], tipos); ok(false, 'texto + imagen sin opciones confirmadas — NO freno') }
+    catch (e) {
+      ok(e instanceof ErrorDeTraduccion && /opciones/.test(e.message),
+        'sin las opciones de la posicion en el mapping, frena en vez de mandar "Derecha" a ciegas')
+    }
+  }
+
+  // Con la tabla puesta (valores DE PRUEBA, no los del sitio): se traduce entero.
+  const conOpciones = structuredClone(tipos)
+  conOpciones.c_sideimagetext.fields[campoPos].opciones = { Izquierda: 'prueba-izq', Derecha: 'prueba-der' }
+  const r = aManifiesto(PAGINA, [bloque], conOpciones)
+  const ti = r.manifiesto.blocks[0]
+  ok(ti.type === 'c_sideimagetext', 'el Texto + Imagen va al paragraph c_sideimagetext')
+  ok(ti.fields[campoPos] === 'prueba-der', 'la posicion viaja con el valor de maquina de la tabla, no con "Derecha"')
+  ok(ti.fields.field_c_text === 'Un texto.' && ti.fields['field_c_link.uri'] === '/mas',
+    'se lleva el cuerpo y su link suelto')
+  ok(Object.keys(ti.fields).every((f) => f in tipos.c_sideimagetext.fields),
+    'todos sus campos existen en el mapping real')
+  const nombres = new Set(mediosDeBloque(planDelHub(bloque), 'prueba').map((m) => m.nombre))
+  ok(nombres.has(ti.fields.field_c_image),
+    `su imagen se nombra igual que en el recortador (${ti.fields.field_c_image})`)
+
+  try {
+    aManifiesto(PAGINA, [{ ...bloque, content: { ...bloque.content, image_position: 'Arriba' } }], conOpciones)
+    ok(false, 'una posicion que no esta en la tabla — NO freno')
+  } catch (e) { ok(e instanceof ErrorDeTraduccion, 'una posicion que no esta en la tabla frena') }
+
+  const sinPos = { ...bloque, content: { ...bloque.content } }
+  delete sinPos.content.image_position
+  ok(aManifiesto(PAGINA, [sinPos], tipos).manifiesto.blocks[0].type === 'c_sideimagetext',
+    'sin posicion cargada no hace falta la tabla')
+}
+
 // Y que FRENE. Un componente sin traduccion y un campo cargado que no sabe donde poner.
 const frena = (bloques, que) => {
   try { aManifiesto(PAGINA, bloques, tipos); ok(false, `${que} — NO freno`) }

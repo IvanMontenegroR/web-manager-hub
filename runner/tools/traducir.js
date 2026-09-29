@@ -93,6 +93,28 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
     }
   }
 
+  // Un select cuyo valor en el hub NO es el valor de maquina del CMS (la posicion de la
+  // imagen del Texto + Imagen: "Izquierda" en el hub). La equivalencia es de ESTE sitio,
+  // asi que vive en el mapping, en `opciones` del campo, y sale del volcado del
+  // formulario. Si no esta, o no trae ese valor, se frena: mandar "Izquierda" a un select
+  // que espera otra cosa es un valor inventado, y el orden por defecto del CMS dejaria la
+  // imagen del lado que no era sin que nadie se entere.
+  function valorDelCms(def, k, v, donde) {
+    if (!def.conOpciones?.includes(k) || !porTipo) return v
+    const campo = def.campos[k]
+    const opciones = porTipo[def.tipo]?.fields?.[campo]?.opciones
+    if (!opciones) {
+      frenar(`${donde}: el mapping no tiene confirmadas las opciones de "${campo}" (${def.tipo}). `
+        + 'Agregá `opciones` a ese campo en el mapping, con el valor del hub y el de maquina '
+        + 'del CMS, sacados del volcado del formulario (npm run inspect).')
+    }
+    if (!(v in opciones)) {
+      frenar(`${donde}: "${v}" no esta en las opciones de "${campo}" del mapping `
+        + `(conoce: ${Object.keys(opciones).join(', ')}).`)
+    }
+    return opciones[v]
+  }
+
   function traducir(componente, contenido, donde) {
     const def = PARAGRAFOS[componente]
     if (!def) {
@@ -106,7 +128,7 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
 
     for (const [k, v] of Object.entries(contenido || {})) {
       if (vacio(v)) continue
-      if (def.campos[k]) { poner(def.campos[k], v); continue }
+      if (def.campos[k]) { poner(def.campos[k], valorDelCms(def, k, v, donde)); continue }
       if (def.ctaPlano?.[k]) { poner(def.ctaPlano[k], v); continue }
       if (def.media && k in def.media) {
         const url = origenDe(v)

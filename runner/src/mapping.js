@@ -60,6 +60,11 @@
 // Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se
 // pone ANTES de escribir, porque el CMS arranca en uno que no admite HTML.
 //
+// Un `select` puede traer `opciones: { "<valor del hub>": "<valor de maquina del CMS>" }`
+// cuando el hub guarda otra cosa que el CMS (la posicion de la imagen del Texto + Imagen).
+// Es una equivalencia de ESTE sitio y sale del volcado del formulario; el traductor la
+// exige para los campos que la tabla declara `conOpciones`, y frena si falta.
+//
 // El mapping NO pone valores por su cuenta: dice DONDE esta cada campo, no que va adentro.
 // Todo lo que se escribe sale del manifiesto, el `html_tag` de un titulo incluido — el
 // nivel de encabezado es una decision de esa pagina, no del tipo de bloque.
