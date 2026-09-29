@@ -71,6 +71,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   (bodegones de Longevidad y Nutricion Reforzada).
 - **Un marco pensado para fundirse con el fondo de la pagina vieja se recorta**: en la pagina nueva
   se ve como un recuadro. Origen: MX, ronda 5 (banner "Oli" de Longevidad).
+- **Las curvas de transicion se sacan**: una forma lisa al borde de la imagen (una V, una ola, una
+  franja) que en el sitio viejo servia para empalmar con la seccion de al lado queda suelta en la
+  pagina nueva (la V blanca al pie del hero de LiveClear sobre la pagina oscura de Pro Plan). Se pinta
+  con el color del fondo de la foto o se recorta, sin tocar el sujeto. NO son transiciones: la ola
+  verde de Dog Chow (es el sello de la marca, esta en sus key visuals) ni un piso donde esta parado el
+  sujeto (la linea dorada y el blanco donde esta sentado el gato de Cat Chow, con su sombra). Origen:
+  MX, ronda 5, confirmado por el usuario. Se busco el mismo tipo en las 38 paginas (detector de formas
+  lisas al borde + revision a ojo): ademas de LiveClear aparecio la V violeta arriba del bodegon de
+  Longevidad, que empalmaba con la seccion violeta del sitio viejo; se pinto con el verde de la banda.
+- **Una foto de persona que en el sitio viejo era un avatar chico va en una columna chica**
+  (layout 25/75: foto en la de 25, texto en la de 75), no en texto con imagen, donde ocupa media
+  pantalla. Origen: MX, ronda 5 (Dr. Satyaraj en Alergenos del gato), confirmado por el usuario.
 - **Los avisos legales metidos en una imagen no se borran** (la linea de marcas registradas al pie de
   una infografia), aunque esten en ingles: los decide Legal.
 
@@ -173,8 +185,4 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Preguntas abiertas (no se aplican hasta que el usuario responda; se le muestran en imagen)
 
-- Curvas de transicion pensadas para empalmar con la seccion de abajo del sitio viejo (la V blanca
-  al pie del hero de LiveClear sobre la pagina oscura de Pro Plan, y las curvas de Cat Chow y Dog
-  Chow FAQ): ¿se recortan o son parte del estilo?
-- Foto del Dr. Satyaraj en Alergenos del gato: en texto con imagen ocupa media pantalla (en el
-  sitio viejo era un avatar de ~150px). ¿Columna chica (layout 25/75) o se deja?
+(ninguna por ahora)
