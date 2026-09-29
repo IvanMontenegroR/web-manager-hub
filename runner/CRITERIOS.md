@@ -22,6 +22,9 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Los "decidir si..." no se dejan como pendiente**: si la decision sale de estos criterios, se toma
   y se anota lo que se decidio. Al usuario le llega solo lo que de verdad no se puede decidir sin el
   (un dato del negocio, un copy nuevo, un asset que no existe).
+- **Cada pregunta al usuario va con la imagen**: como se ve hoy y como quedaria (antes/despues, en la
+  captura del Hub). Una pregunta de diseño sin imagen obliga a imaginarse el resultado. Origen: MX,
+  ronda 5 ("al hacer estas preguntas mostrame").
 - El runner deja todo en borrador; nunca publica. Las paginas editadas a mano en el Hub no se pisan.
 
 ## Alcance
@@ -73,6 +76,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Heroes y banners
 
+- **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
+  pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
+  cercana...", "Resultados visibles en 28 dias" + "Purina® One® para perros."). El corte cae en un
+  limite natural de la frase. Origen: MX, ronda 5, confirmado por el usuario.
+- **El h1 va siempre como texto real, aunque el key visual ya diga lo mismo.** El h1 es lo que
+  estructura la pagina (buscadores, lectores de pantalla); las letras de una imagen no cuentan, salvo
+  por su alt. Que se repita a la vista no es un problema. Origen: MX, ronda 5 (Nutricion Reforzada,
+  Gran Comienzo), confirmado por el usuario.
+
 - **Si la imagen tiene una zona limpia y oscura, el texto va EN el banner y la imagen se ajusta para
   eso** (encuadre, alineacion del texto, titulo mas corto si hace falta). Sacar el texto del banner es
   el ultimo recurso, no el primero. Origen: MX, ronda 5 (hero de Gran Comienzo).
@@ -103,7 +115,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   mismo componente, mismo tipo de titulo. Origen: MX, ronda 5 ("Alimento seco" bien, "Alimento
   humedo" mal).
 - **Una pagina de preguntas sobre un producto cierra con el carrusel de ese producto**, para seguir
-  guiando al usuario. Origen: MX, ronda 5 (FAQ de LiveClear).
+  guiando al usuario. Origen: MX, ronda 5 (FAQ de LiveClear). **Las FAQ de marca tambien**: cierran con
+  el carrusel de productos de la marca (Dog Chow, Cat Chow, Beneful, Dentalife). Confirmado por el
+  usuario.
+- **Los productos todavia no estan cargados en el CMS**: los nombres del carrusel son una guia para el
+  editor, no hace falta el nombre exacto de catalogo ni frenar por un producto que falta.
 
 ## Cards
 
@@ -144,27 +160,21 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Pendientes de confirmar (decisiones tomadas por el que migra, sin respuesta todavia)
 
-- Titulos partidos para que el texto no tape al sujeto (Donde comprar: "Donde comprar" + el resto a
-  la bajada; Gran Comienzo: "Dog Chow® Gran Comienzo®" + "Croquetas para cachorros." a la bajada).
 - Estirar el degrade oscuro que YA trae el key visual para correr el sujeto y dejarle lugar al texto
   (hero de Gran Comienzo, 84px). No es inventar imagen: es el mismo borde liso.
 - Una banda cuya mitad era para texto HTML pasa a texto con imagen (la mitad con contenido recortada,
   el texto al lado), porque ningun componente pone texto oscuro sobre una imagen (banda "SIN
   colorantes" de Gran Comienzo).
 - Etiqueta del CTA de Donde comprar: "Buscar veterinaria".
-- Hero de Nutricion Reforzada con el texto en el banner, debajo del logo del key visual (el titulo
-  repite el logo, igual que en Gran Comienzo).
+- Titulos de carrusel: cuando el bloque de texto traia bajada, se une al titulo si agrega un beneficio
+  (Longevidad, Snacks, Purina One gatos) y se saca si repite el titulo o es un slogan (Pro Plan
+  "Alimento humedo", Gran Comienzo, Purina One perros). Titulos en mayusculas del sitio viejo pasan a
+  minuscula como el resto ("OPTI TECNOLOGIAS PARA PERROS" -> "Opti Tecnologias para perros").
 
-## Preguntas abiertas (no se aplican hasta que el usuario responda)
+## Preguntas abiertas (no se aplican hasta que el usuario responda; se le muestran en imagen)
 
 - Curvas de transicion pensadas para empalmar con la seccion de abajo del sitio viejo (la V blanca
   al pie del hero de LiveClear sobre la pagina oscura de Pro Plan, y las curvas de Cat Chow y Dog
   Chow FAQ): ¿se recortan o son parte del estilo?
 - Foto del Dr. Satyaraj en Alergenos del gato: en texto con imagen ocupa media pantalla (en el
   sitio viejo era un avatar de ~150px). ¿Columna chica (layout 25/75) o se deja?
-- FAQ de marca (Dog Chow, Cat Chow, Beneful, Dentalife): ¿cierran con el carrusel de productos de la
-  marca, como la FAQ de LiveClear cierra con su producto?
-- Titulos de carrusel: cuando el bloque de texto traia bajada, se une al titulo si agrega un beneficio
-  (Longevidad, Snacks, Purina One gatos) y se saca si repite el titulo o es un slogan (Pro Plan
-  "Alimento humedo", Gran Comienzo, Purina One perros). Titulos en mayusculas del sitio viejo pasan a
-  minuscula como el resto ("OPTI TECNOLOGIAS PARA PERROS" -> "Opti Tecnologias para perros").
