@@ -228,14 +228,52 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
     return bloque
   }
 
+  // LAS PESTAÑAS. En el hub son UN bloque con una lista de pestañas y los componentes
+  // colgando con su `tab_index`; en el CMS son tres niveles: el Tabs, un Tab por pestaña
+  // y UN componente adentro de cada Tab (la cardinalidad del campo es 1).
+  function pestanas(def, b, donde) {
+    const lista = Array.isArray(b.content?.tabs) ? b.content.tabs : []
+    if (!lista.length) frenar(`${donde}: el bloque de pestañas no tiene pestañas cargadas.`)
+    const hijosDe = lista.map(() => [])
+    for (const [j, h] of (b.hijos || []).entries()) {
+      // Una pestaña borrada no pierde sus hijos: caen en la ULTIMA, igual que en el builder.
+      const k = Math.min(h.tab_index ?? 0, lista.length - 1)
+      const th = traducir(h.component_key, h.content, `${donde} > pestaña ${k + 1}`)
+      if (!th) continue
+      if (!def.admite.includes(th.type)) {
+        frenar(`${donde} > pestaña ${k + 1}: una pestaña del CMS no admite "${th.type}" `
+          + `(admite ${def.admite.join(', ')}).`)
+      }
+      hijosDe[k].push(th)
+    }
+    return lista.map((tab, k) => {
+      if (hijosDe[k].length > 1) {
+        frenar(`${donde} > pestaña ${k + 1} ("${tab?.label || ''}"): tiene ${hijosDe[k].length} `
+          + 'componentes y en el CMS una pestaña lleva UNO solo.')
+      }
+      const fields = {}
+      for (const [kk, campo] of Object.entries(def.campos)) {
+        if (vacio(tab?.[kk])) continue
+        verificar(def.como, campo, `${donde} > pestaña ${k + 1}`)
+        fields[campo] = tab[kk]
+      }
+      const item = { type: def.como, fields, slot: 0 }
+      if (hijosDe[k].length) item.children = [{ ...hijosDe[k][0], slot: 0 }]
+      return item
+    })
+  }
+
   const blocks = []
   for (const [i, b] of bloques.entries()) {
     const donde = `bloque ${i + 1}`
     const t = traducir(b.component_key, b.content, donde)
     if (!t) continue
-    // Contenedores del hub (pestañas, layouts): sus hijos son componentes de verdad, y
-    // su ranura sale del `tab_index`, que es el indice de slot.
-    if (b.hijos?.length && !PARAGRAFOS[b.component_key]?.lista) {
+    const pest = PARAGRAFOS[b.component_key]?.pestanas
+    if (pest) {
+      t.children = pestanas(pest, b, donde)
+    } else if (b.hijos?.length && !PARAGRAFOS[b.component_key]?.lista) {
+      // Contenedores de ranuras FIJAS (los layouts): sus hijos son componentes de verdad,
+      // y su ranura sale del `tab_index`, que es el indice de slot.
       const dentro = b.hijos
         .map((h, j) => {
           const th = traducir(h.component_key, h.content, `${donde} > adentro ${j + 1}`)

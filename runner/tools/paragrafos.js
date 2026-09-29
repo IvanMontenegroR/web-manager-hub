@@ -88,6 +88,27 @@ export const PARAGRAFOS = {
     ctaPlano: { cta_label: 'field_c_link.title', cta_url: 'field_c_link.uri', cta_target: 'field_c_link.target' },
   },
 
+  // CONTENEDORES. Sus hijos son componentes de verdad y van a una ranura: en el layout, la
+  // columna (el `tab_index` del hub es el indice de columna); en las pestañas, un
+  // `comp_tabs_tab_item` por pestaña con UN componente adentro (ver `pestanas`).
+  layout_columns_2: { tipo: 'layout_columns_2', campos: {} },
+
+  // El Tabs del CMS NO tiene titulo ni subtitulo propios (el formulario real trae solo el
+  // tipo, Avanzado y Classy). Por eso no estan en `campos`: si el bloque del hub trae uno,
+  // el traductor frena en vez de perderlo — donde va ese titulo es una decision de la
+  // pagina, no de la tabla.
+  tabs: {
+    tipo: 'comp_tabs',
+    campos: {},
+    pestanas: {
+      como: 'comp_tabs_tab_item',
+      campos: { label: 'field_title', description: 'field_description' },
+      // Lo que una pestaña del CMS acepta adentro (el dropbutton de Gin del formulario).
+      admite: ['banner', 'banner_wrapper', 'block', 'html', 'ln_c_cardgrid', 'c_externalvideo',
+        'c_image', 'c_sideimagetext', 'c_text'],
+    },
+  },
+
   accordion_grid: {
     tipo: 'accordion_grid',
     campos: {},

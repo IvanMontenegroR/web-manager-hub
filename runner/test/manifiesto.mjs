@@ -194,6 +194,11 @@ function countFields(bs) {
   return bs.reduce((n, b) => n + Object.keys(b.fields || {}).length + countFields(b.children || []), 0)
 }
 
+const frena = (bloques, que) => {
+  try { aManifiesto(PAGINA, bloques, tipos); ok(false, `${que} — NO freno`) }
+  catch (e) { ok(e instanceof ErrorDeTraduccion, `${que} — freno: ${e.message.slice(0, 70)}...`) }
+}
+
 // TEXTO + IMAGEN. La posicion de la imagen es un select nuestro (Izquierda / Derecha) y en
 // el CMS es un select de Classy cuyos valores de maquina salen del formulario real. La
 // equivalencia vive en el mapping (`opciones` del campo); sin ella, frena.
@@ -240,11 +245,48 @@ function countFields(bs) {
     'sin posicion cargada no hace falta la tabla')
 }
 
-// Y que FRENE. Un componente sin traduccion y un campo cargado que no sabe donde poner.
-const frena = (bloques, que) => {
-  try { aManifiesto(PAGINA, bloques, tipos); ok(false, `${que} — NO freno`) }
-  catch (e) { ok(e instanceof ErrorDeTraduccion, `${que} — freno: ${e.message.slice(0, 70)}...`) }
+// CONTENEDORES. El layout de 2 columnas manda cada hijo a su columna (el tab_index del hub
+// es el indice de columna). Las pestañas se arman en TRES niveles: el Tabs, un Tab por
+// pestaña y UN componente adentro de cada Tab.
+{
+  const layout = { component_key: 'layout_columns_2', content: { spacing: 'space_py_0' }, hijos: [
+    { component_key: 'text', content: { body: 'Izquierda.' }, tab_index: 0 },
+    { component_key: 'text', content: { body: 'Derecha.' }, tab_index: 1 },
+  ] }
+  const lay = aManifiesto(PAGINA, [layout], tipos).manifiesto.blocks[0]
+  ok(lay.type === 'layout_columns_2' && lay.children?.length === 2, 'el layout de 2 columnas lleva sus dos hijos')
+  ok(lay.children[0].slot === 0 && lay.children[1].slot === 1, 'cada hijo en su columna')
+  ok(lay.fields['classy.spacing'] === 'space_py_0', 'su Classy se prefija solo')
+
+  const tabs = { component_key: 'tabs', content: { tabs: [{ label: 'Perros', description: 'Para perros.' }, { label: 'Gatos' }] }, hijos: [
+    { component_key: 'text', content: { body: 'Uno.' }, tab_index: 0 },
+    { component_key: 'text', content: { body: 'Dos.' }, tab_index: 1 },
+  ] }
+  const tb = aManifiesto(PAGINA, [tabs], tipos).manifiesto.blocks[0]
+  ok(tb.type === 'comp_tabs' && tb.children?.length === 2, 'las pestañas son un Tabs con un Tab por pestaña')
+  ok(tb.children.every((c) => c.type === 'comp_tabs_tab_item' && c.slot === 0), 'cada pestaña es un comp_tabs_tab_item')
+  ok(tb.children[0].fields.field_title === 'Perros' && tb.children[0].fields.field_description === 'Para perros.',
+    'con su nombre y su descripcion')
+  ok(tb.children[1].children?.[0]?.type === 'c_text' && tb.children[1].children[0].fields.field_c_text === 'Dos.',
+    'y el componente de cada pestaña ADENTRO de su Tab')
+  let valido = true
+  try { validateManifest(aManifiesto(PAGINA, [tabs, layout], tipos).manifiesto, '(contenedores)') } catch { valido = false }
+  ok(valido, 'el manifiesto con contenedores pasa el validador del runner')
+
+  // Una pestaña borrada no pierde sus hijos: caen en la ultima.
+  const huerfano = { ...tabs, hijos: [...tabs.hijos.slice(0, 1), { component_key: 'text', content: { body: 'Tres.' }, tab_index: 5 }] }
+  const th = aManifiesto(PAGINA, [huerfano], tipos).manifiesto.blocks[0]
+  ok(th.children[1].children?.[0]?.fields.field_c_text === 'Tres.', 'un hijo de una pestaña borrada cae en la ultima')
+
+  frena([{ ...tabs, hijos: [...tabs.hijos, { component_key: 'text', content: { body: 'Otro.' }, tab_index: 0 }] }],
+    'dos componentes en una pestaña (el CMS acepta UNO)')
+  frena([{ ...tabs, hijos: [{ component_key: 'accordion_grid', content: { items: [{ title: 'x', text: 'y' }] }, tab_index: 0 }] }],
+    'un acordeon adentro de una pestaña (el CMS no lo admite)')
+  frena([{ ...tabs, content: { ...tabs.content, title: 'Nuestras marcas' } }],
+    'un titulo en el bloque de pestañas (el Tabs del CMS no tiene donde ponerlo)')
 }
+
+// Y que FRENE. Un componente sin traduccion y un campo cargado que no sabe donde poner.
 frena([{ component_key: 'timeline', content: { title: 'x' } }],
   'un componente que no sabe traducir')
 frena([{ component_key: 'banner', content: { title: 'x', campo_inventado: 'con valor' } }],
