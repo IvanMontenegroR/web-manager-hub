@@ -44,3 +44,28 @@ export function taskCountry(partner, project) {
   if (isPurinaRegion(partner)) return project?.region_country || project?.market || null
   return project?.market || null
 }
+
+// El Websites Expert trabaja desde Paraguay.
+export const EXPERT_COUNTRY = 'PY'
+
+// TODOS los calendarios que frenan una tarea. Casi siempre es uno solo (el de arriba). La
+// excepcion es una tarea marcada `expert_calendar`: la ORGANIZA el Expert (ej. el kick-off
+// con un mercado), asi que un feriado suyo tambien la frena. Es una marca por tarea y no
+// una regla por tipo a proposito: si algo esta en manos del mercado (su feedback), el
+// feriado del Expert no tiene por que contar para ellos. El primero es el principal.
+export function taskCountries(partner, project, task) {
+  const main = taskCountry(partner, project)
+  const out = main ? [main] : []
+  if (task?.expert_calendar && !out.includes(EXPERT_COUNTRY)) out.push(EXPERT_COUNTRY)
+  return out
+}
+
+// Union de los feriados de varios calendarios, sin tocar los Sets de origen.
+export function unionHolidays(countries, holidaysByCountry) {
+  const sets = countries.map((c) => holidaysByCountry?.get(c)).filter(Boolean)
+  if (!sets.length) return null
+  if (sets.length === 1) return sets[0]
+  const u = new Set()
+  for (const s of sets) for (const d of s) u.add(d)
+  return u
+}

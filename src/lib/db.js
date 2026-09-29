@@ -165,6 +165,7 @@ function taskPayload(t) {
     depends_on: Array.isArray(t.depends_on) ? t.depends_on : [],
     is_meeting: !!t.is_meeting,
     is_extra: !!t.is_extra,
+    expert_calendar: !!t.expert_calendar,
   }
 }
 
