@@ -74,12 +74,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Las curvas de transicion se sacan**: una forma lisa al borde de la imagen (una V, una ola, una
   franja) que en el sitio viejo servia para empalmar con la seccion de al lado queda suelta en la
   pagina nueva (la V blanca al pie del hero de LiveClear sobre la pagina oscura de Pro Plan). Se pinta
-  con el color del fondo de la foto o se recorta, sin tocar el sujeto. NO son transiciones: la ola
-  verde de Dog Chow (es el sello de la marca, esta en sus key visuals) ni un piso donde esta parado el
-  sujeto (la linea dorada y el blanco donde esta sentado el gato de Cat Chow, con su sombra). Origen:
-  MX, ronda 5, confirmado por el usuario. Se busco el mismo tipo en las 38 paginas (detector de formas
-  lisas al borde + revision a ojo): ademas de LiveClear aparecio la V violeta arriba del bodegon de
-  Longevidad, que empalmaba con la seccion violeta del sitio viejo; se pinto con el verde de la banda.
+  con el color del fondo de la foto o se recorta, sin tocar el sujeto. **La V verde al pie de los
+  banners de Dog Chow TAMBIEN es transicion y se saca** (en la ronda 5 se la habia dejado como sello de
+  la marca y el usuario la marco en Combinacion de proteinas, Longevidad, Nutricion Reforzada, FAQ y
+  Sabrosobres: "controla todas"). Lo que SI queda es lo que forma parte de la escena: el hexagono de
+  linea verde alrededor del sujeto, o un piso donde esta parado el sujeto (la linea dorada y el blanco
+  donde esta sentado el gato de Cat Chow, con su sombra). Origen: MX, rondas 5 y 6. Se busca en TODAS
+  las paginas (detector de formas lisas al borde + revision a ojo).
 - **Una foto de persona que en el sitio viejo era un avatar chico va en una columna chica**
   (layout 25/75: foto en la de 25, texto en la de 75), no en texto con imagen, donde ocupa media
   pantalla. Origen: MX, ronda 5 (Dr. Satyaraj en Alergenos del gato), confirmado por el usuario.
@@ -107,13 +108,36 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un banner sin imagen no va**: dibuja un recuadro vacio. Si la pagina vieja no tenia hero (legales,
   estudios), el titulo es un bloque de texto centrado. Origen: MX, ronda 5 (Cookies, Terminos,
   Estudio de esperanza de vida).
-- **Hero de fondo claro y SIN letras metidas: texto a la izquierda y la foto al lado** (texto con
-  imagen, la foto recortada al contenido), que es como estaba en el sitio viejo. Con el titulo del
-  banner (blanco) no se lee, y con la imagen entera abajo queda media imagen vacia. Origen: MX,
-  ronda 5 (Vet Diets, Ingredientes).
+- **Toda pagina arranca con un banner. Nunca con un texto con imagen (50/50).** Si el hero del sitio
+  viejo es de fondo claro y sin letras metidas, igual va Banner: la foto se encuadra con el sujeto del
+  lado contrario al titulo y la zona del titulo se oscurece hasta que el blanco pase el contraste
+  (ver Contraste). Origen: MX, ronda 6 (Vet Diets: "no podes comenzar la pagina con un 50/50, tiene que
+  ser un banner"). Reemplaza a la regla de la ronda 5 que ponia esos heroes como texto con imagen. Las
+  paginas sin hero en el sitio viejo (legales, estudios) siguen arrancando con el titulo en texto.
+- **Imagen con card (Image Background Box) solo si la card no tapa nada.** Si la foto tiene una zona
+  lisa u oscura para el texto, va Banner con el texto EN esa zona, sin card (Dog Chow Snacks "Con menos
+  de 7 calorias" y "Estamos comprometidos", el cierre de Longevidad). La card frosted sobre una foto
+  con sujeto o sobre un relleno de borde se ve pegada. Origen: MX, ronda 6 ("los banners con cards de
+  dog chow snacks no se ven para nada bien, tenemos que tener un qa para estos casos").
+- **QA de banners (`qa_banners.py`), en cada ronda y sobre las 38 paginas**: por cada banner e Imagen
+  con card mide si queda una banda de transicion en algun borde (desktop y mobile), cuanto detalle
+  hay en la zona del titulo (sujeto o letras de la imagen debajo del texto) y el contraste del blanco.
+  Lo que se miro a ojo y se acepto va a `qa_banners_ok.json` con el motivo (los pisos de Cat Chow y
+  Purina One, el pasto de Dog Chow), asi la corrida siguiente solo muestra lo nuevo.
+- **Un titulo de banner que cruza al sujeto o a letras de la imagen se parte** aunque la imagen ya este
+  bien encuadrada: el h1 queda con lo que dice de que es la pagina o la seccion ("Combinaciones de
+  proteinas", "Estamos comprometidos") y el resto pasa a la bajada, sin reescribir. Origen: MX, ronda 6.
 - **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
   Perros quedan como Imagen con el banner viejo (su decision de la ronda 4), aunque borrando el slogan
   del key visual el titulo entraria en la franja.
+
+## Textos
+
+- **Nada de mayusculas sostenidas.** Todo lo que en el sitio viejo venia en ALL CAPS (titulos, bajadas,
+  nombres de producto en el cuerpo) pasa a tipo oracion; las marcas quedan con su mayuscula inicial
+  ("PRO PLAN® VETERINARY DIETS" -> "Pro Plan® Veterinary Diets") y las siglas quedan como siglas (DHA,
+  EPA, ADN). Si hace falta enfasis, es la tipografia del componente la que lo da. Origen: MX, ronda 6
+  ("LA SALUD DE LOS GATOS Y PERROS": "todo lo que este en all caps podes poner bien").
 
 ## Productos
 
@@ -126,6 +150,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **El titulo del carrusel va en el campo Titulo del carrusel**, no en un bloque de texto aparte:
   mismo componente, mismo tipo de titulo. Origen: MX, ronda 5 ("Alimento seco" bien, "Alimento
   humedo" mal).
+- **Un titulo de carrusel largo se parte en titulo y subtitulo**: lo que viene despues de los dos
+  puntos, o la parte que describe, va al subtitulo del componente ("Purina® Pro Plan® LiveClear™" +
+  "Alimento seco para gatos con una formula reductora de alergenos"). Vale para todos los carruseles
+  (productos y cards). Origen: MX, ronda 6 (LiveClear, Nutricion Reforzada: "controla demas
+  carruseles").
 - **Una pagina de preguntas sobre un producto cierra con el carrusel de ese producto**, para seguir
   guiando al usuario. Origen: MX, ronda 5 (FAQ de LiveClear). **Las FAQ de marca tambien**: cierran con
   el carrusel de productos de la marca (Dog Chow, Cat Chow, Beneful, Dentalife). Confirmado por el
@@ -143,6 +172,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   fruta, y `ai` es el glifo de la IA del sitio. Si el sitio viejo tenia un dibujo parecido (el perro
   para la flora intestinal en la linea Dog Chow), se respeta, y el mismo beneficio lleva el mismo icono
   en las paginas de la misma linea.
+- **El titulo de un carrusel de cards va en el componente**, igual que en el de productos, no en un
+  bloque de texto aparte. Y el texto de cada card va ADENTRO de la card (card vertical con el texto
+  sobre la imagen), no debajo de la foto. Origen: MX, ronda 6 ("Hasta 1.8 años más de vida
+  saludable": "se ve medio raro, creo que el componente no funciona asi").
+- **Tres columnas con imagen + titulo + texto son un mosaico** (tres imagenes y tres cards), no un
+  layout de columnas con Imagen y Texto sueltos. Origen: MX, ronda 6 ("Evalua la condicion corporal
+  de tu mascota").
 - **La card con icono tiene alto fijo y corta la descripcion a tres lineas.** Un texto que no entra no
   se recorta: si son preguntas y respuestas va a un acordeon; si no, se reparten las mismas palabras
   entre titulo y descripcion para que entren.

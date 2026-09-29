@@ -520,6 +520,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   reutiliza y el runner entra a su ficha a completarle la portada **solo si no tiene ninguna**: llenar un
   campo vacio no es pisar la eleccion de nadie, pero cambiar una portada cargada si lo seria — un medio lo
   comparten todas las paginas que lo referencian.
+  El **Carrusel de productos** (`product_list`) lleva **subtitulo** opcional debajo del titulo: un titulo
+  largo se parte en titulo corto + subtitulo (lo que viene despues de los dos puntos, o la parte que
+  describe), igual que en los demas carruseles. Ver `runner/CRITERIOS.md`.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.

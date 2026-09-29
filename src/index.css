@@ -1861,6 +1861,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-plist { padding: 26px 30px; }
 /* Titulo opcional del carrusel de productos. */
 .cp-plist-h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; color: #1b252e; margin-bottom: 22px; max-width: 620px; }
+.cp-plist-h2.cp-plist-h2--sub { margin-bottom: 6px; }
+.cp-plist-sub { font-size: 15px; line-height: 1.45; color: #4a5561; margin-bottom: 22px; max-width: 620px; }
+.cp-dark .cp-plist-sub { color: #b9c0c9; }
 /* Con imagen izquierda: fila [imagen | contenido]. La imagen es 650×692 (vertical).
    align-items:flex-start => la imagen arranca a la misma altura que las cards.
    Sin imagen, el layout no cambia (bloque normal). */

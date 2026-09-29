@@ -716,7 +716,8 @@ const RENDERERS = {
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
       <div className={`cp-plist${showLeft ? ' has-left' : ''}`}>
-        {c.title && <div className="cp-plist-h2">{c.title}</div>}
+        {c.title && <div className={`cp-plist-h2${c.subtitle ? ' cp-plist-h2--sub' : ''}`}>{c.title}</div>}
+        {c.subtitle && <div className="cp-plist-sub"><RT>{c.subtitle}</RT></div>}
         {/* La cabecera (tabs + flechas) va arriba, a lo ancho: asi la imagen izquierda
             y las cards de producto arrancan a la misma altura (quedan alineadas). */}
         <div className="cp-plist-head">
