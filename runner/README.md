@@ -684,6 +684,13 @@ Los 12 estan verificados contra el HTML real, el alta de una pestaña incluida: 
 un volcado extra de una pestaña **vacia**, porque con la ranura llena Drupal esconde el
 widget de alta y no habia nada que mirar.
 
+**El traductor del hub** (`tools/paragrafos.js`) cubre hoy: banner, texto, imagen,
+Texto + Imagen, video externo, Card Grid, acordeon, layout de 2 columnas y pestañas. El
+Texto + Imagen necesita ademas la tabla `opciones` de la posicion de la imagen en el
+mapping (sale del volcado del formulario); sin ella frena. Faltan el carrusel de
+productos, el carrusel de banners (`banner_wrapper`) y los otros layouts: los tres
+esperan su volcado.
+
 **Falta la primera corrida contra el CMS.** Todo lo verificable sin conexion esta
 verificado; lo que no se puede saber offline es si Drupal acepta la pagina que resulta.
 La primera prueba conviene hacerla sin `--save`, mirando el formulario.
