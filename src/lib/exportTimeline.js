@@ -466,10 +466,12 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       // Feriado (solo si NO cae en finde): "F" en la celda + se agrega al listado de Referencias.
       if (isHoliday) {
         markCell(cell, 'F')
-        holidaysSeen.set(`${t.country}|${iso}`, {
+        // Con varios calendarios (reuniones de Purina Mercado), el feriado es del que lo tenga.
+        const de = (t.countries || []).find((c) => holByKey.has(`${c}|${iso}`)) || t.country
+        holidaysSeen.set(`${de}|${iso}`, {
           date: iso,
-          country: t.country,
-          name: holByKey.get(`${t.country}|${iso}`) || 'Feriado',
+          country: de,
+          name: holByKey.get(`${de}|${iso}`) || 'Feriado',
         })
       } else if (isOverrun && !nonWorking) {
         markCell(cell, 'X')

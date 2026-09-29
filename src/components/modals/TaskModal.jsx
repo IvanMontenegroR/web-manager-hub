@@ -4,7 +4,7 @@ import Modal from '../ui/Modal.jsx'
 import { useData } from '../../context/DataContext.jsx'
 import { createTask, updateTask } from '../../lib/db'
 import { plannedEnd, daysBetween, businessDaysBetween, isWeekendISO, fmtCorto, toISO } from '../../lib/dates'
-import { taskCountry, countryName } from '../../lib/countries'
+import { taskCountries, unionHolidays, countryName, EXPERT_COUNTRY } from '../../lib/countries'
 
 // El retraso se detecta automaticamente (fin real > fin plan); no es un estado manual.
 const TASK_STATUSES = ['Pendiente', 'En curso', 'Completado']
@@ -41,6 +41,7 @@ export default function TaskModal({ task, project, onClose }) {
     depends_on: defaultDeps,
     is_meeting: !!task?.is_meeting,
     is_extra: !!task?.is_extra,
+    expert_calendar: !!task?.expert_calendar,
   })
 
   const toggleDep = (id) =>
@@ -73,8 +74,8 @@ export default function TaskModal({ task, project, onClose }) {
 
   // Calendario de feriados de la tarea: pais del partner, o el market del proyecto.
   const partner = partners.find((p) => p.id === form.partner_id)
-  const country = taskCountry(partner, project)
-  const countrySet = holidaysByCountry?.get(country) || null
+  const countries = taskCountries(partner, project, form)
+  const countrySet = unionHolidays(countries, holidaysByCountry)
 
   // Feriados efectivos = los del pais menos los excluidos en esta tarea.
   const holSet = useMemo(() => {
@@ -101,7 +102,7 @@ export default function TaskModal({ task, project, onClose }) {
   const holidaysInSpan = holidays
     .filter(
       (h) =>
-        h.country === country &&
+        countries.includes(h.country) &&
         !isWeekendISO(h.date) &&
         h.date >= form.planned_start &&
         h.date <= spanEndFull
@@ -252,6 +253,21 @@ export default function TaskModal({ task, project, onClose }) {
         <label className="hol-item" style={{ cursor: 'pointer', display: 'inline-flex' }}>
           <input
             type="checkbox"
+            checked={form.expert_calendar}
+            onChange={(e) => setForm((f) => ({ ...f, expert_calendar: e.target.checked }))}
+          />
+          <span className="hol-name">La organiza el Expert (suma los feriados de {countryName(EXPERT_COUNTRY)})</span>
+        </label>
+        <div className="hint">
+          Para tareas que dependen de vos además del partner, como el kick-off con un mercado: un
+          feriado tuyo también la frena. No marcarla cuando la tarea está en manos del mercado.
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="hol-item" style={{ cursor: 'pointer', display: 'inline-flex' }}>
+          <input
+            type="checkbox"
             checked={form.is_extra}
             onChange={(e) => setForm((f) => ({ ...f, is_extra: e.target.checked }))}
           />
@@ -318,7 +334,7 @@ export default function TaskModal({ task, project, onClose }) {
 
       {holidaysInSpan.length > 0 && (
         <div className="field">
-          <label>Feriados en el rango ({countryName(country)})</label>
+          <label>Feriados en el rango ({countries.map(countryName).join(' + ')})</label>
           <div className="hint" style={{ marginBottom: 6 }}>
             Cuentan como dias no habiles y corren el fin. Destilda uno si esta tarea NO se frena ese
             dia (ej. hay un backup approver de otro pais).

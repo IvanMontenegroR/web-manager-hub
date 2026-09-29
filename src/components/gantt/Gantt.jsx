@@ -135,7 +135,7 @@ export default function Gantt({
 
   // Capa POR ENCIMA de las barras: columnas de finde (y feriados de la fila) para
   // que se vea que no cuentan como dias laborales.
-  function OverlayLayer({ holidaysSet, country }) {
+  function OverlayLayer({ holidaysSet, country, countries }) {
     const holIdx = []
     if (holidaysSet) {
       for (let i = 0; i < geo.days.length; i++) {
@@ -149,8 +149,10 @@ export default function Gantt({
         ))}
         {holIdx.map((i) => {
           const iso = geo.days[i]
-          const name = holName.get(`${country}|${iso}`) || 'Feriado'
-          const place = countryName(country)
+          // Con varios calendarios, el feriado es del que lo tenga.
+          const de = (countries || []).find((c) => holName.has(`${c}|${iso}`)) || country
+          const name = holName.get(`${de}|${iso}`) || 'Feriado'
+          const place = countryName(de)
           return (
             <div
               key={`h${i}`}
@@ -190,6 +192,7 @@ export default function Gantt({
       project: project.name,
       partner: partnerName(partners, t.partner_id),
       country: t.country,
+      countries: t.countries,
       planned: `${fmtCorto(t.planned_start)} a ${fmtCorto(t.planned_end)}`,
       dias: t.planned_days,
       status: t.status,
@@ -445,7 +448,7 @@ export default function Gantt({
                             -{t.aheadDays}d
                           </div>
                         )}
-                        <OverlayLayer holidaysSet={t.holidaysSet} country={t.country} />
+                        <OverlayLayer holidaysSet={t.holidaysSet} country={t.country} countries={t.countries} />
                       </div>
                     </div>
                   )
@@ -470,7 +473,7 @@ export default function Gantt({
           </div>
           <div className="tt-row"><span>Proyecto</span><b>{tip.project}</b></div>
           <div className="tt-row"><span>Partner</span><b>{tip.partner}</b></div>
-          {tip.country && <div className="tt-row"><span>Feriados</span><b>{countryName(tip.country)}</b></div>}
+          {tip.country && <div className="tt-row"><span>Feriados</span><b>{(tip.countries?.length ? tip.countries : [tip.country]).map(countryName).join(' + ')}</b></div>}
           <div className="tt-row"><span>Plan</span><b>{tip.planned}</b></div>
           <div className="tt-row"><span>Dias SLA</span><b>{tip.dias}</b></div>
           <div className="tt-row"><span>Status</span><b>{tip.status}</b></div>

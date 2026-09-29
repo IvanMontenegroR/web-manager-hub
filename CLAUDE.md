@@ -64,10 +64,16 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   en un acordeon con su propio Gantt al final)
 - `tasks(id, project_id, partner_id, action_name, planned_start, planned_days,
   planned_end GENERADA, actual_start, actual_end, status, delay_reason, excluded_holidays,
-  depends_on, is_meeting, is_extra, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
+  depends_on, is_meeting, is_extra, expert_calendar, sort_order, created_at)` (`excluded_holidays` = jsonb array de ISO: feriados que NO
   frenan esta tarea puntualmente, ej. hay backup approver de otro pais. `depends_on` = jsonb array de
   task ids predecesoras finish-to-start. `is_meeting` = bool: marca la tarea como reunion; muestra un
   icono (Users / 👥) en el Gantt y en el export a Excel.
+  `expert_calendar` = bool: la tarea la ORGANIZA el Websites Expert (ej. el kick-off con un mercado), asi
+  que ademas del calendario de su partner la frenan los feriados del Expert (Paraguay, `EXPERT_COUNTRY`
+  en `src/lib/countries.js`; ver `taskCountries`). Es una marca POR TAREA y no una regla por tipo a
+  proposito: si algo esta en manos del mercado (su feedback), el feriado del Expert no cuenta para ellos.
+  La tarea con dos calendarios usa la UNION de feriados, y el Gantt, el tooltip y el Excel dicen de que
+  pais es cada uno. Ver `sql/2026_tasks_expert_calendar.sql`.
   `is_extra` = bool: la tarea NO estaba en el plan original, se agrego porque aparecio trabajo no previsto
   (ej. una vuelta adicional de feedback). Muestra icono CirclePlus + chip `EXTRA` en el Gantt y prefijo `➕`
   + nombre en negrita en el Excel, con su entrada en Referencias. Su barra va en **AMBAR** (`EXTRA_COLOR`

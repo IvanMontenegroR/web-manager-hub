@@ -2,7 +2,7 @@ import { createContext, useContext, useCallback, useEffect, useMemo, useState } 
 import { fetchAll } from '../lib/db'
 import { detectOverlaps, detectDelays, withDerived, buildDailyControl, applyEffectiveDelay } from '../lib/analysis'
 import { computeProjection } from '../lib/projection'
-import { taskCountry } from '../lib/countries'
+import { taskCountries, unionHolidays } from '../lib/countries'
 import { toISO } from '../lib/dates'
 
 const DataContext = createContext(null)
@@ -51,9 +51,11 @@ export function DataProvider({ children }) {
     const today = toISO(new Date())
 
     const enriched = state.tasks.map((t) => {
-      // Calendario de la tarea: pais del partner, o si no tiene, el market del proyecto.
-      const country = taskCountry(partnerById.get(t.partner_id), projectById.get(t.project_id))
-      const base = holidaysByCountry.get(country)
+      // Calendarios de la tarea: pais del partner, o si no tiene, el market del proyecto; y en
+      // las reuniones de Purina Mercado, ademas el del Expert (ver taskCountries).
+      const countries = taskCountries(partnerById.get(t.partner_id), projectById.get(t.project_id), t)
+      const country = countries[0] || null
+      const base = unionHolidays(countries, holidaysByCountry)
       // Feriados efectivos = los del pais menos los excluidos puntualmente en la tarea.
       let hol = base
       const excl = t.excluded_holidays
@@ -63,6 +65,7 @@ export function DataProvider({ children }) {
       }
       const d = withDerived(t, hol, today)
       d.country = country
+      d.countries = countries
       d.holidaysSet = hol || null
       return d
     })
