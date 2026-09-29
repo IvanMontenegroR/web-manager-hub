@@ -17,7 +17,8 @@ import EcoTaskModal from '../components/modals/EcoTaskModal.jsx'
 // al portapapeles como text/html + text/plain, asi Outlook pega el formato y cualquier
 // otro lugar recibe el texto plano. Arranca con el saludo del 1:1 (usa el nombre del
 // tag) y al pie agrega "STATUS DE PROYECTOS" con una linea por marca (deduplicada,
-// solo activos) para completar a mano.
+// solo activos) para completar a mano. Las tarjetas en Done NO entran: el resumen es de
+// lo que sigue abierto, y una cerrada bajaria con su nota vieja como si siguiera viva.
 // Devuelve { html, text }.
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
@@ -28,7 +29,7 @@ function buildTagSummary(tasks, tag, todayISO, projects = []) {
   const intro = 'Te paso mi status para nuestro 1:1, por favor comentame si hay algún punto que tenés en mente y no esta acá.'
   const header = `RESUMEN ${tag.toUpperCase()} — ${fmtLargo(todayISO)}`
   const rows = tasks
-    .filter((t) => ecoTags(t, todayISO).includes(tag))
+    .filter((t) => t.status !== 'Done' && ecoTags(t, todayISO).includes(tag))
     // Una tarjeta es TEMA (titulo) + NOTA. La nota puede tener varias lineas: cada una
     // baja como un renglon propio, asi un tema con varios puntos se lee.
     .map((t) => ({

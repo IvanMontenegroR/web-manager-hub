@@ -97,7 +97,7 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
-  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag (lista plana, sin
+  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag que NO estan en Done (lista plana, sin
   agrupar por estado; cada una = tema en NEGRITA y debajo la nota, una linea por renglon). Devuelve
   `{ html, text }`: el modal muestra el HTML renderizado (lo que se va a pegar) y "Copiar con formato"
   escribe `text/html` + `text/plain` al portapapeles con `ClipboardItem`, asi Outlook pega negritas y
