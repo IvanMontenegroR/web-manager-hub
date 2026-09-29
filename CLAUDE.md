@@ -539,6 +539,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   una lista plana de 30 items no se lee.
   El builder tiene toggle Editar/Vista previa: en preview oculta paleta/editor/toolbars y muestra la
   pagina a sangre con el gutter real (sin los espacios de edicion).
+  Y un toggle **Desktop / Mobile**: en mobile la pagina se dibuja a 390px (`.pb-canvas--mobile` +
+  `.pb-device`, que en desktop es `display: contents` y no cambia nada) con la version mobile de cada
+  imagen. Los renders de los componentes NO saben que existe el mobile: `mobileContent` pisa cada
+  campo `<x>` con su `<x>_mobile` cargado (tambien adentro de las listas) y el resto lo acomoda el CSS
+  scopeado. Las reglas salen del sitio nuevo en staging mirado a 390px: gutter 20px, header con
+  hamburguesa a la izquierda del logo, Secondary Hero 1:1 con el texto a la izquierda y centrado en
+  vertical ENCIMA de la foto, carruseles con la card siguiente asomando, columnas y mosaico apilados.
+  El Excel sale siempre de desktop (el boton se apaga en mobile).
   El **Header** (`preview/SiteHeader.jsx`) y el **Footer** (`preview/SiteFooter.jsx`) del sitio son
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Search, ArrowRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, Search, ArrowRight, Menu } from 'lucide-react'
 import { DEFAULT_MENU, menuIconFor } from '../../../data/siteMenu.js'
 
 // Logo real de Purina (public/purina-logo.png). Su marco rojo se funde con la barra.
@@ -117,6 +117,9 @@ export default function SiteHeader({ items, forceOpen = null }) {
   return (
     <header className={`cp-header${openItem ? ' cp-header--open' : ''}`} onMouseLeave={() => setHover(null)}>
       <div className="cp-header-inner">
+        {/* Solo en la vista mobile: los menus colapsan en la hamburguesa, a la izquierda del
+            logo (asi lo dibuja el sitio nuevo en el celular). */}
+        <span className="cp-header-burger" aria-hidden="true"><Menu size={24} strokeWidth={2.2} /></span>
         <img className="cp-header-logo-img" src={LOGO} alt="Purina" />
         <nav className="cp-header-nav">
           {nav.map((n, i) => (

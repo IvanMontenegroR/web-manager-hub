@@ -139,6 +139,24 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   EPA, ADN). Si hace falta enfasis, es la tipografia del componente la que lo da. Origen: MX, ronda 6
   ("LA SALUD DE LOS GATOS Y PERROS": "todo lo que este en all caps podes poner bien").
 
+## Mobile
+
+- **Cada pagina se revisa tambien en mobile** (toggle Desktop / Mobile del builder, 390px con las
+  imagenes mobile) y la galeria muestra las dos versiones lado a lado. Origen: MX, ronda 7 ("estas
+  considerando mobile para todas las paginas no?").
+- **Como pone el texto el sitio nuevo en el celular** (mirado en staging): el Secondary Hero es 1:1
+  con el texto a la izquierda y centrado en vertical, ENCIMA de la foto, aunque pise al sujeto. Por eso
+  en mobile lo que se exige es que se LEA: **4.5:1** en toda la franja del texto (la bajada es letra
+  chica; el 3:1 queda para el titulo grande de desktop). Si no llega, se oscurece esa franja con un
+  degrade suave, lo justo para pasar. Lo mide `qa_banners.py` (`contraste mobile`).
+- **Nunca texto sobre texto, tampoco en mobile**: si el titulo cae sobre letras de la imagen mobile
+  ("SENSACIONAL" en Combinacion, el claim de Sabrosobres), se recorta distinto o, si las letras estan
+  sobre un fondo liso, se pintan con ese fondo.
+- **Una imagen con letras metidas no se achica a mobile**: si el sitio viejo tenia version mobile
+  (Campeon, Calidad en tus manos), va esa; una foto apaisada sin letras se recorta a 4:3 sobre el
+  sujeto (una tira de 1920x500 en el celular queda de 90px); si no hay version mobile y las letras no
+  se leen, queda como pendiente para la agencia.
+
 ## Productos
 
 - **Cards que llevan a productos se reemplazan por el carrusel de productos.** Ya no hay cards
