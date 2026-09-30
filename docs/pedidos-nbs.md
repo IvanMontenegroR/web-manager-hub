@@ -32,8 +32,9 @@ pedido del carrusel de Friskies BR (29/09) y de sus correcciones. Se usa igual p
 
 ## Alt text y title
 
-- Cada imagen nueva lleva **alt text y title**, en el idioma del sitio, en un slide aparte con una
-  tabla (#, página, title, alt) para que NBS los copie. Desktop y mobile llevan los mismos.
+- Cada imagen nueva lleva **alt text y title**, en el idioma del sitio, **en su propia fila** del
+  pedido (debajo de qué cambia), no en una tabla aparte: así NBS tiene todo lo de ese banner junto.
+  Desktop y mobile llevan los mismos. Con el alt y el title, entran 2 banners por slide.
 - El alt describe lo que se ve y el mensaje del banner, con los claims tal como están en la imagen,
   hasta 125 caracteres. Aunque el banner sea un fondo por CSS y hoy no los muestre, Drupal los pide
   al subir la imagen: si no se mandan, NBS los inventa.
