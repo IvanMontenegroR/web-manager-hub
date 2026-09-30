@@ -30,6 +30,14 @@ pedido del carrusel de Friskies BR (29/09) y de sus correcciones. Se usa igual p
   banners nuevos en su posición, con flechas entre cada par. Arriba de cada nuevo, su CTA.
 - **No** se muestra un banner con el botón dibujado en la imagen como "referencia": confunde.
 
+## Alt text y title
+
+- Cada imagen nueva lleva **alt text y title**, en el idioma del sitio, en un slide aparte con una
+  tabla (#, página, title, alt) para que NBS los copie. Desktop y mobile llevan los mismos.
+- El alt describe lo que se ve y el mensaje del banner, con los claims tal como están en la imagen,
+  hasta 125 caracteres. Aunque el banner sea un fondo por CSS y hoy no los muestre, Drupal los pide
+  al subir la imagen: si no se mandan, NBS los inventa.
+
 ## Qué NO lleva
 
 - **Deadline**: solo si el Expert lo pide para ese pedido (en el playbook la regla es "según
