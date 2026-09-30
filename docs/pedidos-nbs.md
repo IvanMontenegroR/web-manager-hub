@@ -41,7 +41,15 @@ pedido del carrusel de Friskies BR (29/09) y de sus correcciones. Se usa igual p
 ## Antes de armarlo
 
 - Mirar la página en vivo: qué es imagen y qué es texto o botón del CMS encima. Si el banner
-  nuevo trae el texto dentro de la imagen, el texto del CMS se saca para que no quede duplicado.
+  nuevo trae el texto dentro de la imagen, el texto del CMS se saca para que no quede duplicado,
+  **salvo que sea el H1**: el H1 pasa debajo del banner (sigue siendo H1), porque la página
+  necesita uno en texto real y el dibujado en la imagen no cuenta. Los botones del CMS se quedan
+  (decidido en el pedido de Purina One BR, 30/09).
+- Si un botón que se queda choca con el arte nuevo, no se le impone una posición a NBS: se les
+  pregunta si pueden probar otra alineación y ellos confirman si se pudo.
+- Solo se toca lo que el mercado lista (actual → nuevo). Lo que no figura, queda igual.
+- Con muchos banners, el pedido va en un slide por página (o grupo de páginas) y el De / para en
+  los slides que hagan falta, de a 5 pares.
 - Confirmar cada CTA y su link con el Expert; no deducirlos.
 - Si un banner nuevo trae un botón dibujado en la imagen y el sitio no pone uno encima, se le
   saca el botón a la imagen (se rellena el fondo) y el CTA se pide como botón del CMS.
