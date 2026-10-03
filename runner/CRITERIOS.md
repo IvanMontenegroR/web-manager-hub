@@ -25,7 +25,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Cada pregunta al usuario va con la imagen**: como se ve hoy y como quedaria (antes/despues, en la
   captura del Hub). Una pregunta de diseño sin imagen obliga a imaginarse el resultado. Origen: MX,
   ronda 5 ("al hacer estas preguntas mostrame").
-- El runner deja todo en borrador; nunca publica. Las paginas editadas a mano en el Hub no se pisan.
+- **Las paginas que cargamos en content quedan PUBLICADAS.** Antes la regla era dejarlas en borrador;
+  la cambio el usuario al pasar a cargar por MCP (MX, octubre 2026). Solo se escribe en content: preprod
+  y prod los arma F5 exportando desde ahi. Las paginas editadas a mano en el Hub, y cualquier pagina que
+  ya exista en el CMS, no se pisan.
 
 ## Alcance
 
