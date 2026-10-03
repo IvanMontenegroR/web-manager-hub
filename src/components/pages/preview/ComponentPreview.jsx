@@ -10,6 +10,8 @@ import {
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
 // Los que faltan estan pendientes de mapear con el CMS.
+// Variante solo del preview (no es un tipo del viejo carrusel de compromiso).
+const CMT_SIMPLE = 'simple'
 const CG_TO_CMT = {
   'slider-default-card': CMT_VERTICAL,
   'slider-card-icons-square': CMT_ICON,
@@ -17,6 +19,10 @@ const CG_TO_CMT = {
   // apaisada (CMT_WIDE_BOTTOM) apila las dos abajo y no la usa ningun modo del CMS.
   'slider-background-default-card': CMT_WIDE_TOP,
   'cards-numbers': CMT_NUMBERS,
+  // Solo imagen + titulo (playbook, "Cards simple"): la foto cuadrada con esquinas redondeadas
+  // y el titulo DEBAJO, en el color del texto de la pagina. No lleva descripcion. Caia a las
+  // verticales y el titulo quedaba blanco encima de la foto: ilegible sobre fotos claras.
+  'cards-simple': CMT_SIMPLE,
 }
 
 // Cuerpo de texto: los enlaces marcados como [texto](url) se pintan como links.
@@ -86,9 +92,15 @@ function MediaEl({ src, className = '', style }) {
   return <img className={className} src={src} alt="" style={style} />
 }
 
-function Img({ src, h = 160, aspect, dim, className = '' }) {
-  const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' } : { height: h }
-  if (src) return <MediaEl className={`cp-img ${className}`} src={src} style={style} />
+// `natural`: con imagen cargada va en su proporcion, sin recortar (el `h` queda solo para
+// el placeholder). Es para las posiciones que NO tienen medida en el catalogo: ahi va el
+// archivo original entero, y un alto fijo con cover le cortaria justo lo que se ve en el
+// sitio. Es alto automatico de un <img>, no la propiedad aspect-ratio: html2canvas lo
+// resuelve bien.
+function Img({ src, h = 160, aspect, natural, dim, className = '' }) {
+  const style = aspect ? { aspectRatio: aspect, width: '100%', height: 'auto' }
+    : natural && src ? { width: '100%', height: 'auto' } : { height: h }
+  if (src) return <MediaEl className={`cp-img${natural ? ' cp-img--nat' : ''} ${className}`} src={src} style={style} />
   return (
     <div className={`cp-img cp-img-ph ${className}`} style={style}>
       <ImageIcon size={22} />
@@ -96,6 +108,12 @@ function Img({ src, h = 160, aspect, dim, className = '' }) {
     </div>
   )
 }
+
+// El titulo de un bloque de contenido con HTML tag h1 es el titulo de la PAGINA (pasa cuando
+// no hay hero: una pagina legal, un hero de texto al lado de la foto). En el sitio un h1 se
+// ve como h1; con la clase de un h2 el titulo de la pagina quedaba mas chico que las
+// secciones y las cards de abajo.
+const hClass = (c) => (c.title_tag === 'h1' ? 'cp-hpage' : 'cp-h2')
 
 // ID de un video de YouTube a partir de cualquiera de sus formas de link
 // (watch?v=, youtu.be/, /embed/, /shorts/). null si no es de YouTube.
@@ -359,12 +377,17 @@ const RENDERERS = {
         className={`cp-block cp-text cp-al-${al}${bg ? ' cp-text--bg' : ''}${bg && !isBoxed(c) ? ' cp-bleed' : ''}${ink ? ' cp-text--ink' : ''}${onDark ? ' cp-text--ondark' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
-        {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.title && <div className={hClass(c)}>{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
-        <div className={two ? 'cp-cols-2' : ''}>
-          <Rich className="cp-p">{T(c.body, 'Texto del bloque...')}</Rich>
-          {two && <p className="cp-p">&nbsp;</p>}
-        </div>
+        {/* El cuerpo es opcional: un bloque que es solo titulo (cabecera de una seccion)
+            o solo boton no tiene que mostrar texto de relleno. El placeholder queda para
+            el bloque recien agregado, que todavia no tiene nada. */}
+        {(c.body || !(c.title || c.subtitle || ctaList(c).length)) && (
+          <div className={two ? 'cp-cols-2' : ''}>
+            <Rich className="cp-p">{T(c.body, 'Texto del bloque...')}</Rich>
+            {two && <p className="cp-p">&nbsp;</p>}
+          </div>
+        )}
         {/* El CTA es repetible: se dibujan todos los cargados. */}
         {ctaList(c).map((b, i) => (
           <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>
@@ -421,7 +444,10 @@ const RENDERERS = {
     if (bgBox) {
       return (
         <div className="cp-block cp-fib">
-          <Img src={c.image} h={420} dim="2088×1044px" className="cp-fib-img" />
+          {/* La imagen sale a la medida del catalogo (2088×1044, 2:1): en su proporcion se ve
+              entera, como en el sitio. Con alto fijo se recortaba a ~3:1 y se perdian claims,
+              badges y productos del borde. */}
+          <Img src={c.image} h={420} natural dim="2088×1044px" className="cp-fib-img" />
           {hasText && (
             <div className="cp-fib-card">
               {c.title && <div className="cp-fib-title">{c.title}</div>}
@@ -435,7 +461,7 @@ const RENDERERS = {
     }
     const txt = hasText && (
       <div className={bottom ? 'cp-cimg-txt' : 'cp-cimg-box'}>
-        {c.title && <div className="cp-h2">{c.title}</div>}
+        {c.title && <div className={hClass(c)}>{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         {c.body && <Rich className="cp-p">{c.body}</Rich>}
         {ctas.map((b, i) => (
@@ -443,10 +469,14 @@ const RENDERERS = {
         ))}
       </div>
     )
+    // Image Style "Full Width" (Classy): la imagen va de borde a borde y el texto sigue en
+    // el container. Es el mismo breakout que un bloque con fondo (`cp-bleed`): lo que se ve
+    // cortarse contra el gutter es la imagen.
+    const full = c.image_style === 'bg_position_full_width' && !!c.image
     return (
-      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}`}>
+      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}${full ? ' cp-cimg--full cp-bleed' : ''}`}>
         {bottom && txt}
-        <Img src={c.image} h={340} />
+        <Img src={c.image} h={340} natural />
         {!bottom && txt}
       </div>
     )
@@ -456,10 +486,12 @@ const RENDERERS = {
     const right = /derecha/i.test(c.image_position)
     return (
       <div className={`cp-block cp-ti ${right ? 'rev' : ''}`}>
-        <div className="cp-ti-img"><Img src={c.image} h={220} /></div>
+        <div className="cp-ti-img"><Img src={c.image} h={220} natural /></div>
         <div className="cp-ti-txt">
-          <div className="cp-h2">{T(c.title, 'Titulo')}</div>
-          <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>
+          {/* El relleno es solo para el bloque vacio: con titulo y sin cuerpo (o al reves) no
+              se inventa la otra mitad, igual que en el bloque de Texto. */}
+          {(c.title || !c.body) && <div className={hClass(c)}>{T(c.title, 'Titulo')}</div>}
+          {(c.body || !c.title) && <Rich className="cp-p">{T(c.body, 'Texto...')}</Rich>}
           {c.cta_label && <span className="cp-cta">{c.cta_label}</span>}
         </div>
       </div>
@@ -684,7 +716,8 @@ const RENDERERS = {
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
     return (
       <div className={`cp-plist${showLeft ? ' has-left' : ''}`}>
-        {c.title && <div className="cp-plist-h2">{c.title}</div>}
+        {c.title && <div className={`cp-plist-h2${c.subtitle ? ' cp-plist-h2--sub' : ''}`}>{c.title}</div>}
+        {c.subtitle && <div className="cp-plist-sub"><RT>{c.subtitle}</RT></div>}
         {/* La cabecera (tabs + flechas) va arriba, a lo ancho: asi la imagen izquierda
             y las cards de producto arrancan a la misma altura (quedan alineadas). */}
         <div className="cp-plist-head">
@@ -770,6 +803,7 @@ const RENDERERS = {
     const v = c.type || CMT_VERTICAL
     const icon = v === CMT_ICON
     const nums = v === CMT_NUMBERS
+    const simple = v === CMT_SIMPLE
     const wide = v === CMT_WIDE_BOTTOM || v === CMT_WIDE_TOP
     // Si hay marca seleccionada, los titulos de las cards toman su acento (detalle).
     const titleStyle = ctx?.brandAccent ? { color: ctx.brandAccent } : undefined
@@ -828,7 +862,7 @@ const RENDERERS = {
       <div
         // `cp-bleed` = el bloque tiene fondo pintado, o sea que es una SECCION: va a
         // sangre (ver la regla generica en el CSS). Sin fondo no se toca.
-        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
+        className={`cp-brands cp-cmt cp-cmt--${icon ? 'icon' : nums ? 'nums' : simple ? 'simple' : v === CMT_WIDE_BOTTOM ? 'wideb' : v === CMT_WIDE_TOP ? 'widet' : 'vert'}${bg && !icon ? ' cp-cmt--hasbg' : ''}${icon && band ? ' cp-cmt--band' : ''}${bleed ? ' cp-bleed' : ''}${txt ? ' cp-cmt--hastxt' : ''}`}
         style={Object.keys(style).length ? style : undefined}
       >
         <div className="cp-brands-head">
@@ -854,12 +888,18 @@ const RENDERERS = {
                   {it.image
                     ? <MediaEl className="cp-cmt-img" src={it.image} />
                     : <div className="cp-cmt-img cp-cmt-ph"><ImageIcon size={24} /><span className="cp-ph-dim">{dim}</span></div>}
-                  <div className="cp-cmt-scrim" />
+                  {!simple && <div className="cp-cmt-scrim" />}
                 </>
               )}
               <div className="cp-cmt-body">
-                <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
-                <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
+                {/* Titulo y descripcion son opcionales por separado (una card de solo
+                    imagen + titulo no lleva texto): el relleno va solo en la card vacia. */}
+                {(it.title || !(it.description || it.image)) && (
+                  <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
+                )}
+                {!simple && (it.description || !(it.title || it.image)) && (
+                  <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
+                )}
               </div>
               {/* La flecha aparece cuando la card tiene link cargado. */}
               {it.url && <span className="cp-cmt-go" aria-hidden="true"><ArrowRight size={18} /></span>}
@@ -1138,8 +1178,8 @@ const RENDERERS = {
                 <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
               </div>,
               <div key={`b${i}`} className="cp-mosaic-box" style={{ background: acc }}>
-                <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>
-                <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>
+                {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>}
+                {(it.description || !it.title) && <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>}
               </div>,
             ])}
           </div>

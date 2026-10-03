@@ -172,8 +172,8 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
           // El archivo de MOBILE. Si el catalogo no declara medida mobile se repite el de
           // desktop: el campo es obligatorio en el CMS y no hay de donde sacar otra.
           const mob = `${medio.nombre}-mobile.${ext}`
-          if (medio.mobile) await recortar({ ...medio.mobile, salida: join(carpeta, mob) })
-          else copyFileSync(join(carpeta, dsk), join(carpeta, mob))
+          const rMob = medio.mobile ? await recortar({ ...medio.mobile, salida: join(carpeta, mob) }) : null
+          if (!rMob) copyFileSync(join(carpeta, dsk), join(carpeta, mob))
 
           const kb = Math.round(statSync(join(carpeta, dsk)).size / 1024)
           const registro = {
@@ -188,8 +188,17 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
           medio.campo.contenedor[medio.campo.key] = registro
           // El campo de mobile del hub queda apuntando al mismo medio: en el CMS es UNA
           // sola entidad con las dos imagenes adentro.
+          // Pero el registro del archivo mobile dice de DONDE salio ese archivo: si el hub trae
+          // una foto mobile aparte, el origen es esa, no la de desktop. Antes se copiaba el de
+          // desktop y cualquier revision posterior (volver a recortar, auditar) trabajaba sobre
+          // la foto equivocada.
           if (medio.campoMobile) {
-            medio.campoMobile.contenedor[medio.campoMobile.key] = { ...registro, archivo: join(slug, mob) }
+            medio.campoMobile.contenedor[medio.campoMobile.key] = {
+              ...registro,
+              origen: medio.mobile?.origen || registro.origen,
+              archivo: join(slug, mob),
+              ...(rMob ? { de: `${rMob.nat.w}×${rMob.nat.h}`, a: `${medio.mobile.w}×${medio.mobile.h}` } : {}),
+            }
           }
           indice.push({
             nombre: medio.nombre, desktop: { archivo: dsk }, mobile: { archivo: mob },

@@ -45,6 +45,20 @@ export const PARAGRAFOS = {
     ctas: 'field_c_link',
   },
 
+  // Texto al costado de una imagen. En el hub la posicion es un select NUESTRO
+  // (Izquierda / Derecha); en el CMS es un select de Classy cuyos valores de maquina
+  // todavia no estan confirmados contra el formulario real. Por eso va en `conOpciones`:
+  // el valor del hub se traduce con la tabla `opciones` de ESE campo en el mapping, y si
+  // la tabla no esta, frena en vez de adivinar.
+  text_image: {
+    tipo: 'c_sideimagetext',
+    campos: { body: 'field_c_text', ...T.titulo, image_position: 'classy.dsu_c_sideimagetext_image_position' },
+    conOpciones: ['image_position'],
+    media: { image: 'field_c_image', image_alt: null, image_mobile: null, image_mobile_alt: null },
+    // Como la card: UN link suelto, no una lista.
+    ctaPlano: { cta_label: 'field_c_link.title', cta_url: 'field_c_link.uri', cta_target: 'field_c_link.target' },
+  },
+
   external_video: {
     tipo: 'c_externalvideo',
     campos: { ...T.titulo, video_url: 'field_c_external_video' },
@@ -72,6 +86,27 @@ export const PARAGRAFOS = {
     media: { image: 'field_c_image', image_alt: null, image_mobile: null, image_mobile_alt: null },
     // La card tiene UN link suelto, no una lista.
     ctaPlano: { cta_label: 'field_c_link.title', cta_url: 'field_c_link.uri', cta_target: 'field_c_link.target' },
+  },
+
+  // CONTENEDORES. Sus hijos son componentes de verdad y van a una ranura: en el layout, la
+  // columna (el `tab_index` del hub es el indice de columna); en las pestañas, un
+  // `comp_tabs_tab_item` por pestaña con UN componente adentro (ver `pestanas`).
+  layout_columns_2: { tipo: 'layout_columns_2', campos: {} },
+
+  // El Tabs del CMS NO tiene titulo ni subtitulo propios (el formulario real trae solo el
+  // tipo, Avanzado y Classy). Por eso no estan en `campos`: si el bloque del hub trae uno,
+  // el traductor frena en vez de perderlo — donde va ese titulo es una decision de la
+  // pagina, no de la tabla.
+  tabs: {
+    tipo: 'comp_tabs',
+    campos: {},
+    pestanas: {
+      como: 'comp_tabs_tab_item',
+      campos: { label: 'field_title', description: 'field_description' },
+      // Lo que una pestaña del CMS acepta adentro (el dropbutton de Gin del formulario).
+      admite: ['banner', 'banner_wrapper', 'block', 'html', 'ln_c_cardgrid', 'c_externalvideo',
+        'c_image', 'c_sideimagetext', 'c_text'],
+    },
   },
 
   accordion_grid: {

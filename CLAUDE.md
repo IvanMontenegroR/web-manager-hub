@@ -97,7 +97,7 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
-  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag (lista plana, sin
+  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag que NO estan en Done (lista plana, sin
   agrupar por estado; cada una = tema en NEGRITA y debajo la nota, una linea por renglon). Devuelve
   `{ html, text }`: el modal muestra el HTML renderizado (lo que se va a pegar) y "Copiar con formato"
   escribe `text/html` + `text/plain` al portapapeles con `ClipboardItem`, asi Outlook pega negritas y
@@ -272,6 +272,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
      variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
      todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
+     La otra cosa que sangra es una IMAGEN: el `c_image` con **Image Style = Full Width**
+     (`bg_position_full_width`, Classy) va de borde a borde (`.cp-cimg--full`, que tambien lleva
+     `.cp-bleed`, asi hereda el pegado al footer). Ahi la imagen va sin padding ni redondeo y solo el
+     texto vuelve al gutter. Para que ademas no deje aire contra el footer se carga
+     `spacing = space_py_0`.
      El breakout va en el `.pb-block` (tiene `overflow:hidden`, adentro se recortaria) y apunta al render
      PROPIO del bloque (`> .cp-render > .cp-bleed`), asi un texto con fondo metido en una columna de un
      layout no hace sangrar al contenedor. `--bleed-x` es el padding lateral propio de cada bloque, para
@@ -326,6 +331,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Los dos checkbox `Show ...` salieron del formulario real y estan cargados como campos del CMS, pero
      **que dibujan en el sitio esta PENDIENTE**: el mockup todavia no los pinta. Cuando se sepa, se agrega
      al render y se saca esta nota.
+     El modo **Cards simple** (`cards-simple`, "only image + title") tiene mockup propio (`CMT_SIMPLE`):
+     foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color del texto de la pagina, sin
+     descripcion (asi lo muestra el playbook del CMS, comp-image59/60). Antes caia a las verticales y el
+     titulo quedaba blanco encima de la foto: ilegible sobre fotos claras (los ingredientes).
      La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
@@ -386,6 +395,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      los bloques anidados se capturen SIN el chrome del builder (barra de edicion y boton de agregar).
      Todo esto para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
+     La excepcion son las posiciones SIN medida en el catalogo (`text_image` y el `c_image` fuera de
+     "Image Background Box"): ahi va el archivo original entero, asi que el mockup lo dibuja en su
+     proporcion (`<Img natural>` = `height: auto` del `<img>`, que html2canvas si resuelve). Con un alto
+     fijo y cover recortaba justo lo que en el sitio se ve (un perro sin patas, un circulo cortado).
+     El "Image Background Box" tambien va en su proporcion: su imagen sale a la medida del catalogo
+     (2088×1044, 2:1), y con alto fijo se recortaba a ~3:1 y se perdian claims y badges del borde.
+     Una imagen en su proporcion no lleva el gris de carga detras (`.cp-img--nat`): en un PNG
+     transparente se veia como un recuadro que en el sitio no existe.
+     El titulo de un bloque de contenido (Texto, texto con imagen, Imagen) con HTML tag **h1** se dibuja
+     como titulo de pagina (`hClass` -> `.cp-hpage`): pasa cuando no hay hero (paginas legales) o el hero
+     es texto al lado de la foto, y con el estilo de un h2 quedaba mas chico que las secciones.
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
@@ -506,6 +526,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   reutiliza y el runner entra a su ficha a completarle la portada **solo si no tiene ninguna**: llenar un
   campo vacio no es pisar la eleccion de nadie, pero cambiar una portada cargada si lo seria — un medio lo
   comparten todas las paginas que lo referencian.
+  El **Carrusel de productos** (`product_list`) lleva **subtitulo** opcional debajo del titulo: un titulo
+  largo se parte en titulo corto + subtitulo (lo que viene despues de los dos puntos, o la parte que
+  describe), igual que en los demas carruseles. Ver `runner/CRITERIOS.md`.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.
@@ -522,10 +545,26 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   una lista plana de 30 items no se lee.
   El builder tiene toggle Editar/Vista previa: en preview oculta paleta/editor/toolbars y muestra la
   pagina a sangre con el gutter real (sin los espacios de edicion).
+  Y un toggle **Desktop / Mobile**: en mobile la pagina se dibuja a 390px (`.pb-canvas--mobile` +
+  `.pb-device`, que en desktop es `display: contents` y no cambia nada) con la version mobile de cada
+  imagen. Los renders de los componentes NO saben que existe el mobile: `mobileContent` pisa cada
+  campo `<x>` con su `<x>_mobile` cargado (tambien adentro de las listas) y el resto lo acomoda el CSS
+  scopeado. Las reglas salen del sitio nuevo en staging mirado a 390px: gutter 20px, header con
+  hamburguesa a la izquierda del logo, Secondary Hero 1:1 con el texto a la izquierda y centrado en
+  vertical ENCIMA de la foto, carruseles con la card siguiente asomando, columnas y mosaico apilados.
+  El Excel sale siempre de desktop (el boton se apaga en mobile).
   El **Header** (`preview/SiteHeader.jsx`) y el **Footer** (`preview/SiteFooter.jsx`) del sitio son
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
   bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+- **Criterios de migracion** (`runner/CRITERIOS.md`): las decisiones del Websites Expert al revisar
+  paginas migradas del sitio viejo (medidas, heroes, contraste, carrusel de productos, iconos, CTAs...),
+  cada una con el caso que la origino. Se lee ANTES de traducir o corregir una pagina, y cada decision
+  nueva se anota ahi en el momento, no al final de la ronda.
+- **Pedidos de cambio a NBS** (`docs/pedidos-nbs.md`): el formato de los slides que el Expert sube
+  por el request form de NBS para cambiar algo publicado (pptx de 2 slides + PDF + zip de imagenes
+  livianas, en castellano: el pedido como estado FINAL por posicion con CTA y link, y un De / para).
+  Se lee antes de armar uno.
 - **Menu del sitio** (`site_menu`, `src/lib/menuDb.js`, `src/components/pages/MenuEditor.jsx`):
   el header (`purina:header-main`) es config GLOBAL **por mercado**, no contenido de una pagina,
   asi que se edita en su propia pantalla (boton "Menú del sitio" en el tracker de paginas) y no

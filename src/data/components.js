@@ -821,6 +821,9 @@ export const COMPONENTS = [
     fields: [
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Explora Pro Plan® y encuentra la nutrición ideal con apoyo experto' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      // Subtitulo: un titulo largo se parte en titulo corto + subtitulo (lo que viene
+      // despues de los dos puntos, o la parte que describe), como en los demas carruseles.
+      { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'text', placeholder: 'Alimento seco para gatos con una fórmula reductora de alérgenos' },
       // Imagen izquierda OPCIONAL: toggle del builder (cms). Si esta activo, se muestra
       // la columna de imagen a la izquierda del carrusel y su campo se exporta.
       { key: 'show_left_image', label: 'Mostrar imagen izquierda', type: 'checkbox', cms: true, default: false },
@@ -838,6 +841,10 @@ export const COMPONENTS = [
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
+      // Avanzado, como en todo paragraph (el Section ID hace falta: hay cards que anclan a un
+      // carrusel). Sin el trio "See more": el carrusel ya tiene su boton "Ver todos" con keys
+      // propias, y `see_more_url` chocaria con la del boton.
+      ...advanced().filter((f) => !f.key.startsWith('see_more')),
     ],
     // Imagen izquierda opcional: mismo tamaño en desktop y mobile (por eso sin link
     // mobile). La spec solo aplica si la imagen izquierda esta activada.

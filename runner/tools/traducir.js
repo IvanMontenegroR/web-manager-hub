@@ -93,6 +93,28 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
     }
   }
 
+  // Un select cuyo valor en el hub NO es el valor de maquina del CMS (la posicion de la
+  // imagen del Texto + Imagen: "Izquierda" en el hub). La equivalencia es de ESTE sitio,
+  // asi que vive en el mapping, en `opciones` del campo, y sale del volcado del
+  // formulario. Si no esta, o no trae ese valor, se frena: mandar "Izquierda" a un select
+  // que espera otra cosa es un valor inventado, y el orden por defecto del CMS dejaria la
+  // imagen del lado que no era sin que nadie se entere.
+  function valorDelCms(def, k, v, donde) {
+    if (!def.conOpciones?.includes(k) || !porTipo) return v
+    const campo = def.campos[k]
+    const opciones = porTipo[def.tipo]?.fields?.[campo]?.opciones
+    if (!opciones) {
+      frenar(`${donde}: el mapping no tiene confirmadas las opciones de "${campo}" (${def.tipo}). `
+        + 'Agregá `opciones` a ese campo en el mapping, con el valor del hub y el de maquina '
+        + 'del CMS, sacados del volcado del formulario (npm run inspect).')
+    }
+    if (!(v in opciones)) {
+      frenar(`${donde}: "${v}" no esta en las opciones de "${campo}" del mapping `
+        + `(conoce: ${Object.keys(opciones).join(', ')}).`)
+    }
+    return opciones[v]
+  }
+
   function traducir(componente, contenido, donde) {
     const def = PARAGRAFOS[componente]
     if (!def) {
@@ -106,7 +128,7 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
 
     for (const [k, v] of Object.entries(contenido || {})) {
       if (vacio(v)) continue
-      if (def.campos[k]) { poner(def.campos[k], v); continue }
+      if (def.campos[k]) { poner(def.campos[k], valorDelCms(def, k, v, donde)); continue }
       if (def.ctaPlano?.[k]) { poner(def.ctaPlano[k], v); continue }
       if (def.media && k in def.media) {
         const url = origenDe(v)
@@ -206,14 +228,52 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
     return bloque
   }
 
+  // LAS PESTAÑAS. En el hub son UN bloque con una lista de pestañas y los componentes
+  // colgando con su `tab_index`; en el CMS son tres niveles: el Tabs, un Tab por pestaña
+  // y UN componente adentro de cada Tab (la cardinalidad del campo es 1).
+  function pestanas(def, b, donde) {
+    const lista = Array.isArray(b.content?.tabs) ? b.content.tabs : []
+    if (!lista.length) frenar(`${donde}: el bloque de pestañas no tiene pestañas cargadas.`)
+    const hijosDe = lista.map(() => [])
+    for (const [j, h] of (b.hijos || []).entries()) {
+      // Una pestaña borrada no pierde sus hijos: caen en la ULTIMA, igual que en el builder.
+      const k = Math.min(h.tab_index ?? 0, lista.length - 1)
+      const th = traducir(h.component_key, h.content, `${donde} > pestaña ${k + 1}`)
+      if (!th) continue
+      if (!def.admite.includes(th.type)) {
+        frenar(`${donde} > pestaña ${k + 1}: una pestaña del CMS no admite "${th.type}" `
+          + `(admite ${def.admite.join(', ')}).`)
+      }
+      hijosDe[k].push(th)
+    }
+    return lista.map((tab, k) => {
+      if (hijosDe[k].length > 1) {
+        frenar(`${donde} > pestaña ${k + 1} ("${tab?.label || ''}"): tiene ${hijosDe[k].length} `
+          + 'componentes y en el CMS una pestaña lleva UNO solo.')
+      }
+      const fields = {}
+      for (const [kk, campo] of Object.entries(def.campos)) {
+        if (vacio(tab?.[kk])) continue
+        verificar(def.como, campo, `${donde} > pestaña ${k + 1}`)
+        fields[campo] = tab[kk]
+      }
+      const item = { type: def.como, fields, slot: 0 }
+      if (hijosDe[k].length) item.children = [{ ...hijosDe[k][0], slot: 0 }]
+      return item
+    })
+  }
+
   const blocks = []
   for (const [i, b] of bloques.entries()) {
     const donde = `bloque ${i + 1}`
     const t = traducir(b.component_key, b.content, donde)
     if (!t) continue
-    // Contenedores del hub (pestañas, layouts): sus hijos son componentes de verdad, y
-    // su ranura sale del `tab_index`, que es el indice de slot.
-    if (b.hijos?.length && !PARAGRAFOS[b.component_key]?.lista) {
+    const pest = PARAGRAFOS[b.component_key]?.pestanas
+    if (pest) {
+      t.children = pestanas(pest, b, donde)
+    } else if (b.hijos?.length && !PARAGRAFOS[b.component_key]?.lista) {
+      // Contenedores de ranuras FIJAS (los layouts): sus hijos son componentes de verdad,
+      // y su ranura sale del `tab_index`, que es el indice de slot.
       const dentro = b.hijos
         .map((h, j) => {
           const th = traducir(h.component_key, h.content, `${donde} > adentro ${j + 1}`)

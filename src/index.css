@@ -1530,6 +1530,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-center { text-align: center; }
 .cp-h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; margin: 6px 0; }
 .cp-h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+/* h1 de un bloque de contenido = titulo de la pagina (ver hClass). */
+.cp-hpage { font-size: 38px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.12; margin-bottom: 10px; }
 .cp-sub { font-size: 14px; color: #545c67; margin-bottom: 14px; }
 .cp-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--purina); }
 .cp-p { font-size: 14px; line-height: 1.6; color: #3a424e; margin: 6px 0; }
@@ -1583,6 +1585,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cimg--bottom .cp-img { border-radius: 14px; }
 .cp-cimg-txt > :last-child { margin-bottom: 0; }
 .cp-img { width: 100%; object-fit: cover; display: block; background: #e5e9f0; }
+/* Imagen en su proporcion (original entero): sin el gris de carga detras, que en un PNG
+   transparente se veia como un recuadro que en el sitio no existe. */
+.cp-img.cp-img--nat { background: transparent; }
 .cp-img-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aab2bd; }
 /* Dimension recomendada dentro del placeholder de imagen. */
 .cp-ph-dim { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: #97a0ab; }
@@ -1856,6 +1861,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-plist { padding: 26px 30px; }
 /* Titulo opcional del carrusel de productos. */
 .cp-plist-h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; color: #1b252e; margin-bottom: 22px; max-width: 620px; }
+.cp-plist-h2.cp-plist-h2--sub { margin-bottom: 6px; }
+.cp-plist-sub { font-size: 15px; line-height: 1.45; color: #4a5561; margin-bottom: 22px; max-width: 620px; }
+.cp-dark .cp-plist-sub { color: #b9c0c9; }
 /* Con imagen izquierda: fila [imagen | contenido]. La imagen es 650×692 (vertical).
    align-items:flex-start => la imagen arranca a la misma altura que las cards.
    Sin imagen, el layout no cambia (bloque normal). */
@@ -1901,8 +1909,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    rgba(0,0,0,.3) uniforme, contenido CENTRADO, titulo fs-display-sm (3rem),
    descripcion body-lg, CTA .btn-primary (pill rojo). */
 .cp-hero { position: relative; height: 420px; border-radius: 16px; overflow: hidden; }
-/* Secondary Hero: banda mas ancha/baja (ratio 3:1), redondeada como el hero. */
-.cp-hero--wide { height: 280px; }
+/* Secondary Hero: banda mas ancha/baja (ratio 3:1), redondeada como el hero. Alto FIJO
+   (html2canvas resuelve mal aspect-ratio) calculado para dar 3:1 al ancho de captura
+   (1180px). Con los 280px de antes quedaba en 4:1 o mas y el preview le cortaba arriba
+   y abajo a una imagen que el CMS muestra entera (2100x700). */
+.cp-hero--wide { height: 393px; }
 .cp-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cp-hero-ph { background: linear-gradient(120deg, #5b6b7a 0%, #33414e 60%, #26313b 100%); }
 .cp-hero-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); }
@@ -2040,6 +2051,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    deja una franja blanca que en el sitio no existe. Se come el padding de abajo del
    container (56px). */
 .pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed):last-child { margin-bottom: -56px; }
+/* Imagen con Image Style "Full Width": lo que sangra es la IMAGEN, no un fondo. El bloque
+   no lleva padding (la imagen va de borde a borde) y solo el texto vuelve al gutter. */
+.cp-cimg--full .cp-img { border-radius: 0; }
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-bleed.cp-cimg--full { padding-inline: 0; }
+.pb-canvas.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-cimg--full > .cp-cimg-txt { padding-inline: 60px; }
 
 .pb-canvas.preview .pb-block--banner { margin-inline: -36px; }
 /* Carrusel de servicios: FULL BLEED (0 del borde del container). */
@@ -2183,6 +2199,16 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-cmt--nums .cp-cmt-ttl { color: var(--acc, #ED1C24); font-size: 20px; font-weight: 600; line-height: 1.22; text-shadow: none; }
 .cp-cmt--nums .cp-cmt-desc { color: #1b252e; font-size: 13.5px; font-weight: 400; line-height: 1.5; text-shadow: none; margin-top: 12px; }
 .cp-cmt--nums .cp-cmt-go { box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
+
+/* --- Variante SIMPLE (Cards simple: solo imagen + titulo). Referencia: playbook del CMS,
+   comp-image59/60. Foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color
+   del texto de la pagina (oscuro sobre blanco, claro en las paginas de marca oscuras). La
+   card no tiene fondo ni alto fijo; la foto si, porque html2canvas no resuelve aspect-ratio. --- */
+.cp-cmt--simple .cp-cmt-card { flex: 0 0 360px; height: auto; background: none; border-radius: 0; overflow: visible; }
+.cp-cmt--simple .cp-cmt-img { position: static; display: block; width: 100%; height: 360px; border-radius: 14px; }
+.cp-cmt--simple .cp-cmt-body { position: static; margin-top: 14px; }
+.cp-cmt--simple .cp-cmt-ttl { color: inherit; font-size: 18px; font-weight: 500; line-height: 1.3; text-shadow: none; }
+.cp-cmt--simple .cp-cmt-go { display: none; }
 
 /* ===== Bloque 50/50 (titulo + texto | texto o desplegable) ===== */
 /* padding 26px 30px = mismo spacing interno que el resto de los bloques de contenido. */
@@ -2464,6 +2490,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-bc-link:hover { color: #e91c24; }
 .cp-bc-current { color: #000; }
 .cp-bc-sep { color: #797777; }
+/* Marca con fondo oscuro (Pro Plan): el breadcrumb negro sobre negro no se lee. */
+.pb-page--dark .cp-bc-link { color: #bdbdbd; }
+.pb-page--dark .cp-bc-current { color: #fff; }
+.pb-page--dark .cp-bc-sep { color: #8a8a8a; }
 
 /* ===== Footer global (site footer) ===== */
 .pb-footer-host { margin-top: 6px; overflow-x: auto; overflow-y: hidden; box-shadow: var(--shadow-sm); }
@@ -2515,3 +2545,105 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* Tarjetas de la derecha, adentro de cada menu (son suyas, no del header). */
 .mn-cards { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
 .mn-cards-t { font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+
+/* ===== Vista MOBILE del builder (toggle Desktop / Mobile) =================================
+   Es para REVISAR como queda la pagina en un celular: el mismo contenido con la version
+   mobile de cada imagen (`mobileContent` en PageBuilder) dibujado a 390px. Todo va scopeado
+   a `.pb-canvas--mobile`: los renders de los componentes no saben que existe el mobile, el
+   que se acomoda es el CSS. Los valores salen del sitio nuevo en staging mirado a 390px
+   (gutter 20px, hero 1:1 con el texto a la izquierda centrado en vertical ENCIMA de la foto,
+   cards de ~300px) y del Design Guidelines 2026 (secciones con fondo, 60px arriba y abajo).
+   En desktop `.pb-device` no existe como caja (display: contents): el layout no cambia. */
+.pb-device-toggle { display: inline-flex; gap: 0; }
+.pb-device-toggle .btn { border-radius: 0; }
+.pb-device-toggle .btn:first-child { border-radius: var(--radius-sm, 6px) 0 0 var(--radius-sm, 6px); }
+.pb-device-toggle .btn:last-child { border-radius: 0 var(--radius-sm, 6px) var(--radius-sm, 6px) 0; margin-left: -1px; }
+.pb-device { display: contents; }
+.cp-header-burger { display: none; color: #fff; }
+.pb-canvas--mobile { align-items: center; background: #e9ebef; }
+.pb-canvas--mobile .pb-device {
+  display: flex; flex-direction: column; gap: 14px; width: 390px; flex: none; background: #fff;
+  box-shadow: 0 2px 18px rgba(20, 26, 36, .16); border-radius: 18px; overflow: hidden;
+}
+.pb-canvas--mobile.preview .pb-device { gap: 0; }
+/* Header: logo + buscador + hamburguesa; los menus y el Pet Club no entran en la barra. */
+.pb-canvas--mobile .pb-header-host { overflow: hidden; }
+.pb-canvas--mobile .pb-header-host .cp-header { min-width: 0; height: 56px; }
+.pb-canvas--mobile .cp-header-inner { padding: 0 20px; gap: 12px; }
+.pb-canvas--mobile .cp-header-logo-img { height: 28px; }
+.pb-canvas--mobile .cp-header-nav, .pb-canvas--mobile .cp-header-petclub { display: none; }
+.pb-canvas--mobile .cp-header-logo-img { margin: 0 auto; }
+.pb-canvas--mobile .cp-header-actions { gap: 18px; }
+.pb-canvas--mobile .cp-header-burger { display: inline-flex; }
+.pb-canvas--mobile .cp-mm { display: none; }
+/* Pagina: gutter de 20px y 32px entre secciones. */
+.pb-canvas--mobile.preview .pb-page, .pb-canvas--mobile.preview .pb-page--brand { padding: 4px 20px 40px; gap: 32px; }
+.pb-canvas--mobile.preview .pb-block--breadcrumb { margin-bottom: -20px; }
+.pb-canvas--mobile .cp-block, .pb-canvas--mobile .cp-brands, .pb-canvas--mobile .cp-vid, .pb-canvas--mobile .cp-mosaic { padding: 12px 0; }
+.pb-canvas--mobile .cp-hpage { font-size: 28px; }
+.pb-canvas--mobile .cp-h2, .pb-canvas--mobile .cp-vid-title { font-size: 20px; }
+.pb-canvas--mobile .cp-brands-title, .pb-canvas--mobile .cp-plist-h2, .pb-canvas--mobile .cp-mosaic-title, .pb-canvas--mobile .cp-tabs-title { font-size: 22px; }
+.pb-canvas--mobile .cp-cols-2 { column-count: 1; }
+/* A sangre: el breakout compensa el gutter de 20px en vez del de 60px. */
+.pb-canvas--mobile.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) { margin-inline: -20px; }
+.pb-canvas--mobile.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-bleed { padding-inline: 20px; }
+.pb-canvas--mobile.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed):last-child { margin-bottom: -40px; }
+.pb-canvas--mobile.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-bleed.cp-cimg--full { padding-inline: 0; }
+.pb-canvas--mobile.preview .pb-page > .pb-block:has(> .cp-render > .cp-bleed) > .cp-render > .cp-cimg--full > .cp-cimg-txt { padding-inline: 20px; }
+/* Banner: la imagen mobile del catalogo es 1:1 (Secondary Hero) o 9:16 / 2:3 (Main, Brand):
+   el alto sale de la proporcion, no del alto fijo de desktop. El texto va encima, como en
+   desktop, con la tipografia del celular. */
+.pb-canvas--mobile.preview .pb-block--banner { margin-inline: 0; }
+.pb-canvas--mobile .cp-hero { height: auto; aspect-ratio: 9 / 16; border-radius: 14px; }
+.pb-canvas--mobile .cp-hero--wide { aspect-ratio: 1 / 1; }
+.pb-canvas--mobile .cp-hero-img { position: absolute; inset: 0; }
+.pb-canvas--mobile .cp-hero-content { padding: 24px 16px; }
+.pb-canvas--mobile .cp-hero-title { font-size: 26px; line-height: 1.15; }
+.pb-canvas--mobile .cp-hero-desc { font-size: 15px; line-height: 1.35; }
+.pb-canvas--mobile .cp-hero-cta { margin-top: 14px; }
+/* Promotional (solo imagen): el mockup le pone 3:1 inline; en el celular la imagen es 2:3. */
+.pb-canvas--mobile .cp-banner .cp-img { height: auto !important; aspect-ratio: 2 / 3 !important; }
+/* Carruseles: una card y el borde de la siguiente, que es lo que avisa que se desliza. */
+.pb-canvas--mobile.preview .pb-block--product_list { margin-right: -20px; }
+.pb-canvas--mobile .cp-plist { padding: 12px 0; }
+.pb-canvas--mobile .cp-plist-row, .pb-canvas--mobile .cp-cmt-row, .pb-canvas--mobile .cp-brands-row { margin-right: -20px; gap: 14px; }
+.pb-canvas--mobile .cp-plist-card, .pb-canvas--mobile .cp-plist-promo { flex: 0 0 300px; }
+.pb-canvas--mobile .cp-plist-tabs { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; gap: 20px; }
+.pb-canvas--mobile .cp-plist-head { gap: 10px; }
+.pb-canvas--mobile .cp-plist-arrows, .pb-canvas--mobile .cp-brands-head .cp-plist-arrows { display: none; }
+.pb-canvas--mobile .cp-cmt-card { flex: 0 0 290px; height: 435px; }
+.pb-canvas--mobile .cp-cmt--widet .cp-cmt-card, .pb-canvas--mobile .cp-cmt--wideb .cp-cmt-card { flex: 0 0 300px; height: 250px; }
+.pb-canvas--mobile .cp-cmt--icon .cp-cmt-card { flex: 0 0 260px; height: 260px; }
+.pb-canvas--mobile .cp-cmt--nums .cp-cmt-card { flex: 0 0 280px; height: auto; min-height: 300px; }
+.pb-canvas--mobile .cp-cmt--simple .cp-cmt-card { flex: 0 0 260px; }
+/* Mosaico: una columna, cada imagen seguida de su caja. */
+.pb-canvas--mobile .cp-mosaic-grid { grid-template-columns: 1fr; gap: 12px; }
+.pb-canvas--mobile .cp-mosaic-box { aspect-ratio: auto; min-height: 220px; }
+/* Columnas, texto con imagen, pestañas, imagen con card: se apilan. */
+.pb-canvas--mobile .cp-cols { grid-template-columns: 1fr !important; gap: 16px; }
+.pb-canvas--mobile .cp-ti, .pb-canvas--mobile .cp-ti.rev { flex-direction: column; align-items: stretch; gap: 16px; }
+.pb-canvas--mobile .cp-tabs-bar { justify-content: flex-start; overflow-x: auto; gap: 18px; }
+.pb-canvas--mobile .cp-tab { white-space: nowrap; }
+.pb-canvas--mobile .cp-fib-card { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 18px; }
+.pb-canvas--mobile .cp-fib-title { font-size: 20px; }
+/* Footer: logo arriba y los menus en dos columnas. */
+.pb-canvas--mobile .cp-footer-inner { padding: 28px 20px 18px; }
+.pb-canvas--mobile .cp-footer-main { flex-direction: column; gap: 24px; }
+.pb-canvas--mobile .cp-footer-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 16px; justify-content: stretch; }
+.pb-canvas--mobile .cp-footer-col { min-width: 0; }
+.pb-canvas--mobile .cp-footer-copy { flex-direction: column; align-items: flex-start; }
+.pb-canvas--mobile .cp-footer-legal { gap: 8px 14px; max-width: 100%; }
+.pb-canvas--mobile .cp-footer-copy > * { max-width: 100%; }
+.pb-canvas--mobile .cp-plist-more { padding-right: 20px; }
+.pb-canvas--mobile .cp-tabs { padding-inline: 0; }
+.pb-canvas--mobile .cp-cmt--icon .cp-cmt-card, .pb-canvas--mobile .cp-cmt--nums .cp-cmt-card { height: auto; min-height: 220px; }
+/* La fila de productos sangra a la derecha, pero el titulo y las pestañas respetan el gutter. */
+.pb-canvas--mobile .cp-plist-h2, .pb-canvas--mobile .cp-plist-sub, .pb-canvas--mobile .cp-plist-head { padding-right: 20px; }
+.pb-canvas--mobile .cp-cmt-ttl { font-size: 19px; line-height: 1.2; }
+.pb-canvas--mobile .cp-cmt-desc { font-size: 14px; }
+.pb-canvas--mobile .cp-mosaic-box { min-height: 0; padding: 22px 20px; }
+.pb-canvas--mobile .cp-mosaic-box-d { margin-top: 12px; }
+.pb-canvas--mobile .cp-hero-cta { font-size: 14px; padding: 10px 20px; max-width: 100%; }
+/* La flecha de una card con link va abajo a la derecha: el texto le deja lugar para que no
+   la tape (pasaba en las cards de Vet Diets, en desktop y en mobile). */
+.cp-cmt-card:has(.cp-cmt-go) .cp-cmt-desc { padding-right: 46px; }
