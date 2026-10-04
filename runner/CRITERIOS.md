@@ -208,7 +208,16 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Tres columnas con imagen + titulo + texto son un mosaico** (tres imagenes y tres cards), no un
   layout de columnas con Imagen y Texto sueltos. Origen: MX, ronda 6 ("Evalua la condicion corporal
   de tu mascota").
-- **La card con icono tiene alto fijo y corta la descripcion a tres lineas.** Un texto que no entra no
+- **Una card cuya imagen es en realidad un icono (un logo, un ingrediente o un sello sobre fondo
+  liso) pasa a card con icono (Card Icon Square)**, con un icono del set que diga lo mismo. Se ve
+  igual en desktop y mobile y no hay imagen que el texto pueda pisar. Se pierde el logo o el sello
+  como imagen: se acepta si el nombre ya esta en el titulo o el sello aparece en otro bloque de la
+  pagina. Origen: MX, revision mobile (Opti Tecnologias / Carne fresca / Formulas respaldadas en La
+  nutricion mas avanzada -> `genetics`, `beef`, `stethoscope`).
+- **La card con icono tiene alto fijo y corta la descripcion a tres lineas.** El limite real lo pone
+  MOBILE: entran unos 70 caracteres (unos 90 en desktop), medido en el builder. Si hay que acortar,
+  se conserva la esencia y el tono del original (la primera persona, el diferencial: "exclusiva",
+  "carne real como primer ingrediente", "500 cientificos") y se mide antes de cargar. Un texto que no entra no
   se recorta: si son preguntas y respuestas va a un acordeon; si no, se reparten las mismas palabras
   entre titulo y descripcion para que entren.
 - **Un texto metido en la foto de una card queda debajo de la descripcion**: se recorta la foto sin
