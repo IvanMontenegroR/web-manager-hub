@@ -20,3 +20,8 @@ manifests/*.json
 !manifests/ejemplo-*.json
 # Imagenes recortadas: tambien se generan, y pesan.
 imagenes/
+
+# Lecturas del CMS (`npm run leer`) y planes de cambios (`npm run aplicar`): son contenido
+# del sitio, y el repo es publico.
+lecturas/
+cambios/

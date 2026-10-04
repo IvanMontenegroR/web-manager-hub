@@ -117,7 +117,10 @@ npm run verify -- mapping/purina-latam.json form.html
 
 - **Siempre borrador.** El runner no publica. Si el mapping sabe donde esta el check de
   publicado, lo destilda. Nada llega al publico sin que un humano lo apruebe.
-- **No modifica nada existente.** Solo entra a "crear contenido". No edita, no borra.
+- **No modifica nada existente, salvo con un plan revisado.** `build` solo entra a "crear
+  contenido". La unica forma de cambiar una pagina que ya existe es `aplicar`, que toca
+  solo los campos que dice el plan y solo si siguen teniendo el valor que se leyo (ver
+  "Leer y cambiar paginas que ya existen"). Nunca borra.
 - **Frena ante la duda.** Un campo que el mapping no conoce, o que no aparece en el
   formulario, es un ERROR y corta la corrida. Una pagina a medio armar es peor que una
   que no se armo. Si corta antes de `--save`, no quedo nada en el CMS.
@@ -451,14 +454,75 @@ existe se actualiza y se le reemplazan todos los bloques. Correrlo dos veces no 
 nada. Lo que quedo en `revisar` baja a `pages.notes`, que es donde se buscan los
 outliers. Con `--seco` muestra que haria sin escribir.
 
+## Leer y cambiar paginas que ya existen
+
+Dos comandos que van juntos y que **no usan el navegador**: hablan con Drupal por HTTP,
+como lo haria un navegador, asi que corren igual en tu maquina que en una sesion en la
+nube. Las credenciales salen de `DRUPAL_MCP_USER_CONTENT_MX` / `DRUPAL_MCP_PASS_CONTENT_MX`
+(el sufijo es `<ENTORNO>_<MERCADO>`); si no estan, las preguntan en la terminal. Nunca se
+escriben en disco. Se presentan como `migration-mx` (User-Agent) y van de a un pedido por
+vez, con una pausa entre uno y otro.
+
+```bash
+npm run leer -- /adopta/tenencia-responsable     # una pagina
+npm run leer -- /adopta --prefijo                # todas las que empiezan con /adopta
+npm run aplicar -- cambios/adopta-ctas.json      # ENSAYO: no guarda nada
+npm run aplicar -- cambios/adopta-ctas.json --save
+```
+
+**`leer`** abre el formulario de edicion, despliega todos los paragraphs (el "Editar todo"
+de cada nivel, que es un pedido AJAX y no guarda nada) y **nunca envia el formulario**.
+Devuelve cada paragraph con su posicion (`8`, `2 > field_c_subitems 0`), su tipo y cada
+campo con su **nombre exacto** y su valor:
+
+```
+[8] Content: Text
+    [field_c_link][0][uri] = #
+    [field_c_link][0][title] = Perros
+```
+
+Lo guarda en `lecturas/<ruta>.json`, que no se versiona: es contenido del CMS y el repo es
+publico. Se lee el formulario y no la pagina publica porque la publica no dice que campo es
+cada cosa ni el numero de cada paragraph, y no muestra lo que no se dibuja (los selects de
+Classy, los HTML tag).
+
+**`aplicar`** recibe un plan: por pagina, una lista de `{ campo, antes, despues }` con el
+nombre completo del campo (`field_ln_n_components[8][subform][field_c_link][0][uri]`, el
+que dio `leer` con su prefijo). Las reglas son las que permiten correrlo sin mirar cada
+pagina a mano:
+
+- **Solo escribe en content** (`SITIOS` en `tools/drupal-http.js`, campo `escribe`). En
+  cualquier otro sitio el ensayo corre y `--save` frena.
+- **Controla el valor de antes.** Si alguien cambio el campo desde que se leyo, esa pagina
+  se saltea entera y se avisa. No se pisa trabajo de nadie.
+- **Toca solo lo del plan.** El resto del formulario viaja tal cual estaba, incluido el
+  estado de moderacion: una pagina publicada sigue publicada.
+- **Deja el mensaje del plan como mensaje de revision**, asi el historial de la pagina dice
+  que se cambio y por que, y se puede volver atras desde Revisiones.
+- **Verifica:** despues de guardar vuelve a leer la pagina entera y la compara con la de
+  antes. Tiene que haber cambiado exactamente lo del plan; cualquier otra diferencia sale
+  como error.
+- Cada corrida con `--save` deja una linea en `logs/aplicar.jsonl`.
+
+Lo que **no** hace: agregar o sacar paragraphs, subir imagenes o elegir medios. Eso sigue
+siendo del motor con navegador (`build`). `aplicar` cambia valores de campos que ya existen.
+
+En un entorno que sale a internet por un proxy (una sesion en la
+nube), Node lo toma con `NODE_USE_ENV_PROXY=1` y `NODE_EXTRA_CA_CERTS=<bundle>`. En tu
+maquina no hace falta.
+
 ## Para la revision de compliance
 
 - **Que hace:** crea nodos nuevos, despublicados, en el CMS, llenando el mismo
   formulario que llenaria una persona. Nada mas.
-- **Que NO hace:** no publica, no borra, no modifica contenido existente, no toca otros
-  content types, no cambia configuracion del sitio.
-- **Credenciales:** no pide, no guarda y no transmite contraseñas. Usa la sesion que el
-  usuario abre a mano en su navegador. No hay tokens ni claves en el codigo ni en disco.
+- **Que NO hace:** no borra, no toca otros content types, no cambia configuracion del
+  sitio. Contenido existente solo lo modifica `aplicar`, campo por campo segun un plan
+  revisado, controlando el valor previo y dejando mensaje de revision.
+- **Credenciales:** el armado (`build`) usa la sesion que el usuario abre a mano en su
+  navegador y no ve ninguna contraseña. `leer` y `aplicar` inician sesion ellos mismos con
+  el usuario de servicio: la contraseña sale de una variable de entorno o se pregunta en la
+  terminal, viaja solo al login de ese Drupal y no se escribe en disco ni en los logs. No
+  hay tokens ni claves en el codigo.
 - **A donde viaja la informacion:** a ningun lado. El programa habla unicamente con el
   host de Drupal que dice el mapping. Sin telemetria, sin servicios de terceros, sin
   llamadas de red mas alla de ese host.
@@ -516,6 +580,10 @@ tools/publicar.js      que pasos son y en que orden (puro, se prueba sin navegad
 tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
 tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name
 tools/manifiesto.mjs   genera manifests/<pagina>.json desde el hub
+tools/drupal-http.js   Drupal por HTTP: sesion, formulario de edicion, abrir paragraphs, arbol
+tools/leer.mjs         lee paginas existentes campo por campo (nunca guarda)
+tools/aplicar.mjs      aplica un plan de cambios a paginas existentes (ensayo por defecto)
+test/leer-aplicar.mjs  prueba leer y aplicar contra un Drupal falso por HTTP
 test/manifiesto.mjs    prueba la traduccion contra el mapping real, sin base ni navegador
 planes/                un plan por pagina: donde vive el criterio
 test/sitio-viejo.mjs   sitio viejo de mentira, con sus trampas
