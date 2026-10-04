@@ -152,6 +152,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   en mobile lo que se exige es que se LEA: **4.5:1** en toda la franja del texto (la bajada es letra
   chica; el 3:1 queda para el titulo grande de desktop). Si no llega, se oscurece esa franja con un
   degrade suave, lo justo para pasar. Lo mide `qa_banners.py` (`contraste mobile`).
+- **Texto sobre foto en mobile ESTA BIEN; solo es problema si debajo hay letras de la imagen o si
+  no llega al contraste.** Que el titulo o la bajada pisen al sujeto (la cara del perro, la comida) no
+  se corrige. Lo que si: letras de la imagen debajo del texto (un logo, un titulo impreso, un empaque,
+  el texto curvo de un sello) y contraste por debajo de 3:1 (titulo grande) o 4.5:1 (el resto). Vale
+  para banners y para cards. Lo mide el QA de mobile: captura cada pagina a 390px con y sin texto,
+  busca letras debajo con OCR y mide el contraste de cada linea. Origen: MX, revision mobile
+  ("casos de texto encima de imagen no importa a menos que las imagenes tengan tambien texto o que
+  haya poco contraste"; el caso que lo abrio fue el logo de Opti debajo de la descripcion).
 - **Nunca texto sobre texto, tampoco en mobile**: si el titulo cae sobre letras de la imagen mobile
   ("SENSACIONAL" en Combinacion, el claim de Sabrosobres), se recorta distinto o, si las letras estan
   sobre un fondo liso, se pintan con ese fondo.
