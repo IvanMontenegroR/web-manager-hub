@@ -19,9 +19,9 @@ const CG_TO_CMT = {
   // apaisada (CMT_WIDE_BOTTOM) apila las dos abajo y no la usa ningun modo del CMS.
   'slider-background-default-card': CMT_WIDE_TOP,
   'cards-numbers': CMT_NUMBERS,
-  // Solo imagen + titulo (playbook, "Cards simple"): la foto cuadrada con esquinas redondeadas
-  // y el titulo DEBAJO, en el color del texto de la pagina. No lleva descripcion. Caia a las
-  // verticales y el titulo quedaba blanco encima de la foto: ilegible sobre fotos claras.
+  // "Simple (image + title)": foto cuadrada y el texto DEBAJO, centrado, sobre el color de
+  // la card. A pesar del nombre (y del playbook) la descripcion SI se dibuja: asi lo
+  // renderiza el sitio (card-grid-examples en content).
   'cards-simple': CMT_SIMPLE,
 }
 
@@ -857,6 +857,14 @@ const RENDERERS = {
     // sangre. La key viaja desde el Card Grid en `background_position`.
     const bleed = painted && !isBoxed(c)
     if (nums) style['--acc'] = acc
+    // Simple: los tres colores de la card salen de Classy (Card - Background Color, Card -
+    // Title Color, Card - Text Color). Sin cargar, la card no tiene fondo y el titulo va en
+    // el rojo del sitio, que es lo que se ve en content con Classy vacio.
+    if (simple) {
+      if (c.card_color) style['--card'] = c.card_color
+      style['--ttl'] = T(c.accent, ctx?.brandAccent || '#E91C24')
+      if (c.card_text) style['--dtxt'] = c.card_text
+    }
     if (txt) style['--txt'] = txt
     return (
       <div
@@ -895,9 +903,10 @@ const RENDERERS = {
                 {/* Titulo y descripcion son opcionales por separado (una card de solo
                     imagen + titulo no lleva texto): el relleno va solo en la card vacia. */}
                 {(it.title || !(it.description || it.image)) && (
-                  <div className="cp-cmt-ttl" style={icon || wide || nums ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
+                  // Simple: sin descripcion el sitio baja el titulo a cuerpo (fs-body-md).
+                  <div className={`cp-cmt-ttl${simple && !it.description ? ' cp-cmt-ttl--sm' : ''}`} style={icon || wide || nums || simple ? undefined : titleStyle}>{T(it.title, 'Título')}</div>
                 )}
-                {!simple && (it.description || !(it.title || it.image)) && (
+                {(it.description || !(it.title || it.image)) && (
                   <Rich className="cp-cmt-desc">{T(it.description, 'Descripción del compromiso.')}</Rich>
                 )}
               </div>
@@ -1212,6 +1221,7 @@ const RENDERERS = {
       background_position: c.background_position,
       card_color: tok(c.background_card_color),
       accent: tok(c.title_card_color),
+      card_text: tok(c.text_card_color),
       items: items.map((it) => ({
         icon: it.icon, image: it.image, image_mobile: it.image_mobile,
         title: it.title, description: it.description, url: it.cta_url,

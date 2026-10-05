@@ -2204,10 +2204,16 @@ textarea.control { resize: vertical; min-height: 64px; }
    comp-image59/60. Foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color
    del texto de la pagina (oscuro sobre blanco, claro en las paginas de marca oscuras). La
    card no tiene fondo ni alto fijo; la foto si, porque html2canvas no resuelve aspect-ratio. --- */
-.cp-cmt--simple .cp-cmt-card { flex: 0 0 360px; height: auto; background: none; border-radius: 0; overflow: visible; }
-.cp-cmt--simple .cp-cmt-img { position: static; display: block; width: 100%; height: 360px; border-radius: 14px; }
-.cp-cmt--simple .cp-cmt-body { position: static; margin-top: 14px; }
-.cp-cmt--simple .cp-cmt-ttl { color: inherit; font-size: 18px; font-weight: 500; line-height: 1.3; text-shadow: none; }
+/* Medidas sacadas del sitio (content, card-grid-examples): card de 300px fija en TODOS los
+   anchos, columna con 16px entre imagen, titulo y descripcion, y las cards de la fila se
+   igualan a la mas alta (stretch del flex). El titulo se corta a las 3 lineas; la
+   descripcion no se corta, estira la card. */
+.cp-cmt--simple .cp-cmt-card { flex: 0 0 300px; height: auto; display: flex; flex-direction: column; gap: 16px; padding-bottom: 16px; background: var(--card, transparent); border-radius: 16px; overflow: hidden; }
+.cp-cmt--simple .cp-cmt-img { position: static; display: block; flex: none; width: 100%; height: 300px; border-radius: 16px; }
+.cp-cmt--simple .cp-cmt-body { position: static; display: flex; flex-direction: column; gap: 16px; padding: 0 12px; text-align: center; }
+.cp-cmt--simple .cp-cmt-ttl { color: var(--ttl, #E91C24); font-size: 20px; font-weight: 500; line-height: 23px; text-shadow: none; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cp-cmt--simple .cp-cmt-ttl--sm { font-size: 16px; font-weight: 400; line-height: 1.3; }
+.cp-cmt--simple .cp-cmt-desc { color: var(--dtxt, #000); font-size: 14px; font-weight: 400; line-height: 1.15; text-shadow: none; margin: 0; }
 .cp-cmt--simple .cp-cmt-go { display: none; }
 
 /* ===== Bloque 50/50 (titulo + texto | texto o desplegable) ===== */
@@ -2615,7 +2621,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas--mobile .cp-cmt--widet .cp-cmt-card, .pb-canvas--mobile .cp-cmt--wideb .cp-cmt-card { flex: 0 0 300px; height: 250px; }
 .pb-canvas--mobile .cp-cmt--icon .cp-cmt-card { flex: 0 0 260px; height: 260px; }
 .pb-canvas--mobile .cp-cmt--nums .cp-cmt-card { flex: 0 0 280px; height: auto; min-height: 300px; }
-.pb-canvas--mobile .cp-cmt--simple .cp-cmt-card { flex: 0 0 260px; }
+/* En mobile la card del sitio sigue midiendo 300px y la siguiente asoma. */
+.pb-canvas--mobile .cp-cmt--simple .cp-cmt-card { flex: 0 0 300px; height: auto; }
 /* Mosaico: una columna, cada imagen seguida de su caja. */
 .pb-canvas--mobile .cp-mosaic-grid { grid-template-columns: 1fr; gap: 12px; }
 .pb-canvas--mobile .cp-mosaic-box { aspect-ratio: auto; min-height: 220px; }
@@ -2641,6 +2648,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas--mobile .cp-plist-h2, .pb-canvas--mobile .cp-plist-sub, .pb-canvas--mobile .cp-plist-head { padding-right: 20px; }
 .pb-canvas--mobile .cp-cmt-ttl { font-size: 19px; line-height: 1.2; }
 .pb-canvas--mobile .cp-cmt-desc { font-size: 14px; }
+/* La card simple no cambia de tipografia en mobile (mismo 20/16px que en desktop). */
+.pb-canvas--mobile .cp-cmt--simple .cp-cmt-ttl { font-size: 20px; line-height: 23px; }
+.pb-canvas--mobile .cp-cmt--simple .cp-cmt-ttl--sm { font-size: 16px; line-height: 1.3; }
 .pb-canvas--mobile .cp-mosaic-box { min-height: 0; padding: 22px 20px; }
 .pb-canvas--mobile .cp-mosaic-box-d { margin-top: 12px; }
 .pb-canvas--mobile .cp-hero-cta { font-size: 14px; padding: 10px 20px; max-width: 100%; }

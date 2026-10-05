@@ -249,9 +249,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      ya existia, asi las paginas armadas antes no cambian.
      El **Background Color** del CMS es una lista de TOKENS (`BG_COLORS`, compartida por el Banner y el
      bloque de Texto), no un hex. Para poder pintarlo en el mockup hay un mapa `BG_TOKENS` token -> hex
-     con SOLO los que conocemos con certeza (Primary Red, Primary White); el resto queda sin pintar a
-     proposito — inventar el color de un design system seria peor que no mostrarlo. Cuando desarrollo pase
-     la paleta, se agrega la entrada y el mockup la toma sola.
+     sacado del CSS REAL del sitio (las variables `--color-*` que declara el tema; 34 de los 39). Ojo:
+     Primary Red es `#E91C24`, no el `#ED1C24` de la marca (ese es Reds 400). Quedan sin pintar a
+     proposito los Brand 01-04 (dependen del tema de cada marca) y Neutral 300 (el sitio no lo declara):
+     inventar el color de un design system seria peor que no mostrarlo.
      En la variante **Card Icon Square**, el relleno de cada card sale del "Card - Background Color" del
      CMS (`background_card_color`), cuyo default es **blanco** — no se deduce de la banda: son dos campos
      distintos.
@@ -331,10 +332,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Los dos checkbox `Show ...` salieron del formulario real y estan cargados como campos del CMS, pero
      **que dibujan en el sitio esta PENDIENTE**: el mockup todavia no los pinta. Cuando se sepa, se agrega
      al render y se saca esta nota.
-     El modo **Cards simple** (`cards-simple`, "only image + title") tiene mockup propio (`CMT_SIMPLE`):
-     foto cuadrada con esquinas redondeadas y el titulo DEBAJO, en el color del texto de la pagina, sin
-     descripcion (asi lo muestra el playbook del CMS, comp-image59/60). Antes caia a las verticales y el
-     titulo quedaba blanco encima de la foto: ilegible sobre fotos claras (los ingredientes).
+     El modo **Simple (image + title)** (`cards-simple`) tiene mockup propio (`CMT_SIMPLE`), medido en
+     el sitio (content, `/card-grid-examples`): card de **300px fija en todos los anchos** (en mobile la
+     siguiente asoma), foto cuadrada arriba y DEBAJO, centrados, titulo y descripcion sobre el
+     "Card - Background Color" de Classy (sin cargar, la card no tiene fondo). A pesar del nombre y del
+     playbook ("description not applicable") el sitio **SI dibuja la descripcion**, asi que el mockup
+     tambien. El titulo va en "Card - Title Color" (default el rojo del sitio) y se corta a las **3
+     lineas**; sin descripcion baja a cuerpo (16px, como el `fs-body-md` del sitio). La descripcion NO se
+     corta pero estira la card y todas las de la fila se igualan a la mas alta. De ahi dos GUIAS de
+     largo (`CARD_SIMPLE_TITLE_MAX` 65, `CARD_SIMPLE_DESC_MAX` 100). Con link, la card ENTERA es el
+     link y el texto del CTA no se muestra. La imagen se pide a 600x600 (el doble de los 300px que
+     ocupa; los 450 del HTML del sitio son el archivo de prueba, no una regla).
      La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS

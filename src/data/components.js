@@ -39,13 +39,25 @@ export const BG_COLORS = [
 // Etiqueta que ve el editor en Drupal cuando el campo esta vacio.
 export const TOKEN_DEFAULT = 'Default'
 
-// Hex de cada token, para poder PINTAR el fondo en el mockup. Solo estan los que
-// conocemos con certeza; el resto queda sin pintar a proposito (inventar un color de
-// un design system seria peor que no mostrarlo). Completar cuando desarrollo pase la
-// paleta: agregar la entrada aca y el mockup la toma sola.
+// Hex de cada token, para poder PINTAR el fondo en el mockup. Salen del CSS REAL del sitio
+// (las variables `--color-*` que el tema de Purina declara en cada pagina; leidas en
+// content, card-grid-examples). Ojo que Primary Red es #E91C24 y NO el #ED1C24 de la
+// marca: ese es Reds 400. Faltan a proposito los Brand 01-04 (dependen del tema de cada
+// marca, no tienen un valor unico) y Neutral 300, que el sitio no declara: quedan sin
+// pintar, que es mejor que inventarles un color.
 export const BG_TOKENS = {
-  'Primary Red': '#ED1C24',
-  'Primary White': '#FFFFFF',
+  'Neutral 000': '#F5F5F5', 'Neutral 100': '#EBEBEB', 'Neutral 200': '#E0E0E0',
+  'Neutral 400': '#AEADAD', 'Neutral 500': '#858585', 'Neutral 600': '#616161',
+  'Neutral 700': '#3D3D3D', 'Neutral 800': '#1F1F1F',
+  'Primary Black': '#000000', 'Primary Red': '#E91C24', 'Primary White': '#FFFFFF',
+  'Reds 000': '#FFE8E9', 'Reds 100': '#FFB6B9', 'Reds 200': '#FF8388', 'Reds 300': '#FF5157',
+  'Reds 400': '#ED1C24', 'Reds 500': '#CB0C13', 'Reds 600': '#A90007',
+  'Secondary 123': '#FEC52C', 'Secondary 131': '#CC8809', 'Secondary 1665': '#DD440A',
+  'Secondary 187': '#A91D2F', 'Secondary 2280': '#466A21', 'Secondary 2294': '#70A601',
+  'Secondary 2577': '#A47BC9', 'Secondary 268': '#582D84', 'Secondary 433': '#1B252E',
+  'Secondary 433 8': '#E9EAEC', 'Secondary 538': '#BFCDDB', 'Secondary 541': '#073C72',
+  'Secondary 636': '#82D3E8', 'Secondary 7567': '#895731', 'Secondary 7704': '#0582AE',
+  'Secondary Red': '#ED1C25',
 }
 
 // Set de iconos del CMS, tal cual el select de Drupal. El VALOR es lo que identifica
@@ -114,19 +126,21 @@ export const CMS_ICON_OPTIONS = CMS_ICONS.map((value) => ({ value, label: iconLa
 // UN solo paragraph del CMS (`ln_c_cardgrid`) del que salen todas estas variantes: el
 // "Modo de vista" cambia el layout, no el componente. Se guarda el VALOR de maquina
 // (grid-cards, cards-numbers...) que es el identificador estable; la etiqueta es la que
-// ve el editor en el desplegable de Drupal y es la que baja al Excel.
+// ve el editor en el desplegable de Drupal y es la que baja al Excel. Las etiquetas son
+// las del formulario de content de 2026-10 (antes decian "Cards Simple (Only Image +
+// Title)", "Slider Cards Default"...): si Drupal las vuelve a cambiar, se cambian aca.
 export const CARD_GRID_MODES = [
-  { value: 'cards-icons', label: 'Cards Icons' },
-  { value: 'cards-numbers', label: 'Cards Numbers' },
-  { value: 'cards-simple', label: 'Cards Simple (Only Image + Title)' },
-  { value: 'full-background-card-icons', label: 'Full Background Card Icons (Without Box - Max 3 cards)' },
-  { value: 'full-background-card-icons-box', label: 'Full Background Card Icons (Max 3 cards)' },
-  { value: 'grid-cards', label: 'Grid Cards (Max 3 Cards)' },
-  { value: 'image-card-icons', label: 'Box Image + Card Icons' },
-  { value: 'slider-default-card', label: 'Slider Cards Default' },
-  { value: 'slider-background-default-card', label: 'Slider Background Cards Default (Max 3 cards)' },
-  { value: 'slider-card-icons-square', label: 'Card Icon Square' },
-  { value: 'full-background-card-icons-square', label: 'Full Background Card Icons Square' },
+  { value: 'cards-icons', label: 'Icons' },
+  { value: 'cards-numbers', label: 'Numbers' },
+  { value: 'cards-simple', label: 'Simple (image + title)' },
+  { value: 'full-background-card-icons', label: 'Image background + icons without box' },
+  { value: 'full-background-card-icons-box', label: 'Image + 3 cards with icons' },
+  { value: 'grid-cards', label: 'Mosaic' },
+  { value: 'image-card-icons', label: 'Image above icon cards' },
+  { value: 'slider-default-card', label: 'Image slider' },
+  { value: 'slider-background-default-card', label: 'Image slider with gradient background' },
+  { value: 'slider-card-icons-square', label: 'Square icon card' },
+  { value: 'full-background-card-icons-square', label: 'Square icon card + background image' },
 ]
 export const CARD_GRID_DEFAULT_MODE = 'grid-cards'
 // La card de estos modos NO lleva imagen propia: o va con icono, o es la card blanca
@@ -173,6 +187,13 @@ export const CARD_SQUARE = 'card_grid_default_square'
 //
 // Por eso se avisa y no se recorta lo ya cargado.
 export const CARD_SQUARE_DESC_MAX = 128
+// Card "Simple (image + title)": medido en content (card-grid-examples). La card mide 300px
+// en todos los anchos. El TITULO se corta a las 3 lineas con puntos suspensivos (~24
+// caracteres por linea: un titulo de 68 entra justo). La DESCRIPCION no se corta pero
+// ESTIRA la card, y todas las de la fila se igualan a la mas alta: una sola larga deja
+// huecos en las demas. 100 son unas 3 lineas. Las dos son GUIAS, como la de arriba.
+export const CARD_SIMPLE_TITLE_MAX = 65
+export const CARD_SIMPLE_DESC_MAX = 100
 export const CARD_STYLES = [
   { value: CARD_SQUARE, label: 'Card Grid Default Square' },
   { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },
@@ -935,16 +956,18 @@ export const COMPONENTS = [
       { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
-        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text',
+          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_TITLE_MAX : null) },
         // El titulo de una CARD siempre cuelga del titulo del bloque, asi que su tag por
         // defecto es h3 y no "- Ninguno -": es lo que hay que poner en el CMS salvo que
         // se elija otra cosa a proposito.
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
         { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS, hideTypes: CARD_GRID_IMAGE_MODES },
-        // Solo las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX): las
-        // verticales son altas y el texto tiene lugar de sobra.
+        // Las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX) y la Simple
+        // tambien (CARD_SIMPLE_DESC_MAX): las verticales son altas y tienen lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
-          maxLength: (c) => (c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
+          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_DESC_MAX
+            : c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
         // Checkbox del formulario de la CARD, entre la descripcion y el subtitulo. Igual
         // que Show Card PET ID: falta confirmar que dibuja, asi que el mockup no lo pinta.
         { key: 'show_ia_icon', label: 'Show IA Icon', cmsLabel: 'Show IA Icon', type: 'checkbox', cms: true, default: false },
@@ -989,6 +1012,10 @@ export const COMPONENTS = [
       // 1.20), asi que poner una sola seria mentir. Van las medidas y listo.
       'slider-default-card-square': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
+      // Simple: la card mide 300px en pantalla en TODOS los anchos (medido en content), asi
+      // que se pide al doble para que se vea nitida en pantallas de alta densidad. Los 450
+      // que aparecen en el HTML del sitio son el tamaño del archivo de prueba, no una regla.
+      'cards-simple': [{ ratio: 'Desktop 1:1 - Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG / PNG' }],
     },
   },
   {
