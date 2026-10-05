@@ -214,6 +214,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   es un dato de clasificacion: es lo que le pone el fondo, el texto por defecto y los acentos a toda
   la pagina. Una marca que no esta en el desplegable FRENA la carga. Origen: MX, revision de los
   colores de Pro Plan en content.
+- **Una card Simple sobre fondo oscuro tiene que verse como card.** Si la imagen es un objeto sobre
+  negro, en la pagina negra la card desaparece y el bloque se ve demasiado pelado. Dos salidas: si el
+  sitio viejo tenia la imagen con un marco propio (los banderines dorados de Pro Plan), se usa esa
+  imagen original, recortada al cuadrado y con el fondo en negro puro para que no se note el borde; si
+  no, se le carga el Card - Background Color de la marca (Brand 03 en Pro Plan, su gris oscuro), asi
+  imagen y texto quedan dentro de una card. Origen: MX, La nutricion mas avanzada (banderines) y
+  LiveClear (Brand 03).
 - **En las paginas de Pro Plan, el titulo de las cards Simple va en Brand 01 (el dorado) y la
   descripcion en Primary White.** Los colores de la card no siguen a la marca: sin cargarlos, el
   titulo sale rojo y la descripcion negra sobre la pagina negra. Origen: MX, La nutricion mas
