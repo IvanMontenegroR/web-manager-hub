@@ -412,7 +412,8 @@ async function reservarFila(ctx, holder, def, type) {
   const primera = cola[0]
   const bundle = enGuiones(def.value || type)
 
-  if (primera && primera.vacia && primera.bundle === bundle) {
+  const mismoTipo = primera && (primera.bundle ? primera.bundle === bundle : primera.titulo === def.label)
+  if (primera && primera.vacia && mismoTipo) {
     cola.shift()
     return { delta: primera.delta, reusar: true }
   }
@@ -420,8 +421,9 @@ async function reservarFila(ctx, holder, def, type) {
     // No se toca y no se vuelve a mirar: si la primera no sirve, reusar una de mas abajo
     // dejaria igual un hueco en el medio. Se avisa, porque una fila de mas en la pagina
     // es algo que alguien va a tener que mirar.
-    onStep(`     (la lista ya traia una fila ${primera.bundle ? `"${primera.bundle}"` : 'de tipo desconocido'}`
-      + `${primera.vacia ? ' vacia' : ' con contenido'} en la posicion ${primera.delta}: se deja como esta)`)
+    onStep(`     (la lista ya traia una fila ${primera.bundle || primera.titulo ? `"${primera.bundle || primera.titulo}"` : 'de tipo desconocido'}`
+      + `${primera.vacia ? ' vacia' : ' con contenido'} en la posicion ${primera.delta}: se deja como esta)`
+      + (primera.porque ? ` [${primera.porque}]` : ''))
     cola.length = 0
   }
   return { delta: await freeDelta(page, holder.dsel), reusar: false }
@@ -453,21 +455,33 @@ const mirarFila = (el) => {
     const m = /paragraph-type--([a-z0-9-]+)/.exec(clase(n))
     if (m) { bundle = m[1]; break }
   }
+  // En algunas listas (las del Banner Wrapper) la clase no va en la fila sino en el
+  // wrapper del subform, adentro. Se toma la PRIMERA que aparezca, que es la propia: las de
+  // los paragraphs anidados vienen despues en el orden del documento.
+  if (!bundle) {
+    const m = /paragraph-type--([a-z0-9-]+)/.exec(clase(el.querySelector('[class*="paragraph-type--"]')))
+    if (m) bundle = m[1]
+  }
+  // Y en otras (las del Banner Wrapper) no hay clase en ningun lado: lo unico que dice el
+  // tipo es la etiqueta de la cabecera de la fila ("Banner"). Va aparte del bundle porque es
+  // la etiqueta que ve el editor, no el nombre de maquina.
+  const titulo = (el.querySelector('.paragraph-type-title')?.textContent || '').trim()
   // Campos que Drupal trae con valor puesto y que no dicen nada sobre si alguien cargo
   // contenido: el peso de la fila, el formato de texto, el idioma.
   // Tampoco el selector de "que tipo agregar" de una lista anidada ([add_more]): una
   // pestaña recien nacida lo trae puesto en el primer tipo y no tiene nada cargado.
-  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$|\[add_more\]/
+  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$|\[add_more\]|\[options\]\[attributes\]/
   let vacia = true
+  let porque = null // el campo que la hizo contar como cargada: va en el aviso
   const campos = el.querySelectorAll('input[type="text"], input[type="url"], input[type="email"],'
     + ' input[type="number"], textarea, select')
   for (const c of campos) {
     if (TECNICOS.test(c.name || '')) continue
     if (c.type === 'submit') continue
     const v = String(c.value || '').trim()
-    if (v && v !== '_none') { vacia = false; break }
+    if (v && v !== '_none') { vacia = false; porque = `${c.name}=${v.slice(0, 40)}`; break }
   }
-  return { bundle, vacia }
+  return { bundle, titulo, vacia, porque }
 }
 
 // `ln_c_grid_card_item` -> `ln-c-grid-card-item`, que es como Drupal escribe el bundle en

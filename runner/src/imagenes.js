@@ -135,10 +135,20 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
 
       // SIN MEDIDA a la que recortar, se guarda el archivo tal cual: ni se re-encoda ni se
       // toca. Es mejor que la del sitio viejo llegue entera a que no llegue.
+      // La excepcion es el FORMATO: la Media library del CMS no acepta webp (la subida queda
+      // con el fid vacio y sin mensaje). Ahi se pasa a PNG a su medida natural, sin
+      // recortar ni comprimir: cambia el envase, no la imagen, y la transparencia se conserva.
       if (!w || !h) {
         mkdirSync(dirname(salida), { recursive: true })
-        writeFileSync(salida, buf)
         const nat = await medidaDe(page, data)
+        if (/webp/i.test(mime) && /\.png$/i.test(salida)) {
+          await page.setViewportSize({ width: nat.w, height: nat.h })
+          await page.setContent(`<style>html,body{margin:0;background:transparent}img{display:block}</style>`
+            + `<img src="${data}">`, { waitUntil: 'load' })
+          await page.locator('img').screenshot({ path: salida, type: 'png', omitBackground: true })
+        } else {
+          writeFileSync(salida, buf)
+        }
         return { nat, w: nat.w, h: nat.h, escala: 1, sinMedida: true }
       }
 
@@ -163,7 +173,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
       for (const medio of mediosDeBloque(bloque, slug)) {
         const donde = `bloque ${i + 1} (${bloque.componente}) — ${medio.etiqueta}`
         try {
-          const ext = medio.desktop.w ? 'jpg' : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.desktop.origen)?.[1] || 'jpg').toLowerCase()
+          const ext = medio.desktop.w ? 'jpg' : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.desktop.origen)?.[1] || 'jpg').toLowerCase().replace('webp', 'png')
           const dsk = `${medio.nombre}-desktop.${ext}`
           const r = await recortar({ ...medio.desktop, salida: join(carpeta, dsk) })
           const estirada = r.escala > 1.001
