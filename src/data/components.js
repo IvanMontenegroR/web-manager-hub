@@ -226,7 +226,7 @@ export const SPACING_PX = {
 // Lo que pone cada componente SIN spacing cargado (el CSS de cada uno). El resto cae en
 // `.section`, que es "Seccion: Medio". OJO el acordeon suelto: 0, pegado a lo de arriba y abajo.
 const SPACING_DEFAULT = {
-  banner: 'space_py_4', banner_wrapper: 'space_py_4',
+  banner: 'space_py_4', banner_wrapper: 'space_py_0',
   text: 'space_py_5', text_image: 'space_py_5',
   accordion_grid: 'space_py_0', breadcrumb: 'space_py_0',
 }
@@ -626,10 +626,10 @@ export const COMPONENTS = [
     // ese orden ES el orden de los slides.
     container: true,
     slots: [{ label: 'Banners del carrusel', cmsLabel: 'Banners' }],
-    // Sin campos propios: falta el subform real de Drupal (ver CMS_PENDING_SUBFORMS), asi
-    // que no se le inventa ni Classy ni configuracion de autoplay. Avanzado si va: Drupal
-    // se lo agrega a TODOS los paragraphs por igual.
-    fields: [...advanced()],
+    // Del subform real de Drupal se conoce el Classy (Background Color y Spacing, leidos
+    // del formulario de /proplan/perros). Los selects del slider (flechas, puntos,
+    // autoplay) siguen pendientes: ver CMS_PENDING_SUBFORMS.
+    fields: [...advanced(), ...classy('background_color', 'spacing')],
   },
   {
     key: 'text',
@@ -1557,7 +1557,7 @@ export const CMS_PENDING_PARAGRAPHS = [
 // Hasta tener el HTML del formulario de Drupal, sus campos son una aproximacion y no
 // se les puede declarar el panel Classy sin inventar.
 export const CMS_PENDING_SUBFORMS = {
-  banner_wrapper: 'Falta el subform de `Banner Wrapper`: sus campos propios (¿autoplay, intervalo?) y el panel Classy. Hoy solo declara Avanzado, que Drupal agrega a todos los paragraphs por igual.',
+  banner_wrapper: 'Faltan los campos propios del `Banner Wrapper`: Buttons (desktop/mobile), Position Buttons (top left/right, bottom left/right, center inside/outside), Dots, Position Dots y Autoplay. El Classy (Background Color y Spacing) ya esta.',
   text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
   tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
   brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',

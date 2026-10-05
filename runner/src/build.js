@@ -128,8 +128,9 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   }
 
   const ctx = { mapping, page, onStep, esperaSubform, consola,
-    escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map() }
+    escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map(), classyAnidado: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
+  ctx.root = root
 
   onStep('Armando la estructura…')
   let n = 0
@@ -203,8 +204,51 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
       .join(' | ').replace(/\s+/g, ' ').trim().slice(0, 600)
     throw new Error(`Drupal no guardo la pagina (sigue en ${after}). ${msg ? 'Dice: ' + msg : 'Sin mensaje visible.'}`)
   }
-  const nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
+  let nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
+  nodeId ??= await page.evaluate(() => (/\/node\/(\d+)/.exec(document.querySelector('link[rel="shortlink"]')?.href || '') || [])[1] || null)
+  if (ctx.classyAnidado.length) await repasarClassyAnidado(ctx, nodeId)
   return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
+}
+
+// El Classy de un paragraph AGREGADO adentro de otro (el segundo banner de un Banner
+// Wrapper) se pierde al CREAR el nodo: el formulario lo muestra elegido, Drupal guarda
+// "Default". Paso con /proplan/perros y /proplan/gatos: el segundo banner quedo centrado
+// con "Banner Left Top" cargado. Editando el nodo ya creado si se guarda, asi que despues
+// del alta se vuelve a abrir el formulario, se re-eligen esos valores y se guarda de nuevo.
+// Solo se tocan los que el formulario guardado tiene distinto de lo que el runner cargo.
+export async function repasarClassyAnidado(ctx, nodeId) {
+  const { mapping, page, onStep, esperaSubform } = ctx
+  if (!nodeId) { onStep('AVISO: no se pudo leer el node id para repasar el Classy de los paragraphs anidados.'); return }
+  onStep(`Repasando el Classy de ${ctx.classyAnidado.length} campo(s) anidado(s) en node/${nodeId}…`)
+  await page.goto(`${mapping.site}/node/${nodeId}/edit`, { waitUntil: 'domcontentloaded' })
+  const todo = page.locator(`[name="${namePath(mapping.paragraphs.dsel.split('-{delta}')[0])}_edit_all"]`).first()
+  if (await todo.count()) { await todo.dispatchEvent('mousedown'); await esperarAjax(page) }
+  const abiertos = new Set()
+  let cambios = 0
+  for (const r of ctx.classyAnidado) {
+    const sel = page.locator(r.sel).first()
+    if (!(await sel.count()) && !abiertos.has(r.editar)) {
+      abiertos.add(r.editar)
+      const b = page.locator(`[name="${r.editar}"]`).first()
+      if (await b.count()) { await b.dispatchEvent('mousedown'); await sel.waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {}) }
+    }
+    if (!(await sel.count())) throw new Error(`Repaso del Classy: no encontre ${r.ref} (${r.sel}) en el formulario guardado`)
+    const antes = await sel.inputValue()
+    if (antes === String(r.value)) continue
+    // Esta adentro del desplegable Classy, cerrado: se elige sin abrirlo.
+    await sel.evaluate((e, v) => { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })) }, String(r.value))
+    onStep(`     ${r.ref}: el CMS lo guardo en "${antes}", se vuelve a poner "${r.value}"`)
+    cambios += 1
+  }
+  if (!cambios) { onStep('     todo quedo bien guardado, no hace falta re-guardar'); return }
+  const log = page.locator('textarea[name="revision_log[0][value]"]')
+  if (await log.count()) await log.fill('migration-mx: re-aplica el Classy de los paragraphs anidados')
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {}),
+    page.locator(mapping.save).first().click(),
+  ])
+  if (/\/edit$/.test(new URL(page.url()).pathname)) throw new Error('Repaso del Classy: Drupal no guardo la segunda pasada')
+  onStep(`     re-guardada (${cambios} campo(s))`)
 }
 
 // Agrega UN paragraph y llena sus campos. `holder` es donde vive la lista: el campo de
@@ -263,7 +307,7 @@ async function addBlock(ctx, block, num, holder) {
   // eso borra lo que se haya escrito antes: si se llena sobre la marcha, la pagina
   // termina armada y vacia. Asi que primero se arma TODA la estructura y despues se
   // llena de una, cuando ya no queda ningun AJAX por delante.
-  ctx.pendientes.push({ block, def, vars, num })
+  ctx.pendientes.push({ block, def, vars, num, anidado: holder !== ctx.root })
   ctx.listas.add(holder.dsel)
 
   // Contenedores: sus hijos van adentro del slot que les toca, no en la lista del nodo.
@@ -306,7 +350,7 @@ async function addBlock(ctx, block, num, holder) {
 // Llena los campos de un paragraph ya agregado. Antes abre los desplegables del
 // formulario (Optional fields, Avanzado, Classy, Atributos), porque un campo que vive
 // adentro no se puede tocar con el panel cerrado.
-async function llenarBloque(ctx, { block, def, vars, num }) {
+async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
   const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
   if (!campos.length) return
@@ -364,6 +408,9 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(ctx, f, vars, value, ref))
+    if (anidado && key.startsWith('classy.') && f.kind === 'select') {
+      ctx.classyAnidado.push({ sel: resolveSelector(f.sel, vars), value, ref, editar: `${vars.npath}_edit` })
+    }
     // Un select que RECARGA parte del formulario al cambiar (el bloque del paragraph Block:
     // al elegirlo, Drupal trae su configuracion por AJAX). Los campos que siguen viven en
     // lo que llega, asi que hay que esperarlo antes de seguir llenando.

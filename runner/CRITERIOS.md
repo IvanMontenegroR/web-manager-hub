@@ -166,6 +166,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un titulo de banner que cruza al sujeto o a letras de la imagen se parte** aunque la imagen ya este
   bien encuadrada: el h1 queda con lo que dice de que es la pagina o la seccion ("Combinaciones de
   proteinas", "Estamos comprometidos") y el resto pasa a la bajada, sin reescribir. Origen: MX, ronda 6.
+- **Los banners de una misma pagina van con la misma alineacion, por defecto a la izquierda**, y eso
+  incluye los slides de un carrusel de banners: uno a la izquierda y el siguiente centrado se lee como
+  un descuido. Si el CMS guarda uno distinto de lo cargado, se corrige (el runner ya lo repasa solo,
+  ver README). Origen: MX, Pro Plan Perros ("siempre tratemos de mantener una alineacion, en este caso
+  izquierda").
 - **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
   Perros quedan como Imagen con el key visual entero (ronda 4, confirmado de nuevo al revisar los
   colores de marca).
@@ -208,6 +213,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **El Acordeon suelto va con Seccion Medio.** Con su 0 por defecto queda pegado al banner de
   arriba y al titulo de abajo. Ademas, suelto en la pagina mide como maximo 686px y va centrado, y
   todos los items arrancan cerrados: es el diseño del CMS (esta pensado para ir en una columna).
+- **El Carrusel de banners (Banner Wrapper) va con Seccion Medio.** Su default es 0 y las flechas
+  van arriba a la derecha, AFUERA del banner: despues de un carrusel de productos quedaban encima
+  del "Ver todos" y las dos piezas se tocaban. Con Medio las flechas bajan 32px y el banner queda
+  separado. Origen: MX, Pro Plan Perros ("entre el banner de pro plan veterinary diets y el carrusel
+  de alimento humedo, estas 2 partes se tocan").
 - Origen: MX, primera pagina subida con el runner (Por que cambiar a Purina One: "quiero que
   aprendas sobre los spacings que tenemos y que apliques correctamente, ademas, que paso con el
   accordion?").

@@ -96,6 +96,9 @@ node src/cli.js build   manifests/*.json --mapping mapping/purina-latam.json --s
 
 Sin `--save` llena el formulario y **deja la ventana abierta** para que lo mires: no
 escribe nada en el CMS. Con `--save` aprieta Guardar: queda publicada o en borrador segun `page.published`.
+Despues de guardar, si la pagina tiene paragraphs anidados con Classy (los banners de un Banner
+Wrapper), reabre el nodo y vuelve a elegir los que el CMS guardo en Default: al crear el nodo Drupal
+pierde el Classy de los que se agregaron adentro de otro. Si todo quedo bien, no re-guarda.
 
 Si hay un solo archivo en `mapping/`, `--mapping` se puede omitir.
 Otras opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.

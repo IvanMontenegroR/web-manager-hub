@@ -341,8 +341,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      en el CMS los banners son un campo multivaluado del wrapper, no ranuras distintas — y el
      `sort_order` de los hijos ES el orden de los slides. En el mockup los slides van APILADOS (no de a
      uno) con una banda arriba que lo aclara: asi se pueden ver y editar todos, y la captura del Excel
-     los muestra a los dos. No tiene campos propios: falta el subform de Drupal, asi que solo declara
-     Avanzado (lo unico que Drupal agrega a TODOS los paragraphs por igual) y no se le inventa Classy.
+     los muestra a los dos. Declara Avanzado y su Classy real (Background Color y Spacing, leidos del
+     formulario); los selects propios del slider (flechas, puntos, autoplay) siguen pendientes. Su
+     spacing por defecto es 0 y va con Seccion Medio (ver `runner/CRITERIOS.md`, Spacing).
+     OJO en el CMS: el Classy de un banner AGREGADO adentro del wrapper se pierde al CREAR el nodo
+     (el formulario lo muestra elegido y Drupal guarda Default). El runner lo repasa solo despues de
+     guardar (`repasarClassyAnidado` en `runner/src/build.js`): reabre el nodo y re-elige lo que quedo
+     distinto.
      Reemplaza al viejo campo `slides` del Banner, que nunca existio en el CMS
      (ver `sql/2026_banner_wrapper.sql`); el Banner vuelve a ser UNO solo, con su Media en todos los
      tipos, el Promotional incluido.
