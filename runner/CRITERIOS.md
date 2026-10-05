@@ -48,6 +48,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   generativa para crear contenido. Origen: MX, ronda 1.
 - **Nunca texto sobre texto**: si la imagen trae letras metidas y el componente dibuja su titulo
   encima, hay que resolverlo (limpiar la imagen o cambiar de componente). Origen: MX, ronda 3.
+- **Una imagen que en el sitio viejo se fundia con el fondo blanco se pinta del fondo nuevo.** Las
+  fotos recortadas sobre blanco, las ilustraciones sin marco y las piezas con una curva que salia del
+  blanco de la pagina funcionaban porque la pagina era blanca; con la marca del nodo (verde Dog Chow,
+  negro Pro Plan) quedan como un recuadro blanco. Se rellena SOLO el blanco que toca el borde de la
+  imagen (inundacion desde el borde, no todo lo claro) y se multiplica por el color nuevo, asi las
+  sombras suaves quedan como sombra de ese color y no como halo gris. El color es el que la rodea: el
+  de la pagina (Dog Chow #007A38) o el de la card si va adentro de una (Pro Plan Brand 03 #1F1F1F). La
+  excepcion es una pieza con logo o texto de color pensada sobre blanco (el hero de Calidad en tus
+  manos): pintarla rompe el logo, queda blanca. Origen: MX, revision de los colores de marca ("esta
+  imagen tiene efecto al no tener fondo, antes funcionaba porque era blanco", transicion de alimento
+  de Dog Chow).
 - **El desenfocado solo si queda bien.** Sirve para rellenar el lado del titulo cuando el fondo ya era
   suave (bokeh, bosque, follaje: el FAQ de LiveClear es el ejemplo bueno). En heroes con fondo nitido
   queda mal y no se usa. Origen: MX, ronda 4.
@@ -145,6 +156,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   ("PRO PLAN® VETERINARY DIETS" -> "Pro Plan® Veterinary Diets") y las siglas quedan como siglas (DHA,
   EPA, ADN). Si hace falta enfasis, es la tipografia del componente la que lo da. Origen: MX, ronda 6
   ("LA SALUD DE LOS GATOS Y PERROS": "todo lo que este en all caps podes poner bien").
+- **El subtitulo NO tiene color propio en el CMS: toma el mismo que el titulo.** Sin Text Color de
+  Classy, los dos van en el texto por defecto de la marca (blanco en Pro Plan, Dog Chow, Purina One y
+  Cat Chow); con Text Color, ese color pinta los dos juntos. No hay forma de separarlos, asi que un
+  subtitulo con poco contraste se resuelve con el fondo del bloque, nunca con su color. Medido sobre
+  el CSS real con cada marca (`components-text__subtitle`). Origen: MX, Estudio sobre la esperanza de
+  vida (el mockup lo dibujaba gris violaceo: era un error del hub, no del sitio).
+- **Si el sitio viejo tenia una bajada debajo del titulo de una seccion, va al subtitulo del
+  componente.** No se pierde al traducir. Origen: MX, Opti tecnologias ("por que no usamos los
+  subtitulos nosotros?").
 
 ## Mobile
 
@@ -175,7 +195,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 ## Productos
 
 - **Cards que llevan a productos se reemplazan por el carrusel de productos.** Ya no hay cards
-  personalizadas para productos. Origen: MX, ronda 4.
+  personalizadas para productos. Origen: MX, ronda 4. **Pero una card que lleva a una GAMA o a una
+  categoria (no a un producto) no es un producto**: las Opti tecnologias (cada una lleva a su linea),
+  "Alimento seco / Alimento humedo" de Purina One (llevan al listado). Esas van en cards "Simple
+  (image + title)" con su imagen ORIGINAL, que es lo que el carrusel de productos pierde: los
+  banderines Opti con su perro o gato, los packshots. Origen: MX, revision de los colores de marca
+  ("con la nueva card no es mejor usar las imagenes originales?"); reemplaza lo decidido en la ronda
+  5 para Opti.
 - **Nada de listas de productos (acordeones, textos) debajo del carrusel**: los productos y su
   descripcion salen del CMS. Origen: MX, ronda 5 (Opti tecnologias).
 - **Un bloque que ES un producto va en el carrusel de productos**, aunque sea uno solo. Origen: MX,
@@ -267,6 +293,21 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   marcas de fondo oscuro deja la descripcion en negro sobre negro si no se carga el Card - Text Color.
   Origen: MX, prueba de antes y despues sobre Hasta 1.8 años (Dog Chow), las cuatro home de marca y
   Nuestra historia: ninguna mejora, se quedan como estaban.
+- **Si la card del sitio viejo tenia una imagen propia SIN texto adentro, se usa esa imagen, no un
+  icono del set.** Ilustraciones (las doradas de LiveClear, los circulos de los 28 dias de Purina One),
+  fotos numeradas (los 15 beneficios de Campeon), los platos de la transicion: el icono generico pierde
+  justo lo que la imagen decia. Van en "Simple (image + title)", completadas a cuadrado con fondo
+  transparente (o del color de la pieza) y sin agrandarlas; si la imagen traia un rotulo que repite el
+  titulo ("DIA #01") o una flecha de secuencia, se recorta. Si la imagen ES la card con el texto
+  quemado (los cuadros de beneficios de Dog Chow, "Revisa / Guarda" de Calidad, los circulos rojos de
+  Purina One), se queda el icono: el texto tiene que ser texto. Origen: MX, idem.
+- **Un color de fondo que choca con el de la marca se cambia por un token de la MISMA marca.** El
+  Primary Red (bandas, el acento del mosaico) va sobre la pagina blanca; sobre el verde de Dog Chow es
+  rojo contra verde y se reemplaza por Brand 03 (verde oscuro #13482C, blanco encima 10:1). En Purina
+  One el acento del mosaico pasa a Brand 04 (#B82828, el rojo de la propia marca). Las cards Simple
+  sobre el turquesa de Purina One van con Card BG Primary White y titulo Brand 04, asi se ven como
+  card y la imagen (platos, packshots) no se pierde contra el turquesa. Origen: MX, idem (banda
+  newsletter de Combinaciones de proteinas).
 
 ## CTAs y links
 

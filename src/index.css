@@ -2422,7 +2422,8 @@ textarea.control { resize: vertical; min-height: 64px; }
    textos claros y placeholders/cards oscuros. Los acentos de color se mantienen. */
 /* Tema de marca oscuro (Pro Plan, Dog Chow, Purina One, Cat Chow). En el sitio la marca pone
    `--color-text-default` en BLANCO y todo el texto sin color propio lo toma, titulos y cuerpo por
-   igual (no hay grises). Las cards de producto van en blanco al 25% y los bordes en blanco
+   igual (no hay grises). El SUBTITULO tambien: en el sitio no tiene color propio, toma el mismo que
+   el titulo (el de la marca o el Text Color de Classy, que pinta los dos juntos). Las cards de producto van en blanco al 25% y los bordes en blanco
    translucido, asi el mismo tema sirve sobre negro, verde, turquesa o azul. */
 .cp-render.cp-dark { background: transparent; color: #fff; }
 .cp-dark .cp-h1, .cp-dark .cp-h2, .cp-dark .cp-plist-h2, .cp-dark .cp-mosaic-title,
@@ -2430,7 +2431,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-dark .cp-tl-h1, .cp-dark .cp-brands-title, .cp-dark .cp-half-title,
 .cp-dark .cp-gcards-title, .cp-dark .cp-stat-v, .cp-dark .cp-tl-name,
 .cp-dark .cp-svc-title { color: #fff; }
-.cp-dark .cp-p, .cp-dark .cp-sub, .cp-dark .cp-mosaic-sub, .cp-dark .cp-imgfeat-sub,
+.cp-dark .cp-p, .cp-dark .cp-sub, .cp-dark .cp-h3, .cp-dark .cp-mosaic-sub, .cp-dark .cp-imgfeat-sub,
 .cp-dark .cp-twi-body, .cp-dark .cp-tl-sub, .cp-dark .cp-brands-sub, .cp-dark .cp-svc-sub,
 .cp-dark .cp-half-text, .cp-dark .cp-half-rtext, .cp-dark .cp-gcards-sub,
 .cp-dark .cp-stat-l, .cp-dark .cp-tl-desc { color: #fff; }
