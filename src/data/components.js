@@ -207,6 +207,40 @@ export const ARROW_POSITIONS = [
   { value: 'position_arrows_top_left', label: 'top left' },
   { value: 'position_arrows_top_right', label: 'top right' },
 ]
+// ===== SPACING (Classy) — lo que hace cada opcion en el sitio =====
+// Medido en el CSS real de content (2026-10): `space_py_N` sale como la clase `section-py-N`
+// (mismo padding arriba y abajo, igual en mobile y desktop) y `space_section_X` como
+// `section-space--X`, que tiene un valor en mobile y otro desde 992px. En px: [arriba, abajo].
+export const SPACING_PX = {
+  space_py_0: [0, 0], space_py_1: [4, 4], space_py_2: [8, 8], space_py_3: [12, 12],
+  space_py_4: [16, 16], space_py_5: [20, 20], space_py_6: [24, 24], space_py_7: [32, 32],
+  space_py_8: [36, 36], space_py_9: [40, 40], space_py_10: [60, 60], space_py_11: [80, 80],
+  space_py_12: [120, 120],
+  space_section_2xs: { m: [4, 8], d: [8, 16] },
+  space_section_xs: { m: [8, 16], d: [16, 32] },
+  space_section_sm: { m: [16, 32], d: [20, 40] },
+  space_section_md: { m: [20, 40], d: [32, 60] },
+  space_section_lg: { m: [32, 60], d: [40, 80] },
+  space_section_xl: { m: [40, 80], d: [60, 120] },
+}
+// Lo que pone cada componente SIN spacing cargado (el CSS de cada uno). El resto cae en
+// `.section`, que es "Seccion: Medio". OJO el acordeon suelto: 0, pegado a lo de arriba y abajo.
+const SPACING_DEFAULT = {
+  banner: 'space_py_4', banner_wrapper: 'space_py_4',
+  text: 'space_py_5', text_image: 'space_py_5',
+  accordion_grid: 'space_py_0', breadcrumb: 'space_py_0',
+}
+export function spacingDefault(key, c = {}) {
+  if (SPACING_DEFAULT[key]) return SPACING_DEFAULT[key]
+  if (key === 'card_grid' && c.view_mode === 'full-background-card-icons-square') return 'space_py_0'
+  return 'space_section_md'
+}
+// [arriba, abajo] en px de un bloque, el cargado o el de su componente.
+export function spacingPx(key, c = {}, mobile = false) {
+  const v = SPACING_PX[c.spacing] || SPACING_PX[spacingDefault(key, c)]
+  return Array.isArray(v) ? v : (mobile ? v.m : v.d)
+}
+
 export const CLASSY_ALIGNS = [
   { value: 'text_align_center', label: 'Text Align Center' },
   { value: 'text_align_left', label: 'Text Align Left' },

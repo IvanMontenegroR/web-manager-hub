@@ -280,6 +280,16 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      se pinta y el bloque se comporta como cualquier otro. Un campo de color
      `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
      quitarlo, en vez de un rojo que parece cargado.
+     **SPACING** (Classy `spacing`): `SPACING_PX` en components.js tiene lo que hace cada opcion
+     (medido en el CSS de content: `space_py_N` -> `section-py-N`, mismo padding arriba y abajo;
+     `space_section_X` -> `section-space--X`, un valor en mobile y otro desde 992px) y
+     `spacingDefault` lo que pone cada componente sin cargar nada (Medio casi todos; 20/20 Texto y
+     Texto con imagen; 16/16 Banner; 0 el Acordeon suelto). `spacingPx` resuelve el par
+     [arriba, abajo] y el preview lo aplica en `.cp-render.cp-sp` como padding AFUERA del bloque, o
+     ADENTRO de la banda si el bloque pinta fondo (`.cp-bleed`). En Vista previa las secciones van
+     pegadas (gap 0): el aire entre dos bloques es la suma de los dos, como en el sitio. La regla de
+     uso (titulos sueltos con 0 y 60 arriba) esta en `runner/CRITERIOS.md`, Spacing.
+     El **Acordeon** suelto se dibuja como en el sitio: maximo 686px centrado y todo cerrado.
      **FULL BLEED**: un bloque con FONDO PINTADO es una **seccion**, no una card: la banda de color cubre
      todo el ancho y solo el contenido queda dentro del container, sin borde redondeado, y si es el ULTIMO
      bloque de la pagina va PEGADO al footer (una franja que corta antes del pie deja un blanco que en el

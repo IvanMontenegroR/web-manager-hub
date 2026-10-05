@@ -2224,6 +2224,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-half-rtext { font-size: 14px; color: #545c67; line-height: 1.65; }
 .cp-half-acc { border-top: 1px solid #e4e7eb; }
 .cp-acc-item { border-bottom: 1px solid #e4e7eb; }
+/* Acordeon suelto: el contenedor del sitio mide como maximo 42.875rem y va centrado. */
+.cp-acc-wrap { max-width: 686px; margin-left: auto; margin-right: auto; }
 .cp-acc-sum { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 2px; font-size: 17px; font-weight: 600; color: #1b252e; }
 .cp-acc-sum::-webkit-details-marker { display: none; }
 .cp-acc-item[open] > .cp-acc-sum .cp-acc-label { color: var(--acc-open, #E91C24); }
@@ -2664,3 +2666,22 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* La flecha de una card con link va abajo a la derecha: el texto le deja lugar para que no
    la tape (pasaba en las cards de Vet Diets, en desktop y en mobile). */
 .cp-cmt-card:has(.cp-cmt-go) .cp-cmt-desc { padding-right: 46px; }
+
+/* ===== SPACING (Classy) =====================================================
+   Cada bloque trae su padding vertical real en --sp-t/--sp-b (desktop) y --sp-tm/--sp-bm
+   (mobile): el cargado en Classy o el que el componente pone por defecto (ver `spacingPx`).
+   Va AFUERA del bloque (el banner es la imagen misma: el aire no puede quedar adentro), y
+   si el bloque pinta una banda de color va ADENTRO de la banda, como en el sitio. El padding
+   vertical propio de cada mockup se anula; el horizontal no se toca. */
+.cp-render.cp-sp { padding-top: var(--sp-t); padding-bottom: var(--sp-b); }
+.cp-render.cp-sp > :first-child { padding-top: 0 !important; padding-bottom: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+/* Con banda de color (seccion pintada, .cp-bleed) el aire va ADENTRO de la banda. */
+.cp-render.cp-sp:has(> .cp-bleed) { padding-top: 0; padding-bottom: 0; }
+.cp-render.cp-sp > .cp-bleed { padding-top: var(--sp-t) !important; padding-bottom: var(--sp-b) !important; }
+.pb-canvas--mobile .cp-render.cp-sp { padding-top: var(--sp-tm); padding-bottom: var(--sp-bm); }
+.pb-canvas--mobile .cp-render.cp-sp:has(> .cp-bleed) { padding-top: 0; padding-bottom: 0; }
+.pb-canvas--mobile .cp-render.cp-sp > .cp-bleed { padding-top: var(--sp-tm) !important; padding-bottom: var(--sp-bm) !important; }
+/* En vista previa las secciones van PEGADAS: el aire entre dos bloques es el spacing de
+   abajo de uno mas el de arriba del otro, no un gap fijo del hub. */
+.pb-canvas.preview .pb-page { gap: 0; }
+.pb-canvas.preview .pb-block--breadcrumb { margin-bottom: 0; }

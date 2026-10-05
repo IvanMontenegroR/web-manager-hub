@@ -320,7 +320,12 @@ export function aManifiesto(pagina, bloques, porTipo = null, { productosMuestra 
     // hub van a un bloque de Texto justo antes, que es como se ve igual.
     if (PARAGRAFOS[b.component_key]?.pestanas && (b.content?.title || b.content?.subtitle)) {
       const { title, title_tag, subtitle, ...resto } = b.content
-      const encabezado = traducir('text', { title, title_tag, body: subtitle }, `${donde} (titulo de las pestañas)`)
+      // Es un TITULO de seccion, no un bloque de texto: sin aire propio (space_py_0), asi
+      // queda pegado a sus pestañas y el aire separa secciones (ver CRITERIOS, Spacing). Salvo
+      // justo despues de un banner, que deja solo 16px abajo: ahi conserva su 20/20.
+      const previo = bloques[i - 1]?.component_key
+      const pegado = previo && !['banner', 'banner_wrapper', 'breadcrumb'].includes(previo)
+      const encabezado = traducir('text', { title, title_tag, body: subtitle, ...(pegado ? { spacing: 'space_py_0' } : {}) }, `${donde} (titulo de las pestañas)`)
       if (encabezado) blocks.push(encabezado)
       avisos.push(`${donde}: el titulo de las pestañas va en un bloque de Texto antes, porque el Tabs del CMS no tiene titulo.`)
       b = { ...b, content: resto }

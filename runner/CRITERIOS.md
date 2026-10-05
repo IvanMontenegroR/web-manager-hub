@@ -187,6 +187,31 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   componente.** No se pierde al traducir. Origen: MX, Opti tecnologias ("por que no usamos los
   subtitulos nosotros?").
 
+## Spacing
+
+- **Que hace cada opcion** (medido en el CSS real de content, 2026-10): `space_py_N` es el mismo
+  padding arriba y abajo en todos los anchos (0, 4, 8, 12, 16, 20, 24, 32, 36, 40, 60, 80, 120 px).
+  Las "Espaçamento de Seção" tienen mas abajo que arriba y cambian a los 992px: Minimo 4/8 -> 8/16,
+  Extra Pequeño 8/16 -> 16/32, Pequeño 16/32 -> 20/40, **Medio 20/40 -> 32/60**, Grande 32/60 ->
+  40/80, Extra Grande 40/80 -> 60/120 (mobile -> desktop, arriba/abajo).
+- **Sin spacing cargado cada componente trae el suyo**: Medio en todos los card grid, la Imagen,
+  las pestañas, el carrusel de productos y el resto de las secciones; 20/20 el Texto y el Texto
+  con imagen; 16/16 el Banner; **0 el Acordeon suelto**. El aire entre dos bloques es la SUMA del
+  de abajo de uno y el de arriba del otro.
+- **Un Texto que es solo el TITULO de la seccion de abajo va con 0 (`space_py_0`)**: asi queda a
+  32px de su contenido (el aire de arriba del componente que sigue) y no flotando a mitad de camino.
+  Para que se lea como el arranque de una seccion nueva, lo que tiene ARRIBA tiene que dejar 60:
+  si es un Texto o un Texto con imagen (20), pasa a Seccion Medio. Lo mismo el titulo de pestañas
+  que el traductor pone en un Texto antes del Tabs.
+  **Excepcion: justo despues del banner** el titulo conserva su 20/20. El banner deja 16 abajo y
+  agrandarlo cambiaria el arranque de todas las paginas.
+- **El Acordeon suelto va con Seccion Medio.** Con su 0 por defecto queda pegado al banner de
+  arriba y al titulo de abajo. Ademas, suelto en la pagina mide como maximo 686px y va centrado, y
+  todos los items arrancan cerrados: es el diseño del CMS (esta pensado para ir en una columna).
+- Origen: MX, primera pagina subida con el runner (Por que cambiar a Purina One: "quiero que
+  aprendas sobre los spacings que tenemos y que apliques correctamente, ademas, que paso con el
+  accordion?").
+
 ## Mobile
 
 - **Cada pagina se revisa tambien en mobile** (toggle Desktop / Mobile del builder, 390px con las

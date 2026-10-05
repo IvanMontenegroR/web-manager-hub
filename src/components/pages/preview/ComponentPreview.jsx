@@ -5,8 +5,7 @@ import { parseInline, parseRich } from '../../../lib/richText'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
   BG_TOKENS, CARD_GRID_DEFAULT_MODE, CARD_SQUARE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
-  BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_BRAND_HERO,
-} from '../../../data/components'
+  BT_MAIN_HERO, BT_SECONDARY_HERO, BT_ONLY_IMAGE, BT_BRAND_HERO, spacingPx } from '../../../data/components'
 
 // Modo de vista del Card Grid -> variante del carrusel de cards que ya sabemos dibujar.
 // Los que faltan estan pendientes de mapear con el CMS.
@@ -397,7 +396,9 @@ const RENDERERS = {
   },
 
   // `accordion_grid`: la lista de desplegables sola (en el CMS suele ir dentro de una
-  // columna de un layout). El primer item con texto arranca abierto.
+  // columna de un layout). Como en el sitio (medido en content, 2026-10): TODOS los items
+  // arrancan CERRADOS, y suelto en la pagina su contenedor mide como maximo 686px
+  // (42.875rem) y va centrado — no ocupa el ancho de la pagina. Spacing por defecto 0.
   accordion_grid: (c, ctx) => {
     const items = list(c.items)
     const arr = items.length ? items : [
@@ -405,13 +406,12 @@ const RENDERERS = {
       { title: 'Segunda pregunta' },
       { title: 'Tercera pregunta' },
     ]
-    const openIdx = arr.findIndex((it) => it.text)
     return (
       // El item ABIERTO toma el Brand 01 de la marca de la pagina (medido en content: dorado
       // en Pro Plan, #2CAB5B en Dog Chow, #66C9D6 en Purina One); sin marca, el rojo del sitio.
-      <div className="cp-block cp-half-acc" style={ctx?.brandTokens ? { '--acc-open': ctx.brandTokens['Brand 01'] } : undefined}>
+      <div className="cp-block cp-half-acc cp-acc-wrap" style={ctx?.brandTokens ? { '--acc-open': ctx.brandTokens['Brand 01'] } : undefined}>
         {arr.map((it, i) => (
-          <details key={i} className="cp-acc-item" open={i === (openIdx < 0 ? 0 : openIdx)}>
+          <details key={i} className="cp-acc-item">
             <summary className="cp-acc-sum">
               <span className="cp-acc-label">{T(it.title, 'Título')}</span>
               <ChevronDown size={18} className="cp-acc-chev" />
@@ -1379,5 +1379,12 @@ export default function ComponentPreview({ componentKey, content, theme, slots, 
     activeTab: activeTab || 0,
     onTab: onTab || null,
   }
-  return <div className={`cp-render${ctx.dark ? ' cp-dark' : ''}`}>{render(content || {}, ctx)}</div>
+  // SPACING: el padding de arriba y abajo de la seccion, el que cargaron en Classy o el
+  // que el componente trae por defecto (ver `spacingPx`). Va como variables y el CSS lo
+  // pone en el elemento raiz del render, adentro de la banda de color si la hay, como en
+  // el sitio. Desktop y mobile por separado: los "Espaçamento de Seção" cambian a 992px.
+  const [t, b] = spacingPx(componentKey, content || {}, false)
+  const [tm, bm] = spacingPx(componentKey, content || {}, true)
+  const sp = { '--sp-t': `${t}px`, '--sp-b': `${b}px`, '--sp-tm': `${tm}px`, '--sp-bm': `${bm}px` }
+  return <div className={`cp-render cp-sp${ctx.dark ? ' cp-dark' : ''}`} style={sp}>{render(content || {}, ctx)}</div>
 }
