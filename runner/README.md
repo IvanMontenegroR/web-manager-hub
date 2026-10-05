@@ -737,7 +737,7 @@ Lo que ninguno de los dos puede decir es si el CMS acepta la pagina: eso solo lo
 ## Estado
 
 El mapping de Purina LATAM (`mapping/purina-latam.json`) esta escrito a partir del HTML
-real de `/node/add/dsu_component_page` en **preprod MX**. Son dos volcados: uno con 8
+real de `/node/add/dsu_component_page` en **content MX** (el entorno que en los primeros volcados se llamaba "preprod" es content). Son dos volcados: uno con 8
 paragraphs sueltos (**275 selectores, 0 sin encontrar**) y otro con un Tabs de 3 pestañas
 (**132 selectores, 0 sin encontrar**). `npm test` pasa.
 

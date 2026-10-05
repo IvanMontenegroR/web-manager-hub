@@ -32,6 +32,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Alcance
 
+- **Las paginas que ya existen en content y estan bien, quedan como estan**: no se suben ni se
+  reemplazan. Hoy son /conoce-purina, /adopta/como-apoyamos-refugios y /adopta/tenencia-responsable.
+  Origen: MX, subida a content.
+
 - **Las paginas de linea de Pro Plan (debajo de /proplan/gatos y /proplan/perros) quedan en pausa**:
   la idea es linkear directo a los productos. Origen: MX, ronda 3.
 - **Club Purina se arma a mano.** El borrador automatico queda solo como referencia. Origen: MX, ronda 2.
@@ -236,6 +240,9 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   En un boton suelto (banner, slide, bloque de texto o de imagen) nombra el destino ("Conoce Pro Plan®
   Perros", "Ver productos Dog Chow®") y el mismo destino lleva la misma etiqueta en todo el sitio. En
   la card de un carrusel alcanza "Ver más": el titulo de la card ya dice el tema.
+- **Un boton o link sin destino conocido va con `#` y se anota como pendiente** (pagina, bloque,
+  etiqueta), no frena la subida. El `#` es la marca buscable para completarlo despues con `aplicar`.
+  Origen: MX, subida a content (botones de Adopta).
 - **Todo carrusel de productos lleva su "Ver todos" con destino** (el listado de la marca; Campeón,
   que no tiene, al listado general). Sin URL el boton no lleva a ningun lado.
 - **En un carrusel donde todas las cards llevan link, la que no lo tiene y tiene tema con pagina
