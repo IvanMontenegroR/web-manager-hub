@@ -115,8 +115,10 @@ npm run verify -- mapping/purina-latam.json form.html
 
 ## Reglas de la casa
 
-- **Siempre borrador.** El runner no publica. Si el mapping sabe donde esta el check de
-  publicado, lo destilda. Nada llega al publico sin que un humano lo apruebe.
+- **Publicada o borrador, segun el manifiesto.** El tilde "Publicado" se fija siempre a lo
+  que pide `page.published` (en content viene tildado de entrada). Las paginas que salen del
+  hub van PUBLICADAS: es la regla de content (ver `CRITERIOS.md`). Un manifiesto escrito a
+  mano sin `published` queda en borrador.
 - **No modifica nada existente, salvo con un plan revisado.** `build` solo entra a "crear
   contenido". La unica forma de cambiar una pagina que ya existe es `aplicar`, que toca
   solo los campos que dice el plan y solo si siguen teniendo el valor que se leyo (ver
@@ -513,8 +515,9 @@ maquina no hace falta.
 
 ## Para la revision de compliance
 
-- **Que hace:** crea nodos nuevos, despublicados, en el CMS, llenando el mismo
-  formulario que llenaria una persona. Nada mas.
+- **Que hace:** crea nodos nuevos en el CMS (publicados si el manifiesto lo pide, que es lo
+  que hace el traductor del hub para content), llenando el mismo formulario que llenaria una
+  persona. Nada mas.
 - **Que NO hace:** no borra, no toca otros content types, no cambia configuracion del
   sitio. Contenido existente solo lo modifica `aplicar`, campo por campo segun un plan
   revisado, controlando el valor previo y dejando mensaje de revision.
@@ -532,8 +535,8 @@ maquina no hace falta.
   entre acciones (`--slowmo`, 120ms por defecto). No hay paralelismo ni scraping.
 - **Auditoria:** cada corrida deja una linea en `logs/runs.jsonl` con la fecha, el
   manifiesto, el titulo y el node id creado, o el error. Local, no sale de la maquina.
-- **Rollback:** todo lo creado queda despublicado, y el log dice exactamente que node
-  ids se crearon para poder borrarlos.
+- **Rollback:** el log dice exactamente que node ids se crearon, para despublicarlos o
+  borrarlos; y `aplicar` deja un mensaje en cada revision, que se puede revertir.
 - **Codigo:** fuente legible, sin ofuscar y sin empaquetar en un ejecutable, para que se
   pueda revisar entero. Son unos pocos cientos de lineas.
 - **La interfaz es un servidor LOCAL**, no un sitio: escucha solo en `127.0.0.1`, nunca en

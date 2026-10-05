@@ -51,6 +51,19 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
 
   onStep(`Abriendo ${url}`)
   await prepararPagina(page)
+
+  // No se pisa nada: si la direccion ya responde en el sitio (una pagina, una redireccion,
+  // algo despublicado), se frena ANTES de tocar el formulario. Crear igual dejaria dos
+  // nodos peleando por el mismo alias, y Drupal le pondria "-0" al nuestro sin avisar.
+  if (manifest.page.path) {
+    const destino = site + manifest.page.path
+    const r = await page.request.get(destino, { maxRedirects: 0, failOnStatusCode: false })
+    if (r.status() !== 404) {
+      throw new Error(`${manifest.page.path} ya existe en el sitio (responde ${r.status()}). `
+        + 'No se crea para no pisar nada: si hay que reemplazarla, se decide aparte.')
+    }
+  }
+
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   if (/\/user\/login/.test(page.url())) {
@@ -71,13 +84,14 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     await escribir(page.locator(mapping.path).first(), manifest.page.path)
   }
 
-  // Despublicado SIEMPRE, salvo que el manifiesto pida lo contrario Y el mapping sepa
-  // donde esta el check.
+  // El tilde "Publicado" queda como lo pide el manifiesto (por defecto destildado). En
+  // content viene TILDADO de entrada y vive fuera del <form>, en la barra de Gin: por eso
+  // se fija siempre, para que el resultado no dependa del default del sitio.
   if (mapping.published) {
     const wants = manifest.page.published === true
     const box = page.locator(mapping.published).first()
     if (await box.count()) await tildar(box, wants)
-    if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
+    onStep(wants ? 'Queda PUBLICADA' : 'Queda en BORRADOR')
   }
 
   const ctx = { mapping, page, onStep, esperaSubform, consola,

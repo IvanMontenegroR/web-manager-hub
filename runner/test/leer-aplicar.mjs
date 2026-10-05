@@ -23,7 +23,7 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replac
 const nodo = {
   titulo: 'Tenencia "responsable"', moderacion: 'published',
   linkUri: '#', linkTitle: 'Perros', cuerpo: '<p>Hola & chau</p>',
-  spacing: 'space_section_md', pregunta: '1. Descanso',
+  spacing: 'space_section_md', pregunta: '1. Descanso', publicado: true,
 }
 let build = 1
 let abiertoTop = false, abiertoItems = false
@@ -75,9 +75,12 @@ const formulario = () => `<html><body><div class="messages">x</div>
   <input type="hidden" name="form_token" value="tok">
   <input type="hidden" name="form_id" value="node_dsu_component_page_edit_form">
   <input type="file" name="files[x]">
-  <input type="submit" name="op" value="Vista previa" data-drupal-selector="edit-preview">
-  <input type="submit" name="op" value="Guardar" data-drupal-selector="edit-submit">
-</form></body></html>`
+</form>
+<div class="gin-sticky-form-actions">
+  <input form="node-dsu-component-page-edit-form" type="checkbox" name="status[value]" value="1"${nodo.publicado ? ' checked="checked"' : ''}>
+  <input form="node-dsu-component-page-edit-form" type="submit" name="op" value="Vista previa" data-drupal-selector="edit-preview">
+  <input form="node-dsu-component-page-edit-form" type="submit" name="op" value="Guardar" data-drupal-selector="edit-submit">
+</div></body></html>`
 
 function leerCuerpo(req) {
   return new Promise(res => { let b = ''; req.on('data', d => { b += d }); req.on('end', () => res(new URLSearchParams(b))) })
@@ -132,6 +135,7 @@ const server = http.createServer(async (req, res) => {
     nodo.spacing = b.get('field_ln_n_components[1][subform][classy][0][accordion_grid][spacing]')
     nodo.pregunta = b.get('field_ln_n_components[1][subform][field_items][0][subform][field_c_advanced_title][0][value]')
     nodo.moderacion = b.get('moderation_state[0][state]')
+    nodo.publicado = b.get('status[value]') === '1'
     if (romperAlGuardar) nodo.pregunta = 'otra cosa'
     ultimoLog = b.get('revision_log[0][value]')
     guardados += 1
@@ -173,6 +177,7 @@ linea &amp; otra</textarea><input name="g" value="h" disabled><input type="submi
   ok(l.nid === 7, 'saca el nodo de la ruta')
   ok(l.titulo === 'Tenencia "responsable"', 'titulo decodificado')
   ok(l.estado === 'published', 'estado de moderacion')
+  ok(l.pagina['status[value]'] === '1', 'lee el tilde Publicado aunque este fuera del form')
   const [texto, acordeon, item] = l.paragraphs
   ok(l.paragraphs.length === 3, 'tres paragraphs, el item anidado incluido (abrio los dos niveles)')
   ok(texto?.tipo === 'c_text' && texto.campos['[field_c_link][0][uri]'] === '#', 'el link del texto, con su nombre exacto')
@@ -204,7 +209,8 @@ linea &amp; otra</textarea><input name="g" value="h" disabled><input type="submi
   ok(r.resultado === 'guardado', 'guarda y verifica')
   ok(nodo.linkUri === 'https://ejemplo.com/perros', 'el campo quedo cambiado')
   ok(nodo.linkTitle === 'Perros' && nodo.cuerpo === cuerpoAntes && nodo.pregunta === '1. Descanso' && nodo.spacing === 'space_section_md', 'todo lo demas viajo tal cual')
-  ok(nodo.moderacion === 'published', 'sigue publicada')
+  ok(nodo.moderacion === 'published', 'sigue con su estado de moderacion')
+  ok(nodo.publicado === true, 'sigue PUBLICADA: el tilde que vive fuera del form viajo al guardar')
   ok(ultimoLog === 'Batch prueba', 'con el mensaje de revision')
 
   romperAlGuardar = true

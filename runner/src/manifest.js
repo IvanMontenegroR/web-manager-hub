@@ -21,7 +21,8 @@
 //     layout, los items de un acordeon). Por defecto 0, que es la primera.
 //   - Las IMAGENES no van en el manifiesto: subirlas a la Media library se hace a
 //     mano (ver README). Un campo de imagen en `fields` se ignora con aviso.
-//   - `published` es siempre opcional y por defecto FALSE: el runner deja borradores.
+//   - `published` es opcional y por defecto FALSE (borrador). El traductor del hub lo pone en
+//     TRUE: en content las paginas que cargamos quedan publicadas (CRITERIOS.md).
 import { readFileSync } from 'node:fs'
 
 export const MANIFEST_VERSION = 1

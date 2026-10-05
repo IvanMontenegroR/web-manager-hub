@@ -54,7 +54,7 @@ const { manifiesto, avisos, pendientes } = aManifiesto(PAGINA, BLOQUES, tipos)
 
 validateManifest(manifiesto, '(prueba)')
 ok(true, 'el manifiesto pasa el validador del runner')
-ok(manifiesto.page.published === false, 'la pagina sale como BORRADOR (regla de la casa)')
+ok(manifiesto.page.published === true, 'la pagina sale PUBLICADA (regla de content, ver CRITERIOS.md)')
 
 const tiposEmitidos = manifiesto.blocks.map((b) => b.type)
 ok(!tiposEmitidos.includes('breadcrumb'), 'el breadcrumb no viaja al CMS')

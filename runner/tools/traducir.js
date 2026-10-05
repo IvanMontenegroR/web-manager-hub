@@ -290,7 +290,8 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
       _: 'Generado por tools/manifiesto.mjs desde el hub. Las imagenes NO van aca: el runner '
         + 'ELIGE de la Media library, no sube. Ver la lista de pendientes que imprime la herramienta.',
       manifest: 1,
-      page: { title: pagina.name, path: pagina.path, published: false },
+      // Publicada: las paginas que se cargan en content quedan publicadas (CRITERIOS.md).
+      page: { title: pagina.name, path: pagina.path, published: true },
       blocks,
     },
     avisos,

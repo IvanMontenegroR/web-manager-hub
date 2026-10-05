@@ -45,8 +45,27 @@ export function formDelNodo(html) {
   const m = html.match(/<form\b[^>]*\bid="node-[^"]*-form"[^>]*>/)
   if (!m) throw new ErrorDrupal('No encontre el formulario del nodo en la pagina (¿sesion vencida o sin permiso?).')
   const ini = m.index
-  const fin = html.indexOf('</form>', ini)
-  return { abre: attrs(m[0].slice(5, -1)), html: html.slice(ini, fin < 0 ? undefined : fin + 7) }
+  const fin0 = html.indexOf('</form>', ini)
+  const fin = fin0 < 0 ? html.length : fin0
+  const abre = attrs(m[0].slice(5, -1))
+  // Controles AFUERA del <form> que le pertenecen por el atributo form="id". En content el
+  // tilde "Publicado" (status[value]) y los botones viven en la barra de acciones de Gin,
+  // fuera del form. Si no se cuentan, al guardar el tilde no viaja y Drupal DESPUBLICA.
+  let externos = ''
+  if (abre.id) {
+    const id = abre.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp(`<(input|select|textarea|button)\\b[^>]*\\bform="${id}"[^>]*>`, 'gi')
+    let x
+    while ((x = re.exec(html))) {
+      if (x.index > ini && x.index < fin) continue
+      const tag = x[1].toLowerCase()
+      if (tag === 'select' || tag === 'textarea' || tag === 'button') {
+        const cierre = html.toLowerCase().indexOf(`</${tag}>`, re.lastIndex)
+        externos += html.slice(x.index, cierre < 0 ? re.lastIndex : cierre + tag.length + 3)
+      } else externos += x[0]
+    }
+  }
+  return { abre, html: html.slice(ini, fin) + externos + '</form>' }
 }
 
 /**

@@ -226,6 +226,14 @@ try {
   } catch (e) { freno = /no tiene el campo "campo_inventado"/.test(e.message) }
   check(freno, 'frena ante un campo que el mapping no conoce')
 
+  // Una direccion que ya existe en el sitio frena ANTES de tocar el formulario.
+  let ocupada = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {},
+      manifest: validateManifest({ manifest: 1, page: { title: 'x', path: '/node/123' }, blocks: [] }) })
+  } catch (e) { ocupada = e.message }
+  check(/\/node\/123 ya existe en el sitio \(responde 200\)/.test(ocupada), 'frena si la direccion ya existe en el sitio')
+
   // Un slot que no existe tambien frena: mejor eso que meter el bloque en otro lado.
   let slotMalo = false
   try {
