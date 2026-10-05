@@ -226,6 +226,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   entre titulo y descripcion para que entren.
 - **Un texto metido en la foto de una card queda debajo de la descripcion**: se recorta la foto sin
   ese rotulo o la card pasa a columnas con Imagen (texto arriba, foto entera abajo).
+- **"Simple (image + title)" no se usa para rescatar cards verticales que ya se leen.** Es para cards
+  que nacen asi: foto que funciona CUADRADA (300px en todos los anchos) y texto corto (titulo de
+  hasta 65, descripcion de hasta 100). Pasar a este modo una card vertical recorta una foto que se
+  compuso alta, saca el texto de adentro de la card (lo que ya se descarto en la ronda 6) y en las
+  marcas de fondo oscuro deja la descripcion en negro sobre negro si no se carga el Card - Text Color.
+  Origen: MX, prueba de antes y despues sobre Hasta 1.8 años (Dog Chow), las cuatro home de marca y
+  Nuestra historia: ninguna mejora, se quedan como estaban.
 
 ## CTAs y links
 
