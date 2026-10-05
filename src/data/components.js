@@ -851,11 +851,11 @@ export const COMPONENTS = [
       { key: 'left_image', label: 'Imagen izquierda', type: 'image', requiresTrue: 'show_left_image' },
       // Filtro por categoria: toggle SOLO del builder (cms, no se exporta). Si esta
       // activo, el campo de tabs SI se exporta (requires: 'show_filters'); si no, se oculta.
-      { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true },
+      { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true, default: false },
       { key: 'filters', label: 'Pestañas de filtro (separadas por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks', requires: 'show_filters' },
       // Pet ID: componente fijo (no editable). Checkbox solo del builder (cms) para
       // mostrar/ocultar la card; NO sale como campo en el Excel.
-      { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true },
+      { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true, default: false },
       // Productos pulleados por el CMS: en la matriz solo el nombre (sin imagen).
       { key: 'products', label: 'Productos', type: 'list', itemLabel: 'Producto', item: [
         { key: 'title', label: 'Nombre', type: 'text' },

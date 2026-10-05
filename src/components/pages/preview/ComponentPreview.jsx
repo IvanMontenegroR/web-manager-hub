@@ -709,10 +709,11 @@ const RENDERERS = {
     const products = list(c.products)
     // Los productos los pullea el CMS: cada uno es solo un placeholder con el nombre.
     const arr = products.length ? products : [{}, {}, {}, {}, {}]
-    // Pet ID: card fija (no editable), se muestra/oculta con el checkbox del builder.
-    const showPetId = c.show_petid !== false
-    // Tabs de filtro por categoria: solo si el toggle esta activo (default: mostrar).
-    const showFilters = c.show_filters !== false
+    // Pet ID y tabs de filtro: APAGADOS salvo que se prendan a mano. En el CMS el carrusel es
+    // un Block "Selected Product", que no tiene pestañas, y el Pet ID no va en el lanzamiento:
+    // el runner los descarta, asi que el mockup no los dibuja si no se pidieron.
+    const showPetId = c.show_petid === true
+    const showFilters = c.show_filters === true
     // Imagen izquierda OPCIONAL (650×692): solo si el toggle esta activo.
     const showLeft = c.show_left_image === true
     const moreText = c.see_more_text == null ? 'Ver todos' : c.see_more_text
