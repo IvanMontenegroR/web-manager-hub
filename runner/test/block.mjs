@@ -51,6 +51,21 @@ const escritos = await llenarLista(ctx, lista, vars, productos, 'productos')
 const valores = await page.locator('#filas input').evaluateAll((els) => els.map((e) => e.value))
 ok(JSON.stringify(valores) === JSON.stringify(productos), `los 3 productos, cada uno en su fila (${JSON.stringify(valores)})`)
 ok(escritos.length === 3, 'y cada fila queda verificada')
+// El chequeo previo: un producto que no existe frena ANTES de armar.
+{
+  const { createServer } = await import('node:http')
+  const srv = createServer((req, res) => { res.writeHead(req.url === '/node/620' ? 200 : 404); res.end('') })
+  await new Promise((r) => srv.listen(0, r))
+  const site = `http://127.0.0.1:${srv.address().port}`
+  const { referenciasQueFaltan } = await import('../src/build.js')
+  const mapping = { paragraphs: { types: { block: { fields: { 'field_block.productos': { kind: 'lista' } } } } } }
+  const manifest = { blocks: [{ type: 'layout_columns_2', children: [{ type: 'block', fields: {
+    'field_block.productos': ['Existe (620)', 'Borrado (999)', 'Existe de nuevo (620)'] } }] }] }
+  const faltan = await referenciasQueFaltan(page, site, manifest, mapping)
+  ok(faltan.length === 1 && /Borrado \(999\)/.test(faltan[0]), `avisa el producto que no existe, aunque este adentro de un layout (${JSON.stringify(faltan)})`)
+  srv.close()
+}
+
 await browser.close()
 console.log(fallas ? `\n${fallas} falla/s` : '\nTodo bien.')
 process.exit(fallas ? 1 : 0)

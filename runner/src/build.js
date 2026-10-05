@@ -64,6 +64,16 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     }
   }
 
+  // LAS REFERENCIAS A PRODUCTOS tienen que existir. Un producto borrado o despublicado
+  // no falla al escribirlo: falla al GUARDAR, con todo el formulario ya cargado. Se
+  // revisan antes de empezar.
+  const faltan = await referenciasQueFaltan(page, site, manifest, mapping)
+  if (faltan.length) {
+    throw new Error(`Estos productos no existen en el sitio: ${faltan.join(' | ')}. `
+      + 'Corregí productosMuestra en el mapping (o el manifiesto) y volvé a correr.')
+  }
+  if (contarReferencias(manifest, mapping)) onStep('Productos referenciados: todos existen en el sitio')
+
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   if (/\/user\/login/.test(page.url())) {
@@ -673,6 +683,44 @@ export async function fillField(ctx, f, vars, value, ref) {
       + `Elementos con ese selector: ${total}.`)
   }
   return { selector, f, ref, valor: value, puesto, rutaRich }
+}
+
+// Las referencias "Nombre (nid)" de los campos repetibles del manifiesto (los productos
+// del carrusel), con el nid aparte.
+function referencias(manifest, mapping) {
+  const out = []
+  const recorrer = (bloques) => {
+    for (const b of bloques || []) {
+      const def = mapping.paragraphs?.types?.[b.type]
+      for (const [k, v] of Object.entries(b.fields || {})) {
+        if (def?.fields?.[k]?.kind !== 'lista') continue
+        for (const x of [].concat(v)) {
+          const nid = /\((\d+)\)\s*$/.exec(String(x))?.[1]
+          if (nid) out.push({ texto: String(x), nid })
+        }
+      }
+      recorrer(b.children)
+    }
+  }
+  recorrer(manifest.blocks)
+  return out
+}
+const contarReferencias = (manifest, mapping) => referencias(manifest, mapping).length
+
+// Cuales de esas referencias NO existen: el nodo responde 404 (o 403, que es lo que da un
+// nodo despublicado a quien no lo puede ver). Cada nid se consulta una sola vez.
+export async function referenciasQueFaltan(page, site, manifest, mapping) {
+  const faltan = []
+  const vistos = new Map()
+  for (const r of referencias(manifest, mapping)) {
+    if (!vistos.has(r.nid)) {
+      const res = await page.request.get(`${site}/node/${r.nid}`, { maxRedirects: 0, failOnStatusCode: false })
+      vistos.set(r.nid, res.status())
+    }
+    const st = vistos.get(r.nid)
+    if (st === 404 || st === 403) faltan.push(`${r.texto} (responde ${st})`)
+  }
+  return faltan
 }
 
 // Llena un campo repetible fila por fila. `f.sel` lleva `{i}` (la fila) y `f.add` es el
