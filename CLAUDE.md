@@ -265,7 +265,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      color propio de Classy los hereda — titulos y cuerpo en blanco por igual, sin grises. Pro Plan
      negro, Dog Chow / Purina One / Cat Chow su Brand 02; Fancy Feast y Dentalife blancas. Lo que NO
      sigue a la marca: los colores cargados en Classy (un titulo rojo queda rojo sobre el verde), la caja
-     del mosaico (roja salvo Card - Background Color), los colores de la card Simple y el texto negro
+     del mosaico (SIEMPRE roja: el CMS ignora el Card - Background Color en grid-cards), los colores de la card Simple y el texto negro
      fijo de algunos componentes del CMS (timeline, cards-contact). El acordeon abierto toma el Brand 01
      (`--acc-open`). Con Purina One el blanco sobre #00A5BB da 3:1: es el diseño del sitio, no del hub.
      Las marcas sin pagina en content (Felix, Beneful, Campeon, Excellent, Gatina, Snacks) NO estan

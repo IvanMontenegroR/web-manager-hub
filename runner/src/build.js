@@ -2,8 +2,8 @@
 // Drupal, manejando el navegador con la sesion que vos ya abriste.
 //
 // Reglas de la casa, y no son negociables:
-//   - Siempre BORRADOR. El runner no publica: destilda "Publicado" si el mapping dice
-//     donde esta. Nada de lo que hace llega al publico sin que un humano lo apruebe.
+//   - El tilde "Publicado" queda como lo pide el manifiesto (`page.published`, por defecto
+//     borrador). Las paginas del hub van PUBLICADAS: es la regla de content.
 //   - No modifica contenido existente: solo entra a "crear contenido".
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
@@ -189,9 +189,20 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   }
 
   onStep('Guardando…')
-  await page.locator(mapping.save).first().click()
-  await page.waitForLoadState('domcontentloaded')
+  const antes = page.url()
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {}),
+    page.locator(mapping.save).first().click(),
+  ])
   const after = page.url()
+  // GUARDADO = Drupal salio del formulario de alta. Si sigue en /node/add (o en la misma
+  // URL), lo rechazo: se lee el mensaje de error y se FRENA, en vez de anunciar un guardado
+  // que no paso (paso con un producto cuyo nombre tenia una coma).
+  if (after === antes || /\/node\/add\//.test(after)) {
+    const msg = (await page.locator('[role="alert"], .messages--error, [data-drupal-messages] .messages').allInnerTexts().catch(() => []))
+      .join(' | ').replace(/\s+/g, ' ').trim().slice(0, 600)
+    throw new Error(`Drupal no guardo la pagina (sigue en ${after}). ${msg ? 'Dice: ' + msg : 'Sin mensaje visible.'}`)
+  }
   const nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
   return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
 }
@@ -363,6 +374,7 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
 function resolveIn(add, vars) {
   const out = { ...add }
   for (const k of ['select', 'button', 'open', 'enMedio']) if (out[k]) out[k] = resolveSelector(out[k], vars)
+  if (out.alternativa) out.alternativa = resolveIn(out.alternativa, vars)
   return out
 }
 
@@ -443,12 +455,15 @@ const mirarFila = (el) => {
   }
   // Campos que Drupal trae con valor puesto y que no dicen nada sobre si alguien cargo
   // contenido: el peso de la fila, el formato de texto, el idioma.
-  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$/
+  // Tampoco el selector de "que tipo agregar" de una lista anidada ([add_more]): una
+  // pestaña recien nacida lo trae puesto en el primer tipo y no tiene nada cargado.
+  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$|\[add_more\]/
   let vacia = true
   const campos = el.querySelectorAll('input[type="text"], input[type="url"], input[type="email"],'
     + ' input[type="number"], textarea, select')
   for (const c of campos) {
     if (TECNICOS.test(c.name || '')) continue
+    if (c.type === 'submit') continue
     const v = String(c.value || '').trim()
     if (v && v !== '_none') { vacia = false; break }
   }
@@ -474,8 +489,22 @@ async function freeDelta(page, dselTpl) {
 async function clickAdd(page, add, def, type) {
   if (add.mode === 'select') {
     const sel = page.locator(add.select).first()
+    // Una ranura puede ofrecer el alta de DOS maneras segun el estado del formulario (en
+    // las pestañas: "Párrafo type" + boton, o un dropbutton de Gin). `alternativa` es la otra.
+    if (!(await sel.count()) && add.alternativa) return clickAdd(page, add.alternativa, def, type)
     if (!(await sel.count())) throw new Error(`No encontre el desplegable de tipos (${add.select})`)
-    if (def.value) await sel.selectOption(def.value)
+    if (add.sinAjaxAlElegir) {
+      // El desplegable de algunas ranuras dispara un AJAX que en el CMS esta ROTO (en las
+      // pestañas, paragraphs_features tira un TypeError y el alta posterior no aparece).
+      // Drupal no necesita ese AJAX: lee el valor del desplegable al apretar el boton. Se
+      // pone el valor sin disparar el evento, como si nunca se hubiera recargado.
+      const ok = await sel.evaluate((s, v) => {
+        const o = [...s.options].find((x) => x.value === v.value || (!v.value && x.text.trim() === v.label))
+        if (!o) return false
+        s.value = o.value; return true
+      }, { value: def.value || null, label: def.label })
+      if (!ok) throw new Error(`El desplegable de tipos no ofrece "${def.value || def.label}"`)
+    } else if (def.value) await sel.selectOption(def.value)
     else await sel.selectOption({ label: def.label })
     // El desplegable tambien dispara AJAX: apretar Agregar sin esperar rompe las dos.
     await esperarAjax(page)
@@ -741,9 +770,20 @@ export async function llenarLista(ctx, f, vars, valores, ref) {
       await page.locator(sel).first().waitFor({ state: 'attached', timeout: 20000 })
         .catch(() => { throw new Error(`${ref}: apreté "Añadir otro elemento" y no aparecio la fila ${i + 1}`) })
     }
-    escritos.push(await fillField(ctx, { ...f, kind: 'text', sel: f.sel.replaceAll('{i}', String(i)) }, vars, v, `${ref}[${i}]`))
+    const valor = f.referencia ? citarReferencia(v) : v
+    escritos.push(await fillField(ctx, { ...f, kind: 'text', sel: f.sel.replaceAll('{i}', String(i)) }, vars, valor, `${ref}[${i}]`))
   }
   return escritos
+}
+
+// Un autocompletado de referencias de Drupal SEPARA POR COMA: "Purina One carne, pollo y
+// cordero (666)" lo lee como dos productos y el segundo no existe, asi que el formulario no
+// se guarda. La regla de Drupal es encerrar entre comillas dobles el valor que lleva coma
+// (y duplicar las comillas que tenga adentro).
+export function citarReferencia(v) {
+  const t = String(v ?? '')
+  if (!t.includes(',') || /^".*"$/.test(t.trim())) return t
+  return `"${t.replace(/"/g, '""')}"`
 }
 
 // Elige un medio YA subido. El valor del manifiesto es el NOMBRE del medio en la

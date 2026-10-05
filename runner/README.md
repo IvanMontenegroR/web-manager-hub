@@ -8,7 +8,7 @@ programas que generan manifiestos; cualquier otro proyecto puede generarlos con 
 cosa, o escribirlos a mano.
 
 ```
-manifiesto.json  +  mapping.json  ->  page-runner  ->  borrador en Drupal
+manifiesto.json  +  mapping.json  ->  page-runner  ->  pagina en Drupal (publicada si el manifiesto lo pide)
    que pagina        como es el
    hay que armar     formulario de
                      ESE Drupal
@@ -80,7 +80,7 @@ Los tres pasos de la pantalla:
    recortan las imagenes, las suben a la Media library y arman la pagina. *Probar sin
    guardar* llena el formulario para que lo mires y **no crea la pagina** en el CMS (los
    medios si se suben: son reutilizables y hacen falta para que el formulario se llene de
-   verdad). *Crear borrador* ademas la guarda despublicada y te da el link. Los pasos se
+   verdad). *Crear página* ademas la guarda (publicada, como piden los manifiestos del hub) y te da el link. Los pasos se
    ven en vivo mientras corre.
 
 ### Por terminal
@@ -95,7 +95,7 @@ node src/cli.js build   manifests/*.json --mapping mapping/purina-latam.json --s
 ```
 
 Sin `--save` llena el formulario y **deja la ventana abierta** para que lo mires: no
-escribe nada en el CMS. Con `--save` aprieta Guardar y deja el borrador despublicado.
+escribe nada en el CMS. Con `--save` aprieta Guardar: queda publicada o en borrador segun `page.published`.
 
 Si hay un solo archivo en `mapping/`, `--mapping` se puede omitir.
 Otras opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
@@ -356,7 +356,7 @@ npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin 
 viejo: las que se arman directo en el hub no tienen archivo de plan, asi que el recortador
 las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques.
 
-**Desde la INTERFAZ es un boton.** `npm run ui` y "Crear borrador": la interfaz corre la
+**Desde la INTERFAZ es un boton.** `npm run ui` y "Crear página": la interfaz corre la
 cadena entera — regenera el manifiesto desde el hub, recorta, sube los medios y arma la
 pagina. Antes solo hacia el ultimo paso, asi que dependia de que alguien hubiera corrido
 tres comandos antes, en orden; y cuando el manifiesto estaba viejo no fallaba nada, se

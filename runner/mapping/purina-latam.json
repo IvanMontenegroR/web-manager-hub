@@ -1028,7 +1028,7 @@
               "base": "{base}[field_tab_item][{delta}][subform]",
               "add": {
                 "mode": "buttons",
-                "button": "button[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"], input[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"]"
+                "button": "button[name=\"{npath}_subform_field_tab_item_add_more\"], input[name=\"{npath}_subform_field_tab_item_add_more\"], button[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"], input[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"]"
               }
             }
           ]
@@ -1086,10 +1086,17 @@
               "dsel": "{dsel}-subform-field-component-{delta}",
               "base": "{base}[field_component][{delta}][subform]",
               "add": {
-                "mode": "buttons",
-                "_": "No es el modal de paragraphs_ee sino un DROPBUTTON de Gin: el primer tipo (Banner) queda a la vista y los otros ocho estan plegados detras del toggle, asi que hay que abrirlo antes de poder clickear. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. NO entran los layouts, ni otro comp_tabs, ni un accordion_grid.",
-                "open": "[data-drupal-selector=\"{dsel}-subform-field-component-add-more\"] button.dropbutton__toggle",
-                "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
+                "mode": "select",
+                "_": "En el formulario de content (2026-10) la pestaña trae \"Párrafo type\" (un desplegable) + \"Add Párrafo\", como el nivel principal de la pagina. Si aparece el dropbutton de Gin, se usa `alternativa`. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. El AJAX del desplegable esta roto en el CMS (TypeError de paragraphs_features ScrollToElementCommand): `sinAjaxAlElegir` pone el valor sin dispararlo.",
+                "select": "select[name=\"{base}[field_component][add_more][add_more_select]\"]",
+                "button": "input[name=\"{npath}_subform_field_component_add_more\"], button[name=\"{npath}_subform_field_component_add_more\"]",
+                "alternativa": {
+                  "mode": "buttons",
+                  "_": "No es el modal de paragraphs_ee sino un DROPBUTTON de Gin: el primer tipo (Banner) queda a la vista y los otros ocho estan plegados detras del toggle, asi que hay que abrirlo antes de poder clickear. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. NO entran los layouts, ni otro comp_tabs, ni un accordion_grid.",
+                  "open": "[data-drupal-selector=\"{dsel}-subform-field-component-add-more\"] button.dropbutton__toggle",
+                  "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
+                },
+                "sinAjaxAlElegir": true
               }
             }
           ]
@@ -1963,7 +1970,8 @@
             "kind": "lista",
             "sel": "input[name=\"{base}[field_block][0][settings][items_fixed_products][{i}][fixed_products]\"]",
             "add": "input[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"], button[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"]",
-            "note": "Referencia a un producto del CMS (\"Nombre (nid)\"). El primero viene en el formulario; los demas con \"Añadir otro elemento\"."
+            "note": "Referencia a un producto del CMS (\"Nombre (nid)\"). El primero viene en el formulario; los demas con \"Añadir otro elemento\". `referencia`: un nombre con coma va entre comillas, si no Drupal lo parte en dos.",
+            "referencia": true
           },
           "field_c_advanced_title": {
             "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"

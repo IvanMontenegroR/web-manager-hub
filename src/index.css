@@ -2363,6 +2363,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-mosaic-title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.12; color: #1b252e; }
 .cp-mosaic-sub { margin-top: 10px; font-size: 14px; color: #545c67; }
 .cp-mosaic-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.cp-mosaic-col { display: flex; flex-direction: column; gap: 16px; }
+.cp-mosaic-col--inv { flex-direction: column-reverse; }
 .cp-mosaic-cell { aspect-ratio: 1/1; }
 .cp-mosaic-img { height: 100%; border-radius: 4px; }
 .cp-mosaic-box { aspect-ratio: 1/1; background: var(--acc, #ED1C24); border-radius: 10px; padding: 26px 24px; text-align: left; display: flex; flex-direction: column; }

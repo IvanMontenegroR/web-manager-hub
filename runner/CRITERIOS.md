@@ -323,9 +323,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   quemado (los cuadros de beneficios de Dog Chow, "Revisa / Guarda" de Calidad, los circulos rojos de
   Purina One), se queda el icono: el texto tiene que ser texto. Origen: MX, idem.
 - **Un color de fondo que choca con el de la marca se cambia por un token de la MISMA marca.** El
-  Primary Red (bandas, el acento del mosaico) va sobre la pagina blanca; sobre el verde de Dog Chow es
-  rojo contra verde y se reemplaza por Brand 03 (verde oscuro #13482C, blanco encima 10:1). En Purina
-  One el acento del mosaico pasa a Brand 04 (#B82828, el rojo de la propia marca). Las cards Simple
+  Primary Red de una banda va sobre la pagina blanca; sobre el verde de Dog Chow es rojo contra verde
+  y se reemplaza por Brand 03 (verde oscuro #13482C, blanco encima 10:1). **El mosaico (grid-cards)
+  NO se puede cambiar**: su caja es siempre Primary Red y el CMS ignora el Card - Background Color
+  (medido en content con la primera pagina subida, Purina One con Brand 04 cargado: sale #E91C24).
+  Si el rojo choca, la salida es otro modo de vista, no el color. Las cards Simple
   sobre el turquesa de Purina One van con Card BG Primary White y titulo Brand 04, asi se ven como
   card y la imagen (platos, packshots) no se pierde contra el turquesa. Origen: MX, idem (banda
   newsletter de Combinaciones de proteinas).

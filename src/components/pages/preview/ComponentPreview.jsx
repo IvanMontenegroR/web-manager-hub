@@ -848,9 +848,11 @@ const RENDERERS = {
     const dim = c.dim || '822×1230px'
     const style = {}
     if (icon) {
-      // El relleno de la card sale del "Card - Background Color" del CMS, cuyo default
-      // es BLANCO. No se deduce de la banda: son dos campos distintos.
-      style['--card'] = T(c.card_color, '#FFFFFF')
+      // El relleno de la card sale del "Card - Background Color" del CMS. Sin cargar es
+      // BLANCO AL 70% (medido en content: `rgb(255 255 255 / .7)`), asi que deja ver el
+      // fondo de la pagina: blanca en una pagina blanca, celeste en Purina One, verde claro
+      // en Dog Chow. No se deduce de la banda: son dos campos distintos.
+      style['--card'] = T(c.card_color, 'rgba(255, 255, 255, 0.7)')
       if (band) style['--band'] = band
     } else if (bg) style.background = bg
     // Lo que el bloque pinta de verdad: la banda en la variante con iconos, el fondo en
@@ -1170,10 +1172,12 @@ const RENDERERS = {
     const tok = (v) => BG_TOKENS[v] || ctx?.brandTokens?.[v] || null
     const items = list(c.items)
     if (mode === 'grid-cards') {
-      // Cada card del CMS son DOS celdas del mosaico: su imagen y su caja de texto.
-      // Sin Card - Background Color la caja va ROJA en todas las marcas (medido en content con
-      // Pro Plan, Dog Chow y Purina One): no toma el acento de la marca.
-      const acc = tok(c.background_card_color) || ACCENT
+      // Cada card del CMS es una COLUMNA del mosaico: su imagen y su caja de texto apiladas,
+      // y una de cada dos va invertida (la caja arriba): asi lo arma el sitio, con
+      // `card-grid--inverse` en la 2ª, 4ª... card. La caja es SIEMPRE roja: el CMS ignora el
+      // Card - Background Color en este modo (medido en content, Purina One con Brand 04
+      // cargado sale igual en #E91C24).
+      const acc = ACCENT
       const arr = items.length ? items : [
         { title: 'Título de la card', description: 'Texto de la card.' },
         { title: 'Segunda card', description: 'Texto de la segunda card.' },
@@ -1189,15 +1193,17 @@ const RENDERERS = {
             </div>
           )}
           <div className="cp-mosaic-grid">
-            {arr.flatMap((it, i) => [
-              <div key={`i${i}`} className="cp-mosaic-cell">
-                <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
-              </div>,
-              <div key={`b${i}`} className="cp-mosaic-box" style={{ background: acc }}>
-                {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>}
-                {(it.description || !it.title) && <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>}
-              </div>,
-            ])}
+            {arr.map((it, i) => (
+              <div key={i} className={`cp-mosaic-col${i % 2 ? ' cp-mosaic-col--inv' : ''}`}>
+                <div className="cp-mosaic-cell">
+                  <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
+                </div>
+                <div className="cp-mosaic-box" style={{ background: acc }}>
+                  {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>}
+                  {(it.description || !it.title) && <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )
