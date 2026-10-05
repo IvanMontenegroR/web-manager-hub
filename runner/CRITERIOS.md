@@ -197,6 +197,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Cada pagina se carga con su marca en el campo Brand del nodo** (la del hub, `pages.brand`). No
+  es un dato de clasificacion: es lo que le pone el fondo, el texto por defecto y los acentos a toda
+  la pagina. Una marca que no esta en el desplegable FRENA la carga. Origen: MX, revision de los
+  colores de Pro Plan en content.
+- **En las paginas de Pro Plan, el titulo de las cards Simple va en Brand 01 (el dorado) y la
+  descripcion en Primary White.** Los colores de la card no siguen a la marca: sin cargarlos, el
+  titulo sale rojo y la descripcion negra sobre la pagina negra. Origen: MX, La nutricion mas
+  avanzada y LiveClear.
+
 - **El mosaico (`grid-cards`) es solo para 3 cards con 3 imagenes.** Con menos, carrusel de cards.
   Origen: MX, ronda 5 (Vet Diets, 2 cards).
 - **Cada card con icono lleva un icono distinto y que diga algo de su contenido.** Nunca el mismo icono

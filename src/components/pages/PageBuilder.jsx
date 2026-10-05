@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { PALETTE, getComponent, slotsOf, paletteGroups } from '../../data/components'
 import {
-  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
+  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandTokens, brandPageBg,
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import { fetchSiteMenu } from '../../lib/menuDb'
@@ -73,7 +73,7 @@ export default function PageBuilder({ page, onBack }) {
   const theme = useMemo(() => {
     const t = brandTheme(page.brand)
     if (!t && !page.brand) return null
-    return { ...(t || {}), name: page.brand || null }
+    return { ...(t || {}), name: page.brand || null, tokens: brandTokens(page.brand) }
   }, [page.brand])
   // La pagina es un ARBOL de un nivel: bloques sueltos (parent_id null) y, dentro de un
   // contenedor (bloque de pestañas), sus hijos agrupados por pestaña (tab_index).

@@ -291,7 +291,10 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
         + 'ELIGE de la Media library, no sube. Ver la lista de pendientes que imprime la herramienta.',
       manifest: 1,
       // Publicada: las paginas que se cargan en content quedan publicadas (CRITERIOS.md).
-      page: { title: pagina.name, path: pagina.path, published: true },
+      // La MARCA de la pagina (el campo Brand del nodo) es la que le pone los colores a
+      // toda la pagina: el fondo, el texto por defecto y los acentos (Pro Plan negro y
+      // dorado, Dog Chow verde). Sin ella la pagina sale con el tema Purina.
+      page: { title: pagina.name, path: pagina.path, published: true, brand: pagina.brand || null },
       blocks,
     },
     avisos,

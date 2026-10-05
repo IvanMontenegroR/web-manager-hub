@@ -20,7 +20,7 @@ const ok = (cond, que) => {
   if (!cond) fallas += 1
 }
 
-const PAGINA = { name: 'Pagina de prueba', path: '/prueba' }
+const PAGINA = { name: 'Pagina de prueba', path: '/prueba', brand: 'Pro Plan' }
 const BLOQUES = [
   // El breadcrumb NO es un paragraph del CMS: tiene que desaparecer, avisando.
   { component_key: 'breadcrumb', content: { items: [{ label: 'Inicio', url: '/' }] } },
@@ -55,6 +55,7 @@ const { manifiesto, avisos, pendientes } = aManifiesto(PAGINA, BLOQUES, tipos)
 validateManifest(manifiesto, '(prueba)')
 ok(true, 'el manifiesto pasa el validador del runner')
 ok(manifiesto.page.published === true, 'la pagina sale PUBLICADA (regla de content, ver CRITERIOS.md)')
+ok(manifiesto.page.brand === (PAGINA.brand || null), `la marca de la pagina viaja al manifiesto (${manifiesto.page.brand})`)
 
 const tiposEmitidos = manifiesto.blocks.map((b) => b.type)
 ok(!tiposEmitidos.includes('breadcrumb'), 'el breadcrumb no viaja al CMS')

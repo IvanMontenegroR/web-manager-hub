@@ -94,6 +94,29 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     onStep(wants ? 'Queda PUBLICADA' : 'Queda en BORRADOR')
   }
 
+  // La MARCA. Es la que le pone los colores a toda la pagina (fondo, texto por defecto,
+  // acentos), asi que una marca que no se encuentra FRENA: dejarla en "- Ninguno -" sacaria
+  // una pagina de Pro Plan en blanco y negro sin que nadie lo note.
+  if (mapping.brand) {
+    const sel = page.locator(mapping.brand).first()
+    const quiere = claveMarca(manifest.page.brand)
+    if (quiere && await sel.count()) {
+      const opciones = await sel.locator('option').evaluateAll((os) => os.map((o) => ({ value: o.value, label: o.textContent })))
+      const elegida = opciones.find((o) => claveMarca(o.label) === quiere)
+      if (!elegida) {
+        throw new Error(`La marca "${manifest.page.brand}" no esta en el campo Brand del sitio `
+          + `(ofrece: ${opciones.filter((o) => o.value !== '_none').map((o) => o.label.trim()).join(', ')}).`)
+      }
+      await revelar(sel)
+      await sel.selectOption(elegida.value)
+      onStep(`Marca: ${elegida.label.trim()}`)
+    } else if (quiere) {
+      throw new Error(`La pagina es de ${manifest.page.brand} pero el formulario no tiene el campo Brand (${mapping.brand}).`)
+    } else {
+      onStep('Marca: ninguna (tema Purina)')
+    }
+  }
+
   const ctx = { mapping, page, onStep, esperaSubform, consola,
     escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map() }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
@@ -506,6 +529,14 @@ async function revelar(loc) {
       if (p.tagName === 'DETAILS' && !p.open) p.open = true
     }
   }).catch(() => { /* si no se puede evaluar, se intenta igual: quiza ya se ve */ })
+}
+
+// La marca como se compara: sin ®/™, sin acentos, sin mayusculas, sin espacios y sin el
+// "Purina" del nombre. Asi "Purina One" del hub encuentra "Purina® One®" del CMS y "Felix"
+// encuentra "Purina®  Felix®". "Purina" a secas queda vacio: es la marca paraguas, sin tema.
+export function claveMarca(nombre) {
+  return String(nombre || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[®™]/g, '').replace(/\bpurina\b/g, '').replace(/[^a-z0-9]/g, '')
 }
 
 async function escribir(loc, valor) {

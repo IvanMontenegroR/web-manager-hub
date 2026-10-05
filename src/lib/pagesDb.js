@@ -35,6 +35,28 @@ const BRAND_THEMES = {
   'Fancy Feast': { primary: '#ffffff', secondary: '#FFFCF1', accent: '#d7bb77', dark: false },
 }
 
+// Los cuatro tokens "Brand 01".."Brand 04" del CMS NO tienen un color fijo: los define el
+// campo Brand del NODO, que inyecta `--brand-0N-source` en la pagina. Estos son los valores
+// que el sitio declara en content para cada marca (leidos de /proplan, /dogchow,
+// /purina-one, /fancy-feast, /catchow y /dentalife/productos). Las marcas que todavia no
+// tienen pagina en content no estan: sus Brand quedan sin pintar, igual que antes.
+// OJO: esto es solo la paleta de los tokens. El FONDO de la pagina sigue saliendo de
+// BRAND_THEMES (el sitio pinta tambien Dog Chow, Purina One y Cat Chow con fondo de color,
+// y el hub todavia no lo dibuja).
+const BRAND_TOKENS = {
+  'Pro Plan': ['#D7BB77', '#B29962', '#1F1F1F', '#121212'],
+  'Dog Chow': ['#2CAB5B', '#007A38', '#13482C', '#000000'],
+  'Purina One': ['#66C9D6', '#00A5BB', '#008799', '#B82828'],
+  'Fancy Feast': ['#F8F4EC', '#CBAB6D', '#8D7535', '#49301C'],
+  'Cat Chow': ['#6797C3', '#02529B', '#063560', '#000000'],
+  'Dentalife': ['#B7C0E1', '#2C3A6B', '#3770B5', '#000000'],
+}
+export function brandTokens(brand) {
+  const key = String(brand || '').trim().toLowerCase()
+  const hit = Object.entries(BRAND_TOKENS).find(([n]) => n.toLowerCase() === key)
+  return hit ? Object.fromEntries(hit[1].map((hex, i) => [`Brand 0${i + 1}`, hex])) : null
+}
+
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
 export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Purina']

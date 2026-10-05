@@ -5,6 +5,7 @@
   "nodeAdd": "/node/add/dsu_component_page",
   "title": "input[name=\"title[0][value]\"]",
   "published": "input[name=\"status[value]\"]",
+  "brand": "select[name=\"field_brand\"]",
   "pathauto": "input[name=\"path[0][pathauto]\"]",
   "path": "input[name=\"path[0][alias]\"]",
   "save": "input[name=\"op\"][value=\"Guardar\"]:visible",

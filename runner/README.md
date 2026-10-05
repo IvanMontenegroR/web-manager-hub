@@ -119,6 +119,9 @@ npm run verify -- mapping/purina-latam.json form.html
   que pide `page.published` (en content viene tildado de entrada). Las paginas que salen del
   hub van PUBLICADAS: es la regla de content (ver `CRITERIOS.md`). Un manifiesto escrito a
   mano sin `published` queda en borrador.
+- **Con la marca de la pagina.** `page.brand` (la del hub) va al campo Brand del nodo, que es el
+  que le pone los colores de la marca a toda la pagina. Se busca entre las opciones sin mirar ®,
+  acentos ni el "Purina" del nombre; si no esta, frena. Sin marca queda "- Ninguno -".
 - **No modifica nada existente, salvo con un plan revisado.** `build` solo entra a "crear
   contenido". La unica forma de cambiar una pagina que ya existe es `aplicar`, que toca
   solo los campos que dice el plan y solo si siguen teniendo el valor que se leyo (ver

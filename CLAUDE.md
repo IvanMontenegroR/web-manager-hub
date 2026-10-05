@@ -250,9 +250,15 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      El **Background Color** del CMS es una lista de TOKENS (`BG_COLORS`, compartida por el Banner y el
      bloque de Texto), no un hex. Para poder pintarlo en el mockup hay un mapa `BG_TOKENS` token -> hex
      sacado del CSS REAL del sitio (las variables `--color-*` que declara el tema; 34 de los 39). Ojo:
-     Primary Red es `#E91C24`, no el `#ED1C24` de la marca (ese es Reds 400). Quedan sin pintar a
-     proposito los Brand 01-04 (dependen del tema de cada marca) y Neutral 300 (el sitio no lo declara):
-     inventar el color de un design system seria peor que no mostrarlo.
+     Primary Red es `#E91C24`, no el `#ED1C24` de la marca (ese es Reds 400). Neutral 300 queda sin
+     pintar (el sitio no lo declara): inventar el color de un design system seria peor que no mostrarlo.
+     Los **Brand 01-04** no tienen valor fijo: los pone el campo **Brand del nodo** (`field_brand`), que
+     inyecta `--brand-0N-source` y ademas cambia el FONDO y el texto por defecto de toda la pagina (Pro
+     Plan negro, Dog Chow verde #007A38, Purina One #00A5BB, Cat Chow #02529B; Fancy Feast y Dentalife
+     blancos). `BRAND_TOKENS` / `brandTokens` en `pagesDb.js` tiene la paleta de las seis marcas que ya
+     tienen pagina en content y el preview la resuelve por la marca de la pagina (`ctx.brandTokens`). El
+     FONDO de pagina por marca sigue saliendo de `BRAND_THEMES`, que hoy solo dibuja Pro Plan y Fancy
+     Feast. El runner carga el Brand del nodo desde `pages.brand` (ver `claveMarca` en `runner/src/build.js`).
      En la variante **Card Icon Square**, el relleno de cada card sale del "Card - Background Color" del
      CMS (`background_card_color`), cuyo default es **blanco** — no se deduce de la banda: son dos campos
      distintos.
@@ -335,7 +341,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      El modo **Simple (image + title)** (`cards-simple`) tiene mockup propio (`CMT_SIMPLE`), medido en
      el sitio (content, `/card-grid-examples`): card de **300px fija en todos los anchos** (en mobile la
      siguiente asoma), foto cuadrada arriba y DEBAJO, centrados, titulo y descripcion sobre el
-     "Card - Background Color" de Classy (sin cargar, la card no tiene fondo). A pesar del nombre y del
+     "Card - Background Color" de Classy (sin cargar, la card no tiene fondo). Los colores de la card NO
+     siguen a la marca de la pagina: con el tema de Pro Plan la pagina va negra y el titulo de la card
+     sigue rojo y la descripcion negra, asi que en una marca oscura hay que cargar Card - Text Color (y
+     Card - Title Color en Brand 01 para el acento). A pesar del nombre y del
      playbook ("description not applicable") el sitio **SI dibuja la descripcion**, asi que el mockup
      tambien. El titulo va en "Card - Title Color" (default el rojo del sitio) y se corta a las **3
      lineas**; sin descripcion baja a cuerpo (16px, como el `fs-body-md` del sitio). La descripcion NO se

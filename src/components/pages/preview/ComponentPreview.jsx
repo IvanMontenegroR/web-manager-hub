@@ -356,16 +356,16 @@ const RENDERERS = {
     )
   },
 
-  text: (c) => {
+  text: (c, ctx) => {
     // Todo lo visual sale del panel Classy, igual que en el CMS.
     const two = /two_columns/.test(c.content_text_styles || '')
     // La alineacion arrastra al CTA (en el CMS hoy no lo hace: es un bug reportado).
     const al = /center/.test(c.text_align || '') ? 'center'
       : /right/.test(c.text_align || '') ? 'right' : 'left'
     // Fondo por TOKEN del CMS. Los que no tenemos mapeados quedan sin pintar.
-    const bg = BG_TOKENS[c.background_color] || null
+    const bg = BG_TOKENS[c.background_color] || ctx?.brandTokens?.[c.background_color] || null
     // Color del texto: el token elegido; si no hay, el que contraste con el fondo.
-    const ink = BG_TOKENS[c.text_color] || (bg ? readableOn(bg) : null)
+    const ink = BG_TOKENS[c.text_color] || ctx?.brandTokens?.[c.text_color] || (bg ? readableOn(bg) : null)
     // Sobre fondo oscuro el boton rojo no se ve: se invierte a blanco con el texto del
     // color del fondo. Se mira el FONDO, no el color del texto elegido.
     const onDark = bg ? readableOn(bg) === '#ffffff' : false
@@ -858,11 +858,13 @@ const RENDERERS = {
     const bleed = painted && !isBoxed(c)
     if (nums) style['--acc'] = acc
     // Simple: los tres colores de la card salen de Classy (Card - Background Color, Card -
-    // Title Color, Card - Text Color). Sin cargar, la card no tiene fondo y el titulo va en
-    // el rojo del sitio, que es lo que se ve en content con Classy vacio.
+    // Title Color, Card - Text Color). Sin cargar, la card no tiene fondo, el titulo va en
+    // el rojo del sitio y la descripcion en negro. Eso NO cambia con la marca de la pagina:
+    // medido en content con el tema de Pro Plan, la pagina va negra y el titulo de la card
+    // sigue rojo (y la descripcion negra, invisible). Por eso no se usa el acento de marca.
     if (simple) {
       if (c.card_color) style['--card'] = c.card_color
-      style['--ttl'] = T(c.accent, ctx?.brandAccent || '#E91C24')
+      style['--ttl'] = T(c.accent, '#E91C24')
       if (c.card_text) style['--dtxt'] = c.card_text
     }
     if (txt) style['--txt'] = txt
@@ -1162,7 +1164,7 @@ const RENDERERS = {
   // colores llegan como TOKENS: se pintan los que estan en BG_TOKENS y el resto no.
   card_grid: (c, ctx) => {
     const mode = c.view_mode || CARD_GRID_DEFAULT_MODE
-    const tok = (v) => BG_TOKENS[v] || null
+    const tok = (v) => BG_TOKENS[v] || ctx?.brandTokens?.[v] || null
     const items = list(c.items)
     if (mode === 'grid-cards') {
       // Cada card del CMS son DOS celdas del mosaico: su imagen y su caja de texto.
@@ -1359,6 +1361,8 @@ export default function ComponentPreview({ componentKey, content, theme, slots, 
     brandPrimary: theme?.primary || null,
     brandSecondary: theme?.secondary || null,
     brandAccent: theme?.accent || null,
+    // Los "Brand 01".."Brand 04" del CMS, que dependen de la marca de la pagina.
+    brandTokens: theme?.tokens || null,
     dark: !!theme?.dark,
     slots: slots || null,
     activeTab: activeTab || 0,
