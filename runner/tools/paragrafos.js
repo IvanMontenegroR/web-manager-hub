@@ -91,7 +91,21 @@ export const PARAGRAFOS = {
   // CONTENEDORES. Sus hijos son componentes de verdad y van a una ranura: en el layout, la
   // columna (el `tab_index` del hub es el indice de columna); en las pestañas, un
   // `comp_tabs_tab_item` por pestaña con UN componente adentro (ver `pestanas`).
+  // Los 12 layouts del CMS tienen la MISMA forma (columnas `field_column_first..fifth`,
+  // Classy con background_color/position/spacing): solo cambia el nombre y cuantas columnas.
+  // Leidos del formulario de alta de content (2026-10).
+  layout_columns_1: { tipo: 'layout_columns_1', campos: {} },
   layout_columns_2: { tipo: 'layout_columns_2', campos: {} },
+  layout_columns_3: { tipo: 'layout_columns_3', campos: {} },
+  layout_columns_4: { tipo: 'layout_columns_4', campos: {} },
+  layout_columns_20: { tipo: 'layout_columns_20', campos: {} },
+  layout_75_25: { tipo: 'layout_75_25', campos: {} },
+  layout_66_33: { tipo: 'layout_66_33', campos: {} },
+  layout_50_25_25: { tipo: 'layout_50_25_25', campos: {} },
+  layout_25_75: { tipo: 'layout_25_75', campos: {} },
+  layout_33_66: { tipo: 'layout_33_66', campos: {} },
+  layout_25_25_50: { tipo: 'layout_25_25_50', campos: {} },
+  layout_25_50_25: { tipo: 'layout_25_50_25', campos: {} },
 
   // El Tabs del CMS NO tiene titulo ni subtitulo propios (el formulario real trae solo el
   // tipo, Avanzado y Classy). Por eso no estan en `campos`: si el bloque del hub trae uno,
