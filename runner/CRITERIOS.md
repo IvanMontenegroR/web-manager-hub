@@ -212,12 +212,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Tres columnas con imagen + titulo + texto son un mosaico** (tres imagenes y tres cards), no un
   layout de columnas con Imagen y Texto sueltos. Origen: MX, ronda 6 ("Evalua la condicion corporal
   de tu mascota").
-- **Una card cuya imagen es en realidad un icono (un logo, un ingrediente o un sello sobre fondo
-  liso) pasa a card con icono (Card Icon Square)**, con un icono del set que diga lo mismo. Se ve
-  igual en desktop y mobile y no hay imagen que el texto pueda pisar. Se pierde el logo o el sello
-  como imagen: se acepta si el nombre ya esta en el titulo o el sello aparece en otro bloque de la
-  pagina. Origen: MX, revision mobile (Opti Tecnologias / Carne fresca / Formulas respaldadas en La
-  nutricion mas avanzada -> `genetics`, `beef`, `stethoscope`).
+- **Una card cuya imagen es un objeto solo sobre fondo liso (un logo, un ingrediente, un sello) y
+  que tiene el texto ENCIMA pasa a "Simple (image + title)"**: la imagen queda entera arriba y el
+  texto debajo, asi que no hay nada que el texto pueda pisar en mobile, y se conserva lo que la
+  imagen dice (el logo Opti, el salmon, el sello), que un icono generico del set pierde. Se usan las
+  imagenes ORIGINALES sin tocar, tambien las mobile: el runner las recorta al cuadrado tomando el
+  centro, que es donde esta el objeto. Si la pagina es de fondo oscuro (Pro Plan) se carga el Card -
+  Text Color en Primary White, porque el default es negro. La descripcion se acorta a 100 sin
+  cambiar el tono. Reemplaza al criterio anterior, que las pasaba a Card Icon Square: esa queda para
+  cuando la imagen no aporta nada propio. Origen: MX, comparacion de las tres versiones en La
+  nutricion mas avanzada (Opti / Carne fresca / Formulas respaldadas) y LiveClear (huevo y signo de
+  pregunta, que en mobile habia que oscurecer para que se leyera).
 - **La card con icono tiene alto fijo y corta la descripcion a tres lineas.** El limite real lo pone
   MOBILE: entran unos 70 caracteres (unos 90 en desktop), medido en el builder. Si hay que acortar,
   se conserva la esencia y el tono del original (la primera persona, el diferencial: "exclusiva",
