@@ -398,7 +398,7 @@ const RENDERERS = {
 
   // `accordion_grid`: la lista de desplegables sola (en el CMS suele ir dentro de una
   // columna de un layout). El primer item con texto arranca abierto.
-  accordion_grid: (c) => {
+  accordion_grid: (c, ctx) => {
     const items = list(c.items)
     const arr = items.length ? items : [
       { title: 'Primera pregunta', text: 'Dorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.' },
@@ -407,7 +407,9 @@ const RENDERERS = {
     ]
     const openIdx = arr.findIndex((it) => it.text)
     return (
-      <div className="cp-block cp-half-acc">
+      // El item ABIERTO toma el Brand 01 de la marca de la pagina (medido en content: dorado
+      // en Pro Plan, #2CAB5B en Dog Chow, #66C9D6 en Purina One); sin marca, el rojo del sitio.
+      <div className="cp-block cp-half-acc" style={ctx?.brandTokens ? { '--acc-open': ctx.brandTokens['Brand 01'] } : undefined}>
         {arr.map((it, i) => (
           <details key={i} className="cp-acc-item" open={i === (openIdx < 0 ? 0 : openIdx)}>
             <summary className="cp-acc-sum">
@@ -1168,7 +1170,9 @@ const RENDERERS = {
     const items = list(c.items)
     if (mode === 'grid-cards') {
       // Cada card del CMS son DOS celdas del mosaico: su imagen y su caja de texto.
-      const acc = tok(c.background_card_color) || ctx?.brandSecondary || ACCENT
+      // Sin Card - Background Color la caja va ROJA en todas las marcas (medido en content con
+      // Pro Plan, Dog Chow y Purina One): no toma el acento de la marca.
+      const acc = tok(c.background_card_color) || ACCENT
       const arr = items.length ? items : [
         { title: 'Título de la card', description: 'Texto de la card.' },
         { title: 'Segunda card', description: 'Texto de la segunda card.' },

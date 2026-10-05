@@ -257,8 +257,19 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Plan negro, Dog Chow verde #007A38, Purina One #00A5BB, Cat Chow #02529B; Fancy Feast y Dentalife
      blancos). `BRAND_TOKENS` / `brandTokens` en `pagesDb.js` tiene la paleta de las seis marcas que ya
      tienen pagina en content y el preview la resuelve por la marca de la pagina (`ctx.brandTokens`). El
-     FONDO de pagina por marca sigue saliendo de `BRAND_THEMES`, que hoy solo dibuja Pro Plan y Fancy
-     Feast. El runner carga el Brand del nodo desde `pages.brand` (ver `claveMarca` en `runner/src/build.js`).
+     FONDO de pagina por marca sale de `BRAND_THEMES`. El runner carga el Brand del nodo desde
+     `pages.brand` (ver `claveMarca` en `runner/src/build.js`).
+     **Que hace la marca en el sitio** (medido con el CSS real: 18 paginas de ejemplo de content x 7
+     marcas, inyectando el `:root` de cada una — la marca no carga otro CSS, solo ese bloque y el de la
+     barra de marca): pone `--background-color-page` y `--color-text-default`, y TODO componente sin
+     color propio de Classy los hereda — titulos y cuerpo en blanco por igual, sin grises. Pro Plan
+     negro, Dog Chow / Purina One / Cat Chow su Brand 02; Fancy Feast y Dentalife blancas. Lo que NO
+     sigue a la marca: los colores cargados en Classy (un titulo rojo queda rojo sobre el verde), la caja
+     del mosaico (roja salvo Card - Background Color), los colores de la card Simple y el texto negro
+     fijo de algunos componentes del CMS (timeline, cards-contact). El acordeon abierto toma el Brand 01
+     (`--acc-open`). Con Purina One el blanco sobre #00A5BB da 3:1: es el diseño del sitio, no del hub.
+     Las marcas sin pagina en content (Felix, Beneful, Campeon, Excellent, Gatina, Snacks) NO estan
+     medidas: el hub las dibuja sin tema hasta verlas.
      En la variante **Card Icon Square**, el relleno de cada card sale del "Card - Background Color" del
      CMS (`background_card_color`), cuyo default es **blanco** — no se deduce de la banda: son dos campos
      distintos.

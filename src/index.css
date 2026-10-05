@@ -1863,7 +1863,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-plist-h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; color: #1b252e; margin-bottom: 22px; max-width: 620px; }
 .cp-plist-h2.cp-plist-h2--sub { margin-bottom: 6px; }
 .cp-plist-sub { font-size: 15px; line-height: 1.45; color: #4a5561; margin-bottom: 22px; max-width: 620px; }
-.cp-dark .cp-plist-sub { color: #b9c0c9; }
+.cp-dark .cp-plist-sub { color: #fff; }
 /* Con imagen izquierda: fila [imagen | contenido]. La imagen es 650×692 (vertical).
    align-items:flex-start => la imagen arranca a la misma altura que las cards.
    Sin imagen, el layout no cambia (bloque normal). */
@@ -2226,9 +2226,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-acc-item { border-bottom: 1px solid #e4e7eb; }
 .cp-acc-sum { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 2px; font-size: 17px; font-weight: 600; color: #1b252e; }
 .cp-acc-sum::-webkit-details-marker { display: none; }
-.cp-acc-item[open] > .cp-acc-sum .cp-acc-label { color: var(--purina, #ED1C24); }
+.cp-acc-item[open] > .cp-acc-sum .cp-acc-label { color: var(--acc-open, #E91C24); }
 .cp-acc-chev { color: #9aa0a6; flex: none; transition: transform .2s ease; }
-.cp-acc-item[open] > .cp-acc-sum .cp-acc-chev { transform: rotate(180deg); color: var(--purina, #ED1C24); }
+.cp-acc-item[open] > .cp-acc-sum .cp-acc-chev { transform: rotate(180deg); color: var(--acc-open, #E91C24); }
 .cp-acc-body { padding: 0 2px 20px; font-size: 13.5px; color: #6b727b; line-height: 1.6; }
 
 /* ===== Hero con tarjetas (gradient_cards) ===== */
@@ -2272,7 +2272,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-vid-play svg { margin-left: 3px; fill: currentColor; }
 /* Tema oscuro (paginas de marca oscura). */
 .cp-dark .cp-vid-title { color: #f4f5f7; }
-.cp-dark .cp-vid-sub { color: #b9c0c9; }
+.cp-dark .cp-vid-sub { color: #fff; }
 
 /* ===== Pestañas (tabs) — componente CONTENEDOR ===== */
 .cp-tabs { padding: 26px 30px 30px; }
@@ -2291,8 +2291,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-tabs-desc { font-size: 14px; color: #545c67; line-height: 1.6; text-align: center; max-width: 780px; margin: 16px auto 0; }
 /* Tema oscuro (paginas de marca oscura). */
 .cp-dark .cp-tabs-title, .cp-dark .cp-tab.on { color: #f4f5f7; }
-.cp-dark .cp-tabs-sub, .cp-dark .cp-tabs-desc { color: #b9c0c9; }
-.cp-dark .cp-tabs-bar { border-bottom-color: #2c3037; }
+.cp-dark .cp-tabs-sub, .cp-dark .cp-tabs-desc { color: #fff; }
+.cp-dark .cp-tabs-bar { border-bottom-color: rgba(255, 255, 255, .3); }
 /* El contenido de la pestaña son OTROS componentes (los hijos). Las pestañas
    inactivas se montan igual, fuera de pantalla, para poder capturarlas en el export. */
 .cp-tabs-slot { position: relative; margin-top: 14px; }
@@ -2420,7 +2420,11 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* ===== Tema oscuro de componentes (paginas de marca oscura, ej. Pro Plan) =====
    El componente se pinta transparente (deja ver el fondo negro de la pagina) con
    textos claros y placeholders/cards oscuros. Los acentos de color se mantienen. */
-.cp-render.cp-dark { background: transparent; color: #e8e9ec; }
+/* Tema de marca oscuro (Pro Plan, Dog Chow, Purina One, Cat Chow). En el sitio la marca pone
+   `--color-text-default` en BLANCO y todo el texto sin color propio lo toma, titulos y cuerpo por
+   igual (no hay grises). Las cards de producto van en blanco al 25% y los bordes en blanco
+   translucido, asi el mismo tema sirve sobre negro, verde, turquesa o azul. */
+.cp-render.cp-dark { background: transparent; color: #fff; }
 .cp-dark .cp-h1, .cp-dark .cp-h2, .cp-dark .cp-plist-h2, .cp-dark .cp-mosaic-title,
 .cp-dark .cp-imgfeat-title, .cp-dark .cp-stats-title, .cp-dark .cp-twi-title,
 .cp-dark .cp-tl-h1, .cp-dark .cp-brands-title, .cp-dark .cp-half-title,
@@ -2429,21 +2433,21 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-dark .cp-p, .cp-dark .cp-sub, .cp-dark .cp-mosaic-sub, .cp-dark .cp-imgfeat-sub,
 .cp-dark .cp-twi-body, .cp-dark .cp-tl-sub, .cp-dark .cp-brands-sub, .cp-dark .cp-svc-sub,
 .cp-dark .cp-half-text, .cp-dark .cp-half-rtext, .cp-dark .cp-gcards-sub,
-.cp-dark .cp-stat-l, .cp-dark .cp-tl-desc { color: #b9bcc3; }
+.cp-dark .cp-stat-l, .cp-dark .cp-tl-desc { color: #fff; }
 /* Placeholders e imagenes vacias en oscuro. */
-.cp-dark .cp-img, .cp-dark .cp-img-ph, .cp-dark .cp-plist-ph { background: #1e1f24; color: #6c6f77; }
-.cp-dark .cp-plist-card { background: #17181c; }
-.cp-dark .cp-ph-dim { color: #7a7d85; }
+.cp-dark .cp-img, .cp-dark .cp-img-ph, .cp-dark .cp-plist-ph { background: rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .6); }
+.cp-dark .cp-plist-card { background: rgba(255, 255, 255, .25); }
+.cp-dark .cp-ph-dim { color: rgba(255, 255, 255, .6); }
 /* Carrusel de productos: tabs, flechas y boton en claro. */
-.cp-dark .cp-plist-tab { color: #cfd2d8; }
-.cp-dark .cp-plist-arrow { border-color: #6a6d75; color: #e8e9ec; }
+.cp-dark .cp-plist-tab { color: #fff; }
+.cp-dark .cp-plist-arrow { border-color: rgba(255, 255, 255, .5); color: #fff; }
 .cp-dark .cp-plist-more-btn { background: #f5f5f5; color: #14151a; }
 /* Grilla de numeros: la linea inferior clara. */
-.cp-dark .cp-stat-line { border-bottom-color: #e8e9ec; }
+.cp-dark .cp-stat-line { border-bottom-color: #fff; }
 /* 50/50: acordeon con bordes oscuros. */
-.cp-dark .cp-half-acc, .cp-dark .cp-acc-item { border-color: #33353b; }
-.cp-dark .cp-acc-sum { color: #e8e9ec; }
-.cp-dark .cp-acc-body { color: #9aa0a6; }
+.cp-dark .cp-half-acc, .cp-dark .cp-acc-item { border-color: rgba(255, 255, 255, .6); }
+.cp-dark .cp-acc-sum { color: #fff; }
+.cp-dark .cp-acc-body { color: #fff; }
 
 /* Cuerpo de texto con enlaces: barra bajo el textarea. */
 .cf-rt-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
@@ -2497,9 +2501,9 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-bc-current { color: #000; }
 .cp-bc-sep { color: #797777; }
 /* Marca con fondo oscuro (Pro Plan): el breadcrumb negro sobre negro no se lee. */
-.pb-page--dark .cp-bc-link { color: #bdbdbd; }
+.pb-page--dark .cp-bc-link { color: #fff; }
 .pb-page--dark .cp-bc-current { color: #fff; }
-.pb-page--dark .cp-bc-sep { color: #8a8a8a; }
+.pb-page--dark .cp-bc-sep { color: #fff; }
 
 /* ===== Footer global (site footer) ===== */
 .pb-footer-host { margin-top: 6px; overflow-x: auto; overflow-y: hidden; box-shadow: var(--shadow-sm); }

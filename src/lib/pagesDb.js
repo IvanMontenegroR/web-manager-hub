@@ -30,9 +30,19 @@ function isMissingTable(error) {
 //               secundario (Pro Plan) o no (Fancy Feast, cuyo secundario es casi
 //               blanco y no serviria para un icono).
 //   dark      = la pagina se pinta en tema oscuro (texto claro sobre fondo oscuro)
+// Tema de pagina por marca. Sale del CSS REAL del sitio: el campo Brand del nodo define
+// `--background-color-page` y `--color-text-default`, y todo componente sin color propio de
+// Classy toma esos dos (medido en content con 18 paginas de ejemplo x 7 marcas). Pro Plan va
+// negro, y Dog Chow, Purina One y Cat Chow van con su Brand 02 de fondo; las cuatro con TODO
+// el texto en blanco (`dark`). Fancy Feast y Dentalife quedan blancas con texto negro, como
+// sin marca. `secondary` y `accent` son acentos propios del hub que solo tenian Pro Plan y
+// Fancy Feast; a las marcas nuevas no se les inventa uno.
 const BRAND_THEMES = {
-  'Pro Plan': { primary: '#111114', secondary: '#d7bb77', accent: '#d7bb77', dark: true },
+  'Pro Plan': { primary: '#000000', secondary: '#d7bb77', accent: '#d7bb77', dark: true },
   'Fancy Feast': { primary: '#ffffff', secondary: '#FFFCF1', accent: '#d7bb77', dark: false },
+  'Dog Chow': { primary: '#007A38', dark: true },
+  'Purina One': { primary: '#00A5BB', dark: true },
+  'Cat Chow': { primary: '#02529B', dark: true },
 }
 
 // Los cuatro tokens "Brand 01".."Brand 04" del CMS NO tienen un color fijo: los define el
@@ -87,7 +97,7 @@ export function brandTheme(brand) {
   return null
 }
 
-// ¿La marca usa tema oscuro (fondo negro)? Hoy solo Pro Plan.
+// ¿La pagina va con el texto en blanco? Pro Plan, Dog Chow, Purina One y Cat Chow.
 export function pageIsDark(brand) {
   return !!brandTheme(brand)?.dark
 }
