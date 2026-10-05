@@ -111,10 +111,22 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
   cercana...", "Resultados visibles en 28 dias" + "Purina® One® para perros."). El corte cae en un
   limite natural de la frase. Origen: MX, ronda 5, confirmado por el usuario.
-- **El h1 va siempre como texto real, aunque el key visual ya diga lo mismo.** El h1 es lo que
-  estructura la pagina (buscadores, lectores de pantalla); las letras de una imagen no cuentan, salvo
-  por su alt. Que se repita a la vista no es un problema. Origen: MX, ronda 5 (Nutricion Reforzada,
-  Gran Comienzo), confirmado por el usuario.
+- **El h1 va siempre como texto real, y las palabras NO se repiten.** El h1 es lo que estructura la
+  pagina (buscadores, lectores de pantalla); las letras de una imagen no cuentan. Si el key visual
+  trae metido el mismo mensaje que el titulo o la bajada ("UN SOLO producto 15 BENEFICIOS", "ALCANZA
+  LO EXCEPCIONAL", "RESULTADOS VISIBLES EN 28 DIAS...", la placa de datos de LiveClear, el logo y
+  claim de Calidad en tus manos), se BORRA de la imagen y el texto va en el banner. Origen: MX,
+  revision de los colores de marca ("no me gusta que aca no usemos banner y que se repitan las
+  palabras", Campeon); reemplaza lo de la ronda 5, que aceptaba la repeticion.
+- **Como se borra: solo limpiando, nunca dibujando.** Letras sobre un fondo liso o un degrade
+  (crema, rojo, turquesa): se rellena con el mismo fondo, columna por columna. Letras sobre una
+  franja oscura con textura: inpainting chico, solo sobre el trazo de la letra. Una placa grande
+  sobre un fondo con textura: se tapa con el MISMO fondo de otra parte de la imagen. Si para que el
+  titulo no cruce al sujeto hace falta mas lugar, se extiende el fondo propio de la imagen (espejado
+  y desenfocado, que no se lea como repeticion) o se achica la foto contra una esquina; nunca se
+  agrega nada que no estuviera. Un fondo claro donde el blanco no se lee se pinta del color de la
+  propia pieza o de la marca (Campeon: el rojo de su titular; Calidad: el verde de Dog Chow), igual
+  que las imagenes que se fundian con el blanco.
 
 - **Si la imagen tiene una zona limpia y oscura, el texto va EN el banner y la imagen se ajusta para
   eso** (encuadre, alineacion del texto, titulo mas corto si hace falta). Sacar el texto del banner es
@@ -145,9 +157,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un titulo de banner que cruza al sujeto o a letras de la imagen se parte** aunque la imagen ya este
   bien encuadrada: el h1 queda con lo que dice de que es la pagina o la seccion ("Combinaciones de
   proteinas", "Estamos comprometidos") y el resto pasa a la bajada, sin reescribir. Origen: MX, ronda 6.
-- **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
-  Perros quedan como Imagen con el banner viejo (su decision de la ronda 4), aunque borrando el slogan
-  del key visual el titulo entraria en la franja.
+- **Si el usuario ya decidio un hero, no se revierte por una regla general nueva** salvo que el mismo
+  usuario la extienda a todas las paginas. Pro Plan Gatos y Perros eran Imagen con el banner viejo
+  (ronda 4); con "aplica ese mismo criterio a todas las paginas" pasan a Banner: se borra el slogan de
+  la franja y el titulo va centrado arriba, sobre ella.
 
 ## Textos
 
@@ -195,13 +208,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 ## Productos
 
 - **Cards que llevan a productos se reemplazan por el carrusel de productos.** Ya no hay cards
-  personalizadas para productos. Origen: MX, ronda 4. **Pero una card que lleva a una GAMA o a una
-  categoria (no a un producto) no es un producto**: las Opti tecnologias (cada una lleva a su linea),
-  "Alimento seco / Alimento humedo" de Purina One (llevan al listado). Esas van en cards "Simple
-  (image + title)" con su imagen ORIGINAL, que es lo que el carrusel de productos pierde: los
-  banderines Opti con su perro o gato, los packshots. Origen: MX, revision de los colores de marca
-  ("con la nueva card no es mejor usar las imagenes originales?"); reemplaza lo decidido en la ronda
-  5 para Opti.
+  personalizadas para productos. Origen: MX, ronda 4. **Aunque la card lleve a una gama o a un
+  listado y no a la ficha de un producto, si lo que muestra son productos va en el carrusel de
+  productos**: las Opti tecnologias de Pro Plan y "Alimento seco / Alimento humedo" de Purina One.
+  Se probo pasarlas a cards Simple con su imagen original y el usuario lo freno ("ojo que aca tenemos
+  que usar los carruseles de productos, porque esos son productos"). Origen: MX, revision de los
+  colores de marca.
 - **Nada de listas de productos (acordeones, textos) debajo del carrusel**: los productos y su
   descripcion salen del CMS. Origen: MX, ronda 5 (Opti tecnologias).
 - **Un bloque que ES un producto va en el carrusel de productos**, aunque sea uno solo. Origen: MX,
@@ -286,16 +298,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   entre titulo y descripcion para que entren.
 - **Un texto metido en la foto de una card queda debajo de la descripcion**: se recorta la foto sin
   ese rotulo o la card pasa a columnas con Imagen (texto arriba, foto entera abajo).
-- **"Simple (image + title)" no se usa para rescatar cards verticales que ya se leen.** Es para cards
-  que nacen asi: foto que funciona CUADRADA (300px en todos los anchos) y texto corto (titulo de
-  hasta 65, descripcion de hasta 100). Pasar a este modo una card vertical recorta una foto que se
-  compuso alta, saca el texto de adentro de la card (lo que ya se descarto en la ronda 6) y en las
-  marcas de fondo oscuro deja la descripcion en negro sobre negro si no se carga el Card - Text Color.
-  Origen: MX, prueba de antes y despues sobre Hasta 1.8 años (Dog Chow), las cuatro home de marca y
-  Nuestra historia: ninguna mejora, se quedan como estaban.
+- **Las cards verticales (texto arriba de una foto alta) pasan a "Simple (image + title)" cuando el
+  sujeto de la foto funciona CUADRADO**: se recorta al sujeto (el hexagono de Hasta 1.8 años, el
+  perro o gato con sus paquetes de Vet Diets) y se completa a cuadrado con el mismo fondo de la
+  imagen, que es el de la pagina. Titulo y descripcion van debajo, con Card - Title/Text Color
+  cargados porque los de la card no siguen a la marca (Primary White en Dog Chow; Brand 01 + Primary
+  White en Pro Plan). Una card vertical sin imagen cargada se queda como esta. Origen: MX, revision
+  de los colores de marca ("aca no es mejor usar las nuevas cards?", Hasta 1.8 años); reemplaza la
+  regla anterior, que las dejaba verticales. Las home de marca siguen en pausa.
 - **Si la card del sitio viejo tenia una imagen propia SIN texto adentro, se usa esa imagen, no un
   icono del set.** Ilustraciones (las doradas de LiveClear, los circulos de los 28 dias de Purina One),
-  fotos numeradas (los 15 beneficios de Campeon), los platos de la transicion: el icono generico pierde
+  fotos numeradas (los 15 beneficios de Campeon), los platos de la transicion, /adopta: el icono generico pierde
   justo lo que la imagen decia. Van en "Simple (image + title)", completadas a cuadrado con fondo
   transparente (o del color de la pieza) y sin agrandarlas; si la imagen traia un rotulo que repite el
   titulo ("DIA #01") o una flecha de secuencia, se recorta. Si la imagen ES la card con el texto
