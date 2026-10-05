@@ -195,6 +195,19 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Los productos todavia no estan cargados en el CMS**: los nombres del carrusel son una guia para el
   editor, no hace falta el nombre exacto de catalogo ni frenar por un producto que falta.
 
+## Lanzamiento
+
+- **En el lanzamiento no hay buscador con IA ni registro / inicio de sesion (Pet ID).** Todo lo
+  que dependa de eso se saca al traducir, avisando: el buscador del banner, sus sugerencias, la
+  card Pet ID del carrusel de productos y la del Card Grid. Origen: MX, mapeo del carrusel de
+  productos.
+- **Los carruseles de productos van con productos de MUESTRA** de la misma marca de la pagina
+  (`productosMuestra` del mapping, productos reales de content), tantos como tenia el bloque,
+  porque los productos todavia no estan migrados. Se reemplazan cuando se migren. Las pestañas
+  de filtro del sitio viejo no existen en el carrusel del CMS y se sacan. Origen: MX, idem.
+- **El titulo de un bloque de pestañas va en un bloque de Texto justo antes.** El Tabs del CMS
+  no tiene titulo (lo que se ve arriba es la etiqueta de cada pestaña). Origen: MX, idem.
+
 ## Cards
 
 - **Cada pagina se carga con su marca en el campo Brand del nodo** (la del hub, `pages.brand`). No

@@ -334,9 +334,19 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
       ctx.escritos.push(await ponerDeLaLibreria(ctx, f, vars, v, ref))
       continue
     }
+    // Un campo que se REPITE con "Añadir otro elemento" (los productos del carrusel): el
+    // formulario trae la primera fila y cada una de las demas se pide con el boton.
+    if (f.kind === 'lista') {
+      ctx.escritos.push(...await llenarLista(ctx, f, vars, value, ref))
+      continue
+    }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(ctx, f, vars, value, ref))
+    // Un select que RECARGA parte del formulario al cambiar (el bloque del paragraph Block:
+    // al elegirlo, Drupal trae su configuracion por AJAX). Los campos que siguen viven en
+    // lo que llega, asi que hay que esperarlo antes de seguir llenando.
+    if (f.ajax) await esperarAjax(page)
   }
 }
 
@@ -592,7 +602,7 @@ async function elegirFormato(page, selector, cfg, ref, onStep) {
 
 // Recibe el `ctx` entero — y no solo la pagina — porque el formato de texto es una regla
 // del SITIO, no del campo: vive en el mapping y hay que poder leerla desde aca.
-async function fillField(ctx, f, vars, value, ref) {
+export async function fillField(ctx, f, vars, value, ref) {
   const { page } = ctx
   const selector = resolveSelector(f.sel, vars)
   const total = await page.locator(selector).count()
@@ -663,6 +673,29 @@ async function fillField(ctx, f, vars, value, ref) {
       + `Elementos con ese selector: ${total}.`)
   }
   return { selector, f, ref, valor: value, puesto, rutaRich }
+}
+
+// Llena un campo repetible fila por fila. `f.sel` lleva `{i}` (la fila) y `f.add` es el
+// boton "Añadir otro elemento" de ese campo. La fila 0 viene en el formulario; las demas
+// se piden de a una y se espera a que aparezcan, igual que haria una persona.
+export async function llenarLista(ctx, f, vars, valores, ref) {
+  const { page } = ctx
+  const lista = Array.isArray(valores) ? valores : [valores]
+  const escritos = []
+  for (const [i, v] of lista.entries()) {
+    const sel = resolveSelector(f.sel, { ...vars, i })
+    if (!(await page.locator(sel).count())) {
+      const boton = page.locator(resolveSelector(f.add, vars)).last()
+      if (!(await boton.count())) throw new Error(`${ref}: no encontre el boton para agregar la fila ${i + 1} (${resolveSelector(f.add, vars)})`)
+      await revelar(boton)
+      await boton.click()
+      await esperarAjax(page)
+      await page.locator(sel).first().waitFor({ state: 'attached', timeout: 20000 })
+        .catch(() => { throw new Error(`${ref}: apreté "Añadir otro elemento" y no aparecio la fila ${i + 1}`) })
+    }
+    escritos.push(await fillField(ctx, { ...f, kind: 'text', sel: f.sel.replaceAll('{i}', String(i)) }, vars, v, `${ref}[${i}]`))
+  }
+  return escritos
 }
 
 // Elige un medio YA subido. El valor del manifiesto es el NOMBRE del medio en la

@@ -721,7 +721,7 @@
               "base": "{base}[field_items][{delta}][subform]",
               "add": {
                 "mode": "buttons",
-                "button": "button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
               }
             }
           ]
@@ -1944,7 +1944,436 @@
             }
           ]
         }
+      },
+      "block": {
+        "label": "Block",
+        "value": "block",
+        "_": "El paragraph Block muestra un bloque del sitio elegido en field_block. El carrusel de productos es el bloque \"Selected Product\" (pl_product_selected_product_block): al elegirlo, Drupal carga por AJAX su configuracion (la lista de productos y la presentacion). Leido del formulario de alta de content, 2026-10.",
+        "fields": {
+          "field_block.plugin": {
+            "sel": "select[name=\"{base}[field_block][0][plugin_id]\"]",
+            "kind": "select",
+            "ajax": true
+          },
+          "field_block.display": {
+            "sel": "select[name=\"{base}[field_block][0][settings][display_type]\"]",
+            "kind": "select"
+          },
+          "field_block.productos": {
+            "kind": "lista",
+            "sel": "input[name=\"{base}[field_block][0][settings][items_fixed_products][{i}][fixed_products]\"]",
+            "add": "input[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"], button[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"]",
+            "note": "Referencia a un producto del CMS (\"Nombre (nid)\"). El primero viene en el formulario; los demas con \"Añadir otro elemento\"."
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "field_background_image": {
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-background-image\"]",
+            "note": "La imagen a la izquierda del carrusel (section--bg-image). Inline entity form, como las demas."
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][block][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][block][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.position_arrows": {
+            "sel": "select[name=\"{base}[classy][0][block][position_arrows]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][block][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.style_button": {
+            "sel": "select[name=\"{base}[classy][0][block][style_button]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][block][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][block][text_color]\"]",
+            "kind": "select"
+          }
+        }
+      },
+      "history_grid": {
+        "label": "History Grid",
+        "value": "history_grid",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][text_color]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Hitos",
+              "dsel": "{dsel}-subform-field-items-{delta}",
+              "base": "{base}[field_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "history_grid_item": {
+        "label": "History Grid Item",
+        "value": "history_grid_item",
+        "fields": {
+          "field_history_year": {
+            "sel": "select[name=\"{base}[field_history_year][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_image": {
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Obligatoria en el CMS."
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "banner_wrapper": {
+        "label": "Banner Wrapper",
+        "value": "banner_wrapper",
+        "fields": {
+          "field_banner_slider_buttons": {
+            "sel": "select[name=\"{base}[field_banner_slider_buttons]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_pos_buttons": {
+            "sel": "select[name=\"{base}[field_banner_slider_pos_buttons]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_dots": {
+            "sel": "select[name=\"{base}[field_banner_slider_dots]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_pos_dots": {
+            "sel": "select[name=\"{base}[field_banner_slider_pos_dots]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_autoplay": {
+            "sel": "input[name=\"{base}[field_banner_slider_autoplay][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][banner_wrapper][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Banners",
+              "dsel": "{dsel}-subform-field-c-subitems-{delta}",
+              "base": "{base}[field_c_subitems][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_c_subitems_banner_add_more\"], input[name=\"{npath}_subform_field_c_subitems_banner_add_more\"]"
+              }
+            }
+          ]
+        }
       }
     }
+  },
+  "productosMuestra": {
+    "_": [
+      "Adulto Todas las Razas con Optihealth® Sobre Sabor Pollo (579)",
+      "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (586)",
+      "PURINA® PRO PLAN® GATO LIVE CLEAR™ CON OPTITRACT® SABOR SALMÓN (587)",
+      "Dog Chow® Nutrición Reforzada® Adulto Minis & Pequeños Sabor Carne en Filetes con Arroz (592)",
+      "DOG CHOW® NUTRICIÓN REFORZADA ® ADULTO Sabor Cordero en Filetes con Arroz (595)",
+      "DOG CHOW GRAN COMIENZO CACHORROS MEDIANOS Y GRANDES (607)",
+      "Cat Chow® Adultos carne (605)",
+      "Cat Chow® Gato Esterilizados Carne con Hydro Defense® 85g (614)"
+    ],
+    "Pro Plan": [
+      "Adulto Todas las Razas con Optihealth® Sobre Sabor Pollo (579)",
+      "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (586)",
+      "PURINA® PRO PLAN® GATO LIVE CLEAR™ CON OPTITRACT® SABOR SALMÓN (587)",
+      "Cachorro Razas Grandes con Optistart® Sabor Pollo (588)",
+      "Gato Senior con Optiage® Sabor Pollo (590)",
+      "Purina® Pro Plan® Gato Urinary con Optiplus® Sobre Sabor Pollo (593)",
+      "PRO PLAN HIDROLIZADO PERROS VETERINARY DIETS (594)",
+      "PRO PLAN SENSITIVE DISGESTION ADULTOS TODOS LOS TAMAÑOS (596)"
+    ],
+    "Fancy Feast": [
+      "FANCY FEAST PETIT FILETS POLLO | POUCHES (580)",
+      "FANCY FEAST POUCHES PETIT FILETS (615)",
+      "LATA FANCY FEAST TERRINE PAVO | LÍNEA GOURMET (630)",
+      "FANCY FEAST® Classic Paté lata para gato sabor salmón (642)",
+      "SOBRE FANCY FEAST DE GOULASH CORDERO | POUCHES (674)",
+      "Fancy Feast Atún y Salmón Casserole (679)",
+      "FANCY FEAST CASSEROLE CARNE (695)",
+      "Fancy Feast ® Demi Glace Pollo | Pouches (702)"
+    ],
+    "Felix": [
+      "Felix® Classic para gato sabor atún, salmón y sardina (582)",
+      "Felix® Classic para gato sabor atún (583)",
+      "Felix® Lata para gato sabor pate pescado y atún (591)",
+      "Felix® Classic para gato sabor pescado blanco (602)",
+      "Felix® Gatito sabor carne (613)",
+      "Felix® Classic para gato sabor salmón (624)",
+      "Felix® Triple Delicious Mar para gato sabor salmón, atún y camarón (629)",
+      "Felix® Fantastic Tiritas Pavo para gatos (631)"
+    ],
+    "Excellent": [
+      "Purina® Excellent® Adulto pollo y arroz razas medianas y grandes (584)",
+      "Purina® Excellent® Cachorro pollo y arroz razas medianas y grandes (585)",
+      "Purina® Excellent® Gato adulto con pollo y arroz (659)",
+      "Purina® Excellent® Puppy: Croquetas para cachorro raza pequeña (696)",
+      "Purina® Excellent® Adulto todas las razas de cordero y arroz (714)",
+      "Purina® Excellent® Adulto pollo y arroz razas minis y pequeñas (719)",
+      "Purina® Excellent® Urinary pollo y arroz (744)",
+      "Purina® Excellent® Kitten pollo y arroz (771)"
+    ],
+    "Purina One": [
+      "Purina® One® Pollo y cordero perro adulto mediano y grande (589)",
+      "Purina® One® Gatitos de pollo y carne (633)",
+      "Purina® One® Super nutrientes pollo adultos y cachorros (645)",
+      "Purina® One® Razas pequeñas y minis adultos con pollo y cordero (654)",
+      "Purina® One® Adultos minis y pequeños pollo y carne (664)",
+      "Purina® One® Multiproteínas para perro carne, pollo y cordero (666)",
+      "Purina® One® Super nutrientes carne adultos y esterilizados (704)",
+      "Purina® One® Croquetas para gato esterilizado con pollo y salmón (707)"
+    ],
+    "Dog Chow": [
+      "Dog Chow® Nutrición Reforzada® Adulto Minis & Pequeños Sabor Carne en Filetes con Arroz (592)",
+      "DOG CHOW® NUTRICIÓN REFORZADA ® ADULTO Sabor Cordero en Filetes con Arroz (595)",
+      "DOG CHOW GRAN COMIENZO CACHORROS MEDIANOS Y GRANDES (607)",
+      "DOG CHOW® Protección Completa Adultos Minis y Pequeños (608)",
+      "DOG CHOW® TRIPLE PROTEÍNA ADULTO  Sabor Carne, Pollo y Salmón en Tiritas (616)",
+      "DOG CHOW® NUTRICIÓN REFORZADA+ Adultos Minis y Pequeños (620)",
+      "DOG CHOW® NUTRICIÓN REFORZADA+  Adultos Todos los Tamaños (621)",
+      "DOG CHOW HOGAREÑO ADULTO (623)"
+    ],
+    "Cat Chow": [
+      "Cat Chow® Adultos carne (605)",
+      "Cat Chow® Gato Esterilizados Carne con Hydro Defense® 85g (614)",
+      "Cat Chow® Esterilizados pescado con Defense Plus+® (635)",
+      "Cat Chow® Gato Esterilizados Pescado con Hydro Defense® 85g (639)",
+      "Cat Chow® Gato Pollo con Hydro Defense® 85g (648)",
+      "Cat Chow® Hogareños carne (658)",
+      "Cat Chow® Delimix Adultos salmón, carne y pollo (721)",
+      "Cat Chow® Nutriplus atún, pollo y queso (748)"
+    ],
+    "Beneful": [
+      "BENEFUL® BAKED DELIGHTS SNACKERS (622)",
+      "BENEFUL® CACHORROS MINIS CRECIMIENTO VIBRANTE CARNE (638)",
+      "BENEFUL® BAKED DELIGHT HUGS (646)",
+      "BENEFUL® ALIMENTO HÚMEDO CACHORROS POLLO Y ARROZ SALVAJE (655)",
+      "BENEFUL® ORIGINAL ADULTOS PAVO Y ARROZ SALVAJE (690)",
+      "BENEFUL® CACHORROS RAZAS PEQUEÑAS DE CARNE (720)",
+      "BENEFUL® POLLO Y CAMOTE PARA ADULTOS (734)",
+      "BENEFUL® CARNE PARA PERRO ADULTO MINIS ORIGINAL (736)"
+    ],
+    "Dentalife": [
+      "DentaLife® Razas pequeñas y medianas (684)",
+      "DentaLife® Razas grandes (689)",
+      "DentaLife® Gato con sabor a salmón (718)",
+      "DentaLife® Gato con sabor a salmón (798)"
+    ],
+    "Gatina": [
+      "GATINA GATITOS SABOR CARNES, VERDURITAS Y LECHE (712)",
+      "GATINA GATOS ADULTOS CARNE, POLLO Y VERDURAS (713)"
+    ],
+    "Campeón": [
+      "Campeón® Adultos todos los tamaños (742)",
+      "Campeón® Adultos minis y pequeños (752)",
+      "Campeón® Cachorros todos los tamaños (792)"
+    ]
   }
 }

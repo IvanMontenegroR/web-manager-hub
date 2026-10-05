@@ -557,6 +557,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   El **Carrusel de productos** (`product_list`) lleva **subtitulo** opcional debajo del titulo: un titulo
   largo se parte en titulo corto + subtitulo (lo que viene despues de los dos puntos, o la parte que
   describe), igual que en los demas carruseles. Ver `runner/CRITERIOS.md`.
+  En el CMS **no es un componente propio**: es un paragraph **Block** con el bloque "Selected Product"
+  (`pl_product_selected_product_block`) en Carousel, que es como lo arma F5. Elegir el bloque recarga el
+  formulario por AJAX (`ajax: true` en el mapping) y los productos son un campo repetible con "Añadir
+  otro elemento" (kind `lista`). Cada producto es una referencia "Nombre (nid)" a un producto del CMS; como
+  todavia no estan migrados, el runner pone MUESTRAS de la marca (`productosMuestra` del mapping). La
+  imagen de la izquierda es `field_background_image`. Pestañas de filtro y card Pet ID no existen ahi.
+  La **Linea de tiempo** (`timeline`) es el **History Grid** del CMS: cada hito lleva año (select), imagen
+  (obligatoria), titulo y cuerpo.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.

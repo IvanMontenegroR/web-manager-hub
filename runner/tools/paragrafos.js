@@ -23,9 +23,8 @@ export const PARAGRAFOS = {
       ...T.titulo,
       // OJO: la bajada del banner NO es `field_c_text` como en los demas: es `field_html`.
       description: 'field_html',
-      show_search: 'field_show_search',
-      search_fixed_mobile: 'field_search_ai_pos_fixed_mob',
     },
+    // El buscador con IA no va en el lanzamiento (ver SIN_LANZAMIENTO en traducir.js).
     // En el CMS es UN Media que resuelve desktop y mobile solo; en el hub son dos campos
     // porque el mercado entrega los dos archivos.
     media: { image: 'field_c_image', image_mobile: null },
@@ -68,7 +67,6 @@ export const PARAGRAFOS = {
     tipo: 'ln_c_cardgrid',
     campos: {
       view_mode: 'field_c_cardgrid_view_mode',
-      show_card_pet_id: 'field_show_card_pet_id',
       ...T.titulo, ...T.subtitulo, ...T.tamanos,
     },
     media: { background_image: 'field_media' },
@@ -87,6 +85,39 @@ export const PARAGRAFOS = {
     // La card tiene UN link suelto, no una lista.
     ctaPlano: { cta_label: 'field_c_link.title', cta_url: 'field_c_link.uri', cta_target: 'field_c_link.target' },
   },
+
+  // EL CARRUSEL DE PRODUCTOS. En el CMS no es un componente propio: es un paragraph Block
+  // con el bloque "Selected Product" en Carousel, que es como lo arma F5 en /proplan y
+  // /dogchow. Los productos son referencias a productos del CMS; mientras no esten
+  // migrados van MUESTRAS de la misma marca (`productosMuestra` del mapping).
+  // Lo que el Block no tiene: las pestañas de filtro y la card Pet ID (no van en el
+  // lanzamiento). La imagen de la izquierda es `field_background_image`.
+  product_list: {
+    tipo: 'block',
+    fijos: { 'field_block.plugin': 'pl_product_selected_product_block', 'field_block.display': 'carousel' },
+    campos: { ...T.titulo, subtitle: 'field_c_advanced_subtitle' },
+    media: { left_image: 'field_background_image' },
+    productos: 'field_block.productos',
+    verMas: { texto: 'see_more_text', url: 'see_more_url' },
+    // Interruptores del builder: dicen que se ve, no son contenido del CMS.
+    descartar: ['show_left_image', 'show_filters', 'filters', 'show_petid'],
+  },
+
+  // LA LINEA DE TIEMPO = History Grid. Cada hito es un `history_grid_item` con año (un
+  // select), imagen (OBLIGATORIA en el CMS), titulo y cuerpo.
+  timeline: {
+    tipo: 'history_grid',
+    campos: { ...T.titulo, subtitle: 'field_c_advanced_subtitle' },
+    lista: { campo: 'items', como: 'timeline_item', slot: 0 },
+  },
+  timeline_item: {
+    tipo: 'history_grid_item',
+    campos: { year: 'field_history_year', ...T.titulo, description: 'field_c_text' },
+    media: { image: 'field_c_image' },
+  },
+
+  // El carrusel de banners: sus hijos son Banners (un solo slot, el orden es el de los slides).
+  banner_wrapper: { tipo: 'banner_wrapper', campos: {} },
 
   // CONTENEDORES. Sus hijos son componentes de verdad y van a una ranura: en el layout, la
   // columna (el `tab_index` del hub es el indice de columna); en las pestañas, un

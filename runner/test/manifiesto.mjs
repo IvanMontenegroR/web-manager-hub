@@ -283,12 +283,56 @@ const frena = (bloques, que) => {
     'dos componentes en una pestaña (el CMS acepta UNO)')
   frena([{ ...tabs, hijos: [{ component_key: 'accordion_grid', content: { items: [{ title: 'x', text: 'y' }] }, tab_index: 0 }] }],
     'un acordeon adentro de una pestaña (el CMS no lo admite)')
-  frena([{ ...tabs, content: { ...tabs.content, title: 'Nuestras marcas' } }],
-    'un titulo en el bloque de pestañas (el Tabs del CMS no tiene donde ponerlo)')
+  // El Tabs del CMS no tiene titulo: el del hub va a un bloque de Texto justo antes.
+  const conTitulo = aManifiesto(PAGINA, [{ ...tabs, content: { ...tabs.content, title: 'Nuestras marcas', title_tag: 'h2', subtitle: 'Bajada.' } }], tipos).manifiesto.blocks
+  ok(conTitulo.length === 2 && conTitulo[0].type === 'c_text' && conTitulo[1].type === 'comp_tabs',
+    'el titulo de las pestañas va en un Texto ANTES del Tabs')
+  ok(conTitulo[0].fields.field_c_advanced_title === 'Nuestras marcas' && conTitulo[0].fields['field_c_advanced_title.html_tag'] === 'h2'
+    && conTitulo[0].fields.field_c_text === 'Bajada.', 'con su titulo, su tag y la bajada como cuerpo')
+}
+
+// EL CARRUSEL DE PRODUCTOS = Block "Selected Product" en Carousel, con muestras de la marca.
+{
+  const muestras = loadMapping('mapping/purina-latam.json').productosMuestra
+  const pl = { component_key: 'product_list', content: {
+    title: 'Explora', title_tag: 'h2', subtitle: 'Bajada', show_petid: true, show_filters: true, filters: 'Seco, Húmedo',
+    show_left_image: true, left_image: 'https://ejemplo.com/izq.jpg', see_more_text: 'Ver todos',
+    products: [{ title: 'Uno' }, { title: 'Dos' }],
+  } }
+  const r = aManifiesto({ ...PAGINA, brand: 'Dog Chow' }, [pl], tipos, { productosMuestra: muestras })
+  const b = r.manifiesto.blocks[0]
+  ok(b.type === 'block', 'el carrusel de productos es un paragraph Block')
+  const orden = Object.keys(b.fields)
+  ok(orden[0] === 'field_block.plugin' && b.fields['field_block.plugin'] === 'pl_product_selected_product_block',
+    'el bloque "Selected Product" va PRIMERO (recarga el formulario)')
+  ok(b.fields['field_block.display'] === 'carousel', 'en Carousel')
+  ok(Array.isArray(b.fields['field_block.productos']) && b.fields['field_block.productos'].length === 2
+    && b.fields['field_block.productos'].every((x) => muestras['Dog Chow'].includes(x)), 'tantos productos como tenia, de MUESTRA y de la misma marca')
+  ok(b.fields.field_background_image && r.pendientes.some((p) => p.campo === 'left_image'), 'la imagen izquierda va a field_background_image')
+  ok(b.fields['advanced.include_see_more_button'] === true && b.fields['advanced.see_more_uri'] === '#',
+    'el "Ver todos" sin destino va con # (y se avisa)')
+  ok(!Object.keys(b.fields).some((k) => /pet|filter/i.test(k)), 'sin Pet ID ni pestañas de filtro')
+  ok(r.avisos.some((a) => /MUESTRA/.test(a)) && r.avisos.some((a) => /Pet ID/.test(a)), 'avisa las muestras y lo que saca')
+}
+
+// LA LINEA DE TIEMPO = History Grid, un hito por item con año, imagen, titulo y cuerpo.
+{
+  const tl = { component_key: 'timeline', content: { title: 'Historia', subtitle: 'Bajada',
+    items: [{ year: '1894', title: 'Inicio', description: 'Texto.', image: 'https://ejemplo.com/h.jpg' }] } }
+  const b = aManifiesto(PAGINA, [tl], tipos).manifiesto.blocks[0]
+  ok(b.type === 'history_grid' && b.children?.[0]?.type === 'history_grid_item', 'la linea de tiempo es un History Grid con sus hitos')
+  ok(b.children[0].fields.field_history_year === '1894' && b.children[0].fields.field_c_image, 'cada hito con su año y su imagen')
+}
+
+// SIN IA EN EL LANZAMIENTO: el buscador del banner se saca avisando.
+{
+  const r = aManifiesto(PAGINA, [{ component_key: 'banner', content: { title: 'x', show_search: true, search_fixed_mobile: true } }], tipos)
+  ok(!Object.keys(r.manifiesto.blocks[0].fields).some((k) => /search/.test(k)) && r.avisos.some((a) => /IA/.test(a)),
+    'el buscador con IA no viaja al CMS')
 }
 
 // Y que FRENE. Un componente sin traduccion y un campo cargado que no sabe donde poner.
-frena([{ component_key: 'timeline', content: { title: 'x' } }],
+frena([{ component_key: 'species_selector', content: { title: 'x' } }],
   'un componente que no sabe traducir')
 frena([{ component_key: 'banner', content: { title: 'x', campo_inventado: 'con valor' } }],
   'un campo cargado que no sabe a donde va')

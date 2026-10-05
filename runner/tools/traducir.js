@@ -41,6 +41,15 @@ import { PARAGRAFOS } from './paragrafos.js'
 // Campos del hub que no viajan al CMS: los consume esta misma traduccion.
 const SOLO_DEL_HUB = new Set(['items', 'ctas', 'tabs'])
 
+// LO QUE NO VA EN EL LANZAMIENTO: no hay buscador con IA ni registro / inicio de sesion
+// (Pet ID). Si el bloque lo tiene prendido en el hub, se descarta avisando: el CMS lo
+// dejaria visible y no funcionaria.
+const SIN_LANZAMIENTO = {
+  show_search: 'el buscador con IA', search_fixed_mobile: 'el buscador con IA',
+  search_suggestions: 'las sugerencias del buscador con IA',
+  show_card_pet_id: 'la card Pet ID', show_petid: 'la card Pet ID',
+}
+
 // Destino de relleno para un boton que todavia no sabe a donde va. Es un ancla a la
 // misma pagina: el CMS lo acepta y no lleva a ningun lado.
 export const SIN_DESTINO = '#'
@@ -74,7 +83,7 @@ export class ErrorDeTraduccion extends Error {}
  * @param {Array} bloques  arbol de componentes del hub ({component_key, content, hijos})
  * @param {{fields: object}} porTipo  mapping.paragraphs.types, para verificar los nombres
  */
-export function aManifiesto(pagina, bloques, porTipo = null) {
+export function aManifiesto(pagina, bloques, porTipo = null, { productosMuestra = null } = {}) {
   // El slug es el de la pagina, el mismo que nombra el plan y la carpeta de imagenes.
   const slug = slugDePagina(pagina.path)
   const pendientes = []
@@ -125,9 +134,24 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
 
     const fields = {}
     const poner = (campo, valor) => { verificar(def.tipo, campo, donde); fields[campo] = valor }
+    // Valores que el tipo de bloque exige siempre (el bloque del Block). Van PRIMERO: el
+    // select que los define recarga el formulario, y los demas campos viven en lo que trae.
+    for (const [campo, valor] of Object.entries(def.fijos || {})) poner(campo, valor)
 
     for (const [k, v] of Object.entries(contenido || {})) {
       if (vacio(v)) continue
+      if (k in SIN_LANZAMIENTO) {
+        if (v === true || (Array.isArray(v) && v.length)) {
+          avisos.push(`${donde}: se saca ${SIN_LANZAMIENTO[k]}, que no va en el lanzamiento.`)
+        }
+        continue
+      }
+      if (def.descartar?.includes(k)) {
+        if (k === 'filters' && v) avisos.push(`${donde}: las pestañas de filtro ("${v}") no existen en el carrusel del CMS; se sacan.`)
+        continue
+      }
+      if (def.productos && k === 'products') continue
+      if (def.verMas && (k === def.verMas.texto || k === def.verMas.url)) continue
       if (def.campos[k]) { poner(def.campos[k], valorDelCms(def, k, v, donde)); continue }
       if (def.ctaPlano?.[k]) { poner(def.ctaPlano[k], v); continue }
       if (def.media && k in def.media) {
@@ -183,6 +207,30 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
           // solo no puede frenar la pagina entera, y una que cargo el mercado si.
           ...(arch.derivada ? { derivada: true } : {}),
         },
+      }
+    }
+
+    // LOS PRODUCTOS DEL CARRUSEL. Todavia no estan migrados al CMS, asi que van muestras
+    // REALES de la misma marca (del mapping), tantas como tenia el bloque. Se avisa: hay
+    // que reemplazarlas cuando se migren los productos.
+    if (def.productos) {
+      const pedidos = (contenido?.products || []).filter((x) => x?.title)
+      const pool = productosMuestra?.[pagina?.brand] || productosMuestra?._
+      if (!pool?.length) frenar(`${donde}: no hay productos de muestra en el mapping (productosMuestra) para "${pagina?.brand || 'sin marca'}".`)
+      const n = Math.max(1, Math.min(pedidos.length || 3, pool.length))
+      poner(def.productos, pool.slice(0, n))
+      avisos.push(`${donde}: el carrusel lleva ${n} producto/s de MUESTRA de ${pagina?.brand || 'Purina'}`
+        + (pedidos.length ? ` en lugar de: ${pedidos.map((x) => x.title).join(' / ')}` : '')
+        + '. Reemplazar cuando se migren los productos.')
+    }
+    // EL BOTON "VER TODOS" del carrusel es el "See more" del paragraph (Avanzado).
+    if (def.verMas && (contenido?.[def.verMas.texto] || contenido?.[def.verMas.url])) {
+      poner('advanced.include_see_more_button', true)
+      if (contenido[def.verMas.texto]) poner('advanced.see_more_title', contenido[def.verMas.texto])
+      poner('advanced.see_more_uri', contenido[def.verMas.url] || SIN_DESTINO)
+      if (!contenido[def.verMas.url]) {
+        avisos.push(`${donde}: el boton "${contenido[def.verMas.texto]}" no tiene destino. `
+          + `Se pone "${SIN_DESTINO}" para que el CMS lo acepte — HAY QUE COMPLETARLO.`)
       }
     }
 
@@ -264,8 +312,19 @@ export function aManifiesto(pagina, bloques, porTipo = null) {
   }
 
   const blocks = []
-  for (const [i, b] of bloques.entries()) {
+  for (const [i, b0] of bloques.entries()) {
     const donde = `bloque ${i + 1}`
+    let b = b0
+    // EL TITULO DE LAS PESTAÑAS. El Tabs del CMS no tiene titulo de bloque (lo que se ve
+    // arriba de cada pestaña es la etiqueta de ESA pestaña). El titulo y la bajada del
+    // hub van a un bloque de Texto justo antes, que es como se ve igual.
+    if (PARAGRAFOS[b.component_key]?.pestanas && (b.content?.title || b.content?.subtitle)) {
+      const { title, title_tag, subtitle, ...resto } = b.content
+      const encabezado = traducir('text', { title, title_tag, body: subtitle }, `${donde} (titulo de las pestañas)`)
+      if (encabezado) blocks.push(encabezado)
+      avisos.push(`${donde}: el titulo de las pestañas va en un bloque de Texto antes, porque el Tabs del CMS no tiene titulo.`)
+      b = { ...b, content: resto }
+    }
     const t = traducir(b.component_key, b.content, donde)
     if (!t) continue
     const pest = PARAGRAFOS[b.component_key]?.pestanas

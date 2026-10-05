@@ -57,6 +57,10 @@
 // mediaLibrary (el modal con grilla: se elige por URL, y si no esta se crea) |
 // image / file (se saltean: el runner no sabe llenarlos, solo guarda su HTML para
 // aprender como es el widget).
+// lista (un campo que se repite con "Añadir otro elemento": `sel` lleva `{i}` por la fila
+// y `add` es el boton; el valor del manifiesto es un array).
+// Un `select` con `ajax: true` recarga parte del formulario al cambiar (el bloque del
+// paragraph Block): el runner espera esa respuesta antes de seguir con los demas campos.
 // Un `richtext` puede traer `format: { sel, value }`: el selector de formato de texto se
 // pone ANTES de escribir, porque el CMS arranca en uno que no admite HTML.
 //
