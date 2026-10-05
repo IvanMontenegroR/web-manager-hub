@@ -111,14 +111,23 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
   cercana...", "Resultados visibles en 28 dias" + "Purina® One® para perros."). El corte cae en un
   limite natural de la frase. Origen: MX, ronda 5, confirmado por el usuario.
-- **El h1 va siempre como texto real, y las palabras NO se repiten.** El h1 es lo que estructura la
-  pagina (buscadores, lectores de pantalla); las letras de una imagen no cuentan. Si el key visual
-  trae metido el mismo mensaje que el titulo o la bajada ("UN SOLO producto 15 BENEFICIOS", "ALCANZA
-  LO EXCEPCIONAL", "RESULTADOS VISIBLES EN 28 DIAS...", la placa de datos de LiveClear, el logo y
-  claim de Calidad en tus manos), se BORRA de la imagen y el texto va en el banner. Origen: MX,
-  revision de los colores de marca ("no me gusta que aca no usemos banner y que se repitan las
-  palabras", Campeon); reemplaza lo de la ronda 5, que aceptaba la repeticion.
-- **Como se borra: solo limpiando, nunca dibujando.** Letras sobre un fondo liso o un degrade
+- **Si el key visual trae su propio texto (slogan, claim, logo de producto, placa de datos), va
+  ENTERO y el titulo con la bajada van ARRIBA, como texto** (Imagen con "Image Bottom": titulo,
+  bajada y debajo la pieza original, desktop y mobile). Asi la pieza se ve como se diseño y el texto
+  de la pagina no compite con sus letras. Es el caso de Pro Plan Gatos y Perros ("Alcanza lo
+  excepcional"), Satisfaccion Garantizada, LiveClear, Calidad en tus manos y los heroes de Dog Chow
+  con logo (Gran Comienzo, Nutricion Reforzada, "Sensacional" de Combinaciones). Si la pieza traia una
+  forma pensada para pegarse a una seccion de color del sitio viejo (la cuña verde de Dog Chow), se
+  pinta del fondo de la pagina. Origen: MX, revision de los colores de marca ("en este tipo de casos
+  si me gusta mucho mas que el titulo y subtitulo este por encima del banner", Pro Plan Perros).
+- **La excepcion: si las letras de la imagen SON el titulo** (no un slogan: el mismo texto, como
+  "UN SOLO producto 15 BENEFICIOS PARA LA SALUD" de Campeon), titulo arriba e imagen abajo repiten
+  todo. Ahi se borran las letras de la imagen y el titulo va EN el banner. Origen: MX, idem ("no me
+  gusta que aca no usemos banner y que se repitan las palabras", Campeon).
+- **Un hero sin letras en la imagen es Banner con el titulo adentro**, como siempre (Alergenos del
+  gato, Estandares). Si el titulo cruzaria al sujeto, se corre la foto (se extiende su propio fondo o
+  se achica contra una esquina) antes que partir el titulo.
+- **Cuando hay que borrar letras (la excepcion de arriba), solo limpiando, nunca dibujando.** Letras sobre un fondo liso o un degrade
   (crema, rojo, turquesa): se rellena con el mismo fondo, columna por columna. Letras sobre una
   franja oscura con textura: inpainting chico, solo sobre el trazo de la letra. Una placa grande
   sobre un fondo con textura: se tapa con el MISMO fondo de otra parte de la imagen. Si para que el
@@ -157,10 +166,9 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un titulo de banner que cruza al sujeto o a letras de la imagen se parte** aunque la imagen ya este
   bien encuadrada: el h1 queda con lo que dice de que es la pagina o la seccion ("Combinaciones de
   proteinas", "Estamos comprometidos") y el resto pasa a la bajada, sin reescribir. Origen: MX, ronda 6.
-- **Si el usuario ya decidio un hero, no se revierte por una regla general nueva** salvo que el mismo
-  usuario la extienda a todas las paginas. Pro Plan Gatos y Perros eran Imagen con el banner viejo
-  (ronda 4); con "aplica ese mismo criterio a todas las paginas" pasan a Banner: se borra el slogan de
-  la franja y el titulo va centrado arriba, sobre ella.
+- **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
+  Perros quedan como Imagen con el key visual entero (ronda 4, confirmado de nuevo al revisar los
+  colores de marca).
 
 ## Textos
 
