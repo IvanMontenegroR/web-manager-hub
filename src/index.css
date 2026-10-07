@@ -1869,8 +1869,12 @@ textarea.control { resize: vertical; min-height: 64px; }
    Sin imagen, el layout no cambia (bloque normal). */
 .cp-plist.has-left .cp-plist-main { display: flex; gap: 26px; align-items: flex-start; }
 .cp-plist.has-left .cp-plist-content { flex: 1; min-width: 0; }
-.cp-plist-left { flex: 0 0 34%; max-width: 360px; }
-.cp-plist-leftimg { border-radius: 16px; }
+/* Imagen izquierda medida en content (/dogchow, 1440px): columna de 396x498, del MISMO alto
+   que las cards, recortada con cover y sin redondeo (el fondo de la foto es el de la pagina,
+   asi que la mascota parece recortada sobre el verde). En mobile el sitio NO la muestra. */
+.cp-plist-left { flex: 0 0 30%; align-self: stretch; display: flex; align-items: flex-end; }
+.cp-plist-leftimg { border-radius: 0; object-fit: cover; }
+.pb-canvas--mobile .cp-plist-left { display: none; }
 .cp-plist-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .cp-plist-tabs { display: flex; flex-wrap: wrap; gap: 28px; }
 .cp-plist-tab { font-size: 18px; color: #2b2b2b; white-space: nowrap; }

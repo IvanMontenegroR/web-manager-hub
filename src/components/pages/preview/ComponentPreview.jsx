@@ -735,7 +735,7 @@ const RENDERERS = {
         <div className="cp-plist-main">
           {showLeft && (
             <div className="cp-plist-left">
-              <Img src={c.left_image} aspect="650/692" dim="650×692px" className="cp-plist-leftimg" />
+              <Img src={c.left_image} aspect="396/498" dim="650×692px" className="cp-plist-leftimg" />
             </div>
           )}
           <div className="cp-plist-content">
