@@ -12,8 +12,19 @@
 import readline from 'node:readline'
 
 export const SITIOS = {
-  // Solo se ESCRIBE en content: preprod y prod los arma F5 exportando desde ahi.
+  // Se escribe en content y, para las homes de marca, en preprod MX (autorizado por el
+  // Websites Expert). Preprod usa el mismo usuario que content (`cred`) y tiene un shield
+  // (HTTP basic) delante: sale de RUNNER_SHIELD=usuario:clave, nunca del codigo.
   'content-mx': { base: 'https://content-ef5-purina-latam-mx.pantheonsite.io', env: 'CONTENT', mkt: 'MX', escribe: true },
+  'preprod-mx': { base: 'https://preprod-dig0049395-petcare-purina-mexico.pantheonsite.io', env: 'PREPROD', cred: 'CONTENT', mkt: 'MX', escribe: true, shield: true },
+}
+
+/** El header del shield (HTTP basic) de un sitio que lo tiene, o nada. */
+export function shieldHeader(sitio) {
+  if (!sitio?.shield) return {}
+  const s = process.env.RUNNER_SHIELD
+  if (!s) throw new ErrorDrupal(`${sitio.base} tiene shield: falta RUNNER_SHIELD=usuario:clave.`)
+  return { authorization: 'Basic ' + Buffer.from(s).toString('base64') }
 }
 
 export const USER_AGENT = 'migration-mx'
@@ -264,7 +275,7 @@ async function preguntar(texto, oculto = false) {
 
 /** Las credenciales salen de DRUPAL_MCP_USER_<ENV>_<MKT> / DRUPAL_MCP_PASS_<ENV>_<MKT>, o se preguntan. */
 export async function credenciales(sitio) {
-  const sfx = `${sitio.env}_${sitio.mkt}`
+  const sfx = `${sitio.cred || sitio.env}_${sitio.mkt}`
   const user = process.env[`DRUPAL_MCP_USER_${sfx}`] || await preguntar(`Usuario de Drupal (${sfx.toLowerCase()}): `)
   const pass = process.env[`DRUPAL_MCP_PASS_${sfx}`] || await preguntar('Contraseña (no se muestra): ', true)
   if (!user || !pass) throw new ErrorDrupal(`Faltan las credenciales: DRUPAL_MCP_USER_${sfx} y DRUPAL_MCP_PASS_${sfx}.`)
@@ -284,7 +295,7 @@ export class Sesion {
       if (falta > 0) await new Promise(r => setTimeout(r, falta))
     }
     this._ultimo = Date.now()
-    const headers = { 'user-agent': USER_AGENT, ...(opts.headers || {}) }
+    const headers = { 'user-agent': USER_AGENT, ...shieldHeader(this.sitio), ...(opts.headers || {}) }
     if (this.cookies.size) headers.cookie = [...this.cookies].map(([k, v]) => `${k}=${v}`).join('; ')
     const res = await fetch(url, { ...opts, headers, redirect: 'manual' })
     for (const c of res.headers.getSetCookie?.() ?? []) {
