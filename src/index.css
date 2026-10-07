@@ -2290,6 +2290,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 }
 .cp-tab:hover { color: #545c67; }
 .cp-tab.on { color: #1b252e; border-bottom-color: var(--tab-acc, #ed1c24); }
+/* Classy del Tabs: Text Color = las no seleccionadas, Text Tabs Active = la seleccionada. */
+.cp-tabs[style*="--tab-ink"] .cp-tab:not(.on) { color: var(--tab-ink); }
 .cp-tabs-desc { font-size: 14px; color: #545c67; line-height: 1.6; text-align: center; max-width: 780px; margin: 16px auto 0; }
 /* Tema oscuro (paginas de marca oscura). */
 .cp-dark .cp-tabs-title, .cp-dark .cp-tab.on { color: #f4f5f7; }

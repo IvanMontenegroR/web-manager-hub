@@ -1065,11 +1065,13 @@ const RENDERERS = {
     const items = tabList(c)
     const active = Math.min(Math.max(0, ctx?.activeTab || 0), items.length - 1)
     const cur = items[active] || {}
-    const acc = ctx?.brandAccent || ACCENT
+    const tok = (v) => BG_TOKENS[v] || ctx?.brandTokens?.[v] || null
+    const acc = tok(c.text_tabs_active) || ctx?.brandAccent || ACCENT
+    const ink = tok(c.text_color)
     const title = OPT(c.title)
     const subtitle = OPT(c.subtitle)
     return (
-      <div className="cp-tabs" style={{ '--tab-acc': acc }}>
+      <div className="cp-tabs" style={{ '--tab-acc': acc, ...(ink ? { '--tab-ink': ink } : {}) }}>
         {(title || subtitle) && (
           <div className="cp-tabs-head">
             {title && <div className="cp-tabs-title">{title}</div>}

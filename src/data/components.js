@@ -423,6 +423,9 @@ const CLASSY_FIELDS = {
   spacing: { label: 'Spacing', options: SPACINGS },
   text_align: { label: 'Text Align', options: CLASSY_ALIGNS },
   text_color: { label: 'Text Color', options: BG_COLORS },
+  // Solo del Tabs: el color de la pestaña SELECCIONADA. El Text Color pinta las demas
+  // (en el sitio: --color-text-tabs y --color-text-tabs-active).
+  text_tabs_active: { label: 'Text Tabs Active', options: BG_COLORS },
   content_text_styles: { label: 'Content Text Styles', options: CONTENT_TEXT_STYLES },
   style_button: { label: 'Style Button', options: BUTTON_STYLES },
   background_card_color: { label: 'Card - Background Color', options: BG_COLORS },
@@ -1152,8 +1155,11 @@ export const COMPONENTS = [
         { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
         { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
       ] },
-      // Classy PENDIENTE: falta el subform real de `comp_tabs` (ver TODO al pie).
       ...advanced(),
+      // Leido del formulario de /purina-one/por-que-cambiar-a-one. Text Color pinta las
+      // pestañas NO seleccionadas (sin cargar caen a #1f1f1f, que no se lee sobre una
+      // marca de fondo oscuro o de color) y Text Tabs Active la seleccionada (rojo).
+      ...classy('background_color', 'background_position', 'text_align', 'text_color', 'text_tabs_active'),
     ],
   },
   {
@@ -1559,7 +1565,6 @@ export const CMS_PENDING_PARAGRAPHS = [
 export const CMS_PENDING_SUBFORMS = {
   banner_wrapper: 'Faltan los campos propios del `Banner Wrapper`: Buttons (desktop/mobile), Position Buttons (top left/right, bottom left/right, center inside/outside), Dots, Position Dots y Autoplay. El Classy (Background Color y Spacing) ya esta.',
   text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
-  tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
   brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',
   articles_carousel: 'Idem: confirmar si es un View/bloque y no un paragraph.',
 }

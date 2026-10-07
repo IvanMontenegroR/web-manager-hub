@@ -59,6 +59,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   manos): pintarla rompe el logo, queda blanca. Origen: MX, revision de los colores de marca ("esta
   imagen tiene efecto al no tener fondo, antes funcionaba porque era blanco", transicion de alimento
   de Dog Chow).
+  **Excepcion (ronda 10): las FOTOS no se pintan.** Una foto recortada (el perro con el plato de
+  Calidad en tus manos) o una foto con marco propio (el circulo de "Nuestra promesa") pintada del
+  color de la pagina queda como un recorte flotando, y no se ve bien: van con su fondo blanco, como
+  una card blanca sobre la pagina. Pintar sigue valiendo para ilustraciones y graficos sin foto.
+  Origen: MX, Calidad en tus manos ("la foto del perro debe tener el fondo blanco, ya que no queda
+  bien sin fondo"; la de nuestra promesa igual, por consistencia).
+- **Al sacar un elemento del borde de una imagen (la cuña verde del sitio viejo) no se recorta al
+  sujeto.** Si el recorte a la medida del componente se come la cabeza del sujeto, se rellena el
+  hueco con el fondo de la propia foto (desenfocado, inpainting clasico) y se recorta por el costado
+  vacio, no por arriba. Origen: MX, banner "La combinacion perfecta" de Longevidad ("se corta la cara
+  del perro").
 - **El desenfocado solo si queda bien.** Sirve para rellenar el lado del titulo cuando el fondo ya era
   suave (bokeh, bosque, follaje: el FAQ de LiveClear es el ejemplo bueno). En heroes con fondo nitido
   queda mal y no se usa. Origen: MX, ronda 4.
@@ -171,11 +182,31 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   un descuido. Si el CMS guarda uno distinto de lo cargado, se corrige (el runner ya lo repasa solo,
   ver README). Origen: MX, Pro Plan Perros ("siempre tratemos de mantener una alineacion, en este caso
   izquierda").
+- **El h1 de la pagina y su subtitulo van SIEMPRE alineados a la izquierda**, como el layout del
+  sitio, aunque el bloque sea de Texto o Imagen y en el sitio viejo estuviera centrado. Origen: MX,
+  Satisfaccion garantizada.
+- **Un banner que no tiene nada alrededor no luce:** en una pagina casi sin contenido el desenfoque
+  que el banner le aplica a la foto queda mal. Ahi va la Imagen tal cual (`c_image`, Image Bottom) con
+  el titulo arriba. Origen: MX, Estandares de nutricion.
 - **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
   Perros quedan como Imagen con el key visual entero (ronda 4, confirmado de nuevo al revisar los
   colores de marca).
 
 ## Textos
+
+- **El subtitulo nunca lleva saltos de linea.** Va en una sola linea (o un solo parrafo): las frases
+  que venian partidas con `<br>` se unen con un espacio, poniendo el punto que falte entre una y otra.
+  Vale para el subtitulo de cualquier componente, la Description del banner y la bajada de un h1.
+  Origen: MX, Gran Comienzo ("el subtitulo nunca debe estar separados por breaks").
+- **El contenido no puede quedar solo como texto adentro de una imagen.** Una infografia con
+  informacion (cifras, pasos, porcentajes) se rearma con componentes de texto: cards con icono para
+  las cifras, cards numeradas para los pasos. La imagen se puede sacar. Un key visual de campaña con
+  su slogan NO entra aca (ver Heroes). Origen: MX, Campeon 15 beneficios ("no esta ni en formato
+  texto, no podamos obviar contenido de esta manera"), y por la misma regla la transicion de alimento
+  de Calidad en tus manos y los 97% / 47% de Alergenos del gato.
+- **Una cita va como cita:** la frase entre comillas en el titulo del bloque de Texto y el nombre (con
+  su cargo) en el subtitulo. No como un parrafo en negrita con "-Nombre" abajo. Origen: MX, Alergenos
+  del gato.
 
 - **Nada de mayusculas sostenidas.** Todo lo que en el sitio viejo venia en ALL CAPS (titulos, bajadas,
   nombres de producto en el cuerpo) pasa a tipo oracion; las marcas quedan con su mayuscula inicial
@@ -191,6 +222,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Si el sitio viejo tenia una bajada debajo del titulo de una seccion, va al subtitulo del
   componente.** No se pierde al traducir. Origen: MX, Opti tecnologias ("por que no usamos los
   subtitulos nosotros?").
+
+## Figma
+
+- **Si la pagina esta diseñada en Figma, se sigue ese layout con el contenido del sitio viejo.** Esto
+  vale para todas. El indice es `figma_mx_inventario.csv` (archivo `zKnt2Z78kLDgBt0GM7DgL2`). Hoy el
+  Figma tiene las portadas de seccion (Purina Cuida, Calidad, Nutricion, Comunidad, Por el planeta),
+  Institucional (Nuestra historia, Nutricion y calidad, Preguntas frecuentes, Aliados, Profesionales,
+  Contacto) y la home de cada marca; NO tiene Ingredientes, Estandares ni Purina Cares. Origen: MX,
+  Ingredientes ("esta pagina esta en figma no? ... esto aplica para todas").
 
 ## Spacing
 
@@ -290,6 +330,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   no tiene titulo (lo que se ve arriba es la etiqueta de cada pestaña). Origen: MX, idem.
 
 ## Cards
+
+- **En una card el texto va DEBAJO de la imagen.** El `c_image` del CMS no tiene "imagen arriba, texto
+  abajo" (Image Bottom deja el texto arriba), asi que una card armada con columnas va como DOS bloques
+  en la misma columna: la Imagen sola (spacing 0) y debajo un Texto con titulo, cuerpo y boton (spacing
+  16). Origen: MX, Alergenos del gato y Purina Cares ("el texto deberia estar abajo de las cards").
+- **Dos Texto con imagen seguidos se alternan**: si uno tiene la imagen a la izquierda, el siguiente
+  la lleva a la derecha. Origen: MX, Resultados visibles en 28 dias ("hay 2 text + images hacia el
+  final y estan del mismo lado, siempre hay que alternar").
+- **Pestañas sobre una marca de fondo oscuro o de color**: el Text Color de Classy del Tabs pinta las
+  pestañas NO seleccionadas (sin cargar caen a #1f1f1f, que no se lee sobre el turquesa de Purina One
+  ni el verde de Dog Chow). Va en Primary White. Origen: MX, Por que cambiar a Purina One ("hay poco
+  contraste en el ultimo componente").
 
 - **Cada pagina se carga con su marca en el campo Brand del nodo** (la del hub, `pages.brand`). No
   es un dato de clasificacion: es lo que le pone el fondo, el texto por defecto y los acentos a toda
