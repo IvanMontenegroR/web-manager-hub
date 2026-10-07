@@ -42,6 +42,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Imagenes
 
+- **Homes de marca: de donde sale cada imagen.** Primero la que entrego el mercado (matriz o carpeta),
+  despues la del Figma, despues la del sitio viejo. Si una seccion no tiene ninguna, se busca una que
+  quede bien en el sitio viejo, en MX o en BR (con el criterio de reuso BR/MX: fotos sin texto, pack ni
+  logo). No se deja una seccion con placeholder: el placeholder es SOLO para el hero (ver Heroes).
+  Origen: MX, homes de marca Ecosystem 2.0, pedido del usuario.
+
 - **La medida es la del catalogo del Hub**, siempre (`src/data/components.js`, `specs`/`specsByType`).
   Son las medidas reales del CMS. Origen: MX, ronda 3.
 - **No se generan imagenes nuevas: se modifican y redimensionan las que ya existen.** Nada de IA
@@ -117,6 +123,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   una infografia), aunque esten en ingles: los decide Legal.
 
 ## Heroes y banners
+
+- **Hero de una home de marca sin su asset especifico (el video de la marca, el key visual de la
+  campaña): se pone el PLACEHOLDER del Brand Hero y se marca como pendiente.** No se lo reemplaza con
+  otra foto: el hero es la pieza de la marca y una foto cualquiera ahi parece una decision tomada. Es la
+  unica seccion que lleva placeholder; en el resto se busca una imagen que funcione (ver Imagenes).
+  Origen: MX, home de Dog Chow (el video no estaba en la carpeta), pedido del usuario.
 
 - **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
