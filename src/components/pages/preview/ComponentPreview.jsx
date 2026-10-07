@@ -1219,6 +1219,54 @@ const RENDERERS = {
         </div>
       )
     }
+    if (mode === 'full-background-card-icons-box') {
+      // "Image + 3 cards with icons", medido en /proplan ("Nutricion respaldada por
+      // ciencia"): titulo y bajada centrados, un panel redondeado con el degradé (Background
+      // Degrade Color, sin cargar = el fondo de la pagina) y la imagen de fondo arriba, y una
+      // fila de 3 tarjetas de alto FIJO encima con icono, titulo y texto. El texto se corta a
+      // 4 lineas, como en el sitio, para que se vea aca lo que se va a cortar alla.
+      const arr = items.length ? items : [
+        { icon: 'browse', title: 'Título', description: 'Texto de la tarjeta.' },
+        { icon: 'beef', title: 'Título', description: 'Texto de la tarjeta.' },
+        { icon: 'cat', title: 'Título', description: 'Texto de la tarjeta.' },
+      ]
+      const grad = tok(c.background_degrade_color)
+      const card = tok(c.background_card_color) || '#FFFFFF'
+      const st = {
+        '--ib-grad': grad || 'transparent',
+        '--ib-card': card,
+        '--ib-ico': tok(c.icon_card_color) || ctx?.brandAccent || ACCENT,
+        '--ib-tt': tok(c.title_card_color) || ctx?.brandAccent || ACCENT,
+        '--ib-tx': tok(c.text_card_color) || readableOn(card, '#1f1f1f'),
+        ...(tok(c.text_color) ? { '--txt': tok(c.text_color) } : {}),
+      }
+      return (
+        <div className={`cp-icobox${tok(c.text_color) ? ' cp-icobox--hastxt' : ''}`} style={st}>
+          {(OPT(c.title) || OPT(c.subtitle)) && (
+            <div className="cp-icobox-head">
+              {OPT(c.title) && <div className="cp-icobox-title">{c.title}</div>}
+              {OPT(c.subtitle) && <div className="cp-icobox-sub"><RT>{c.subtitle}</RT></div>}
+            </div>
+          )}
+          <div className="cp-icobox-panel">
+            <div className="cp-icobox-bg">
+              {c.background_image
+                ? <MediaEl className="cp-icobox-img" src={c.background_image} />
+                : <Img h={300} dim="2784×1994px" />}
+            </div>
+            <div className="cp-icobox-row">
+              {arr.map((it, i) => (
+                <div key={i} className="cp-icobox-card">
+                  <span className="cp-icobox-ico"><FeatureIcon name={it.icon} size={24} /></span>
+                  <div className="cp-icobox-t">{T(it.title, 'Título')}</div>
+                  <Rich className="cp-icobox-d">{T(it.description, 'Texto de la tarjeta.')}</Rich>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
     // El resto de los modos son variantes del carrusel de cards: se adapta el contenido
     // a la forma que ese render ya sabe dibujar. Los modos que todavia no tienen mockup
     // propio caen a las cards verticales, que es el layout mas neutro.

@@ -2691,3 +2691,23 @@ textarea.control { resize: vertical; min-height: 64px; }
    abajo de uno mas el de arriba del otro, no un gap fijo del hub. */
 .pb-canvas.preview .pb-page { gap: 0; }
 .pb-canvas.preview .pb-block--breadcrumb { margin-bottom: 0; }
+
+/* ===== Card Grid "Image + 3 cards with icons" (full-background-card-icons-box) =====
+   Medido en content /proplan: tarjetas de 338x352 (286x320 en mobile), texto a 4 lineas. */
+.cp-icobox { padding: 40px 30px 48px; color: var(--txt, inherit); }
+.cp-icobox-head { text-align: center; max-width: 780px; margin: 0 auto 18px; }
+.cp-icobox-title { font-size: 30px; font-weight: 700; line-height: 1.15; }
+.cp-icobox-sub { font-size: 14px; margin-top: 6px; opacity: .92; }
+.cp-icobox-panel { position: relative; border-radius: 24px; padding: 0 40px 40px; background: linear-gradient(180deg, transparent 15%, var(--ib-grad) 100%); }
+.cp-icobox-bg { display: flex; justify-content: center; }
+.cp-icobox-img { width: 62%; max-height: 340px; object-fit: contain; display: block; }
+.cp-icobox-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: -40px; position: relative; }
+.cp-icobox-card { background: var(--ib-card); border-radius: 12px; min-height: 220px; padding: 26px 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; }
+.cp-icobox-ico { color: var(--ib-ico); display: inline-flex; }
+.cp-icobox-t { color: var(--ib-tt); font-size: 18px; font-weight: 600; line-height: 1.2; }
+.cp-icobox-d { color: var(--ib-tx); font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.cp-icobox-d p { margin: 0; }
+.pb-canvas--mobile .cp-icobox { padding: 28px 20px 32px; }
+.pb-canvas--mobile .cp-icobox-panel { padding: 0 0 20px; }
+.pb-canvas--mobile .cp-icobox-img { width: 100%; }
+.pb-canvas--mobile .cp-icobox-row { grid-template-columns: 82% 82% 82%; overflow: hidden; margin-top: -20px; }

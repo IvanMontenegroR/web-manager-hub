@@ -187,6 +187,11 @@ export const CARD_SQUARE = 'card_grid_default_square'
 //
 // Por eso se avisa y no se recorta lo ya cargado.
 export const CARD_SQUARE_DESC_MAX = 128
+// "Image + 3 cards with icons" (full-background-card-icons-box): la descripcion de cada
+// tarjeta se corta a 4 LINEAS (line-clamp del sitio). Lo que manda es MOBILE, donde la
+// tarjeta mide 286px: ahi un texto de 102 ya se ve cortado y uno de 86 entra (medido en
+// content, homes de marca, 2026-10). En desktop (338px) entran unos 150. Guia, no regla.
+export const CARD_ICONS_BOX_DESC_MAX = 90
 // Card "Simple (image + title)": medido en content (card-grid-examples). La card mide 300px
 // en todos los anchos. El TITULO se corta a las 3 lineas con puntos suspensivos (~24
 // caracteres por linea: un titulo de 68 entra justo). La DESCRIPCION no se corta pero
@@ -1012,6 +1017,7 @@ export const COMPONENTS = [
         // tambien (CARD_SIMPLE_DESC_MAX): las verticales son altas y tienen lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
           maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_DESC_MAX
+            : c?.view_mode === 'full-background-card-icons-box' ? CARD_ICONS_BOX_DESC_MAX
             : c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
         // Checkbox del formulario de la CARD, entre la descripcion y el subtitulo. Igual
         // que Show Card PET ID: falta confirmar que dibuja, asi que el mockup no lo pinta.
@@ -1056,6 +1062,9 @@ export const COMPONENTS = [
       // Apaisadas. Sin `ratio`: desktop y mobile NO comparten proporcion (1.73 contra
       // 1.20), asi que poner una sola seria mentir. Van las medidas y listo.
       'slider-default-card-square': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
+      // El fondo del bloque (la mascota recortada sobre el degradé). Medida de la matriz de
+      // las homes de marca. Mobile es aproximado: se adecua al largo de la descripcion.
+      'full-background-card-icons-box': [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.4:1 - Mobile ~9:20', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
       // Simple: la card mide 300px en pantalla en TODOS los anchos (medido en content), asi
       // que se pide al doble para que se vea nitida en pantallas de alta densidad. Los 450

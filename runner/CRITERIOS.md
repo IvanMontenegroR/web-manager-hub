@@ -343,6 +343,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Homes de marca: el bloque de 3 tarjetas con icono ("Image + 3 cards with icons") se arma como
+  "Nutricion respaldada por ciencia" de /proplan**, que es el modelo: titulo y bajada centrados, la
+  mascota recortada arriba sobre el degradé y las 3 tarjetas de alto fijo. La descripcion de cada
+  tarjeta va en **90 caracteres como maximo**: el sitio la corta a 4 lineas y en mobile (tarjeta de
+  286px) un texto de 102 ya queda cortado con "…" (le pasaba a Fancy Feast y a Dog Chow). Si el
+  mercado manda mas, se acorta conservando lo que dice, sin inventar. Origen: MX, homes de marca, el
+  usuario señalo /proplan como ejemplo; medido en content.
+
 - **Homes de marca: el bloque "Cuidado integral" (carrusel de servicios) es el MISMO en todas las
   marcas**: un solo titulo, descripcion y cards, que se definen mas adelante. Hasta entonces van con
   texto placeholder. Lo unico que cambia por marca es la imagen de fondo. En el CMS es un Tabs
