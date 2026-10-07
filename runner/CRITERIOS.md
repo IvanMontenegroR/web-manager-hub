@@ -343,6 +343,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Homes de marca: el bloque "Cuidado integral" (carrusel de servicios) es el MISMO en todas las
+  marcas**: un solo titulo, descripcion y cards, que se definen mas adelante. Hasta entonces van con
+  texto placeholder. Lo unico que cambia por marca es la imagen de fondo. En el CMS es un Tabs
+  "Full Background" con una pestaña cuya imagen es el fondo y un Card Grid "slider-card-icons-square"
+  adentro. Origen: MX, homes de marca Ecosystem 2.0, pedido del usuario.
+
 - **En una card el texto va DEBAJO de la imagen.** El `c_image` del CMS no tiene "imagen arriba, texto
   abajo" (Image Bottom deja el texto arriba), asi que una card armada con columnas va como DOS bloques
   en la misma columna: la Imagen sola (spacing 0) y debajo un Texto con titulo, cuerpo y boton (spacing

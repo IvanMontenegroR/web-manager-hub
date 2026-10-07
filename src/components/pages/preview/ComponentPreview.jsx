@@ -1070,15 +1070,24 @@ const RENDERERS = {
     const ink = tok(c.text_color)
     const title = OPT(c.title)
     const subtitle = OPT(c.subtitle)
+    // Full Background: la pestaña activa pinta SU imagen a sangre y el componente va encima.
+    // Con una sola pestaña el sitio no dibuja la barra (es el bloque "Cuidado integral" de
+    // las homes de marca), asi que aca tampoco.
+    const full = c.tab_type === 'full_background'
+    const bg = full && typeof cur.image === "string" && cur.image ? cur.image : null
+    const showBar = !(full && items.length < 2)
     return (
-      <div className="cp-tabs" style={{ '--tab-acc': acc, ...(ink ? { '--tab-ink': ink } : {}) }}>
+      <div
+        className={`cp-tabs${full ? ' cp-tabs--full' : ''}${bg ? ' cp-bleed' : ''}`}
+        style={{ '--tab-acc': acc, ...(ink ? { '--tab-ink': ink } : {}), ...(bg ? { backgroundImage: `url("${bg}")` } : {}) }}
+      >
         {(title || subtitle) && (
           <div className="cp-tabs-head">
             {title && <div className="cp-tabs-title">{title}</div>}
             {subtitle && <p className="cp-tabs-sub"><RT>{subtitle}</RT></p>}
           </div>
         )}
-        <div className="cp-tabs-bar" role="tablist">
+        {showBar && <div className="cp-tabs-bar" role="tablist">
           {items.map((t, i) => (
             <button
               key={i}
@@ -1089,7 +1098,7 @@ const RENDERERS = {
               {T(t.label, `Pestaña ${i + 1}`)}
             </button>
           ))}
-        </div>
+        </div>}
         {cur.description && <p className="cp-tabs-desc"><RT>{cur.description}</RT></p>}
         <div className="cp-tabs-slot">{ctx?.slots}</div>
       </div>

@@ -144,10 +144,12 @@ export const PARAGRAFOS = {
   // pagina, no de la tabla.
   tabs: {
     tipo: 'comp_tabs',
-    campos: {},
+    campos: { tab_type: 'field_tab_type' },
     pestanas: {
       como: 'comp_tabs_tab_item',
       campos: { label: 'field_title', description: 'field_description' },
+      // El fondo de una pestaña Full Background. El mobile vive en el mismo medio.
+      media: { image: 'field_c_image', image_mobile: null },
       // Lo que una pestaña del CMS acepta adentro (el dropbutton de Gin del formulario).
       admite: ['banner', 'banner_wrapper', 'block', 'html', 'ln_c_cardgrid', 'c_externalvideo',
         'c_image', 'c_sideimagetext', 'c_text'],

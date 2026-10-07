@@ -289,6 +289,14 @@ export const BUTTON_STYLES = [
   { value: 'style_btn_text', label: 'Style Text' },
 ]
 
+// ---- Tabs -----------------------------------------------------------------------
+// `field_tab_type` de `comp_tabs` (leido del formulario de content, 2026-10).
+export const TAB_FULL_BACKGROUND = 'full_background'
+export const TAB_TYPES = [
+  { value: 'only_tabs', label: 'Only Tabs' },
+  { value: TAB_FULL_BACKGROUND, label: 'Full Background' },
+]
+
 // ---- Banner ---------------------------------------------------------------------
 // `field_banner_type` es OBLIGATORIO en el CMS (el select no trae opcion vacia).
 // El valor de maquina no siempre se parece a la etiqueta: "Secondary Hero" se guarda
@@ -1148,12 +1156,19 @@ export const COMPONENTS = [
     // apuntan al suyo con `tab_index` (ver slotsOf).
     container: true,
     fields: [
+      // `field_tab_type` del CMS, el primer campo del formulario. "Full Background" es el
+      // bloque "Cuidado integral" de las homes de marca: cada pestaña pinta SU imagen a
+      // sangre (field_c_image del tab item) y lleva el componente encima.
+      { key: 'tab_type', label: 'Tipo de pestañas', cmsLabel: 'Tab Type', type: 'select', cms: true, options: TAB_TYPES },
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Título de la sección' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'textarea' },
       { key: 'tabs', label: 'Pestañas', type: 'list', itemLabel: 'Pestaña', sample: TAB_SAMPLE, item: [
         { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
         { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
+        // El fondo de la pestaña: solo lo dibuja el tipo Full Background.
+        { key: 'image', label: 'Imagen de fondo', cmsLabel: 'Image', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND] },
+        { key: 'image_mobile', label: 'Imagen de fondo mobile', cmsLabel: 'Image (mobile)', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND] },
       ] },
       ...advanced(),
       // Leido del formulario de /purina-one/por-que-cambiar-a-one. Text Color pinta las
@@ -1161,6 +1176,13 @@ export const COMPONENTS = [
       // marca de fondo oscuro o de color) y Text Tabs Active la seleccionada (rojo).
       ...classy('background_color', 'background_position', 'text_align', 'text_color', 'text_tabs_active'),
     ],
+    // La medida es la del fondo del bloque de servicios de las homes de marca (la que pide
+    // la matriz de contenido: 16:9 desktop, 9:16 mobile). Solo Full Background tiene imagen.
+    specKey: 'tab_type',
+    defaultType: 'only_tabs',
+    specsByType: {
+      [TAB_FULL_BACKGROUND]: [{ label: 'Imagen de fondo de la pestaña', ratio: 'Desktop 16:9 - Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG / PNG' }],
+    },
   },
   {
     key: 'external_video',
@@ -1435,7 +1457,7 @@ export function visibleFields(def, content = {}, opts = {}) {
 // se llama en el CMS. Sin esto, un Card Grid en modo iconos le pediria al mercado las
 // cuatro imagenes de cada card, que en ese layout no se ven.
 function variantOf(content) {
-  return (content && (content.type ?? content.view_mode)) || undefined
+  return (content && (content.type ?? content.view_mode ?? content.tab_type)) || undefined
 }
 
 // ¿Este campo se OMITE del Excel para este valor? Un campo con `noneOption` (ej.

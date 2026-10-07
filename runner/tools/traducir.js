@@ -305,6 +305,17 @@ export function aManifiesto(pagina, bloques, porTipo = null, { productosMuestra 
         verificar(def.como, campo, `${donde} > pestaña ${k + 1}`)
         fields[campo] = tab[kk]
       }
+      // El fondo de la pestaña (Full Background). Se nombra igual que lo nombra
+      // `mediosDeBloque` para una imagen de lista: con el componente del BLOQUE ('tabs'),
+      // porque la tabla no declara la lista como paragraph hijo.
+      for (const [kk, campo] of Object.entries(def.media || {})) {
+        const url = origenDe(tab?.[kk])
+        if (!url || !campo) continue
+        verificar(def.como, campo, `${donde} > pestaña ${k + 1}`)
+        const medio = nombreDeMedio({ slug, componente: 'tabs', campo: kk, origen: url })
+        fields[campo] = medio
+        pendientes.push({ donde: `${donde} > pestaña ${k + 1}`, campo: campoBase(kk), medio, url })
+      }
       const item = { type: def.como, fields, slot: 0 }
       if (hijosDe[k].length) item.children = [{ ...hijosDe[k][0], slot: 0 }]
       return item
