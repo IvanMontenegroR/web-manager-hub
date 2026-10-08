@@ -343,6 +343,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Homes de marca, largos que no se cortan** (medido en /dogchow publicada): en el carrusel de
+  cards verticales la descripcion se corta con "…" a las 3 lineas (una de 102 caracteres se corto, una
+  de 88 entra); en el mosaico, una de 122 se corto y una de 116 entro. Si el mercado manda mas, se
+  acorta sin cambiar lo que dice. El mosaico SI respeta el Card - Background Color (cajas blancas en
+  Dog Chow, como el Figma).
+- **Despues de crear una pagina, se relee el Classy de cada bloque.** En Dog Chow el de dos Card Grid
+  (tarjetas y mosaico) se perdio al guardar aunque el formulario lo mostraba puesto; se repuso con
+  `aplicar`. Origen: MX, home Dog Chow.
+
 - **Homes de marca: el bloque de 3 tarjetas con icono ("Image + 3 cards with icons") se arma como
   "Nutricion respaldada por ciencia" de /proplan**, que es el modelo: titulo y bajada centrados, la
   mascota recortada arriba sobre el degradé y las 3 tarjetas de alto fijo. La descripcion de cada

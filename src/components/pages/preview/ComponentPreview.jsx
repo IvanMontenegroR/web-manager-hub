@@ -1170,7 +1170,7 @@ const RENDERERS = {
         <div className="cp-mosaic-grid">
           {arr.map((b, i) => (i % 2 === 1) ? (
             <div key={i} className="cp-mosaic-box" style={{ background: acc }}>
-              <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(b.title, 'Título del bloque')}</div>
+              <div className="cp-mosaic-box-t" style={boxTitleStyle}>{T(b.title, 'Título del bloque')}</div>
               <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(b.text, 'Texto del bloque de contenido.')}</Rich>
             </div>
           ) : (
@@ -1193,16 +1193,19 @@ const RENDERERS = {
     if (mode === 'grid-cards') {
       // Cada card del CMS es una COLUMNA del mosaico: su imagen y su caja de texto apiladas,
       // y una de cada dos va invertida (la caja arriba): asi lo arma el sitio, con
-      // `card-grid--inverse` en la 2ª, 4ª... card. La caja es SIEMPRE roja: el CMS ignora el
-      // Card - Background Color en este modo (medido en content, Purina One con Brand 04
-      // cargado sale igual en #E91C24).
-      const acc = ACCENT
+      // `card-grid--inverse` en la 2ª, 4ª... card. La caja toma el Card - Background Color
+      // (sin cargar, el rojo del sitio), y titulo y texto sus colores de card. Medido en
+      // content, Dog Chow 2026-10: con Primary White la caja sale blanca. (Antes deciamos que
+      // el CMS lo ignoraba: era un bloque cuyo Classy no se habia guardado.)
+      const acc = tok(c.background_card_color) || ACCENT
       const arr = items.length ? items : [
         { title: 'Título de la card', description: 'Texto de la card.' },
         { title: 'Segunda card', description: 'Texto de la segunda card.' },
         { title: 'Tercera card', description: 'Texto de la tercera card.' },
       ]
-      const boxTextStyle = ctx?.brandPrimary ? { color: readableOn(acc, ctx.brandPrimary) } : undefined
+      const tt = tok(c.title_card_color), tx = tok(c.text_card_color)
+      const boxTextStyle = tx ? { color: tx } : ctx?.brandPrimary ? { color: readableOn(acc, ctx.brandPrimary) } : undefined
+      const boxTitleStyle = tt ? { color: tt } : boxTextStyle
       return (
         <div className="cp-mosaic" style={{ '--acc': acc }}>
           {(OPT(c.title) || OPT(c.subtitle)) && (
