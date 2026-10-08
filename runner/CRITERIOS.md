@@ -156,14 +156,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   medio de un hero ya publicado esta `qa-local/_hero-medio.mjs` (quita la referencia sin borrar el
   medio viejo de la libreria). Origen: MX, home de Dog Chow (spot 100 años).
 
-- **"Cuidado integral" (Tabs Full Background): el titulo y la bajada van SIEMPRE en blanco sobre la
-  imagen** y el Text Color de Classy no los toca (solo pinta las etiquetas de las pestañas). Con los
-  fondos claros que entregan los mercados el blanco daba 1.05 a 2.2:1. Se oscurece la imagen con un
-  degradé vertical a todo el ancho, fuerte arriba (donde cae el texto: ~130-680 de 1212 en desktop,
-  ~250-420 de 999 en mobile) y que se apaga antes de las tarjetas, con el minimo que deja 4.5:1. Un
-  velo plano, no se inventa imagen. En una ilustracion de fondo blanco (Felix) el velo va del Brand
-  02 de la marca, no negro, que ahi se lee como un recuadro gris. Ver `velo.py` en la ronda de homes.
-  Origen: MX, homes de marca, el pedido de contraste de Nutricion Reforzada.
+- **"Cuidado integral" (Tabs Full Background): la foto tiene que LEERSE y el texto blanco pasar 4.5:1.**
+  El titulo y la bajada van siempre en blanco (el Text Color de Classy solo pinta las pestañas). La
+  franja mide 2.32:1 (1440x620), la foto 16:9 se recorta arriba y abajo, y las tarjetas tapan la
+  mitad de abajo: lo unico que queda a la vista es la franja de ARRIBA del titulo (en la foto de
+  2160x1212, y 150..330; mobile 562x999, y 60..250). Por eso: (1) el sujeto (caras, mascotas) se
+  corre o se reencuadra hasta esa franja, o a la derecha del texto (x>1650); (2) el velo va SOLO
+  detras del texto, con degradé suave desde la izquierda, nunca sobre toda la mitad de arriba: un
+  velo ancho apaga justo lo unico que se ve y la foto deja de entenderse. En fondo blanco
+  (ilustracion) el velo va del color de la marca. Herramienta: `bin/serv.py` + `bin/simular.py` (simula
+  texto y tarjetas a 1440, 1920 y 390 antes de subir). Ojo con los archivos del mercado: en Dog Chow
+  "Desktop" y "Mobile" venian INVERTIDOS (medir siempre el tamaño real). Origen: MX, homes de marca
+  ("el fondo del carrusel de servicios no se entiende").
 
 - **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
@@ -308,6 +312,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - Origen: MX, primera pagina subida con el runner (Por que cambiar a Purina One: "quiero que
   aprendas sobre los spacings que tenemos y que apliques correctamente, ademas, que paso con el
   accordion?").
+
+- **Homes de marca: el hero va con `space_py_5` y el primer bloque despues del hero con `space_py_11`**,
+  como el modelo de F5 (/proplan, armado desde el Figma). Queda 100px de aire despues del hero y
+  112 hasta el bloque siguiente en desktop; el resto con los defaults (92 / 60 / 60). En mobile
+  py_11 es fijo (80), asi que entre el primer y el segundo bloque quedan 136px. Origen: MX, homes de
+  marca ("buenos margenes entre components").
 
 ## Mobile
 
