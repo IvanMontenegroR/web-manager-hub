@@ -343,6 +343,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Bloque de 3 tarjetas con icono: el fondo deja libre la franja del titulo y el subtitulo.** En el
+  sitio la imagen cubre TODO el panel y el texto va encima de su parte de arriba (desktop: hasta ~230px
+  de los 1994 de alto; mobile: hasta ~390px de los 1600, porque el subtitulo ocupa mas lineas). Si el
+  sujeto llega a esa franja, el subtitulo blanco se pone sobre la foto y no pasa el contraste. Se baja
+  el contenido de la imagen dentro del mismo lienzo (franja transparente arriba, achicando lo justo),
+  sin tocar la foto: es lo que ya hace la de Pro Plan. Origen: MX, home Dog Chow, pedido del usuario.
+
 - **Homes de marca, largos que no se cortan** (medido en /dogchow publicada): en el carrusel de
   cards verticales la descripcion se corta con "…" a las 3 lineas (una de 102 caracteres se corto, una
   de 88 entra); en el mosaico, una de 122 se corto y una de 116 entro. Si el mercado manda mas, se
