@@ -1005,6 +1005,8 @@ export const COMPONENTS = [
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
       { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
+      // En el CMS es UN medio con desktop y mobile; el mercado entrega los dos archivos.
+      { key: 'background_image_mobile', label: 'Imagen de fondo mobile (opcional)', cmsLabel: 'Background Image (mobile)', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text',
           maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_TITLE_MAX : null) },

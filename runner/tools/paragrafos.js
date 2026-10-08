@@ -69,7 +69,7 @@ export const PARAGRAFOS = {
       view_mode: 'field_c_cardgrid_view_mode',
       ...T.titulo, ...T.subtitulo, ...T.tamanos,
     },
-    media: { background_image: 'field_media' },
+    media: { background_image: 'field_media', background_image_mobile: null },
     lista: { campo: 'items', como: 'card_grid_item', slot: 0 },
   },
 
