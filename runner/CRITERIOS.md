@@ -53,7 +53,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   viejo solo trae banners con el texto quemado y packs), esos dos bloques no se arman: la home queda en
   hero (placeholder) + 3 tarjetas con icono + carrusel de productos + "Cuidado integral". El copy de
   las tarjetas sale de lo que el sitio viejo ya publicaba (beneficios, claims de los banners), acortado
-  a la guia de 90 sin agregar promesas. Cuando lleguen las fotos se suman los dos bloques. Origen: MX,
+  a la guia de 90 sin agregar promesas. Cuando lleguen las fotos se suman los dos bloques. El bloque de 3 tarjetas NUNCA va sin imagen de fondo: el
+  layout toma su alto de la imagen y sin ella colapsa y se monta sobre el carrusel de productos (paso
+  en Campeon). Sin foto va un PNG TRANSPARENTE a la medida (2784x1994 / 702x1600): el panel muestra
+  solo el degradé de la marca. Origen: MX,
   homes de Beneful, Campeón, Gatina y Dentalife (matrices vacias o sin imagenes).
 
 - **La medida es la del catalogo del Hub**, siempre (`src/data/components.js`, `specs`/`specsByType`).
