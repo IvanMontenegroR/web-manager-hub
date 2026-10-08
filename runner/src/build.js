@@ -13,6 +13,8 @@ import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listP
 import { esperarAjax, esperarVisible } from './esperas.js'
 import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
 import { elegirMedia, leerMedia } from './mediaExistente.js'
+import { crearMedioEnLinea } from './mediaNuevo.js'
+import { ALT_DE_RESERVA } from './media.js'
 import { elegirDeLaLibreria, leerSeleccion } from './mediaLibrary.js'
 
 // Los que el runner todavia NO sabe tocar. `media` salio de la lista: ese si se elige.
@@ -386,6 +388,15 @@ async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
     if (f.kind === 'media') {
       onStep(`     imagen "${key}": eligiendo "${value}" de la libreria`)
       ctx.escritos.push(await ponerMedia(ctx, f, vars, String(value), ref))
+      continue
+    }
+    // Un inline entity form SIN "existente" (el fondo de una pestaña): el medio se crea ahi
+    // mismo con los archivos que dejo imagenes.mjs.
+    if (f.kind === 'mediaNuevo') {
+      onStep(`     imagen "${key}": creando "${value}" en el formulario`)
+      const campo = resolveSelector(f.sel, vars)
+      const r = await crearMedioEnLinea({ page: ctx.page, campo, nombre: String(value), alt: ALT_DE_RESERVA, ref })
+      ctx.escritos.push({ selector: campo, f, ref, valor: String(value), puesto: r.texto })
       continue
     }
     // El OTRO widget de medios: el modal con grilla. Lo usa el video externo. Se elige por
@@ -957,7 +968,7 @@ async function loQueQuedo(page, f, selector, el) {
     if (f.kind === 'richtext') return await leerRich(page, el)
     // Un medio no tiene "valor": lo que hay es la fila que dibuja el inline entity form
     // con el nombre del medio adentro.
-    if (f.kind === 'media') return await leerMedia(page, selector)
+    if (f.kind === 'media' || f.kind === 'mediaNuevo') return await leerMedia(page, selector)
     if (f.kind === 'mediaLibrary') return await leerSeleccion(page, selector)
     return await el.inputValue()
   } catch { return null }

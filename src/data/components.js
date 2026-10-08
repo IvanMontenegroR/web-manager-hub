@@ -1178,7 +1178,10 @@ export const COMPONENTS = [
         { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
         { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
         // El fondo de la pestaña: solo lo dibuja el tipo Full Background.
-        { key: 'image', label: 'Imagen de fondo', cmsLabel: 'Image', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND] },
+        // `creaEnLinea`: en el CMS este campo NO deja elegir un medio de la libreria, el medio
+        // se crea adentro del formulario (ver runner/src/mediaNuevo.js). Por eso no va al
+        // INDICE de subida: subirlo aparte dejaria un duplicado que nadie referencia.
+        { key: 'image', label: 'Imagen de fondo', cmsLabel: 'Image', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND], creaEnLinea: true },
         { key: 'image_mobile', label: 'Imagen de fondo mobile', cmsLabel: 'Image (mobile)', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND] },
       ] },
       ...advanced(),

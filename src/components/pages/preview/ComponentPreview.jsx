@@ -1087,6 +1087,14 @@ const RENDERERS = {
             {subtitle && <p className="cp-tabs-sub"><RT>{subtitle}</RT></p>}
           </div>
         )}
+        {/* Full Background con una sola pestaña: el Title y la Description de ESA pestaña son
+            el titulo y la bajada de la seccion (asi lo arma el CMS en "Cuidado integral"). */}
+        {!showBar && (cur.label || cur.description) && (
+          <div className="cp-tabs-fullhead">
+            {cur.label && <div className="cp-tabs-fulltitle">{cur.label}</div>}
+            {cur.description && <p className="cp-tabs-fullsub"><RT>{cur.description}</RT></p>}
+          </div>
+        )}
         {showBar && <div className="cp-tabs-bar" role="tablist">
           {items.map((t, i) => (
             <button
@@ -1099,7 +1107,7 @@ const RENDERERS = {
             </button>
           ))}
         </div>}
-        {cur.description && <p className="cp-tabs-desc"><RT>{cur.description}</RT></p>}
+        {showBar && cur.description && <p className="cp-tabs-desc"><RT>{cur.description}</RT></p>}
         <div className="cp-tabs-slot">{ctx?.slots}</div>
       </div>
     )

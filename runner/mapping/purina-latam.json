@@ -1039,9 +1039,9 @@
         "value": "comp_tabs_tab_item",
         "fields": {
           "field_c_image": {
-            "kind": "media",
+            "kind": "mediaNuevo",
             "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
-            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
+            "note": "Inline entity form con UN solo boton (Añadir nuevo elemento multimedia): no deja elegir uno existente, asi que el runner CREA el medio ahi con los archivos de imagenes/ (ver src/mediaNuevo.js). Leido del formulario de content, 2026-10."
           },
           "field_title": {
             "sel": "input[name=\"{base}[field_title][0][value]\"]"

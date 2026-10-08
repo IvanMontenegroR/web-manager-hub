@@ -238,7 +238,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
               ...(rMob ? { de: `${rMob.nat.w}×${rMob.nat.h}`, a: `${medio.mobile.w}×${medio.mobile.h}` } : {}),
             }
           }
-          indice.push({
+          if (!medio.enLinea) indice.push({
             nombre: medio.nombre, desktop: { archivo: dsk }, mobile: { archivo: mob },
             alt: medio.campo.contenedor[`${campoBase(medio.campo.key)}_alt`] || '',
           })
