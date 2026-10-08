@@ -81,10 +81,13 @@ export function prepararCambios(pares, cambios) {
       problemas.push(`${c.campo}: el valor actual no es el del plan.\n      plan:   ${JSON.stringify(c.antes)}\n      actual: ${JSON.stringify(actual)}`)
       continue
     }
+    // `despues: null` = el campo NO viaja. Es como se destilda un checkbox en Drupal (un
+    // checkbox con valor "" cuenta como tildado): por ejemplo, despublicar con status[value].
+    if (c.despues === null) { if (idx.length) nuevos[idx[0]] = null; continue }
     if (idx.length) nuevos[idx[0]][1] = c.despues
     else nuevos.push([c.campo, c.despues])
   }
-  return { nuevos, problemas }
+  return { nuevos: nuevos.filter(Boolean), problemas }
 }
 
 /** Diferencias entre dos lecturas del formulario, ignorando lo volatil. */
