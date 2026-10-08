@@ -145,6 +145,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   90px de cada lado) se RECORTAN sin escalar hasta la proporcion del hero: estirarlo agranda las bandas
   de compresion y el sitio lo dibuja a sangre. Origen: MX, homes de Fancy Feast y Pro Plan.
 
+- **"Cuidado integral" (Tabs Full Background): el titulo y la bajada van SIEMPRE en blanco sobre la
+  imagen** y el Text Color de Classy no los toca (solo pinta las etiquetas de las pestañas). Con los
+  fondos claros que entregan los mercados el blanco daba 1.05 a 2.2:1. Se oscurece la imagen con un
+  degradé vertical a todo el ancho, fuerte arriba (donde cae el texto: ~130-680 de 1212 en desktop,
+  ~250-420 de 999 en mobile) y que se apaga antes de las tarjetas, con el minimo que deja 4.5:1. Un
+  velo plano, no se inventa imagen. En una ilustracion de fondo blanco (Felix) el velo va del Brand
+  02 de la marca, no negro, que ahi se lee como un recuadro gris. Ver `velo.py` en la ronda de homes.
+  Origen: MX, homes de marca, el pedido de contraste de Nutricion Reforzada.
+
 - **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
   cercana...", "Resultados visibles en 28 dias" + "Purina® One® para perros."). El corte cae en un
@@ -342,6 +351,19 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   usuario.
 - **Los productos todavia no estan cargados en el CMS**: los nombres del carrusel son una guia para el
   editor, no hace falta el nombre exacto de catalogo ni frenar por un producto que falta.
+
+## Menu de marca
+
+- **El menu de marca (la barra con el logo debajo del header) sale de la MATRIZ; si la matriz no lo
+  trae, del menu del sitio viejo. Lo que haya hoy en content no manda.** Es un menu de Drupal por
+  marca (`dog-chow`, `pro-plan`...), elegido en el campo "Brand Menu" del termino de la marca. Las
+  matrices traen los textos pero no los links: el link sale del sitio viejo con la ruta que va a
+  tener la pagina en el sitio nuevo, aunque todavia no exista (Drupal lo acepta). Si la pagina ya
+  existe en content con otra ruta (los productos viven en `/productos/...`), va la que existe. Los
+  items que sobran se DESACTIVAN, no se borran. Hoy el bloque dibuja UN solo nivel: los subitems
+  quedan cargados pero no se ven, asi que ningun padre va sin link (toma el de su primer hijo).
+  Origen: MX, homes de marca (Dog Chow tenia el menu de Brasil en portugues y Felix, Beneful y
+  Gatina mostraban el de Dentalife).
 
 ## Lanzamiento
 
