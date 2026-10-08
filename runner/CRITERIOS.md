@@ -148,6 +148,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   90px de cada lado) se RECORTAN sin escalar hasta la proporcion del hero: estirarlo agranda las bandas
   de compresion y el sitio lo dibuja a sangre. Origen: MX, homes de Fancy Feast y Pro Plan.
 
+- **Hero con video sin version mobile: el mobile es un mp4 de UN cuadro fijo en 2:3.** El Responsive
+  Video solo acepta mp4 en los dos campos, asi que la "imagen" mobile va como video quieto (3 s, unos
+  100 KB). El hero mobile del sitio es **1:1.5** (clase `media--ratio-1-1-5--2-5-1`; desktop 2.5:1),
+  no cuadrado: el cuadro se arma a esa proporcion y se elige uno con el sujeto entero, sin el texto
+  quemado del spot; el logo de la esquina se saca con inpaint sobre el fondo difuso. Para cambiar el
+  medio de un hero ya publicado esta `qa-local/_hero-medio.mjs` (quita la referencia sin borrar el
+  medio viejo de la libreria). Origen: MX, home de Dog Chow (spot 100 años).
+
 - **"Cuidado integral" (Tabs Full Background): el titulo y la bajada van SIEMPRE en blanco sobre la
   imagen** y el Text Color de Classy no los toca (solo pinta las etiquetas de las pestañas). Con los
   fondos claros que entregan los mercados el blanco daba 1.05 a 2.2:1. Se oscurece la imagen con un
