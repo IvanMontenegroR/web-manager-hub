@@ -60,6 +60,12 @@ const BRAND_TOKENS = {
   'Fancy Feast': ['#F8F4EC', '#CBAB6D', '#8D7535', '#49301C'],
   'Cat Chow': ['#6797C3', '#02529B', '#063560', '#000000'],
   'Dentalife': ['#B7C0E1', '#2C3A6B', '#3770B5', '#000000'],
+  // Leidos de la ficha de la marca en content (taxonomia, field_brand_color), 2026-10: es
+  // de donde sale el `--brand-0N-source`. Dog Chow ahi da lo mismo que arriba.
+  'Felix': ['#3D5986', '#0C3068', '#071D3E', '#000000'],
+  'Beneful': ['#F5D2D2', '#CE201F', '#A00B0B', '#000000'],
+  'Campeón': ['#F5D2D2', '#FF0006', '#99150C', '#004264'],
+  'Gatina': ['#FFD3D0', '#FF2314', '#99150C', '#000000'],
 }
 export function brandTokens(brand) {
   const key = String(brand || '').trim().toLowerCase()
@@ -69,7 +75,7 @@ export function brandTokens(brand) {
 
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
-export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Purina']
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Gatina', 'Purina']
 
 // ===== Categorias =====
 // El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es

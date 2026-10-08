@@ -48,6 +48,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   logo). No se deja una seccion con placeholder: el placeholder es SOLO para el hero (ver Heroes).
   Origen: MX, homes de marca Ecosystem 2.0, pedido del usuario.
 
+- **Home de marca sin fotos usables: layout REDUCIDO, no secciones con fotos de relleno.** Si ni el
+  mercado, ni el Figma, ni el sitio viejo tienen fotos para el carrusel de cards y el mosaico (el sitio
+  viejo solo trae banners con el texto quemado y packs), esos dos bloques no se arman: la home queda en
+  hero (placeholder) + 3 tarjetas con icono + carrusel de productos + "Cuidado integral". El copy de
+  las tarjetas sale de lo que el sitio viejo ya publicaba (beneficios, claims de los banners), acortado
+  a la guia de 90 sin agregar promesas. Cuando lleguen las fotos se suman los dos bloques. Origen: MX,
+  homes de Beneful, Campeón, Gatina y Dentalife (matrices vacias o sin imagenes).
+
 - **La medida es la del catalogo del Hub**, siempre (`src/data/components.js`, `specs`/`specsByType`).
   Son las medidas reales del CMS. Origen: MX, ronda 3.
 - **No se generan imagenes nuevas: se modifican y redimensionan las que ya existen.** Nada de IA
@@ -129,6 +137,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   otra foto: el hero es la pieza de la marca y una foto cualquiera ahi parece una decision tomada. Es la
   unica seccion que lleva placeholder; en el resto se busca una imagen que funcione (ver Imagenes).
   Origen: MX, home de Dog Chow (el video no estaba en la carpeta), pedido del usuario.
+
+- **Hero con video: en el CMS va un Responsive Video (mp4 desktop + mobile, sin audio); en el Hub, un
+  cuadro del mismo video.** El bucket del Hub no acepta mp4. El medio de video se crea antes de guardar
+  la pagina con el MISMO nombre que el traductor le da a la imagen del hero, asi el runner lo elige de
+  la libreria en vez de subir el cuadro. Si el video trae bandas negras (el "desk" de Fancy Feast tenia
+  90px de cada lado) se RECORTAN sin escalar hasta la proporcion del hero: estirarlo agranda las bandas
+  de compresion y el sitio lo dibuja a sangre. Origen: MX, homes de Fancy Feast y Pro Plan.
 
 - **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas
