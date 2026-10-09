@@ -298,11 +298,20 @@ export async function repasarClassy(ctx, nodeId) {
     if (!(await sel.count()) && delta != null) await abrir(`${raiz}_${delta}_edit`, sel)
     if (!(await sel.count()) && r.editar !== `${raiz}_${delta}_edit`) await abrir(r.editar, sel)
     if (!(await sel.count())) throw new Error(`Repaso del Classy: no encontre ${r.ref} (${r.sel}) en el formulario guardado`)
-    const antes = await sel.inputValue()
-    if (antes === String(r.value)) continue
+    // El valor del manifiesto puede ser el de MAQUINA ("image_bottom") o la ETIQUETA que ve
+    // el editor ("Primary White", que en el CMS es "background_card_primary_white"). Se
+    // resuelve a la opcion real antes de comparar: comparar contra la etiqueta daba distinto
+    // siempre y "reponia" un valor que no existe en el select, o sea que lo rompia.
+    const { antes, quiere } = await sel.evaluate((e, v) => {
+      const o = [...e.options].find((x) => x.value === v)
+        || [...e.options].find((x) => x.textContent.trim().toLowerCase() === v.trim().toLowerCase())
+      return { antes: e.value, quiere: o ? o.value : null }
+    }, String(r.value))
+    if (quiere === null) throw new Error(`Repaso del Classy: ${r.ref} no ofrece la opcion "${r.value}"`)
+    if (antes === quiere) continue
     // Esta adentro del desplegable Classy, cerrado: se elige sin abrirlo.
-    await sel.evaluate((e, v) => { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })) }, String(r.value))
-    onStep(`     ${r.ref}: el CMS lo guardo en "${antes}", se vuelve a poner "${r.value}"`)
+    await sel.evaluate((e, v) => { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })) }, quiere)
+    onStep(`     ${r.ref}: el CMS lo guardo en "${antes}", se vuelve a poner "${quiere}"`)
     cambios += 1
   }
   if (!cambios) { onStep('     todo quedo bien guardado, no hace falta re-guardar'); return }
