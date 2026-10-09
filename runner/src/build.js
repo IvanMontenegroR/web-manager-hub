@@ -4,7 +4,9 @@
 // Reglas de la casa, y no son negociables:
 //   - El tilde "Publicado" queda como lo pide el manifiesto (`page.published`, por defecto
 //     borrador). Las paginas del hub van PUBLICADAS: es la regla de content.
-//   - No modifica contenido existente: solo entra a "crear contenido".
+//   - No modifica contenido existente: solo entra a "crear contenido". La unica excepcion es
+//     `page.nid`, que AGREGA bloques al final de una pagina nuestra (confirmada por el alias)
+//     sin tocar lo que ya tenia.
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
 //   - Las IMAGENES se ELIGEN de la Media library por su nombre, nunca se suben. Si la
@@ -49,7 +51,12 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
 
 async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubform, consola = [] }) {
   const site = mapping.site.replace(/\/+$/, '')
-  const url = new URL(mapping.nodeAdd, site + '/').href
+  // AGREGAR a una pagina que ya existe (`page.nid`): se abre su formulario de edicion y los
+  // bloques del manifiesto van AL FINAL. Lo que ya tenia no se toca. Sirve para armar una
+  // pagina larga en varias vueltas, guardando entre una y otra: un alta enorme en un solo
+  // formulario es la que se corta a mitad de camino.
+  const agregar = manifest.page.nid ? String(manifest.page.nid) : null
+  const url = agregar ? `${site}/node/${agregar}/edit` : new URL(mapping.nodeAdd, site + '/').href
 
   onStep(`Abriendo ${url}`)
   await prepararPagina(page)
@@ -57,7 +64,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // No se pisa nada: si la direccion ya responde en el sitio (una pagina, una redireccion,
   // algo despublicado), se frena ANTES de tocar el formulario. Crear igual dejaria dos
   // nodos peleando por el mismo alias, y Drupal le pondria "-0" al nuestro sin avisar.
-  if (manifest.page.path) {
+  if (manifest.page.path && !agregar) {
     const destino = site + manifest.page.path
     const r = await page.request.get(destino, { maxRedirects: 0, failOnStatusCode: false })
     if (r.status() !== 404) {
@@ -82,57 +89,72 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     throw new Error('Drupal pidio login. Corre primero: page-runner login')
   }
 
-  onStep(`Titulo: ${manifest.page.title}`)
-  await escribir(page.locator(mapping.title).first(), manifest.page.title)
-
-  // El alias esta DESHABILITADO mientras Pathauto lo genere solo: hay que destildarlo
-  // antes de poder escribirlo.
-  if (manifest.page.path && mapping.path) {
-    if (mapping.pathauto) {
-      const auto = page.locator(mapping.pathauto).first()
-      if (await auto.count()) await tildar(auto, false)
+  // Agregando, la pagina tiene que ser la que dice el manifiesto: se confirma por el alias
+  // antes de tocar nada. Titulo, alias, publicado y marca quedan como estan.
+  if (agregar) {
+    const alias = mapping.path ? await page.locator(mapping.path).first().inputValue().catch(() => null) : null
+    if (!manifest.page.path || alias !== manifest.page.path) {
+      throw new Error(`El node ${agregar} tiene el alias ${alias ?? '(ninguno)'} y el manifiesto pide `
+        + `${manifest.page.path || '(ninguno)'}: no se agrega nada a una pagina que no es la del manifiesto.`)
     }
-    onStep(`Alias: ${manifest.page.path}`)
-    await escribir(page.locator(mapping.path).first(), manifest.page.path)
-  }
+    onStep(`Agregando al final de ${alias} (node ${agregar})`)
+  } else {
+    onStep(`Titulo: ${manifest.page.title}`)
+    await escribir(page.locator(mapping.title).first(), manifest.page.title)
 
-  // El tilde "Publicado" queda como lo pide el manifiesto (por defecto destildado). En
-  // content viene TILDADO de entrada y vive fuera del <form>, en la barra de Gin: por eso
-  // se fija siempre, para que el resultado no dependa del default del sitio.
-  if (mapping.published) {
-    const wants = manifest.page.published === true
-    const box = page.locator(mapping.published).first()
-    if (await box.count()) await tildar(box, wants)
-    onStep(wants ? 'Queda PUBLICADA' : 'Queda en BORRADOR')
-  }
-
-  // La MARCA. Es la que le pone los colores a toda la pagina (fondo, texto por defecto,
-  // acentos), asi que una marca que no se encuentra FRENA: dejarla en "- Ninguno -" sacaria
-  // una pagina de Pro Plan en blanco y negro sin que nadie lo note.
-  if (mapping.brand) {
-    const sel = page.locator(mapping.brand).first()
-    const quiere = claveMarca(manifest.page.brand)
-    if (quiere && await sel.count()) {
-      const opciones = await sel.locator('option').evaluateAll((os) => os.map((o) => ({ value: o.value, label: o.textContent })))
-      const elegida = opciones.find((o) => claveMarca(o.label) === quiere)
-      if (!elegida) {
-        throw new Error(`La marca "${manifest.page.brand}" no esta en el campo Brand del sitio `
-          + `(ofrece: ${opciones.filter((o) => o.value !== '_none').map((o) => o.label.trim()).join(', ')}).`)
+    // El alias esta DESHABILITADO mientras Pathauto lo genere solo: hay que destildarlo
+    // antes de poder escribirlo.
+    if (manifest.page.path && mapping.path) {
+      if (mapping.pathauto) {
+        const auto = page.locator(mapping.pathauto).first()
+        if (await auto.count()) await tildar(auto, false)
       }
-      await revelar(sel)
-      await sel.selectOption(elegida.value)
-      onStep(`Marca: ${elegida.label.trim()}`)
-    } else if (quiere) {
-      throw new Error(`La pagina es de ${manifest.page.brand} pero el formulario no tiene el campo Brand (${mapping.brand}).`)
-    } else {
-      onStep('Marca: ninguna (tema Purina)')
+      onStep(`Alias: ${manifest.page.path}`)
+      await escribir(page.locator(mapping.path).first(), manifest.page.path)
     }
+
+    // El tilde "Publicado" queda como lo pide el manifiesto (por defecto destildado). En
+    // content viene TILDADO de entrada y vive fuera del <form>, en la barra de Gin: por eso
+    // se fija siempre, para que el resultado no dependa del default del sitio.
+    if (mapping.published) {
+      const wants = manifest.page.published === true
+      const box = page.locator(mapping.published).first()
+      if (await box.count()) await tildar(box, wants)
+      onStep(wants ? 'Queda PUBLICADA' : 'Queda en BORRADOR')
+    }
+
+    // La MARCA. Es la que le pone los colores a toda la pagina (fondo, texto por defecto,
+    // acentos), asi que una marca que no se encuentra FRENA: dejarla en "- Ninguno -" sacaria
+    // una pagina de Pro Plan en blanco y negro sin que nadie lo note.
+    if (mapping.brand) {
+      const sel = page.locator(mapping.brand).first()
+      const quiere = claveMarca(manifest.page.brand)
+      if (quiere && await sel.count()) {
+        const opciones = await sel.locator('option').evaluateAll((os) => os.map((o) => ({ value: o.value, label: o.textContent })))
+        const elegida = opciones.find((o) => claveMarca(o.label) === quiere)
+        if (!elegida) {
+          throw new Error(`La marca "${manifest.page.brand}" no esta en el campo Brand del sitio `
+            + `(ofrece: ${opciones.filter((o) => o.value !== '_none').map((o) => o.label.trim()).join(', ')}).`)
+        }
+        await revelar(sel)
+        await sel.selectOption(elegida.value)
+        onStep(`Marca: ${elegida.label.trim()}`)
+      } else if (quiere) {
+        throw new Error(`La pagina es de ${manifest.page.brand} pero el formulario no tiene el campo Brand (${mapping.brand}).`)
+      } else {
+        onStep('Marca: ninguna (tema Purina)')
+      }
+  }
   }
 
   const ctx = { mapping, page, onStep, esperaSubform, consola,
     escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map(), classyAnidado: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
   ctx.root = root
+  // Agregando, las filas que ya tiene la pagina llegan PLEGADAS (sin campos en el DOM) y
+  // `filasPrevias` las veria vacias: se marcan como que no hay nada para reusar, asi un
+  // bloque del mismo tipo nunca cae encima de uno que ya tenia contenido.
+  if (agregar) ctx.precreadas.set(root.dsel, [])
 
   onStep('Armando la estructura…')
   let n = 0
@@ -201,7 +223,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // GUARDADO = Drupal salio del formulario de alta. Si sigue en /node/add (o en la misma
   // URL), lo rechazo: se lee el mensaje de error y se FRENA, en vez de anunciar un guardado
   // que no paso (paso con un producto cuyo nombre tenia una coma).
-  if (after === antes || /\/node\/add\//.test(after)) {
+  if (after === antes || /\/node\/add\/|\/node\/\d+\/edit/.test(after)) {
     const msg = (await page.locator('[role="alert"], .messages--error, [data-drupal-messages] .messages').allInnerTexts().catch(() => []))
       .join(' | ').replace(/\s+/g, ' ').trim().slice(0, 600)
     throw new Error(`Drupal no guardo la pagina (sigue en ${after}). ${msg ? 'Dice: ' + msg : 'Sin mensaje visible.'}`)
