@@ -56,6 +56,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   se deja. Antes de usar el sitio viejo se revisa el Figma: en Felix, fondo de tarjetas, imagen de
   productos y mosaico 1 venian del sitio viejo y el Figma tenia los suyos. Origen: MX, homes de marca.
 
+- **Marca sin matriz, sin carpeta y sin pagina en el Figma: fotos del sitio viejo, y el layout lo
+  decide lo que haya.** Se recorre la home vieja y sus subpaginas; si aparecen fotos limpias (sin texto,
+  pack ni logo) para el carrusel de cards (2+ verticales) y el mosaico (3), la home va completa; si no,
+  reducida. Hero: placeholder igual (ver Heroes). Asi quedo Excellent (reducida) y se revisaron de nuevo
+  Beneful, Campeon, Gatina y Dentalife (siguen reducidas: el sitio viejo solo tiene packs, ingredientes
+  de 336px, iconos y banners con texto). Origen: MX, homes de marca, pedido del usuario.
+
+- **Snacks NO es una marca**: agrupa snacks de varias (Dog Chow, Beneful, Felix, DentaLife). /snacks es
+  una pagina de componentes comun, sin brand hero ni menu de marca, con un carrusel de productos por
+  especie. Origen: MX, pedido del usuario.
+
 - **Home de marca sin fotos usables: layout REDUCIDO, no secciones con fotos de relleno.** Si ni el
   mercado, ni el Figma, ni el sitio viejo tienen fotos para el carrusel de cards y el mosaico (el sitio
   viejo solo trae banners con el texto quemado y packs), esos dos bloques no se arman: la home queda en
