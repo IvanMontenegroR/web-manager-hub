@@ -7,3 +7,6 @@ dist-ssr
 !.env.example
 .DS_Store
 .vite
+
+# Claude Code: permisos personales de la sesion, no van al repo
+.claude/settings.local.json
