@@ -483,22 +483,14 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       }
     })
 
-    // Se registra el retraso para el listado de Referencias (fechas + razon).
-    if (t.isLateStart) {
+    // Se registra el retraso para el listado de Referencias (fechas + razon). Arrancar
+    // tarde y pasarse del plan son el mismo atraso de la tarea: una sola linea con el total.
+    if (t.isLateStart || (t.isDelayed && t.delayEnd)) {
       delaysSeen.push({
         name: t.action_name || 'Tarea',
-        from: t.lateStart,
-        to: t.lateStartEnd,
-        days: t.lateStartDays,
-        reason: t.delay_reason || '',
-      })
-    }
-    if (t.isDelayed && t.delayEnd) {
-      delaysSeen.push({
-        name: t.action_name || 'Tarea',
-        from: t.effPlanEnd || t.planned_end,
-        to: t.delayEnd,
-        days: t.delayDays,
+        from: t.isLateStart ? t.lateStart : (t.effPlanEnd || t.planned_end),
+        to: t.isDelayed && t.delayEnd ? t.delayEnd : t.lateStartEnd,
+        days: totalDelay,
         reason: t.delay_reason || '',
       })
     }
