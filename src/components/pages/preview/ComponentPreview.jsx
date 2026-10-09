@@ -474,7 +474,7 @@ const RENDERERS = {
     // Image Style "Full Width" (Classy): la imagen va de borde a borde y el texto sigue en
     // el container. Es el mismo breakout que un bloque con fondo (`cp-bleed`): lo que se ve
     // cortarse contra el gutter es la imagen.
-    const full = c.image_style === 'bg_position_full_width' && !!c.image
+    const full = c.image_style === 'full_width_content_image' && !!c.image
     return (
       <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}${full ? ' cp-cimg--full cp-bleed' : ''}`}>
         {bottom && txt}

@@ -301,7 +301,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
      todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
      La otra cosa que sangra es una IMAGEN: el `c_image` con **Image Style = Full Width**
-     (`bg_position_full_width`, Classy) va de borde a borde (`.cp-cimg--full`, que tambien lleva
+     (`full_width_content_image`, Classy) va de borde a borde (`.cp-cimg--full`, que tambien lleva
      `.cp-bleed`, asi hereda el pegado al footer). Ahi la imagen va sin padding ni redondeo y solo el
      texto vuelve al gutter. Para que ademas no deje aire contra el footer se carga
      `spacing = space_py_0`.

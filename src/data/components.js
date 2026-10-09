@@ -353,8 +353,11 @@ export const IMAGE_POSITIONS = [
   { value: 'image_background_box', label: 'Image Background Box' },
   { value: 'image_background_full', label: 'Image Background Full' },
 ]
+// Valor de maquina leido del select real del CMS ("Full Width" = full_width_content_image).
+// Antes decia bg_position_full_width, que es el valor del Background Position, otro campo:
+// el CMS lo rechazaba y la pagina no se podia armar (/dogchow/longevidad).
 export const IMAGE_STYLES = [
-  { value: 'bg_position_full_width', label: 'Full Width' },
+  { value: 'full_width_content_image', label: 'Full Width' },
 ]
 export const TITLE_SIZES = [
   { value: 'fs-headline-sm', label: 'Small' },
