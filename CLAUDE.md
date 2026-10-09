@@ -163,7 +163,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   pero DESPUES del dia en que podia (el habil siguiente al cierre real de su predecesora, o su
   plan si era mas tarde) suma esos dias como atraso PROPIO. Se pintan igual que el atraso (rayado
   rojo `.bar-late` en el Gantt, X roja en el Excel) pero ANTES de la barra, y suman al `(+Nd)`, al
-  panel de Retrasos y a Referencias ("arranco tarde: podia desde..."). Nunca puede quedar un hueco
+  panel de Retrasos y a Referencias (como cualquier atraso, con su razon). Nunca puede quedar un hueco
   en blanco entre una tarea cerrada y la siguiente que arranco tarde: el kick-off de Fancy Feast CO
   (la validacion cerro el 24/9, el kick-off fue el 7/10) dejaba dos semanas vacias que nadie veia.
   Solo cuenta con predecesora CERRADA de verdad: si la anterior sigue abierta, arrancar en paralelo

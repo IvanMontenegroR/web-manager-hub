@@ -203,7 +203,6 @@ export default function Gantt({
       conflict: conflictIds.has(t.id),
       delay: t.isDelayed ? t.delayDays : 0,
       late: t.isLateStart ? t.lateStartDays : 0,
-      lateFrom: t.isLateStart ? fmtCorto(t.lateStart) : null,
       ahead: t.isAhead ? t.aheadDays : 0,
       pushed: t.pushed && !t.actual_end,
       pulled: t.pulled && !t.actual_end,
@@ -503,7 +502,7 @@ export default function Gantt({
           {tip.actual && <div className="tt-row"><span>Real</span><b>{tip.actual}</b></div>}
           {tip.real && <div className="tt-row"><span>Real</span><b>{tip.real}</b></div>}
           {tip.conflict && <div className="tt-flag danger">Solapamiento de partner</div>}
-          {tip.late > 0 && <div className="tt-flag warn">Arrancó {tip.late} día{tip.late > 1 ? 's' : ''} hábil{tip.late > 1 ? 'es' : ''} tarde (podía desde el {tip.lateFrom})</div>}
+          {tip.late > 0 && <div className="tt-flag warn">Retraso de {tip.late} dia{tip.late > 1 ? 's' : ''}</div>}
           {tip.delay > 0 && <div className="tt-flag warn">Retraso de {tip.delay} dia{tip.delay > 1 ? 's' : ''}</div>}
           {tip.ahead > 0 && <div className="tt-flag ok">Adelanto de {tip.ahead} dia{tip.ahead > 1 ? 's' : ''}</div>}
           {tip.pushed && (

@@ -486,7 +486,7 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     // Se registra el retraso para el listado de Referencias (fechas + razon).
     if (t.isLateStart) {
       delaysSeen.push({
-        name: `${t.action_name || 'Tarea'} (arrancó tarde: podía desde el ${fmtCorto(t.lateStart)})`,
+        name: t.action_name || 'Tarea',
         from: t.lateStart,
         to: t.lateStartEnd,
         days: t.lateStartDays,
