@@ -386,6 +386,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      numero es la descripcion mas larga que vimos renderizar ENTERA en produccion, no una validacion de
      Drupal ni un limite exacto: lo que corta es el ALTO, y cuantos caracteres entran depende de como
      caigan las palabras (una de 133 se ve cortada a los 111 y esta de 128 se ve completa). Es una GUIA.
+     El **Mosaico** (`grid-cards`) tiene su propia guia, `CARD_MOSAIC_DESC_MAX` = 70: en desktop entra
+     todo, pero en MOBILE la caja tiene alto fijo y la descripcion se corta a 3 lineas (medido en la
+     caja real: unos 84 caracteres a 390px, entre 65 y 79 a 360px).
      El limite se declara como
      `maxLength` del campo (numero o funcion del contenido del COMPONENTE, resuelto con `maxLengthOf`),
      se muestra como contador en el form (`.cf-count`, rojo si se paso, sin recortar: un texto que ya

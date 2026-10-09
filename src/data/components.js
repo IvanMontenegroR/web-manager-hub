@@ -197,6 +197,12 @@ export const CARD_ICONS_BOX_DESC_MAX = 90
 // caracteres por linea: un titulo de 68 entra justo). La DESCRIPCION no se corta pero
 // ESTIRA la card, y todas las de la fila se igualan a la mas alta: una sola larga deja
 // huecos en las demas. 100 son unas 3 lineas. Las dos son GUIAS, como la de arriba.
+// Mosaico (grid-cards): en MOBILE la caja de texto tiene alto fijo y la descripcion se
+// corta a las 3 LINEAS con puntos suspensivos; en desktop entra todo. Medido en content
+// (homes de marca, 2026-10) probando textos dentro de la caja real: a 390px entran unos 84
+// caracteres y a 360px (Android chico) entre 65 y 79 segun como caigan las palabras. 70 es
+// la guia que entra en los dos anchos casi siempre. Guia, no regla, como las demas.
+export const CARD_MOSAIC_DESC_MAX = 70
 export const CARD_SIMPLE_TITLE_MAX = 65
 export const CARD_SIMPLE_DESC_MAX = 100
 export const CARD_STYLES = [
@@ -1015,11 +1021,13 @@ export const COMPONENTS = [
         // se elija otra cosa a proposito.
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
         { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS, hideTypes: CARD_GRID_IMAGE_MODES },
-        // Las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX) y la Simple
-        // tambien (CARD_SIMPLE_DESC_MAX): las verticales son altas y tienen lugar de sobra.
+        // Las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX), la Simple
+        // (CARD_SIMPLE_DESC_MAX), las de "Image + 3 cards" y el Mosaico en mobile
+        // (CARD_MOSAIC_DESC_MAX): las verticales son altas y tienen lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
           maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_DESC_MAX
             : c?.view_mode === 'full-background-card-icons-box' ? CARD_ICONS_BOX_DESC_MAX
+            : c?.view_mode === 'grid-cards' ? CARD_MOSAIC_DESC_MAX
             : c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
         // Checkbox del formulario de la CARD, entre la descripcion y el subtitulo. Igual
         // que Show Card PET ID: falta confirmar que dibuja, asi que el mockup no lo pinta.

@@ -429,9 +429,21 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 - **Homes de marca, largos que no se cortan** (medido en /dogchow publicada): en el carrusel de
   cards verticales la descripcion se corta con "…" a las 3 lineas (una de 102 caracteres se corto, una
-  de 88 entra); en el mosaico, una de 122 se corto y una de 116 entro. Si el mercado manda mas, se
-  acorta sin cambiar lo que dice. El mosaico SI respeta el Card - Background Color (cajas blancas en
-  Dog Chow, como el Figma).
+  de 88 entra). Si el mercado manda mas, se acorta sin cambiar lo que dice. El mosaico SI respeta el
+  Card - Background Color (cajas blancas en Dog Chow, como el Figma). (El largo del mosaico que decia
+  aca estaba medido solo en desktop: ver la entrada de abajo.)
+- **Mosaico: la descripcion va en 70 caracteres, porque en MOBILE se corta a 3 lineas.** En desktop
+  entra todo; en el celular la caja tiene alto fijo y corta con "…". Medido probando textos dentro de
+  la caja real: a 390px entran unos 84 caracteres y a 360px (Android chico) entre 65 y 79 segun como
+  caigan las palabras. Le pasaba a Cat Chow, Dog Chow, Purina One y Fancy Feast. La guia esta en el hub
+  (`CARD_MOSAIC_DESC_MAX`) y en el generador de homes. Origen: MX, homes de marca, el usuario vio el
+  corte en Fancy Feast.
+- **Acortar un texto del mercado: solo con lo que el original ya dice.** Se sacan partes, no se
+  agregan: ninguna palabra ni idea que el original no tenga (si no dice "gatito", no se escribe
+  "gatito"), y se mantiene el tono (si tutea o invita a algo, sigue haciendolo). Con un claim de salud
+  NUNCA se lo hace mas fuerte: "ayudan a mantener una piel sana" no pasa a "para una piel sana";
+  antes que eso, se saca una parte. Cada version se prueba en la caja real a 360 y 390 y se elige la
+  mas completa que entra. Origen: MX, mosaicos de las homes, pedido del usuario.
 - **Despues de crear una pagina, se relee el Classy de cada bloque.** En Dog Chow el de dos Card Grid
   (tarjetas y mosaico) se perdio al guardar aunque el formulario lo mostraba puesto; se repuso con
   `aplicar`. Origen: MX, home Dog Chow.
