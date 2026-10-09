@@ -132,7 +132,11 @@ export async function subirPlaceholders({ page, mapping, carpeta, solo, alUsar, 
 // volveria a intentar. Asi que se reintenta, con esperas cada vez mas largas, y solo ante
 // fallas de red. Cualquier otra cosa (Drupal que rechaza el archivo, un selector que no
 // aparece) sigue frenando en seco, que es lo que corresponde.
-const ES_DE_RED = /net::ERR_|ERR_NETWORK|ERR_CONNECTION|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|ERR_TIMED_OUT|Timeout .* exceeded/i
+// Tambien "no termino de subir": en preprod MX, mas o menos una de cada diez subidas se
+// queda sin `fids` (siempre una distinta, y la misma imagen sube bien al rato). Antes eso
+// frenaba la pagina entera y se reintentaba TODO desde el principio; ahora se reintenta
+// esa imagen sola, desde un formulario nuevo (nada quedo guardado).
+const ES_DE_RED = /net::ERR_|ERR_NETWORK|ERR_CONNECTION|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|ERR_TIMED_OUT|Timeout .* exceeded|no termino de subir/i
 
 async function conReintentos(fn, { onStep, nombre, veces = 4 }) {
   for (let i = 1; ; i++) {
