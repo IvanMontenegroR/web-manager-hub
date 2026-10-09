@@ -2,6 +2,115 @@
   "_": "Escrito a partir del HTML real de /node/add/dsu_component_page (content MX, 8 paragraphs ya agregados). Los selectores se apoyan en name= y data-drupal-selector= porque Drupal le pega un sufijo aleatorio a cada id.",
   "name": "purina-latam",
   "site": "https://content-ef5-purina-latam-mx.pantheonsite.io",
+  "sitios": {
+    "_": "Otros entornos donde el runner puede armar (RUNNER_SITE=<clave>). Pisan \"site\" y, si traen, \"productosMuestra\": los productos son nodos de CADA sitio y sus nids no coinciden. El shield (HTTP basic) sale de RUNNER_SHIELD, nunca de aca.",
+    "preprod-mx": {
+      "site": "https://preprod-dig0049395-petcare-purina-mexico.pantheonsite.io",
+      "shield": true,
+      "productosMuestra": {
+        "_": [
+          "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (1073)",
+          "Dog Chow multi proteínas (1136)",
+          "Alimento Cat Chow® gatito de hasta 12 meses con pescado, carne y leche (1282)",
+          "Purina® One® Super nutrientes pollo adultos y cachorros (1131)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatitos Gourmet Naturals Sabor Salmón (1273)",
+          "Felix® Megamix para gatito sabor atún, pavo, camarón, leche, pollo, carne y salmón (1202)",
+          "Purina Beneful Alimento Húmedo Para Cachorro Minis y Pequeños Sabor Carne y Arroz Salvaje (1207)",
+          "Campeón® Adultos todos los tamaños (1231)"
+        ],
+        "Pro Plan": [
+          "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (1073)",
+          "Cachorro Razas Grandes con Optistart® Sabor Pollo (1075)",
+          "Veterinary Diets Cardiocare (1135)",
+          "Cachorro Todas las Razas con Optistart® Sabor Pollo (1155)",
+          "Cachorro Todas las Razas con Optistart® Sobre Sabor Pollo (1179)",
+          "Purina® Pro Plan® Gato Urinary con Optitract® Sabor Pollo (1184)",
+          "Adulto Razas Pequeñas con Optihealth® Sabor Pollo (1191)",
+          "CROQUETAS PRO PLAN EN GASTROENTERIC PARA GATOS (1212)"
+        ],
+        "Dog Chow": [
+          "Dog Chow multi proteínas (1136)",
+          "CROQUETAS DOG CHOW ALTA PROTEÍNA (1240)",
+          "Dog Chow Cachorros: Alimento húmedo para perros cachorros todos los tamaños (1251)",
+          "DOG CHOW TRIPLE PROTEÍNA ADULTOS TODOS LOS TAMAÑOS (1264)",
+          "ALIMENTO HÚMEDO DOG CHOW ADULTOS MINIS Y PEQUEÑOS CON CORDERO (1165)",
+          "DOG CHOW CACHORROS TODOS LOS TAMAÑOS CON POLLO (1145)",
+          "DOG CHOW CONTROL PESO PARA ADULTOS (1152)",
+          "DOG CHOW® NUTRICIÓN REFORZADA ® ADULTO Sabor Carne en Filetes con Arroz (1182)"
+        ],
+        "Cat Chow": [
+          "Alimento Cat Chow® gatito de hasta 12 meses con pescado, carne y leche (1282)",
+          "Cat Chow® Delimix Adultos salmón, carne y pollo (1210)",
+          "Cat Chow® Adulto pescado (1263)",
+          "Cat Chow® Nutriplus atún, pollo y queso (1238)",
+          "Cat Chow® Hogareños carne (1143)",
+          "Purina® Cat Chow® Alimento Húmedo Para Gatos Adultos Sabor Pescado (1256)",
+          "Purina® Cat Chow® Alimento Húmedo Para Gatitos Sabor Pollo (1228)",
+          "Purina ® Cat Chow ®Alimento Húmedo Para Gatos Adultos Sabor Carne (1245)"
+        ],
+        "Purina One": [
+          "Purina® One® Super nutrientes pollo adultos y cachorros (1131)",
+          "Purina® One® Adultos minis y pequeños pollo y carne (1149)",
+          "Purina® One® Multi proteínas para gatos y gatitos de salmón, atún y pescado (1216)",
+          "Purina® One® Superfoods perros adultos y cachorros de salmón (1219)",
+          "Purina® One® Adultos minis y pequeños pollo y salmón (1226)",
+          "Purina® One® Cachorros todos los tamaños con pollo y carne (1252)",
+          "Purina® One® Pollo y salmón para gatos (1213)",
+          "Purina® One® Croquetas para gato esterilizado con pollo y salmón (1192)"
+        ],
+        "Fancy Feast": [
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatitos Gourmet Naturals Sabor Salmón (1273)",
+          "FANCY FEAST RAGOUT DE ATÚN | LÍNEA GOURMET (1246)",
+          "FANCY FEAST® Classic Paté lata para gato sabor salmón (1128)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatos Adultos Petit Filets Sabor Salmón (1276)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatos Adultos Gourmet Naturals Sabor Carne y Pollo (1270)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatos Adultos Casserole Sabor Pescado Blanco y Atún (1267)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatos Adultos Naturals Sabor Mousse Trucha y Atún (1262)",
+          "Purina® Fancy Feast® Alimento Húmedo Para Gatos Adultos Casserole Sabor Pollo (1247)"
+        ],
+        "Felix": [
+          "Felix® Megamix para gatito sabor atún, pavo, camarón, leche, pollo, carne y salmón (1202)",
+          "Felix® Classic para gato sabor pavo (1281)",
+          "Felix® Triple Delicious Granja para gato sabor pollo, carne y pavo (1168)",
+          "Felix® Megamix para gato sabor pollo, atún, salmón, hígado, pavo, carne y camarón (1150)",
+          "Felix® Classic para gato sabor pollo (1268)",
+          "Felix® Fantastic Mix con salmón y salsa sabor carne para gatos (1265)",
+          "Felix® Classic para gato sabor cordero (1224)",
+          "Purina Felix Alimento Húmedo Para Gatos Adultos Triple Delicious Mar Sabor Atún, Sardina y Salmón (1220)"
+        ],
+        "Beneful": [
+          "Purina Beneful Alimento Húmedo Para Cachorro Minis y Pequeños Sabor Carne y Arroz Salvaje (1207)",
+          "Purina Beneful Alimento Húmedo Para Perros Adultos Todos los Tamaños Sabor Pavo y Arroz Salvaje (1175)",
+          "Purina Beneful Hugs Para Perros Adultos de Todos los Tamaños (1132)",
+          "Purina Beneful Snackers Para Perros Adultos de Todos los Tamaños (1110)"
+        ],
+        "Campeón": [
+          "Campeón® Adultos todos los tamaños (1231)",
+          "Campeón® Cachorros todos los tamaños (1280)",
+          "Campeón® Adultos minis y pequeños (1243)"
+        ],
+        "Gatina": [
+          "GATINA GATITOS SABOR CARNES, VERDURITAS Y LECHE (1197)",
+          "GATINA GATOS ADULTOS CARNE, POLLO Y VERDURAS (1198)"
+        ],
+        "Dentalife": [
+          "DentaLife® Razas grandes (1174)",
+          "DentaLife® Razas pequeñas y medianas (1169)",
+          "DentaLife® Gato con sabor a salmón (1205)"
+        ],
+        "Excellent": [
+          "Purina® Excellent® Adulto pollo y arroz razas minis y pequeñas (1206)",
+          "Purina® Excellent® Urinary pollo y arroz (1233)",
+          "Purina® Excellent® Kitten pollo y arroz (1259)",
+          "Purina® Excellent® Puppy: Croquetas para cachorro raza pequeña (1181)",
+          "Purina® Excellent® Gato adulto con pollo y arroz (1144)",
+          "Purina® Excellent® Cachorro pollo y arroz razas medianas y grandes (1072)",
+          "Purina® Excellent® Adulto todas las razas de cordero y arroz (1199)",
+          "Purina® Excellent® Adulto pollo y arroz razas medianas y grandes (1070)"
+        ]
+      }
+    }
+  },
   "nodeAdd": "/node/add/dsu_component_page",
   "title": "input[name=\"title[0][value]\"]",
   "published": "input[name=\"status[value]\"]",

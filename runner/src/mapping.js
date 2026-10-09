@@ -95,6 +95,19 @@ export function loadMapping(file) {
   if (!m.paragraphs?.add?.mode) err('falta "paragraphs.add.mode"')
   m.paragraphs.types = m.paragraphs.types || {}
 
+  // Otro entorno (RUNNER_SITE=preprod-mx): pisa el sitio y, si los trae, los productos de
+  // muestra, que son nodos de ese sitio. Todo lo demas del mapping (selectores, formatos,
+  // tipos de bloque) es el mismo: es el mismo CMS en otro servidor.
+  const otro = process.env.RUNNER_SITE
+  if (otro) {
+    const s = m.sitios?.[otro]
+    if (!s?.site) err(`RUNNER_SITE=${otro} no esta en "sitios"`)
+    m.site = s.site
+    if (s.productosMuestra) m.productosMuestra = s.productosMuestra
+    m.sitio = otro
+    m.shield = !!s.shield
+  }
+
   // Se revisa TODO el mapping, no solo los tipos que esta pagina usa: un campo sin
   // selector es un error de escritura y conviene verlo al cargar, no dentro de tres
   // semanas cuando alguien arme la primera pagina que lo lleve.

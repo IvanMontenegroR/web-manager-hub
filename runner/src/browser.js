@@ -15,6 +15,14 @@ import { resolve } from 'node:path'
 
 export const CHANNELS = { chrome: 'chrome', edge: 'msedge' }
 
+function credencialShield() {
+  const v = process.env.RUNNER_SHIELD
+  const i = v.indexOf(':')
+  if (i < 1) throw new Error('RUNNER_SHIELD tiene que ser usuario:clave')
+  const origin = process.env.RUNNER_SHIELD_ORIGIN
+  return { username: v.slice(0, i), password: v.slice(i + 1), ...(origin ? { origin } : {}) }
+}
+
 export async function openBrowser({ browser = 'chrome', profileDir, slowMo = 0, executablePath, headless = false } = {}) {
   // Para correr fuera de una PC con Chrome instalado (un servidor, una sesion remota):
   // RUNNER_CHROME apunta a un binario de Chromium, RUNNER_PROFILE al perfil a usar y
@@ -41,6 +49,9 @@ export async function openBrowser({ browser = 'chrome', profileDir, slowMo = 0, 
     // (alias, publicacion) y sus campos quedan invisibles aunque existan.
     args: ['--start-maximized', '--window-size=1600,1000'],
     ...(process.env.RUNNER_UA ? { userAgent: process.env.RUNNER_UA } : {}),
+    // Un entorno con shield (HTTP basic delante de todo el sitio, como preprod): la
+    // credencial sale de RUNNER_SHIELD=usuario:clave y se manda SOLO a RUNNER_SHIELD_ORIGIN.
+    ...(process.env.RUNNER_SHIELD ? { httpCredentials: credencialShield() } : {}),
   })
   const page = ctx.pages()[0] || (await ctx.newPage())
   return { ctx, page }
