@@ -247,7 +247,7 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
 
 // Lee de nuevo lo escrito y dice lo que no quedo igual. Se compara contra lo que quedo AL
 // ESCRIBIRLO, no contra el manifiesto: asi tambien se caza un campo que cambio a otra cosa.
-async function revisarEscritos(page, escritos) {
+export async function revisarEscritos(page, escritos) {
   const problemas = []
   for (const w of escritos) {
     if (!w || esVacio(w.valor)) continue
@@ -1025,7 +1025,7 @@ const cita = (v) => (typeof v === 'string' ? `"${v.slice(0, 60)}"` : JSON.string
 
 // Lee un campo eligiendo el mismo elemento que se lleno: el que se ve, salvo el cuerpo
 // con CKEditor, que por diseño esta oculto.
-async function leerCampo(page, f, selector) {
+export async function leerCampo(page, f, selector) {
   const n = await page.locator(selector).count()
   if (!n) return null
   let el = page.locator(selector).first()

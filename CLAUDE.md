@@ -622,6 +622,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
   bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+- **Editar paginas que ya existen** (`runner/tools/editar.mjs` + `runner/src/editar.js`): cambios en
+  lote con un plan en el idioma de los manifiestos (bloque por posicion / tipo / titulo, `item` para la
+  card N, campo = clave del mapping, `antes` opcional, `raw:<name>` para cualquier campo del
+  formulario, util en productos y articulos). Abre solo las filas que toca, verifica, guarda una vez y
+  repasa el Classy. Ensayo por defecto. Es la herramienta para cargar los productos reales en los
+  carruseles cuando se migren (hoy van muestras de la marca). Ver `runner/README.md`.
 - **Criterios de migracion** (`runner/CRITERIOS.md`): las decisiones del Websites Expert al revisar
   paginas migradas del sitio viejo (medidas, heroes, contraste, carrusel de productos, iconos, CTAs...),
   cada una con el caso que la origino. Se lee ANTES de traducir o corregir una pagina, y cada decision

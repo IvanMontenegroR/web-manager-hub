@@ -515,6 +515,48 @@ pagina a mano:
 Lo que **no** hace: agregar o sacar paragraphs, subir imagenes o elegir medios. Eso sigue
 siendo del motor con navegador (`build`). `aplicar` cambia valores de campos que ya existen.
 
+### `editar`: cambios en lote con el navegador
+
+`aplicar` abre la pagina ENTERA ("Editar todo") y en una pagina larga ese AJAX da 502;
+tampoco sabe agregar filas (un producto mas en un carrusel) ni escribir a traves de
+CKEditor. **`editar`** hace lo mismo que una persona: abre SOLO la fila de cada bloque que
+toca, escribe con las mismas funciones que usa el armado (texto, cuerpo con CKEditor,
+selects por valor o por etiqueta, listas con "Añadir otro elemento"), verifica cada campo
+antes de pasar al siguiente, guarda una sola vez y despues repasa el Classy que toco.
+
+```bash
+npm run editar -- cambios/productos-dogchow.json          # ENSAYO: escribe, no guarda
+npm run editar -- cambios/productos-dogchow.json --save
+```
+
+El plan habla el idioma de los manifiestos, no el de los nombres largos de Drupal:
+
+```json
+{ "mensaje": "Productos reales en los carruseles de Dog Chow",
+  "paginas": [
+    { "ruta": "/dogchow/longevidad", "cambios": [
+      { "bloque": { "tipo": "block", "n": 1 }, "campo": "field_block.productos",
+        "valor": ["DOG CHOW HOGAREÑO ADULTO (623)", "..."] },
+      { "bloque": 2, "item": 1, "campo": "field_c_text", "antes": "Texto viejo", "valor": "Texto nuevo" },
+      { "bloque": { "titulo": "Ingredientes" }, "campo": "classy.text_align", "valor": "text_align_center" },
+      { "campo": "raw:title[0][value]", "valor": "Titulo nuevo" } ] } ] }
+```
+
+- **`bloque`**: la posicion en la pagina (1 = el primero), `{ tipo, n }` (el N-esimo de ese
+  paragraph) o `{ titulo }` (el que lo menciona en su resumen). **`item`**: la card o el hijo
+  N de ese bloque. **`campo`**: la clave del mapping, igual que en un manifiesto.
+- **`antes`** (opcional): lo que tiene que decir hoy. Si no coincide, la pagina se saltea
+  entera sin tocar nada.
+- **Listas** (los productos): se escribe la lista completa; las filas que sobran de antes se
+  vacian y Drupal las descarta al guardar.
+- **`raw:<name>`**: cualquier campo del formulario por su name exacto. Es lo que sirve hoy
+  para productos y articulos, que son otros tipos de contenido y no tienen mapping propio;
+  cuando se repitan los mismos campos conviene sumarlos al mapping con un nombre corto.
+- Todavia no cambia **imagenes** (hay que quitar el medio actual antes de elegir otro): frena
+  y lo dice.
+- Una pagina por vez; si una falla se anota y sigue con la siguiente. Bitacora en
+  `logs/editar.jsonl`.
+
 En un entorno que sale a internet por un proxy (una sesion en la
 nube), Node lo toma con `NODE_USE_ENV_PROXY=1` y `NODE_EXTRA_CA_CERTS=<bundle>`. En tu
 maquina no hace falta.

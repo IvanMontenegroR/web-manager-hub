@@ -25,7 +25,8 @@
     "subir-medios": "node tools/subir-medios.mjs",
     "publicar": "node tools/publicar.mjs",
     "leer": "node tools/leer.mjs",
-    "aplicar": "node tools/aplicar.mjs"
+    "aplicar": "node tools/aplicar.mjs",
+    "editar": "node tools/editar.mjs"
   },
   "dependencies": {
     "playwright-core": "1.49.1"
