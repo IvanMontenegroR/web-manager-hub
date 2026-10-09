@@ -30,6 +30,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   y prod los arma F5 exportando desde ahi. Las paginas editadas a mano en el Hub, y cualquier pagina que
   ya exista en el CMS, no se pisan.
 
+- **Si la pagina tiene frame en Figma, se sigue el layout de Figma.** Antes de armar o subir una
+  pagina se busca su frame en Figma (archivo del rediseño: Home, Brands, Club Purina®, Purina®
+  Cuida, Institucional, Cookies, Blog, las homes de marca...). Si existe, la estructura, el orden
+  de los bloques, los componentes y las imagenes salen de ahi; el hub se corrige contra el frame
+  antes de subir, no despues. La matriz del mercado aporta el texto y lo que Figma no tiene. Solo
+  las paginas SIN frame se arman directo desde el hub. Origen: MX, lote de subida a content (las
+  de Club Purina salieron armadas desde el hub teniendo diseño en Figma y hubo que borrarlas).
+
 ## Alcance
 
 - **Las paginas que ya existen en content y estan bien, quedan como estan**: no se suben ni se
