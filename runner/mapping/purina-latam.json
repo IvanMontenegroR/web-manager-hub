@@ -2274,6 +2274,425 @@
             }
           ]
         }
+      },
+      "cards_info": {
+        "label": "Cards Info",
+        "value": "cards_info",
+        "_": "Volcado del formulario real (inventario 2026-10). Los items son card_infos.",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_card_infos_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_card_infos_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.title_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][title_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_card_infos_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_card_infos_color]\"]",
+            "kind": "select"
+          },
+          "classy.icon_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][icon_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_align]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Cards",
+              "dsel": "{dsel}-subform-field-c-subitems-{delta}",
+              "base": "{base}[field_c_subitems][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_c_subitems_add_more\"], input[name=\"{npath}_subform_field_c_subitems_add_more\"], button[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"], input[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "card_infos": {
+        "label": "Card Info Item",
+        "value": "card_infos",
+        "fields": {
+          "field_icon": {
+            "sel": "select[name=\"{base}[field_icon][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "big_number_grid": {
+        "label": "Big Number Grid",
+        "value": "big_number_grid",
+        "_": "Volcado del formulario real (inventario 2026-10). Los items son big_number_item.",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.number_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][number_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_number_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_number_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_align]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Numeros",
+              "dsel": "{dsel}-subform-field-items-{delta}",
+              "base": "{base}[field_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_big_number_item_add_more\"], input[name=\"{npath}_subform_field_items_big_number_item_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "big_number_item": {
+        "label": "Big Number Item",
+        "value": "big_number_item",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_big_number_item_number": {
+            "sel": "input[name=\"{base}[field_big_number_item_number][0][value]\"]"
+          },
+          "field_big_number_item_prefix": {
+            "sel": "input[name=\"{base}[field_big_number_item_prefix][0][value]\"]"
+          },
+          "field_big_number_item_suffix": {
+            "sel": "input[name=\"{base}[field_big_number_item_suffix][0][value]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "contact_card_grid": {
+        "label": "Contact Card Grid",
+        "value": "contact_card_grid",
+        "_": "Volcado del formulario real (inventario 2026-10). Sin titulo propio; los items son contact_card.",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][contact_card_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][contact_card_grid][text_align]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Contactos",
+              "dsel": "{dsel}-subform-field-contact-card-items-{delta}",
+              "base": "{base}[field_contact_card_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_contact_card_items_add_more\"], input[name=\"{npath}_subform_field_contact_card_items_add_more\"], button[name=\"{npath}_subform_field_contact_card_items_contact_card_add_more\"], input[name=\"{npath}_subform_field_contact_card_items_contact_card_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "contact_card": {
+        "label": "Contact Card",
+        "value": "contact_card",
+        "fields": {
+          "field_icon": {
+            "sel": "select[name=\"{base}[field_icon][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
       }
     }
   },
