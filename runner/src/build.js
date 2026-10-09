@@ -229,33 +229,48 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     throw new Error(`Drupal no guardo la pagina (sigue en ${after}). ${msg ? 'Dice: ' + msg : 'Sin mensaje visible.'}`)
   }
   let nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
-  nodeId ??= await page.evaluate(() => (/\/node\/(\d+)/.exec(document.querySelector('link[rel="shortlink"]')?.href || '') || [])[1] || null)
-  if (ctx.classyAnidado.length) await repasarClassyAnidado(ctx, nodeId)
+  nodeId ??= agregar
+  nodeId ??= await page.evaluate(() => {
+    const h = document.querySelector('link[rel="shortlink"]')?.href
+      || [...document.querySelectorAll('a[href*="/node/"]')].map((a) => a.getAttribute('href')).find((x) => /\/node\/\d+\/edit/.test(x)) || ''
+    return (/\/node\/(\d+)/.exec(h) || [])[1] || null
+  })
+  if (ctx.classyAnidado.length) await repasarClassy(ctx, nodeId)
   return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
 }
 
-// El Classy de un paragraph AGREGADO adentro de otro (el segundo banner de un Banner
-// Wrapper) se pierde al CREAR el nodo: el formulario lo muestra elegido, Drupal guarda
-// "Default". Paso con /proplan/perros y /proplan/gatos: el segundo banner quedo centrado
-// con "Banner Left Top" cargado. Editando el nodo ya creado si se guarda, asi que despues
-// del alta se vuelve a abrir el formulario, se re-eligen esos valores y se guarda de nuevo.
-// Solo se tocan los que el formulario guardado tiene distinto de lo que el runner cargo.
-export async function repasarClassyAnidado(ctx, nodeId) {
+// El Classy de un paragraph AGREGADO se pierde al guardar: el formulario lo muestra elegido y
+// Drupal guarda "Default". Empezo a verse en los anidados (el segundo banner de un Banner
+// Wrapper en /proplan/perros) y despues tambien en bloques sueltos (el mosaico de
+// /purina-one/por-que-cambiar-a-one quedo con las cajas en el rojo por defecto, el Card Style
+// Square de /referencia/cards volvio a Default). Editando el nodo ya guardado SI se guarda, asi
+// que despues del alta se vuelve a abrir el formulario, se re-eligen esos valores y se guarda
+// de nuevo. Solo se tocan los que quedaron distintos de lo que el runner cargo.
+//
+// Se abre SOLO la fila de cada bloque que hay que mirar, no "Editar todo": en una pagina larga
+// ese AJAX trae el formulario entero y el servidor contesta 502. Abrir una fila pliega la
+// anterior, pero Drupal se queda con lo elegido en ella.
+export async function repasarClassy(ctx, nodeId) {
   const { mapping, page, onStep, esperaSubform } = ctx
-  if (!nodeId) { onStep('AVISO: no se pudo leer el node id para repasar el Classy de los paragraphs anidados.'); return }
-  onStep(`Repasando el Classy de ${ctx.classyAnidado.length} campo(s) anidado(s) en node/${nodeId}…`)
-  await page.goto(`${mapping.site}/node/${nodeId}/edit`, { waitUntil: 'domcontentloaded' })
-  const todo = page.locator(`[name="${namePath(mapping.paragraphs.dsel.split('-{delta}')[0])}_edit_all"]`).first()
-  if (await todo.count()) { await todo.dispatchEvent('mousedown'); await esperarAjax(page) }
-  const abiertos = new Set()
+  if (!nodeId) { onStep('AVISO: no se pudo leer el node id para repasar el Classy de los bloques agregados.'); return }
+  onStep(`Repasando el Classy de ${ctx.classyAnidado.length} campo(s) en node/${nodeId}…`)
+  await page.goto(`${mapping.site}/node/${nodeId}/edit`, { waitUntil: 'domcontentloaded', timeout: 180000 })
+  const raiz = namePath(mapping.paragraphs.dsel.split('-{delta}')[0])
+  // Se abre una fila haciendo click en su boton de editar, si esta a la vista.
+  const abrir = async (nombre, sel) => {
+    const b = page.locator(`[name="${nombre}"]`).first()
+    if (!(await b.count())) return
+    await b.dispatchEvent('mousedown')
+    await esperarAjax(page)
+    await sel.waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {})
+  }
   let cambios = 0
   for (const r of ctx.classyAnidado) {
     const sel = page.locator(r.sel).first()
-    if (!(await sel.count()) && !abiertos.has(r.editar)) {
-      abiertos.add(r.editar)
-      const b = page.locator(`[name="${r.editar}"]`).first()
-      if (await b.count()) { await b.dispatchEvent('mousedown'); await sel.waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {}) }
-    }
+    // Primero la fila del bloque de la pagina; si el campo es de un hijo, despues la del hijo.
+    const delta = (new RegExp(`^${raiz}_(\\d+)`).exec(r.editar) || [])[1]
+    if (!(await sel.count()) && delta != null) await abrir(`${raiz}_${delta}_edit`, sel)
+    if (!(await sel.count()) && r.editar !== `${raiz}_${delta}_edit`) await abrir(r.editar, sel)
     if (!(await sel.count())) throw new Error(`Repaso del Classy: no encontre ${r.ref} (${r.sel}) en el formulario guardado`)
     const antes = await sel.inputValue()
     if (antes === String(r.value)) continue
@@ -266,14 +281,16 @@ export async function repasarClassyAnidado(ctx, nodeId) {
   }
   if (!cambios) { onStep('     todo quedo bien guardado, no hace falta re-guardar'); return }
   const log = page.locator('textarea[name="revision_log[0][value]"]')
-  if (await log.count()) await log.fill('migration-mx: re-aplica el Classy de los paragraphs anidados')
+  if (await log.count()) await log.fill('migration-mx: re-aplica el Classy que no quedo al guardar')
   await Promise.all([
-    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {}),
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 180000 }).catch(() => {}),
     page.locator(mapping.save).first().click(),
   ])
   if (/\/edit$/.test(new URL(page.url()).pathname)) throw new Error('Repaso del Classy: Drupal no guardo la segunda pasada')
   onStep(`     re-guardada (${cambios} campo(s))`)
 }
+// Nombre de antes, cuando solo se repasaban los anidados.
+export const repasarClassyAnidado = repasarClassy
 
 // Agrega UN paragraph y llena sus campos. `holder` es donde vive la lista: el campo de
 // paragraphs del nodo, o un slot adentro del subform de un contenedor. Sus plantillas
@@ -441,7 +458,7 @@ async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(ctx, f, vars, value, ref))
-    if (anidado && key.startsWith('classy.') && f.kind === 'select') {
+    if (key.startsWith('classy.') && f.kind === 'select') {
       ctx.classyAnidado.push({ sel: resolveSelector(f.sel, vars), value, ref, editar: `${vars.npath}_edit` })
     }
     // Un select que RECARGA parte del formulario al cambiar (el bloque del paragraph Block:
