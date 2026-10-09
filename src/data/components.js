@@ -39,13 +39,25 @@ export const BG_COLORS = [
 // Etiqueta que ve el editor en Drupal cuando el campo esta vacio.
 export const TOKEN_DEFAULT = 'Default'
 
-// Hex de cada token, para poder PINTAR el fondo en el mockup. Solo estan los que
-// conocemos con certeza; el resto queda sin pintar a proposito (inventar un color de
-// un design system seria peor que no mostrarlo). Completar cuando desarrollo pase la
-// paleta: agregar la entrada aca y el mockup la toma sola.
+// Hex de cada token, para poder PINTAR el fondo en el mockup. Salen del CSS REAL del sitio
+// (las variables `--color-*` que el tema de Purina declara en cada pagina; leidas en
+// content, card-grid-examples). Ojo que Primary Red es #E91C24 y NO el #ED1C24 de la
+// marca: ese es Reds 400. Faltan a proposito los Brand 01-04 (dependen del tema de cada
+// marca, no tienen un valor unico) y Neutral 300, que el sitio no declara: quedan sin
+// pintar, que es mejor que inventarles un color.
 export const BG_TOKENS = {
-  'Primary Red': '#ED1C24',
-  'Primary White': '#FFFFFF',
+  'Neutral 000': '#F5F5F5', 'Neutral 100': '#EBEBEB', 'Neutral 200': '#E0E0E0',
+  'Neutral 400': '#AEADAD', 'Neutral 500': '#858585', 'Neutral 600': '#616161',
+  'Neutral 700': '#3D3D3D', 'Neutral 800': '#1F1F1F',
+  'Primary Black': '#000000', 'Primary Red': '#E91C24', 'Primary White': '#FFFFFF',
+  'Reds 000': '#FFE8E9', 'Reds 100': '#FFB6B9', 'Reds 200': '#FF8388', 'Reds 300': '#FF5157',
+  'Reds 400': '#ED1C24', 'Reds 500': '#CB0C13', 'Reds 600': '#A90007',
+  'Secondary 123': '#FEC52C', 'Secondary 131': '#CC8809', 'Secondary 1665': '#DD440A',
+  'Secondary 187': '#A91D2F', 'Secondary 2280': '#466A21', 'Secondary 2294': '#70A601',
+  'Secondary 2577': '#A47BC9', 'Secondary 268': '#582D84', 'Secondary 433': '#1B252E',
+  'Secondary 433 8': '#E9EAEC', 'Secondary 538': '#BFCDDB', 'Secondary 541': '#073C72',
+  'Secondary 636': '#82D3E8', 'Secondary 7567': '#895731', 'Secondary 7704': '#0582AE',
+  'Secondary Red': '#ED1C25',
 }
 
 // Set de iconos del CMS, tal cual el select de Drupal. El VALOR es lo que identifica
@@ -114,19 +126,21 @@ export const CMS_ICON_OPTIONS = CMS_ICONS.map((value) => ({ value, label: iconLa
 // UN solo paragraph del CMS (`ln_c_cardgrid`) del que salen todas estas variantes: el
 // "Modo de vista" cambia el layout, no el componente. Se guarda el VALOR de maquina
 // (grid-cards, cards-numbers...) que es el identificador estable; la etiqueta es la que
-// ve el editor en el desplegable de Drupal y es la que baja al Excel.
+// ve el editor en el desplegable de Drupal y es la que baja al Excel. Las etiquetas son
+// las del formulario de content de 2026-10 (antes decian "Cards Simple (Only Image +
+// Title)", "Slider Cards Default"...): si Drupal las vuelve a cambiar, se cambian aca.
 export const CARD_GRID_MODES = [
-  { value: 'cards-icons', label: 'Cards Icons' },
-  { value: 'cards-numbers', label: 'Cards Numbers' },
-  { value: 'cards-simple', label: 'Cards Simple (Only Image + Title)' },
-  { value: 'full-background-card-icons', label: 'Full Background Card Icons (Without Box - Max 3 cards)' },
-  { value: 'full-background-card-icons-box', label: 'Full Background Card Icons (Max 3 cards)' },
-  { value: 'grid-cards', label: 'Grid Cards (Max 3 Cards)' },
-  { value: 'image-card-icons', label: 'Box Image + Card Icons' },
-  { value: 'slider-default-card', label: 'Slider Cards Default' },
-  { value: 'slider-background-default-card', label: 'Slider Background Cards Default (Max 3 cards)' },
-  { value: 'slider-card-icons-square', label: 'Card Icon Square' },
-  { value: 'full-background-card-icons-square', label: 'Full Background Card Icons Square' },
+  { value: 'cards-icons', label: 'Icons' },
+  { value: 'cards-numbers', label: 'Numbers' },
+  { value: 'cards-simple', label: 'Simple (image + title)' },
+  { value: 'full-background-card-icons', label: 'Image background + icons without box' },
+  { value: 'full-background-card-icons-box', label: 'Image + 3 cards with icons' },
+  { value: 'grid-cards', label: 'Mosaic' },
+  { value: 'image-card-icons', label: 'Image above icon cards' },
+  { value: 'slider-default-card', label: 'Image slider' },
+  { value: 'slider-background-default-card', label: 'Image slider with gradient background' },
+  { value: 'slider-card-icons-square', label: 'Square icon card' },
+  { value: 'full-background-card-icons-square', label: 'Square icon card + background image' },
 ]
 export const CARD_GRID_DEFAULT_MODE = 'grid-cards'
 // La card de estos modos NO lleva imagen propia: o va con icono, o es la card blanca
@@ -173,6 +187,24 @@ export const CARD_SQUARE = 'card_grid_default_square'
 //
 // Por eso se avisa y no se recorta lo ya cargado.
 export const CARD_SQUARE_DESC_MAX = 128
+// "Image + 3 cards with icons" (full-background-card-icons-box): la descripcion de cada
+// tarjeta se corta a 4 LINEAS (line-clamp del sitio). Lo que manda es MOBILE, donde la
+// tarjeta mide 286px: ahi un texto de 102 ya se ve cortado y uno de 86 entra (medido en
+// content, homes de marca, 2026-10). En desktop (338px) entran unos 150. Guia, no regla.
+export const CARD_ICONS_BOX_DESC_MAX = 90
+// Card "Simple (image + title)": medido en content (card-grid-examples). La card mide 300px
+// en todos los anchos. El TITULO se corta a las 3 lineas con puntos suspensivos (~24
+// caracteres por linea: un titulo de 68 entra justo). La DESCRIPCION no se corta pero
+// ESTIRA la card, y todas las de la fila se igualan a la mas alta: una sola larga deja
+// huecos en las demas. 100 son unas 3 lineas. Las dos son GUIAS, como la de arriba.
+// Mosaico (grid-cards): en MOBILE la caja de texto tiene alto fijo y la descripcion se
+// corta a las 3 LINEAS con puntos suspensivos; en desktop entra todo. Medido en content
+// (homes de marca, 2026-10) probando textos dentro de la caja real: a 390px entran unos 84
+// caracteres y a 360px (Android chico) entre 65 y 79 segun como caigan las palabras. 70 es
+// la guia que entra en los dos anchos casi siempre. Guia, no regla, como las demas.
+export const CARD_MOSAIC_DESC_MAX = 70
+export const CARD_SIMPLE_TITLE_MAX = 65
+export const CARD_SIMPLE_DESC_MAX = 100
 export const CARD_STYLES = [
   { value: CARD_SQUARE, label: 'Card Grid Default Square' },
   { value: 'card_grid_default_vertical', label: 'Card Grid Default Vertical' },
@@ -186,6 +218,40 @@ export const ARROW_POSITIONS = [
   { value: 'position_arrows_top_left', label: 'top left' },
   { value: 'position_arrows_top_right', label: 'top right' },
 ]
+// ===== SPACING (Classy) — lo que hace cada opcion en el sitio =====
+// Medido en el CSS real de content (2026-10): `space_py_N` sale como la clase `section-py-N`
+// (mismo padding arriba y abajo, igual en mobile y desktop) y `space_section_X` como
+// `section-space--X`, que tiene un valor en mobile y otro desde 992px. En px: [arriba, abajo].
+export const SPACING_PX = {
+  space_py_0: [0, 0], space_py_1: [4, 4], space_py_2: [8, 8], space_py_3: [12, 12],
+  space_py_4: [16, 16], space_py_5: [20, 20], space_py_6: [24, 24], space_py_7: [32, 32],
+  space_py_8: [36, 36], space_py_9: [40, 40], space_py_10: [60, 60], space_py_11: [80, 80],
+  space_py_12: [120, 120],
+  space_section_2xs: { m: [4, 8], d: [8, 16] },
+  space_section_xs: { m: [8, 16], d: [16, 32] },
+  space_section_sm: { m: [16, 32], d: [20, 40] },
+  space_section_md: { m: [20, 40], d: [32, 60] },
+  space_section_lg: { m: [32, 60], d: [40, 80] },
+  space_section_xl: { m: [40, 80], d: [60, 120] },
+}
+// Lo que pone cada componente SIN spacing cargado (el CSS de cada uno). El resto cae en
+// `.section`, que es "Seccion: Medio". OJO el acordeon suelto: 0, pegado a lo de arriba y abajo.
+const SPACING_DEFAULT = {
+  banner: 'space_py_4', banner_wrapper: 'space_py_0',
+  text: 'space_py_5', text_image: 'space_py_5',
+  accordion_grid: 'space_py_0', breadcrumb: 'space_py_0',
+}
+export function spacingDefault(key, c = {}) {
+  if (SPACING_DEFAULT[key]) return SPACING_DEFAULT[key]
+  if (key === 'card_grid' && c.view_mode === 'full-background-card-icons-square') return 'space_py_0'
+  return 'space_section_md'
+}
+// [arriba, abajo] en px de un bloque, el cargado o el de su componente.
+export function spacingPx(key, c = {}, mobile = false) {
+  const v = SPACING_PX[c.spacing] || SPACING_PX[spacingDefault(key, c)]
+  return Array.isArray(v) ? v : (mobile ? v.m : v.d)
+}
+
 export const CLASSY_ALIGNS = [
   { value: 'text_align_center', label: 'Text Align Center' },
   { value: 'text_align_left', label: 'Text Align Left' },
@@ -232,6 +298,14 @@ export const BUTTON_STYLES = [
   { value: 'style_btn_outline', label: 'Style Outline' },
   { value: 'style_btn_secondary', label: 'Style Secondary' },
   { value: 'style_btn_text', label: 'Style Text' },
+]
+
+// ---- Tabs -----------------------------------------------------------------------
+// `field_tab_type` de `comp_tabs` (leido del formulario de content, 2026-10).
+export const TAB_FULL_BACKGROUND = 'full_background'
+export const TAB_TYPES = [
+  { value: 'only_tabs', label: 'Only Tabs' },
+  { value: TAB_FULL_BACKGROUND, label: 'Full Background' },
 ]
 
 // ---- Banner ---------------------------------------------------------------------
@@ -368,6 +442,9 @@ const CLASSY_FIELDS = {
   spacing: { label: 'Spacing', options: SPACINGS },
   text_align: { label: 'Text Align', options: CLASSY_ALIGNS },
   text_color: { label: 'Text Color', options: BG_COLORS },
+  // Solo del Tabs: el color de la pestaña SELECCIONADA. El Text Color pinta las demas
+  // (en el sitio: --color-text-tabs y --color-text-tabs-active).
+  text_tabs_active: { label: 'Text Tabs Active', options: BG_COLORS },
   content_text_styles: { label: 'Content Text Styles', options: CONTENT_TEXT_STYLES },
   style_button: { label: 'Style Button', options: BUTTON_STYLES },
   background_card_color: { label: 'Card - Background Color', options: BG_COLORS },
@@ -375,6 +452,9 @@ const CLASSY_FIELDS = {
   title_card_color: { label: 'Card - Title Color', options: BG_COLORS },
   text_card_color: { label: 'Card - Text Color', options: BG_COLORS },
   icon_card_color: { label: 'Card - Icon Color', options: BG_COLORS },
+  // Solo de Cards Info: la PRIMERA card va resaltada con sus propios colores.
+  background_card_infos_color: { label: 'Color Background First Card', options: BG_COLORS },
+  text_card_infos_color: { label: 'Color Text First Card', options: BG_COLORS },
   card_style_card: { label: 'Card - Style Card', options: CARD_STYLES },
   card_title_position: { label: 'Card - Title Position', options: CARD_TITLE_POSITIONS },
   position_arrows: { label: 'Position Arrows', options: ARROW_POSITIONS },
@@ -571,10 +651,10 @@ export const COMPONENTS = [
     // ese orden ES el orden de los slides.
     container: true,
     slots: [{ label: 'Banners del carrusel', cmsLabel: 'Banners' }],
-    // Sin campos propios: falta el subform real de Drupal (ver CMS_PENDING_SUBFORMS), asi
-    // que no se le inventa ni Classy ni configuracion de autoplay. Avanzado si va: Drupal
-    // se lo agrega a TODOS los paragraphs por igual.
-    fields: [...advanced()],
+    // Del subform real de Drupal se conoce el Classy (Background Color y Spacing, leidos
+    // del formulario de /proplan/perros). Los selects del slider (flechas, puntos,
+    // autoplay) siguen pendientes: ver CMS_PENDING_SUBFORMS.
+    fields: [...advanced(), ...classy('background_color', 'spacing')],
   },
   {
     key: 'text',
@@ -821,23 +901,30 @@ export const COMPONENTS = [
     fields: [
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Explora Pro Plan® y encuentra la nutrición ideal con apoyo experto' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p'] },
+      // Subtitulo: un titulo largo se parte en titulo corto + subtitulo (lo que viene
+      // despues de los dos puntos, o la parte que describe), como en los demas carruseles.
+      { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'text', placeholder: 'Alimento seco para gatos con una fórmula reductora de alérgenos' },
       // Imagen izquierda OPCIONAL: toggle del builder (cms). Si esta activo, se muestra
       // la columna de imagen a la izquierda del carrusel y su campo se exporta.
       { key: 'show_left_image', label: 'Mostrar imagen izquierda', type: 'checkbox', cms: true, default: false },
       { key: 'left_image', label: 'Imagen izquierda', type: 'image', requiresTrue: 'show_left_image' },
       // Filtro por categoria: toggle SOLO del builder (cms, no se exporta). Si esta
       // activo, el campo de tabs SI se exporta (requires: 'show_filters'); si no, se oculta.
-      { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true },
+      { key: 'show_filters', label: 'Activar filtros de categoría', type: 'checkbox', cms: true, default: false },
       { key: 'filters', label: 'Pestañas de filtro (separadas por coma)', type: 'text', placeholder: 'Más populares, Seco, Húmedo, Snacks', requires: 'show_filters' },
       // Pet ID: componente fijo (no editable). Checkbox solo del builder (cms) para
       // mostrar/ocultar la card; NO sale como campo en el Excel.
-      { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true },
+      { key: 'show_petid', label: 'Mostrar card Pet ID', type: 'checkbox', cms: true, default: false },
       // Productos pulleados por el CMS: en la matriz solo el nombre (sin imagen).
       { key: 'products', label: 'Productos', type: 'list', itemLabel: 'Producto', item: [
         { key: 'title', label: 'Nombre', type: 'text' },
       ] },
       { key: 'see_more_text', label: 'Botón — texto', type: 'text', placeholder: 'Ver todos' },
       { key: 'see_more_url', label: 'Botón — link', type: 'url' },
+      // Avanzado, como en todo paragraph (el Section ID hace falta: hay cards que anclan a un
+      // carrusel). Sin el trio "See more": el carrusel ya tiene su boton "Ver todos" con keys
+      // propias, y `see_more_url` chocaria con la del boton.
+      ...advanced().filter((f) => !f.key.startsWith('see_more')),
     ],
     // Imagen izquierda opcional: mismo tamaño en desktop y mobile (por eso sin link
     // mobile). La spec solo aplica si la imagen izquierda esta activada.
@@ -927,17 +1014,24 @@ export const COMPONENTS = [
       { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
       { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
       { key: 'background_image', label: 'Imagen de fondo (opcional)', cmsLabel: 'Background Image', type: 'image' },
+      // En el CMS es UN medio con desktop y mobile; el mercado entrega los dos archivos.
+      { key: 'background_image_mobile', label: 'Imagen de fondo mobile (opcional)', cmsLabel: 'Background Image (mobile)', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
-        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text',
+          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_TITLE_MAX : null) },
         // El titulo de una CARD siempre cuelga del titulo del bloque, asi que su tag por
         // defecto es h3 y no "- Ninguno -": es lo que hay que poner en el CMS salvo que
         // se elija otra cosa a proposito.
         { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
         { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS, hideTypes: CARD_GRID_IMAGE_MODES },
-        // Solo las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX): las
-        // verticales son altas y el texto tiene lugar de sobra.
+        // Las APAISADAS tienen el largo acotado (ver CARD_SQUARE_DESC_MAX), la Simple
+        // (CARD_SIMPLE_DESC_MAX), las de "Image + 3 cards" y el Mosaico en mobile
+        // (CARD_MOSAIC_DESC_MAX): las verticales son altas y tienen lugar de sobra.
         { key: 'description', label: 'Descripción', cmsLabel: 'Description', type: 'textarea',
-          maxLength: (c) => (c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
+          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_DESC_MAX
+            : c?.view_mode === 'full-background-card-icons-box' ? CARD_ICONS_BOX_DESC_MAX
+            : c?.view_mode === 'grid-cards' ? CARD_MOSAIC_DESC_MAX
+            : c?.card_style_card === CARD_SQUARE ? CARD_SQUARE_DESC_MAX : null) },
         // Checkbox del formulario de la CARD, entre la descripcion y el subtitulo. Igual
         // que Show Card PET ID: falta confirmar que dibuja, asi que el mockup no lo pinta.
         { key: 'show_ia_icon', label: 'Show IA Icon', cmsLabel: 'Show IA Icon', type: 'checkbox', cms: true, default: false },
@@ -981,7 +1075,14 @@ export const COMPONENTS = [
       // Apaisadas. Sin `ratio`: desktop y mobile NO comparten proporcion (1.73 contra
       // 1.20), asi que poner una sola seria mentir. Van las medidas y listo.
       'slider-default-card-square': [{ desktop: '485×280px', mobile: '335×280px', max: '500kb', format: 'JPG / PNG' }],
+      // El fondo del bloque (la mascota recortada sobre el degradé). Medida de la matriz de
+      // las homes de marca. Mobile es aproximado: se adecua al largo de la descripcion.
+      'full-background-card-icons-box': [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.4:1 - Mobile ~9:20', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
+      // Simple: la card mide 300px en pantalla en TODOS los anchos (medido en content), asi
+      // que se pide al doble para que se vea nitida en pantallas de alta densidad. Los 450
+      // que aparecen en el HTML del sitio son el tamaño del archivo de prueba, no una regla.
+      'cards-simple': [{ ratio: 'Desktop 1:1 - Mobile 1:1', desktop: '600×600px', mobile: '600×600px', max: '500kb', format: 'JPG / PNG' }],
     },
   },
   {
@@ -1077,16 +1178,36 @@ export const COMPONENTS = [
     // apuntan al suyo con `tab_index` (ver slotsOf).
     container: true,
     fields: [
+      // `field_tab_type` del CMS, el primer campo del formulario. "Full Background" es el
+      // bloque "Cuidado integral" de las homes de marca: cada pestaña pinta SU imagen a
+      // sangre (field_c_image del tab item) y lleva el componente encima.
+      { key: 'tab_type', label: 'Tipo de pestañas', cmsLabel: 'Tab Type', type: 'select', cms: true, options: TAB_TYPES },
       { key: 'title', label: 'Título (opcional)', type: 'text', placeholder: 'Título de la sección' },
       { key: 'title_tag', label: 'Título — HTML tag', type: 'select', cms: true, options: HTML_TAGS },
       { key: 'subtitle', label: 'Subtítulo (opcional)', type: 'textarea' },
       { key: 'tabs', label: 'Pestañas', type: 'list', itemLabel: 'Pestaña', sample: TAB_SAMPLE, item: [
         { key: 'label', label: 'Nombre de la pestaña', type: 'text' },
         { key: 'description', label: 'Descripción (opcional)', type: 'textarea' },
+        // El fondo de la pestaña: solo lo dibuja el tipo Full Background.
+        // `creaEnLinea`: en el CMS este campo NO deja elegir un medio de la libreria, el medio
+        // se crea adentro del formulario (ver runner/src/mediaNuevo.js). Por eso no va al
+        // INDICE de subida: subirlo aparte dejaria un duplicado que nadie referencia.
+        { key: 'image', label: 'Imagen de fondo', cmsLabel: 'Image', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND], creaEnLinea: true },
+        { key: 'image_mobile', label: 'Imagen de fondo mobile', cmsLabel: 'Image (mobile)', type: 'image', onlyTypes: [TAB_FULL_BACKGROUND] },
       ] },
-      // Classy PENDIENTE: falta el subform real de `comp_tabs` (ver TODO al pie).
       ...advanced(),
+      // Leido del formulario de /purina-one/por-que-cambiar-a-one. Text Color pinta las
+      // pestañas NO seleccionadas (sin cargar caen a #1f1f1f, que no se lee sobre una
+      // marca de fondo oscuro o de color) y Text Tabs Active la seleccionada (rojo).
+      ...classy('background_color', 'background_position', 'text_align', 'text_color', 'text_tabs_active'),
     ],
+    // La medida es la del fondo del bloque de servicios de las homes de marca (la que pide
+    // la matriz de contenido: 16:9 desktop, 9:16 mobile). Solo Full Background tiene imagen.
+    specKey: 'tab_type',
+    defaultType: 'only_tabs',
+    specsByType: {
+      [TAB_FULL_BACKGROUND]: [{ label: 'Imagen de fondo de la pestaña', ratio: 'Desktop 16:9 - Mobile 9:16', desktop: '2160×1212px', mobile: '562×999px', max: '500kb', format: 'JPG / PNG' }],
+    },
   },
   {
     key: 'external_video',
@@ -1149,6 +1270,38 @@ export const COMPONENTS = [
       ] },
     ],
     specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
+  },
+  {
+    // CARDS INFO = el paragraph `cards_info` del CMS (items `card_infos`). Cards con icono,
+    // titulo y texto, como las del Card Grid, con una diferencia que es la razon de tenerlo:
+    // el texto NO se corta. Medido en content (/referencia/cards) a 360, 390 y 1440: el
+    // Card Grid corta la descripcion a N lineas en todos sus modos salvo el Simple, y este
+    // la muestra entera. Es el bloque para cards con texto largo (beneficios de producto,
+    // consejos, pasos) que en un Card Grid quedarian con "…" en mobile.
+    // La PRIMERA card va resaltada con sus colores propios (sin cargar, roja).
+    key: 'cards_info',
+    name: 'Cards con texto largo',
+    cmsName: 'Cards Info',
+    category: 'Carruseles',
+    help: 'Paragraph "Cards Info" del CMS: cards con icono, título y texto. A diferencia del Card Grid, el texto no se corta: va para cards con texto largo. La primera card va resaltada (Color Background First Card; sin cargar, roja).',
+    fields: [
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea', cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS },
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
+        { key: 'description', label: 'Descripción', cmsLabel: 'Body', type: 'textarea' },
+      ] },
+      ...advanced(),
+      ...classy('background_color', 'background_card_color', 'background_card_infos_color',
+        'text_color', 'title_card_color', 'text_card_color', 'text_card_infos_color',
+        'icon_card_color', 'text_align', 'background_position', 'spacing'),
+    ],
   },
   {
     key: 'stats_grid',
@@ -1361,7 +1514,7 @@ export function visibleFields(def, content = {}, opts = {}) {
 // se llama en el CMS. Sin esto, un Card Grid en modo iconos le pediria al mercado las
 // cuatro imagenes de cada card, que en ese layout no se ven.
 function variantOf(content) {
-  return (content && (content.type ?? content.view_mode)) || undefined
+  return (content && (content.type ?? content.view_mode ?? content.tab_type)) || undefined
 }
 
 // ¿Este campo se OMITE del Excel para este valor? Un campo con `noneOption` (ej.
@@ -1489,9 +1642,8 @@ export const CMS_PENDING_PARAGRAPHS = [
 // Hasta tener el HTML del formulario de Drupal, sus campos son una aproximacion y no
 // se les puede declarar el panel Classy sin inventar.
 export const CMS_PENDING_SUBFORMS = {
-  banner_wrapper: 'Falta el subform de `Banner Wrapper`: sus campos propios (¿autoplay, intervalo?) y el panel Classy. Hoy solo declara Avanzado, que Drupal agrega a todos los paragraphs por igual.',
+  banner_wrapper: 'Faltan los campos propios del `Banner Wrapper`: Buttons (desktop/mobile), Position Buttons (top left/right, bottom left/right, center inside/outside), Dots, Position Dots y Autoplay. El Classy (Background Color y Spacing) ya esta.',
   text_image: 'Falta el subform de `c_sideimagetext`: panel Classy.',
-  tabs: 'Falta el subform de `comp_tabs`: panel Classy.',
   brand_cards: 'No aparece en el dialogo del CMS. Confirmar si es un View/bloque y no un paragraph.',
   articles_carousel: 'Idem: confirmar si es un View/bloque y no un paragraph.',
 }

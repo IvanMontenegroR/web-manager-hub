@@ -30,14 +30,53 @@ function isMissingTable(error) {
 //               secundario (Pro Plan) o no (Fancy Feast, cuyo secundario es casi
 //               blanco y no serviria para un icono).
 //   dark      = la pagina se pinta en tema oscuro (texto claro sobre fondo oscuro)
+// Tema de pagina por marca. Sale del CSS REAL del sitio: el campo Brand del nodo define
+// `--background-color-page` y `--color-text-default`, y todo componente sin color propio de
+// Classy toma esos dos (medido en content con 18 paginas de ejemplo x 7 marcas). Pro Plan va
+// negro, y Dog Chow, Purina One y Cat Chow van con su Brand 02 de fondo; las cuatro con TODO
+// el texto en blanco (`dark`). Fancy Feast y Dentalife quedan blancas con texto negro, como
+// sin marca. `secondary` y `accent` son acentos propios del hub que solo tenian Pro Plan y
+// Fancy Feast; a las marcas nuevas no se les inventa uno.
 const BRAND_THEMES = {
-  'Pro Plan': { primary: '#111114', secondary: '#d7bb77', accent: '#d7bb77', dark: true },
+  'Pro Plan': { primary: '#000000', secondary: '#d7bb77', accent: '#d7bb77', dark: true },
   'Fancy Feast': { primary: '#ffffff', secondary: '#FFFCF1', accent: '#d7bb77', dark: false },
+  'Dog Chow': { primary: '#007A38', dark: true },
+  'Purina One': { primary: '#00A5BB', dark: true },
+  'Cat Chow': { primary: '#02529B', dark: true },
+}
+
+// Los cuatro tokens "Brand 01".."Brand 04" del CMS NO tienen un color fijo: los define el
+// campo Brand del NODO, que inyecta `--brand-0N-source` en la pagina. Estos son los valores
+// que el sitio declara en content para cada marca (leidos de /proplan, /dogchow,
+// /purina-one, /fancy-feast, /catchow y /dentalife/productos). Las marcas que todavia no
+// tienen pagina en content no estan: sus Brand quedan sin pintar, igual que antes.
+// OJO: esto es solo la paleta de los tokens. El FONDO de la pagina sigue saliendo de
+// BRAND_THEMES (el sitio pinta tambien Dog Chow, Purina One y Cat Chow con fondo de color,
+// y el hub todavia no lo dibuja).
+const BRAND_TOKENS = {
+  'Pro Plan': ['#D7BB77', '#B29962', '#1F1F1F', '#121212'],
+  'Dog Chow': ['#2CAB5B', '#007A38', '#13482C', '#000000'],
+  'Purina One': ['#66C9D6', '#00A5BB', '#008799', '#B82828'],
+  'Fancy Feast': ['#F8F4EC', '#CBAB6D', '#8D7535', '#49301C'],
+  'Cat Chow': ['#6797C3', '#02529B', '#063560', '#000000'],
+  'Dentalife': ['#B7C0E1', '#2C3A6B', '#3770B5', '#000000'],
+  // Leidos de la ficha de la marca en content (taxonomia, field_brand_color), 2026-10: es
+  // de donde sale el `--brand-0N-source`. Dog Chow ahi da lo mismo que arriba.
+  'Felix': ['#3D5986', '#0C3068', '#071D3E', '#000000'],
+  'Beneful': ['#F5D2D2', '#CE201F', '#A00B0B', '#000000'],
+  'Campeón': ['#F5D2D2', '#FF0006', '#99150C', '#004264'],
+  'Gatina': ['#FFD3D0', '#FF2314', '#99150C', '#000000'],
+  'Excellent': ['#DDDDDE', '#56545A', '#971F33', '#000000'],
+}
+export function brandTokens(brand) {
+  const key = String(brand || '').trim().toLowerCase()
+  const hit = Object.entries(BRAND_TOKENS).find(([n]) => n.toLowerCase() === key)
+  return hit ? Object.fromEntries(hit[1].map((hex, i) => [`Brand 0${i + 1}`, hex])) : null
 }
 
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
-export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Purina']
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Gatina', 'Purina']
 
 // ===== Categorias =====
 // El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es
@@ -65,7 +104,7 @@ export function brandTheme(brand) {
   return null
 }
 
-// ¿La marca usa tema oscuro (fondo negro)? Hoy solo Pro Plan.
+// ¿La pagina va con el texto en blanco? Pro Plan, Dog Chow, Purina One y Cat Chow.
 export function pageIsDark(brand) {
   return !!brandTheme(brand)?.dark
 }

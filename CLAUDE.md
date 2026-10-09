@@ -97,7 +97,7 @@ Ref `mgcxlsjmlkfhjbsihczu`. El esquema YA existe (no se recrea, solo se consume)
   `status` = Open|In Progress|On Hold|Done.
   `priority` = alta|media|baja. `tags` = jsonb array de strings libres (sugerido `Helo`, ver `DEFAULT_TAGS`);
   se muestran como chips en la tarjeta y hay una barra de filtro por tag. Desde esa barra, el boton
-  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag (lista plana, sin
+  "Resumen <tag>" (`buildTagSummary`) arma el status del 1:1 de las tarjetas de ese tag que NO estan en Done (lista plana, sin
   agrupar por estado; cada una = tema en NEGRITA y debajo la nota, una linea por renglon). Devuelve
   `{ html, text }`: el modal muestra el HTML renderizado (lo que se va a pegar) y "Copiar con formato"
   escribe `text/html` + `text/plain` al portapapeles con `ClipboardItem`, asi Outlook pega negritas y
@@ -249,9 +249,27 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      ya existia, asi las paginas armadas antes no cambian.
      El **Background Color** del CMS es una lista de TOKENS (`BG_COLORS`, compartida por el Banner y el
      bloque de Texto), no un hex. Para poder pintarlo en el mockup hay un mapa `BG_TOKENS` token -> hex
-     con SOLO los que conocemos con certeza (Primary Red, Primary White); el resto queda sin pintar a
-     proposito — inventar el color de un design system seria peor que no mostrarlo. Cuando desarrollo pase
-     la paleta, se agrega la entrada y el mockup la toma sola.
+     sacado del CSS REAL del sitio (las variables `--color-*` que declara el tema; 34 de los 39). Ojo:
+     Primary Red es `#E91C24`, no el `#ED1C24` de la marca (ese es Reds 400). Neutral 300 queda sin
+     pintar (el sitio no lo declara): inventar el color de un design system seria peor que no mostrarlo.
+     Los **Brand 01-04** no tienen valor fijo: los pone el campo **Brand del nodo** (`field_brand`), que
+     inyecta `--brand-0N-source` y ademas cambia el FONDO y el texto por defecto de toda la pagina (Pro
+     Plan negro, Dog Chow verde #007A38, Purina One #00A5BB, Cat Chow #02529B; Fancy Feast y Dentalife
+     blancos). `BRAND_TOKENS` / `brandTokens` en `pagesDb.js` tiene la paleta de las seis marcas que ya
+     tienen pagina en content y el preview la resuelve por la marca de la pagina (`ctx.brandTokens`). El
+     FONDO de pagina por marca sale de `BRAND_THEMES`. El runner carga el Brand del nodo desde
+     `pages.brand` (ver `claveMarca` en `runner/src/build.js`).
+     **Que hace la marca en el sitio** (medido con el CSS real: 18 paginas de ejemplo de content x 7
+     marcas, inyectando el `:root` de cada una — la marca no carga otro CSS, solo ese bloque y el de la
+     barra de marca): pone `--background-color-page` y `--color-text-default`, y TODO componente sin
+     color propio de Classy los hereda — titulos y cuerpo en blanco por igual, sin grises. Pro Plan
+     negro, Dog Chow / Purina One / Cat Chow su Brand 02; Fancy Feast y Dentalife blancas. Lo que NO
+     sigue a la marca: los colores cargados en Classy (un titulo rojo queda rojo sobre el verde), la caja
+     del mosaico (toma el Card - Background Color; sin cargar, roja), los colores de la card Simple y el texto negro
+     fijo de algunos componentes del CMS (timeline, cards-contact). El acordeon abierto toma el Brand 01
+     (`--acc-open`). Con Purina One el blanco sobre #00A5BB da 3:1: es el diseño del sitio, no del hub.
+     Las marcas sin pagina en content (Felix, Beneful, Campeon, Excellent, Gatina, Snacks) NO estan
+     medidas: el hub las dibuja sin tema hasta verlas.
      En la variante **Card Icon Square**, el relleno de cada card sale del "Card - Background Color" del
      CMS (`background_card_color`), cuyo default es **blanco** — no se deduce de la banda: son dos campos
      distintos.
@@ -262,6 +280,16 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      se pinta y el bloque se comporta como cualquier otro. Un campo de color
      `clearable` significa "vacio = sin color": el form lo muestra como "Sin color" con un boton para
      quitarlo, en vez de un rojo que parece cargado.
+     **SPACING** (Classy `spacing`): `SPACING_PX` en components.js tiene lo que hace cada opcion
+     (medido en el CSS de content: `space_py_N` -> `section-py-N`, mismo padding arriba y abajo;
+     `space_section_X` -> `section-space--X`, un valor en mobile y otro desde 992px) y
+     `spacingDefault` lo que pone cada componente sin cargar nada (Medio casi todos; 20/20 Texto y
+     Texto con imagen; 16/16 Banner; 0 el Acordeon suelto). `spacingPx` resuelve el par
+     [arriba, abajo] y el preview lo aplica en `.cp-render.cp-sp` como padding AFUERA del bloque, o
+     ADENTRO de la banda si el bloque pinta fondo (`.cp-bleed`). En Vista previa las secciones van
+     pegadas (gap 0): el aire entre dos bloques es la suma de los dos, como en el sitio. La regla de
+     uso (titulos sueltos con 0 y 60 arriba) esta en `runner/CRITERIOS.md`, Spacing.
+     El **Acordeon** suelto se dibuja como en el sitio: maximo 686px centrado y todo cerrado.
      **FULL BLEED**: un bloque con FONDO PINTADO es una **seccion**, no una card: la banda de color cubre
      todo el ancho y solo el contenido queda dentro del container, sin borde redondeado, y si es el ULTIMO
      bloque de la pagina va PEGADO al footer (una franja que corta antes del pie deja un blanco que en el
@@ -272,6 +300,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      efectivamente pinta un color — hoy el bloque de Texto con Background Color y el Card Grid en las
      variantes de carrusel, con fondo cargado (incluida la banda de la variante con iconos). Un token que
      todavia no esta en `BG_TOKENS` no lleva la clase: la regla sigue lo que SE VE.
+     La otra cosa que sangra es una IMAGEN: el `c_image` con **Image Style = Full Width**
+     (`bg_position_full_width`, Classy) va de borde a borde (`.cp-cimg--full`, que tambien lleva
+     `.cp-bleed`, asi hereda el pegado al footer). Ahi la imagen va sin padding ni redondeo y solo el
+     texto vuelve al gutter. Para que ademas no deje aire contra el footer se carga
+     `spacing = space_py_0`.
      El breakout va en el `.pb-block` (tiene `overflow:hidden`, adentro se recortaria) y apunta al render
      PROPIO del bloque (`> .cp-render > .cp-bleed`), asi un texto con fondo metido en una columna de un
      layout no hace sangrar al contenedor. `--bleed-x` es el padding lateral propio de cada bloque, para
@@ -308,11 +341,23 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      en el CMS los banners son un campo multivaluado del wrapper, no ranuras distintas — y el
      `sort_order` de los hijos ES el orden de los slides. En el mockup los slides van APILADOS (no de a
      uno) con una banda arriba que lo aclara: asi se pueden ver y editar todos, y la captura del Excel
-     los muestra a los dos. No tiene campos propios: falta el subform de Drupal, asi que solo declara
-     Avanzado (lo unico que Drupal agrega a TODOS los paragraphs por igual) y no se le inventa Classy.
+     los muestra a los dos. Declara Avanzado y su Classy real (Background Color y Spacing, leidos del
+     formulario); los selects propios del slider (flechas, puntos, autoplay) siguen pendientes. Su
+     spacing por defecto es 0 y va con Seccion Medio (ver `runner/CRITERIOS.md`, Spacing).
+     OJO en el CMS: el Classy de un banner AGREGADO adentro del wrapper se pierde al CREAR el nodo
+     (el formulario lo muestra elegido y Drupal guarda Default). El runner lo repasa solo despues de
+     guardar (`repasarClassy` en `runner/src/build.js`): reabre el nodo y re-elige lo que quedo
+     distinto. No es solo de los anidados: tambien se perdio en bloques sueltos (el color de caja de
+     un mosaico, el Card Style Square), asi que el repaso cubre el Classy de TODO bloque agregado, y
+     abre solo la fila de cada uno (el "Editar todo" de una pagina larga da 502).
      Reemplaza al viejo campo `slides` del Banner, que nunca existio en el CMS
      (ver `sql/2026_banner_wrapper.sql`); el Banner vuelve a ser UNO solo, con su Media en todos los
      tipos, el Promotional incluido.
+     **CARDS INFO** (`cards_info`, "Cards con texto largo") = el paragraph `cards_info` del CMS (items
+     `card_infos`): icono + titulo + texto, y el texto NO se corta (el Card Grid si, en todos sus modos
+     menos el Simple). Es a donde van las cards con texto largo. La primera card va resaltada (Color
+     Background First Card; sin cargar, roja): al convertir se iguala a las demas. No tiene link por
+     card. Ver `runner/CRITERIOS.md`, Cards.
      **CARD GRID** (`card_grid`) = el paragraph `ln_c_cardgrid` del CMS. UN solo componente del que salen
      el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que
@@ -326,6 +371,20 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Los dos checkbox `Show ...` salieron del formulario real y estan cargados como campos del CMS, pero
      **que dibujan en el sitio esta PENDIENTE**: el mockup todavia no los pinta. Cuando se sepa, se agrega
      al render y se saca esta nota.
+     El modo **Simple (image + title)** (`cards-simple`) tiene mockup propio (`CMT_SIMPLE`), medido en
+     el sitio (content, `/card-grid-examples`): card de **300px fija en todos los anchos** (en mobile la
+     siguiente asoma), foto cuadrada arriba y DEBAJO, centrados, titulo y descripcion sobre el
+     "Card - Background Color" de Classy (sin cargar, la card no tiene fondo). Los colores de la card NO
+     siguen a la marca de la pagina: con el tema de Pro Plan la pagina va negra y el titulo de la card
+     sigue rojo y la descripcion negra, asi que en una marca oscura hay que cargar Card - Text Color (y
+     Card - Title Color en Brand 01 para el acento). A pesar del nombre y del
+     playbook ("description not applicable") el sitio **SI dibuja la descripcion**, asi que el mockup
+     tambien. El titulo va en "Card - Title Color" (default el rojo del sitio) y se corta a las **3
+     lineas**; sin descripcion baja a cuerpo (16px, como el `fs-body-md` del sitio). La descripcion NO se
+     corta pero estira la card y todas las de la fila se igualan a la mas alta. De ahi dos GUIAS de
+     largo (`CARD_SIMPLE_TITLE_MAX` 65, `CARD_SIMPLE_DESC_MAX` 100). Con link, la card ENTERA es el
+     link y el texto del CTA no se muestra. La imagen se pide a 600x600 (el doble de los 300px que
+     ocupa; los 450 del HTML del sitio son el archivo de prueba, no una regla).
      La FORMA de la card no sale del modo de vista sino del **Card - Style Card** de Classy: el mismo
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
@@ -334,6 +393,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      numero es la descripcion mas larga que vimos renderizar ENTERA en produccion, no una validacion de
      Drupal ni un limite exacto: lo que corta es el ALTO, y cuantos caracteres entran depende de como
      caigan las palabras (una de 133 se ve cortada a los 111 y esta de 128 se ve completa). Es una GUIA.
+     El **Mosaico** (`grid-cards`) tiene su propia guia, `CARD_MOSAIC_DESC_MAX` = 70: en desktop entra
+     todo, pero en MOBILE la caja tiene alto fijo y la descripcion se corta a 3 lineas (medido en la
+     caja real: unos 84 caracteres a 390px, entre 65 y 79 a 360px).
      El limite se declara como
      `maxLength` del campo (numero o funcion del contenido del COMPONENTE, resuelto con `maxLengthOf`),
      se muestra como contador en el form (`.cf-count`, rojo si se paso, sin recortar: un texto que ya
@@ -386,6 +448,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      los bloques anidados se capturen SIN el chrome del builder (barra de edicion y boton de agregar).
      Todo esto para que los editores carguen en el CMS. Los mockups usan alto FIJO (no aspect-ratio) y la captura fija
      el ancho en px, porque html2canvas resuelve mal aspect-ratio y los width:% sin ancho explicito.
+     La excepcion son las posiciones SIN medida en el catalogo (`text_image` y el `c_image` fuera de
+     "Image Background Box"): ahi va el archivo original entero, asi que el mockup lo dibuja en su
+     proporcion (`<Img natural>` = `height: auto` del `<img>`, que html2canvas si resuelve). Con un alto
+     fijo y cover recortaba justo lo que en el sitio se ve (un perro sin patas, un circulo cortado).
+     El "Image Background Box" tambien va en su proporcion: su imagen sale a la medida del catalogo
+     (2088×1044, 2:1), y con alto fijo se recortaba a ~3:1 y se perdian claims y badges del borde.
+     Una imagen en su proporcion no lleva el gris de carga detras (`.cp-img--nat`): en un PNG
+     transparente se veia como un recuadro que en el sitio no existe.
+     El titulo de un bloque de contenido (Texto, texto con imagen, Imagen) con HTML tag **h1** se dibuja
+     como titulo de pagina (`hClass` -> `.cp-hpage`): pasa cuando no hay hero (paginas legales) o el hero
+     es texto al lado de la foto, y con el estilo de un h2 quedaba mas chico que las secciones.
      A la DERECHA de todo (ultima columna) va **la pagina entera** en UNA sola imagen, sin division por
      campos: `stackImages` apila header + cada componente + footer (mismas capturas, memoizadas en `shots`)
      para ver de un vistazo como quedaria armada. La galeria de componentes la apaga (`fullPage: false`).
@@ -506,6 +579,17 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   reutiliza y el runner entra a su ficha a completarle la portada **solo si no tiene ninguna**: llenar un
   campo vacio no es pisar la eleccion de nadie, pero cambiar una portada cargada si lo seria — un medio lo
   comparten todas las paginas que lo referencian.
+  El **Carrusel de productos** (`product_list`) lleva **subtitulo** opcional debajo del titulo: un titulo
+  largo se parte en titulo corto + subtitulo (lo que viene despues de los dos puntos, o la parte que
+  describe), igual que en los demas carruseles. Ver `runner/CRITERIOS.md`.
+  En el CMS **no es un componente propio**: es un paragraph **Block** con el bloque "Selected Product"
+  (`pl_product_selected_product_block`) en Carousel, que es como lo arma F5. Elegir el bloque recarga el
+  formulario por AJAX (`ajax: true` en el mapping) y los productos son un campo repetible con "Añadir
+  otro elemento" (kind `lista`). Cada producto es una referencia "Nombre (nid)" a un producto del CMS; como
+  todavia no estan migrados, el runner pone MUESTRAS de la marca (`productosMuestra` del mapping). La
+  imagen de la izquierda es `field_background_image`. Pestañas de filtro y card Pet ID no existen ahi.
+  La **Linea de tiempo** (`timeline`) es el **History Grid** del CMS: cada hito lleva año (select), imagen
+  (obligatoria), titulo y cuerpo.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.
@@ -522,10 +606,26 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   una lista plana de 30 items no se lee.
   El builder tiene toggle Editar/Vista previa: en preview oculta paleta/editor/toolbars y muestra la
   pagina a sangre con el gutter real (sin los espacios de edicion).
+  Y un toggle **Desktop / Mobile**: en mobile la pagina se dibuja a 390px (`.pb-canvas--mobile` +
+  `.pb-device`, que en desktop es `display: contents` y no cambia nada) con la version mobile de cada
+  imagen. Los renders de los componentes NO saben que existe el mobile: `mobileContent` pisa cada
+  campo `<x>` con su `<x>_mobile` cargado (tambien adentro de las listas) y el resto lo acomoda el CSS
+  scopeado. Las reglas salen del sitio nuevo en staging mirado a 390px: gutter 20px, header con
+  hamburguesa a la izquierda del logo, Secondary Hero 1:1 con el texto a la izquierda y centrado en
+  vertical ENCIMA de la foto, carruseles con la card siguiente asomando, columnas y mosaico apilados.
+  El Excel sale siempre de desktop (el boton se apaga en mobile).
   El **Header** (`preview/SiteHeader.jsx`) y el **Footer** (`preview/SiteFooter.jsx`) del sitio son
   GLOBALES (mismos en todas las paginas): se renderizan fijos arriba/abajo del canvas y se incluyen como
   secciones arriba/abajo del export (imagen), NO son componentes editables por pagina. Para capturarlos
   bien se fuerza el ancho a desktop (1180px) en `snapshot(node, forceWidth)`.
+- **Criterios de migracion** (`runner/CRITERIOS.md`): las decisiones del Websites Expert al revisar
+  paginas migradas del sitio viejo (medidas, heroes, contraste, carrusel de productos, iconos, CTAs...),
+  cada una con el caso que la origino. Se lee ANTES de traducir o corregir una pagina, y cada decision
+  nueva se anota ahi en el momento, no al final de la ronda.
+- **Pedidos de cambio a NBS** (`docs/pedidos-nbs.md`): el formato de los slides que el Expert sube
+  por el request form de NBS para cambiar algo publicado (pptx de 2 slides + PDF + zip de imagenes
+  livianas, en castellano: el pedido como estado FINAL por posicion con CTA y link, y un De / para).
+  Se lee antes de armar uno.
 - **Menu del sitio** (`site_menu`, `src/lib/menuDb.js`, `src/components/pages/MenuEditor.jsx`):
   el header (`purina:header-main`) es config GLOBAL **por mercado**, no contenido de una pagina,
   asi que se edita en su propia pantalla (boton "Menú del sitio" en el tracker de paginas) y no

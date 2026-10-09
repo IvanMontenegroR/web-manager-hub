@@ -2,9 +2,11 @@
 // Drupal, manejando el navegador con la sesion que vos ya abriste.
 //
 // Reglas de la casa, y no son negociables:
-//   - Siempre BORRADOR. El runner no publica: destilda "Publicado" si el mapping dice
-//     donde esta. Nada de lo que hace llega al publico sin que un humano lo apruebe.
-//   - No modifica contenido existente: solo entra a "crear contenido".
+//   - El tilde "Publicado" queda como lo pide el manifiesto (`page.published`, por defecto
+//     borrador). Las paginas del hub van PUBLICADAS: es la regla de content.
+//   - No modifica contenido existente: solo entra a "crear contenido". La unica excepcion es
+//     `page.nid`, que AGREGA bloques al final de una pagina nuestra (confirmada por el alias)
+//     sin tocar lo que ya tenia.
 //   - Si algo no cuadra, FRENA. Un campo que no aparece es un error, no un aviso: una
 //     pagina a medio armar es peor que una que no se armo.
 //   - Las IMAGENES se ELIGEN de la Media library por su nombre, nunca se suben. Si la
@@ -13,6 +15,8 @@ import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listP
 import { esperarAjax, esperarVisible } from './esperas.js'
 import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
 import { elegirMedia, leerMedia } from './mediaExistente.js'
+import { crearMedioEnLinea } from './mediaNuevo.js'
+import { ALT_DE_RESERVA } from './media.js'
 import { elegirDeLaLibreria, leerSeleccion } from './mediaLibrary.js'
 
 // Los que el runner todavia NO sabe tocar. `media` salio de la lista: ese si se elige.
@@ -47,42 +51,110 @@ export async function buildPage({ page, mapping, manifest, save = false, onStep 
 
 async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubform, consola = [] }) {
   const site = mapping.site.replace(/\/+$/, '')
-  const url = new URL(mapping.nodeAdd, site + '/').href
+  // AGREGAR a una pagina que ya existe (`page.nid`): se abre su formulario de edicion y los
+  // bloques del manifiesto van AL FINAL. Lo que ya tenia no se toca. Sirve para armar una
+  // pagina larga en varias vueltas, guardando entre una y otra: un alta enorme en un solo
+  // formulario es la que se corta a mitad de camino.
+  const agregar = manifest.page.nid ? String(manifest.page.nid) : null
+  const url = agregar ? `${site}/node/${agregar}/edit` : new URL(mapping.nodeAdd, site + '/').href
 
   onStep(`Abriendo ${url}`)
   await prepararPagina(page)
+
+  // No se pisa nada: si la direccion ya responde en el sitio (una pagina, una redireccion,
+  // algo despublicado), se frena ANTES de tocar el formulario. Crear igual dejaria dos
+  // nodos peleando por el mismo alias, y Drupal le pondria "-0" al nuestro sin avisar.
+  if (manifest.page.path && !agregar) {
+    const destino = site + manifest.page.path
+    const r = await page.request.get(destino, { maxRedirects: 0, failOnStatusCode: false })
+    if (r.status() !== 404) {
+      throw new Error(`${manifest.page.path} ya existe en el sitio (responde ${r.status()}). `
+        + 'No se crea para no pisar nada: si hay que reemplazarla, se decide aparte.')
+    }
+  }
+
+  // LAS REFERENCIAS A PRODUCTOS tienen que existir. Un producto borrado o despublicado
+  // no falla al escribirlo: falla al GUARDAR, con todo el formulario ya cargado. Se
+  // revisan antes de empezar.
+  const faltan = await referenciasQueFaltan(page, site, manifest, mapping)
+  if (faltan.length) {
+    throw new Error(`Estos productos no existen en el sitio: ${faltan.join(' | ')}. `
+      + 'Corregí productosMuestra en el mapping (o el manifiesto) y volvé a correr.')
+  }
+  if (contarReferencias(manifest, mapping)) onStep('Productos referenciados: todos existen en el sitio')
+
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   if (/\/user\/login/.test(page.url())) {
     throw new Error('Drupal pidio login. Corre primero: page-runner login')
   }
 
-  onStep(`Titulo: ${manifest.page.title}`)
-  await escribir(page.locator(mapping.title).first(), manifest.page.title)
-
-  // El alias esta DESHABILITADO mientras Pathauto lo genere solo: hay que destildarlo
-  // antes de poder escribirlo.
-  if (manifest.page.path && mapping.path) {
-    if (mapping.pathauto) {
-      const auto = page.locator(mapping.pathauto).first()
-      if (await auto.count()) await tildar(auto, false)
+  // Agregando, la pagina tiene que ser la que dice el manifiesto: se confirma por el alias
+  // antes de tocar nada. Titulo, alias, publicado y marca quedan como estan.
+  if (agregar) {
+    const alias = mapping.path ? await page.locator(mapping.path).first().inputValue().catch(() => null) : null
+    if (!manifest.page.path || alias !== manifest.page.path) {
+      throw new Error(`El node ${agregar} tiene el alias ${alias ?? '(ninguno)'} y el manifiesto pide `
+        + `${manifest.page.path || '(ninguno)'}: no se agrega nada a una pagina que no es la del manifiesto.`)
     }
-    onStep(`Alias: ${manifest.page.path}`)
-    await escribir(page.locator(mapping.path).first(), manifest.page.path)
-  }
+    onStep(`Agregando al final de ${alias} (node ${agregar})`)
+  } else {
+    onStep(`Titulo: ${manifest.page.title}`)
+    await escribir(page.locator(mapping.title).first(), manifest.page.title)
 
-  // Despublicado SIEMPRE, salvo que el manifiesto pida lo contrario Y el mapping sepa
-  // donde esta el check.
-  if (mapping.published) {
-    const wants = manifest.page.published === true
-    const box = page.locator(mapping.published).first()
-    if (await box.count()) await tildar(box, wants)
-    if (wants) onStep('OJO: el manifiesto pide PUBLICADA')
+    // El alias esta DESHABILITADO mientras Pathauto lo genere solo: hay que destildarlo
+    // antes de poder escribirlo.
+    if (manifest.page.path && mapping.path) {
+      if (mapping.pathauto) {
+        const auto = page.locator(mapping.pathauto).first()
+        if (await auto.count()) await tildar(auto, false)
+      }
+      onStep(`Alias: ${manifest.page.path}`)
+      await escribir(page.locator(mapping.path).first(), manifest.page.path)
+    }
+
+    // El tilde "Publicado" queda como lo pide el manifiesto (por defecto destildado). En
+    // content viene TILDADO de entrada y vive fuera del <form>, en la barra de Gin: por eso
+    // se fija siempre, para que el resultado no dependa del default del sitio.
+    if (mapping.published) {
+      const wants = manifest.page.published === true
+      const box = page.locator(mapping.published).first()
+      if (await box.count()) await tildar(box, wants)
+      onStep(wants ? 'Queda PUBLICADA' : 'Queda en BORRADOR')
+    }
+
+    // La MARCA. Es la que le pone los colores a toda la pagina (fondo, texto por defecto,
+    // acentos), asi que una marca que no se encuentra FRENA: dejarla en "- Ninguno -" sacaria
+    // una pagina de Pro Plan en blanco y negro sin que nadie lo note.
+    if (mapping.brand) {
+      const sel = page.locator(mapping.brand).first()
+      const quiere = claveMarca(manifest.page.brand)
+      if (quiere && await sel.count()) {
+        const opciones = await sel.locator('option').evaluateAll((os) => os.map((o) => ({ value: o.value, label: o.textContent })))
+        const elegida = opciones.find((o) => claveMarca(o.label) === quiere)
+        if (!elegida) {
+          throw new Error(`La marca "${manifest.page.brand}" no esta en el campo Brand del sitio `
+            + `(ofrece: ${opciones.filter((o) => o.value !== '_none').map((o) => o.label.trim()).join(', ')}).`)
+        }
+        await revelar(sel)
+        await sel.selectOption(elegida.value)
+        onStep(`Marca: ${elegida.label.trim()}`)
+      } else if (quiere) {
+        throw new Error(`La pagina es de ${manifest.page.brand} pero el formulario no tiene el campo Brand (${mapping.brand}).`)
+      } else {
+        onStep('Marca: ninguna (tema Purina)')
+      }
+  }
   }
 
   const ctx = { mapping, page, onStep, esperaSubform, consola,
-    escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map() }
+    escritos: [], pendientes: [], listas: new Set(), imagenes: [], precreadas: new Map(), classyAnidado: [] }
   const root = { dsel: mapping.paragraphs.dsel, base: mapping.paragraphs.base, add: mapping.paragraphs.add }
+  ctx.root = root
+  // Agregando, las filas que ya tiene la pagina llegan PLEGADAS (sin campos en el DOM) y
+  // `filasPrevias` las veria vacias: se marcan como que no hay nada para reusar, asi un
+  // bloque del mismo tipo nunca cae encima de uno que ya tenia contenido.
+  if (agregar) ctx.precreadas.set(root.dsel, [])
 
   onStep('Armando la estructura…')
   let n = 0
@@ -142,12 +214,83 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   }
 
   onStep('Guardando…')
-  await page.locator(mapping.save).first().click()
-  await page.waitForLoadState('domcontentloaded')
+  const antes = page.url()
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {}),
+    page.locator(mapping.save).first().click(),
+  ])
   const after = page.url()
-  const nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
+  // GUARDADO = Drupal salio del formulario de alta. Si sigue en /node/add (o en la misma
+  // URL), lo rechazo: se lee el mensaje de error y se FRENA, en vez de anunciar un guardado
+  // que no paso (paso con un producto cuyo nombre tenia una coma).
+  if (after === antes || /\/node\/add\/|\/node\/\d+\/edit/.test(after)) {
+    const msg = (await page.locator('[role="alert"], .messages--error, [data-drupal-messages] .messages').allInnerTexts().catch(() => []))
+      .join(' | ').replace(/\s+/g, ' ').trim().slice(0, 600)
+    throw new Error(`Drupal no guardo la pagina (sigue en ${after}). ${msg ? 'Dice: ' + msg : 'Sin mensaje visible.'}`)
+  }
+  let nodeId = (/\/node\/(\d+)/.exec(after) || [])[1] || null
+  nodeId ??= agregar
+  nodeId ??= await page.evaluate(() => {
+    const h = document.querySelector('link[rel="shortlink"]')?.href
+      || [...document.querySelectorAll('a[href*="/node/"]')].map((a) => a.getAttribute('href')).find((x) => /\/node\/\d+\/edit/.test(x)) || ''
+    return (/\/node\/(\d+)/.exec(h) || [])[1] || null
+  })
+  if (ctx.classyAnidado.length) await repasarClassy(ctx, nodeId)
   return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
 }
+
+// El Classy de un paragraph AGREGADO se pierde al guardar: el formulario lo muestra elegido y
+// Drupal guarda "Default". Empezo a verse en los anidados (el segundo banner de un Banner
+// Wrapper en /proplan/perros) y despues tambien en bloques sueltos (el mosaico de
+// /purina-one/por-que-cambiar-a-one quedo con las cajas en el rojo por defecto, el Card Style
+// Square de /referencia/cards volvio a Default). Editando el nodo ya guardado SI se guarda, asi
+// que despues del alta se vuelve a abrir el formulario, se re-eligen esos valores y se guarda
+// de nuevo. Solo se tocan los que quedaron distintos de lo que el runner cargo.
+//
+// Se abre SOLO la fila de cada bloque que hay que mirar, no "Editar todo": en una pagina larga
+// ese AJAX trae el formulario entero y el servidor contesta 502. Abrir una fila pliega la
+// anterior, pero Drupal se queda con lo elegido en ella.
+export async function repasarClassy(ctx, nodeId) {
+  const { mapping, page, onStep, esperaSubform } = ctx
+  if (!nodeId) { onStep('AVISO: no se pudo leer el node id para repasar el Classy de los bloques agregados.'); return }
+  onStep(`Repasando el Classy de ${ctx.classyAnidado.length} campo(s) en node/${nodeId}…`)
+  await page.goto(`${mapping.site}/node/${nodeId}/edit`, { waitUntil: 'domcontentloaded', timeout: 180000 })
+  const raiz = namePath(mapping.paragraphs.dsel.split('-{delta}')[0])
+  // Se abre una fila haciendo click en su boton de editar, si esta a la vista.
+  const abrir = async (nombre, sel) => {
+    const b = page.locator(`[name="${nombre}"]`).first()
+    if (!(await b.count())) return
+    await b.dispatchEvent('mousedown')
+    await esperarAjax(page)
+    await sel.waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {})
+  }
+  let cambios = 0
+  for (const r of ctx.classyAnidado) {
+    const sel = page.locator(r.sel).first()
+    // Primero la fila del bloque de la pagina; si el campo es de un hijo, despues la del hijo.
+    const delta = (new RegExp(`^${raiz}_(\\d+)`).exec(r.editar) || [])[1]
+    if (!(await sel.count()) && delta != null) await abrir(`${raiz}_${delta}_edit`, sel)
+    if (!(await sel.count()) && r.editar !== `${raiz}_${delta}_edit`) await abrir(r.editar, sel)
+    if (!(await sel.count())) throw new Error(`Repaso del Classy: no encontre ${r.ref} (${r.sel}) en el formulario guardado`)
+    const antes = await sel.inputValue()
+    if (antes === String(r.value)) continue
+    // Esta adentro del desplegable Classy, cerrado: se elige sin abrirlo.
+    await sel.evaluate((e, v) => { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })) }, String(r.value))
+    onStep(`     ${r.ref}: el CMS lo guardo en "${antes}", se vuelve a poner "${r.value}"`)
+    cambios += 1
+  }
+  if (!cambios) { onStep('     todo quedo bien guardado, no hace falta re-guardar'); return }
+  const log = page.locator('textarea[name="revision_log[0][value]"]')
+  if (await log.count()) await log.fill('migration-mx: re-aplica el Classy que no quedo al guardar')
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 180000 }).catch(() => {}),
+    page.locator(mapping.save).first().click(),
+  ])
+  if (/\/edit$/.test(new URL(page.url()).pathname)) throw new Error('Repaso del Classy: Drupal no guardo la segunda pasada')
+  onStep(`     re-guardada (${cambios} campo(s))`)
+}
+// Nombre de antes, cuando solo se repasaban los anidados.
+export const repasarClassyAnidado = repasarClassy
 
 // Agrega UN paragraph y llena sus campos. `holder` es donde vive la lista: el campo de
 // paragraphs del nodo, o un slot adentro del subform de un contenedor. Sus plantillas
@@ -205,7 +348,7 @@ async function addBlock(ctx, block, num, holder) {
   // eso borra lo que se haya escrito antes: si se llena sobre la marcha, la pagina
   // termina armada y vacia. Asi que primero se arma TODA la estructura y despues se
   // llena de una, cuando ya no queda ningun AJAX por delante.
-  ctx.pendientes.push({ block, def, vars, num })
+  ctx.pendientes.push({ block, def, vars, num, anidado: holder !== ctx.root })
   ctx.listas.add(holder.dsel)
 
   // Contenedores: sus hijos van adentro del slot que les toca, no en la lista del nodo.
@@ -248,7 +391,7 @@ async function addBlock(ctx, block, num, holder) {
 // Llena los campos de un paragraph ya agregado. Antes abre los desplegables del
 // formulario (Optional fields, Avanzado, Classy, Atributos), porque un campo que vive
 // adentro no se puede tocar con el panel cerrado.
-async function llenarBloque(ctx, { block, def, vars, num }) {
+async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
   const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
   if (!campos.length) return
@@ -286,6 +429,15 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
       ctx.escritos.push(await ponerMedia(ctx, f, vars, String(value), ref))
       continue
     }
+    // Un inline entity form SIN "existente" (el fondo de una pestaña): el medio se crea ahi
+    // mismo con los archivos que dejo imagenes.mjs.
+    if (f.kind === 'mediaNuevo') {
+      onStep(`     imagen "${key}": creando "${value}" en el formulario`)
+      const campo = resolveSelector(f.sel, vars)
+      const r = await crearMedioEnLinea({ page: ctx.page, campo, nombre: String(value), alt: ALT_DE_RESERVA, ref })
+      ctx.escritos.push({ selector: campo, f, ref, valor: String(value), puesto: r.texto })
+      continue
+    }
     // El OTRO widget de medios: el modal con grilla. Lo usa el video externo. Se elige por
     // URL porque el nombre del medio lo pone YouTube y el hub no lo tiene.
     if (f.kind === 'mediaLibrary') {
@@ -297,15 +449,29 @@ async function llenarBloque(ctx, { block, def, vars, num }) {
       ctx.escritos.push(await ponerDeLaLibreria(ctx, f, vars, v, ref))
       continue
     }
+    // Un campo que se REPITE con "Añadir otro elemento" (los productos del carrusel): el
+    // formulario trae la primera fila y cada una de las demas se pide con el boton.
+    if (f.kind === 'lista') {
+      ctx.escritos.push(...await llenarLista(ctx, f, vars, value, ref))
+      continue
+    }
     // El numero va en la referencia: con dos cards iguales, "ln_c_grid_card_item.field_c_text"
     // no dice CUAL de las dos, y son justo las que hay que ir a mirar.
     ctx.escritos.push(await fillField(ctx, f, vars, value, ref))
+    if (key.startsWith('classy.') && f.kind === 'select') {
+      ctx.classyAnidado.push({ sel: resolveSelector(f.sel, vars), value, ref, editar: `${vars.npath}_edit` })
+    }
+    // Un select que RECARGA parte del formulario al cambiar (el bloque del paragraph Block:
+    // al elegirlo, Drupal trae su configuracion por AJAX). Los campos que siguen viven en
+    // lo que llega, asi que hay que esperarlo antes de seguir llenando.
+    if (f.ajax) await esperarAjax(page)
   }
 }
 
 function resolveIn(add, vars) {
   const out = { ...add }
   for (const k of ['select', 'button', 'open', 'enMedio']) if (out[k]) out[k] = resolveSelector(out[k], vars)
+  if (out.alternativa) out.alternativa = resolveIn(out.alternativa, vars)
   return out
 }
 
@@ -343,7 +509,8 @@ async function reservarFila(ctx, holder, def, type) {
   const primera = cola[0]
   const bundle = enGuiones(def.value || type)
 
-  if (primera && primera.vacia && primera.bundle === bundle) {
+  const mismoTipo = primera && (primera.bundle ? primera.bundle === bundle : primera.titulo === def.label)
+  if (primera && primera.vacia && mismoTipo) {
     cola.shift()
     return { delta: primera.delta, reusar: true }
   }
@@ -351,8 +518,9 @@ async function reservarFila(ctx, holder, def, type) {
     // No se toca y no se vuelve a mirar: si la primera no sirve, reusar una de mas abajo
     // dejaria igual un hueco en el medio. Se avisa, porque una fila de mas en la pagina
     // es algo que alguien va a tener que mirar.
-    onStep(`     (la lista ya traia una fila ${primera.bundle ? `"${primera.bundle}"` : 'de tipo desconocido'}`
-      + `${primera.vacia ? ' vacia' : ' con contenido'} en la posicion ${primera.delta}: se deja como esta)`)
+    onStep(`     (la lista ya traia una fila ${primera.bundle || primera.titulo ? `"${primera.bundle || primera.titulo}"` : 'de tipo desconocido'}`
+      + `${primera.vacia ? ' vacia' : ' con contenido'} en la posicion ${primera.delta}: se deja como esta)`
+      + (primera.porque ? ` [${primera.porque}]` : ''))
     cola.length = 0
   }
   return { delta: await freeDelta(page, holder.dsel), reusar: false }
@@ -384,18 +552,33 @@ const mirarFila = (el) => {
     const m = /paragraph-type--([a-z0-9-]+)/.exec(clase(n))
     if (m) { bundle = m[1]; break }
   }
+  // En algunas listas (las del Banner Wrapper) la clase no va en la fila sino en el
+  // wrapper del subform, adentro. Se toma la PRIMERA que aparezca, que es la propia: las de
+  // los paragraphs anidados vienen despues en el orden del documento.
+  if (!bundle) {
+    const m = /paragraph-type--([a-z0-9-]+)/.exec(clase(el.querySelector('[class*="paragraph-type--"]')))
+    if (m) bundle = m[1]
+  }
+  // Y en otras (las del Banner Wrapper) no hay clase en ningun lado: lo unico que dice el
+  // tipo es la etiqueta de la cabecera de la fila ("Banner"). Va aparte del bundle porque es
+  // la etiqueta que ve el editor, no el nombre de maquina.
+  const titulo = (el.querySelector('.paragraph-type-title')?.textContent || '').trim()
   // Campos que Drupal trae con valor puesto y que no dicen nada sobre si alguien cargo
   // contenido: el peso de la fila, el formato de texto, el idioma.
-  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$/
+  // Tampoco el selector de "que tipo agregar" de una lista anidada ([add_more]): una
+  // pestaña recien nacida lo trae puesto en el primer tipo y no tiene nada cargado.
+  const TECNICOS = /\[(_weight|format|_original_delta|langcode|bundle)\]$|\[add_more\]|\[options\]\[attributes\]/
   let vacia = true
+  let porque = null // el campo que la hizo contar como cargada: va en el aviso
   const campos = el.querySelectorAll('input[type="text"], input[type="url"], input[type="email"],'
     + ' input[type="number"], textarea, select')
   for (const c of campos) {
     if (TECNICOS.test(c.name || '')) continue
+    if (c.type === 'submit') continue
     const v = String(c.value || '').trim()
-    if (v && v !== '_none') { vacia = false; break }
+    if (v && v !== '_none') { vacia = false; porque = `${c.name}=${v.slice(0, 40)}`; break }
   }
-  return { bundle, vacia }
+  return { bundle, titulo, vacia, porque }
 }
 
 // `ln_c_grid_card_item` -> `ln-c-grid-card-item`, que es como Drupal escribe el bundle en
@@ -417,8 +600,22 @@ async function freeDelta(page, dselTpl) {
 async function clickAdd(page, add, def, type) {
   if (add.mode === 'select') {
     const sel = page.locator(add.select).first()
+    // Una ranura puede ofrecer el alta de DOS maneras segun el estado del formulario (en
+    // las pestañas: "Párrafo type" + boton, o un dropbutton de Gin). `alternativa` es la otra.
+    if (!(await sel.count()) && add.alternativa) return clickAdd(page, add.alternativa, def, type)
     if (!(await sel.count())) throw new Error(`No encontre el desplegable de tipos (${add.select})`)
-    if (def.value) await sel.selectOption(def.value)
+    if (add.sinAjaxAlElegir) {
+      // El desplegable de algunas ranuras dispara un AJAX que en el CMS esta ROTO (en las
+      // pestañas, paragraphs_features tira un TypeError y el alta posterior no aparece).
+      // Drupal no necesita ese AJAX: lee el valor del desplegable al apretar el boton. Se
+      // pone el valor sin disparar el evento, como si nunca se hubiera recargado.
+      const ok = await sel.evaluate((s, v) => {
+        const o = [...s.options].find((x) => x.value === v.value || (!v.value && x.text.trim() === v.label))
+        if (!o) return false
+        s.value = o.value; return true
+      }, { value: def.value || null, label: def.label })
+      if (!ok) throw new Error(`El desplegable de tipos no ofrece "${def.value || def.label}"`)
+    } else if (def.value) await sel.selectOption(def.value)
     else await sel.selectOption({ label: def.label })
     // El desplegable tambien dispara AJAX: apretar Agregar sin esperar rompe las dos.
     await esperarAjax(page)
@@ -494,6 +691,14 @@ async function revelar(loc) {
   }).catch(() => { /* si no se puede evaluar, se intenta igual: quiza ya se ve */ })
 }
 
+// La marca como se compara: sin ®/™, sin acentos, sin mayusculas, sin espacios y sin el
+// "Purina" del nombre. Asi "Purina One" del hub encuentra "Purina® One®" del CMS y "Felix"
+// encuentra "Purina®  Felix®". "Purina" a secas queda vacio: es la marca paraguas, sin tema.
+export function claveMarca(nombre) {
+  return String(nombre || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[®™]/g, '').replace(/\bpurina\b/g, '').replace(/[^a-z0-9]/g, '')
+}
+
 async function escribir(loc, valor) {
   await revelar(loc)
   await loc.fill(String(valor))
@@ -547,7 +752,7 @@ async function elegirFormato(page, selector, cfg, ref, onStep) {
 
 // Recibe el `ctx` entero — y no solo la pagina — porque el formato de texto es una regla
 // del SITIO, no del campo: vive en el mapping y hay que poder leerla desde aca.
-async function fillField(ctx, f, vars, value, ref) {
+export async function fillField(ctx, f, vars, value, ref) {
   const { page } = ctx
   const selector = resolveSelector(f.sel, vars)
   const total = await page.locator(selector).count()
@@ -618,6 +823,78 @@ async function fillField(ctx, f, vars, value, ref) {
       + `Elementos con ese selector: ${total}.`)
   }
   return { selector, f, ref, valor: value, puesto, rutaRich }
+}
+
+// Las referencias "Nombre (nid)" de los campos repetibles del manifiesto (los productos
+// del carrusel), con el nid aparte.
+function referencias(manifest, mapping) {
+  const out = []
+  const recorrer = (bloques) => {
+    for (const b of bloques || []) {
+      const def = mapping.paragraphs?.types?.[b.type]
+      for (const [k, v] of Object.entries(b.fields || {})) {
+        if (def?.fields?.[k]?.kind !== 'lista') continue
+        for (const x of [].concat(v)) {
+          const nid = /\((\d+)\)\s*$/.exec(String(x))?.[1]
+          if (nid) out.push({ texto: String(x), nid })
+        }
+      }
+      recorrer(b.children)
+    }
+  }
+  recorrer(manifest.blocks)
+  return out
+}
+const contarReferencias = (manifest, mapping) => referencias(manifest, mapping).length
+
+// Cuales de esas referencias NO existen: el nodo responde 404 (o 403, que es lo que da un
+// nodo despublicado a quien no lo puede ver). Cada nid se consulta una sola vez.
+export async function referenciasQueFaltan(page, site, manifest, mapping) {
+  const faltan = []
+  const vistos = new Map()
+  for (const r of referencias(manifest, mapping)) {
+    if (!vistos.has(r.nid)) {
+      const res = await page.request.get(`${site}/node/${r.nid}`, { maxRedirects: 0, failOnStatusCode: false })
+      vistos.set(r.nid, res.status())
+    }
+    const st = vistos.get(r.nid)
+    if (st === 404 || st === 403) faltan.push(`${r.texto} (responde ${st})`)
+  }
+  return faltan
+}
+
+// Llena un campo repetible fila por fila. `f.sel` lleva `{i}` (la fila) y `f.add` es el
+// boton "Añadir otro elemento" de ese campo. La fila 0 viene en el formulario; las demas
+// se piden de a una y se espera a que aparezcan, igual que haria una persona.
+export async function llenarLista(ctx, f, vars, valores, ref) {
+  const { page } = ctx
+  const lista = Array.isArray(valores) ? valores : [valores]
+  const escritos = []
+  for (const [i, v] of lista.entries()) {
+    const sel = resolveSelector(f.sel, { ...vars, i })
+    if (!(await page.locator(sel).count())) {
+      const boton = page.locator(resolveSelector(f.add, vars)).last()
+      if (!(await boton.count())) throw new Error(`${ref}: no encontre el boton para agregar la fila ${i + 1} (${resolveSelector(f.add, vars)})`)
+      await revelar(boton)
+      await boton.click()
+      await esperarAjax(page)
+      await page.locator(sel).first().waitFor({ state: 'attached', timeout: 20000 })
+        .catch(() => { throw new Error(`${ref}: apreté "Añadir otro elemento" y no aparecio la fila ${i + 1}`) })
+    }
+    const valor = f.referencia ? citarReferencia(v) : v
+    escritos.push(await fillField(ctx, { ...f, kind: 'text', sel: f.sel.replaceAll('{i}', String(i)) }, vars, valor, `${ref}[${i}]`))
+  }
+  return escritos
+}
+
+// Un autocompletado de referencias de Drupal SEPARA POR COMA: "Purina One carne, pollo y
+// cordero (666)" lo lee como dos productos y el segundo no existe, asi que el formulario no
+// se guarda. La regla de Drupal es encerrar entre comillas dobles el valor que lleva coma
+// (y duplicar las comillas que tenga adentro).
+export function citarReferencia(v) {
+  const t = String(v ?? '')
+  if (!t.includes(',') || /^".*"$/.test(t.trim())) return t
+  return `"${t.replace(/"/g, '""')}"`
 }
 
 // Elige un medio YA subido. El valor del manifiesto es el NOMBRE del medio en la
@@ -730,7 +1007,7 @@ async function loQueQuedo(page, f, selector, el) {
     if (f.kind === 'richtext') return await leerRich(page, el)
     // Un medio no tiene "valor": lo que hay es la fila que dibuja el inline entity form
     // con el nombre del medio adentro.
-    if (f.kind === 'media') return await leerMedia(page, selector)
+    if (f.kind === 'media' || f.kind === 'mediaNuevo') return await leerMedia(page, selector)
     if (f.kind === 'mediaLibrary') return await leerSeleccion(page, selector)
     return await el.inputValue()
   } catch { return null }

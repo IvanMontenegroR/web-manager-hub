@@ -8,7 +8,7 @@ programas que generan manifiestos; cualquier otro proyecto puede generarlos con 
 cosa, o escribirlos a mano.
 
 ```
-manifiesto.json  +  mapping.json  ->  page-runner  ->  borrador en Drupal
+manifiesto.json  +  mapping.json  ->  page-runner  ->  pagina en Drupal (publicada si el manifiesto lo pide)
    que pagina        como es el
    hay que armar     formulario de
                      ESE Drupal
@@ -80,7 +80,7 @@ Los tres pasos de la pantalla:
    recortan las imagenes, las suben a la Media library y arman la pagina. *Probar sin
    guardar* llena el formulario para que lo mires y **no crea la pagina** en el CMS (los
    medios si se suben: son reutilizables y hacen falta para que el formulario se llene de
-   verdad). *Crear borrador* ademas la guarda despublicada y te da el link. Los pasos se
+   verdad). *Crear página* ademas la guarda (publicada, como piden los manifiestos del hub) y te da el link. Los pasos se
    ven en vivo mientras corre.
 
 ### Por terminal
@@ -95,7 +95,10 @@ node src/cli.js build   manifests/*.json --mapping mapping/purina-latam.json --s
 ```
 
 Sin `--save` llena el formulario y **deja la ventana abierta** para que lo mires: no
-escribe nada en el CMS. Con `--save` aprieta Guardar y deja el borrador despublicado.
+escribe nada en el CMS. Con `--save` aprieta Guardar: queda publicada o en borrador segun `page.published`.
+Despues de guardar, si la pagina tiene paragraphs anidados con Classy (los banners de un Banner
+Wrapper), reabre el nodo y vuelve a elegir los que el CMS guardo en Default: al crear el nodo Drupal
+pierde el Classy de los que se agregaron adentro de otro. Si todo quedo bien, no re-guarda.
 
 Si hay un solo archivo en `mapping/`, `--mapping` se puede omitir.
 Otras opciones: `--browser chrome|edge`, `--profile <dir>`, `--slowmo <ms>`, `--keepopen`.
@@ -115,9 +118,17 @@ npm run verify -- mapping/purina-latam.json form.html
 
 ## Reglas de la casa
 
-- **Siempre borrador.** El runner no publica. Si el mapping sabe donde esta el check de
-  publicado, lo destilda. Nada llega al publico sin que un humano lo apruebe.
-- **No modifica nada existente.** Solo entra a "crear contenido". No edita, no borra.
+- **Publicada o borrador, segun el manifiesto.** El tilde "Publicado" se fija siempre a lo
+  que pide `page.published` (en content viene tildado de entrada). Las paginas que salen del
+  hub van PUBLICADAS: es la regla de content (ver `CRITERIOS.md`). Un manifiesto escrito a
+  mano sin `published` queda en borrador.
+- **Con la marca de la pagina.** `page.brand` (la del hub) va al campo Brand del nodo, que es el
+  que le pone los colores de la marca a toda la pagina. Se busca entre las opciones sin mirar ®,
+  acentos ni el "Purina" del nombre; si no esta, frena. Sin marca queda "- Ninguno -".
+- **No modifica nada existente, salvo con un plan revisado.** `build` solo entra a "crear
+  contenido". La unica forma de cambiar una pagina que ya existe es `aplicar`, que toca
+  solo los campos que dice el plan y solo si siguen teniendo el valor que se leyo (ver
+  "Leer y cambiar paginas que ya existen"). Nunca borra.
 - **Frena ante la duda.** Un campo que el mapping no conoce, o que no aparece en el
   formulario, es un ERROR y corta la corrida. Una pagina a medio armar es peor que una
   que no se armo. Si corta antes de `--save`, no quedo nada en el CMS.
@@ -348,7 +359,7 @@ npm run build -- manifests/conoce-purina.json       # 7. armarla en el CMS (sin 
 viejo: las que se arman directo en el hub no tienen archivo de plan, asi que el recortador
 las lee de la base. Es el mismo trabajo; lo unico que cambia es de donde salen los bloques.
 
-**Desde la INTERFAZ es un boton.** `npm run ui` y "Crear borrador": la interfaz corre la
+**Desde la INTERFAZ es un boton.** `npm run ui` y "Crear página": la interfaz corre la
 cadena entera — regenera el manifiesto desde el hub, recorta, sube los medios y arma la
 pagina. Antes solo hacia el ultimo paso, asi que dependia de que alguien hubiera corrido
 tres comandos antes, en orden; y cuando el manifiesto estaba viejo no fallaba nada, se
@@ -451,14 +462,76 @@ existe se actualiza y se le reemplazan todos los bloques. Correrlo dos veces no 
 nada. Lo que quedo en `revisar` baja a `pages.notes`, que es donde se buscan los
 outliers. Con `--seco` muestra que haria sin escribir.
 
+## Leer y cambiar paginas que ya existen
+
+Dos comandos que van juntos y que **no usan el navegador**: hablan con Drupal por HTTP,
+como lo haria un navegador, asi que corren igual en tu maquina que en una sesion en la
+nube. Las credenciales salen de `DRUPAL_MCP_USER_CONTENT_MX` / `DRUPAL_MCP_PASS_CONTENT_MX`
+(el sufijo es `<ENTORNO>_<MERCADO>`); si no estan, las preguntan en la terminal. Nunca se
+escriben en disco. Se presentan como `migration-mx` (User-Agent) y van de a un pedido por
+vez, con una pausa entre uno y otro.
+
+```bash
+npm run leer -- /adopta/tenencia-responsable     # una pagina
+npm run leer -- /adopta --prefijo                # todas las que empiezan con /adopta
+npm run aplicar -- cambios/adopta-ctas.json      # ENSAYO: no guarda nada
+npm run aplicar -- cambios/adopta-ctas.json --save
+```
+
+**`leer`** abre el formulario de edicion, despliega todos los paragraphs (el "Editar todo"
+de cada nivel, que es un pedido AJAX y no guarda nada) y **nunca envia el formulario**.
+Devuelve cada paragraph con su posicion (`8`, `2 > field_c_subitems 0`), su tipo y cada
+campo con su **nombre exacto** y su valor:
+
+```
+[8] Content: Text
+    [field_c_link][0][uri] = #
+    [field_c_link][0][title] = Perros
+```
+
+Lo guarda en `lecturas/<ruta>.json`, que no se versiona: es contenido del CMS y el repo es
+publico. Se lee el formulario y no la pagina publica porque la publica no dice que campo es
+cada cosa ni el numero de cada paragraph, y no muestra lo que no se dibuja (los selects de
+Classy, los HTML tag).
+
+**`aplicar`** recibe un plan: por pagina, una lista de `{ campo, antes, despues }` con el
+nombre completo del campo (`field_ln_n_components[8][subform][field_c_link][0][uri]`, el
+que dio `leer` con su prefijo). Las reglas son las que permiten correrlo sin mirar cada
+pagina a mano:
+
+- **Solo escribe en content** (`SITIOS` en `tools/drupal-http.js`, campo `escribe`). En
+  cualquier otro sitio el ensayo corre y `--save` frena.
+- **Controla el valor de antes.** Si alguien cambio el campo desde que se leyo, esa pagina
+  se saltea entera y se avisa. No se pisa trabajo de nadie.
+- **Toca solo lo del plan.** El resto del formulario viaja tal cual estaba, incluido el
+  estado de moderacion: una pagina publicada sigue publicada.
+- **Deja el mensaje del plan como mensaje de revision**, asi el historial de la pagina dice
+  que se cambio y por que, y se puede volver atras desde Revisiones.
+- **Verifica:** despues de guardar vuelve a leer la pagina entera y la compara con la de
+  antes. Tiene que haber cambiado exactamente lo del plan; cualquier otra diferencia sale
+  como error.
+- Cada corrida con `--save` deja una linea en `logs/aplicar.jsonl`.
+
+Lo que **no** hace: agregar o sacar paragraphs, subir imagenes o elegir medios. Eso sigue
+siendo del motor con navegador (`build`). `aplicar` cambia valores de campos que ya existen.
+
+En un entorno que sale a internet por un proxy (una sesion en la
+nube), Node lo toma con `NODE_USE_ENV_PROXY=1` y `NODE_EXTRA_CA_CERTS=<bundle>`. En tu
+maquina no hace falta.
+
 ## Para la revision de compliance
 
-- **Que hace:** crea nodos nuevos, despublicados, en el CMS, llenando el mismo
-  formulario que llenaria una persona. Nada mas.
-- **Que NO hace:** no publica, no borra, no modifica contenido existente, no toca otros
-  content types, no cambia configuracion del sitio.
-- **Credenciales:** no pide, no guarda y no transmite contraseñas. Usa la sesion que el
-  usuario abre a mano en su navegador. No hay tokens ni claves en el codigo ni en disco.
+- **Que hace:** crea nodos nuevos en el CMS (publicados si el manifiesto lo pide, que es lo
+  que hace el traductor del hub para content), llenando el mismo formulario que llenaria una
+  persona. Nada mas.
+- **Que NO hace:** no borra, no toca otros content types, no cambia configuracion del
+  sitio. Contenido existente solo lo modifica `aplicar`, campo por campo segun un plan
+  revisado, controlando el valor previo y dejando mensaje de revision.
+- **Credenciales:** el armado (`build`) usa la sesion que el usuario abre a mano en su
+  navegador y no ve ninguna contraseña. `leer` y `aplicar` inician sesion ellos mismos con
+  el usuario de servicio: la contraseña sale de una variable de entorno o se pregunta en la
+  terminal, viaja solo al login de ese Drupal y no se escribe en disco ni en los logs. No
+  hay tokens ni claves en el codigo.
 - **A donde viaja la informacion:** a ningun lado. El programa habla unicamente con el
   host de Drupal que dice el mapping. Sin telemetria, sin servicios de terceros, sin
   llamadas de red mas alla de ese host.
@@ -468,8 +541,8 @@ outliers. Con `--seco` muestra que haria sin escribir.
   entre acciones (`--slowmo`, 120ms por defecto). No hay paralelismo ni scraping.
 - **Auditoria:** cada corrida deja una linea en `logs/runs.jsonl` con la fecha, el
   manifiesto, el titulo y el node id creado, o el error. Local, no sale de la maquina.
-- **Rollback:** todo lo creado queda despublicado, y el log dice exactamente que node
-  ids se crearon para poder borrarlos.
+- **Rollback:** el log dice exactamente que node ids se crearon, para despublicarlos o
+  borrarlos; y `aplicar` deja un mensaje en cada revision, que se puede revertir.
 - **Codigo:** fuente legible, sin ofuscar y sin empaquetar en un ejecutable, para que se
   pueda revisar entero. Son unos pocos cientos de lineas.
 - **La interfaz es un servidor LOCAL**, no un sitio: escucha solo en `127.0.0.1`, nunca en
@@ -516,6 +589,10 @@ tools/publicar.js      que pasos son y en que orden (puro, se prueba sin navegad
 tools/hub.js           acceso al hub (credenciales + lectura de una pagina)
 tools/traducir.js      hub -> manifiesto: la tabla componente/campo -> paragraph/machine name
 tools/manifiesto.mjs   genera manifests/<pagina>.json desde el hub
+tools/drupal-http.js   Drupal por HTTP: sesion, formulario de edicion, abrir paragraphs, arbol
+tools/leer.mjs         lee paginas existentes campo por campo (nunca guarda)
+tools/aplicar.mjs      aplica un plan de cambios a paginas existentes (ensayo por defecto)
+test/leer-aplicar.mjs  prueba leer y aplicar contra un Drupal falso por HTTP
 test/manifiesto.mjs    prueba la traduccion contra el mapping real, sin base ni navegador
 planes/                un plan por pagina: donde vive el criterio
 test/sitio-viejo.mjs   sitio viejo de mentira, con sus trampas
@@ -669,7 +746,7 @@ Lo que ninguno de los dos puede decir es si el CMS acepta la pagina: eso solo lo
 ## Estado
 
 El mapping de Purina LATAM (`mapping/purina-latam.json`) esta escrito a partir del HTML
-real de `/node/add/dsu_component_page` en **preprod MX**. Son dos volcados: uno con 8
+real de `/node/add/dsu_component_page` en **content MX** (el entorno que en los primeros volcados se llamaba "preprod" es content). Son dos volcados: uno con 8
 paragraphs sueltos (**275 selectores, 0 sin encontrar**) y otro con un Tabs de 3 pestañas
 (**132 selectores, 0 sin encontrar**). `npm test` pasa.
 
@@ -683,6 +760,13 @@ se frena solo.
 Los 12 estan verificados contra el HTML real, el alta de una pestaña incluida: hizo falta
 un volcado extra de una pestaña **vacia**, porque con la ranura llena Drupal esconde el
 widget de alta y no habia nada que mirar.
+
+**El traductor del hub** (`tools/paragrafos.js`) cubre hoy: banner, texto, imagen,
+Texto + Imagen, video externo, Card Grid, acordeon, layout de 2 columnas y pestañas. El
+Texto + Imagen necesita ademas la tabla `opciones` de la posicion de la imagen en el
+mapping (sale del volcado del formulario); sin ella frena. Faltan el carrusel de
+productos, el carrusel de banners (`banner_wrapper`) y los otros layouts: los tres
+esperan su volcado.
 
 **Falta la primera corrida contra el CMS.** Todo lo verificable sin conexion esta
 verificado; lo que no se puede saber offline es si Drupal acepta la pagina que resulta.

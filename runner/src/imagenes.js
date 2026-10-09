@@ -17,7 +17,7 @@
 // LAS MEDIDAS NO SE ESCRIBEN ACA: salen de `getSpecs` del catalogo del hub, la misma
 // funcion que usa la matriz de contenido y el placeholder del mockup.
 import { writeFileSync, mkdirSync, statSync, copyFileSync } from 'node:fs'
-import { join, resolve, dirname } from 'node:path'
+import { join, resolve, dirname, basename } from 'node:path'
 import { request } from 'playwright-core'
 import { mediosDeBloque, archivosDeBloque, archivoDe, campoBase } from '../tools/medios.js'
 
@@ -135,16 +135,50 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
 
       // SIN MEDIDA a la que recortar, se guarda el archivo tal cual: ni se re-encoda ni se
       // toca. Es mejor que la del sitio viejo llegue entera a que no llegue.
+      // La excepcion es el FORMATO: la Media library del CMS no acepta webp (la subida queda
+      // con el fid vacio y sin mensaje). Ahi se pasa a PNG a su medida natural, sin
+      // recortar ni comprimir: cambia el envase, no la imagen, y la transparencia se conserva.
       if (!w || !h) {
         mkdirSync(dirname(salida), { recursive: true })
-        writeFileSync(salida, buf)
         const nat = await medidaDe(page, data)
+        if (/webp/i.test(mime) && /\.png$/i.test(salida)) {
+          await page.setViewportSize({ width: nat.w, height: nat.h })
+          await page.setContent(`<style>html,body{margin:0;background:transparent}img{display:block}</style>`
+            + `<img src="${data}">`, { waitUntil: 'load' })
+          await page.locator('img').screenshot({ path: salida, type: 'png', omitBackground: true })
+        } else {
+          writeFileSync(salida, buf)
+        }
         return { nat, w: nat.w, h: nat.h, escala: 1, sinMedida: true }
+      }
+
+      // TRANSPARENCIA. Un PNG con partes transparentes (una mascota recortada que se apoya
+      // sobre el degradé del bloque) pasado a JPG gana un fondo BLANCO, y en el sitio se ve
+      // un rectangulo blanco que no existe en el diseño. Si el original tiene transparencia
+      // el recorte sale PNG y la conserva.
+      const transparente = /png|webp|gif/i.test(mime) && await page.evaluate(async (src) => {
+        const img = new Image(); img.src = src; await img.decode()
+        const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight
+        const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0)
+        const px = cx.getImageData(0, 0, cv.width, cv.height).data
+        for (let k = 3; k < px.length; k += 4 * 7) if (px[k] < 250) return true
+        return false
+      }, data)
+      if (transparente) salida = salida.replace(/\.jpe?g$/i, '.png')
+
+      // YA ESTA A LA MEDIDA y en el formato que va a salir: se sube el archivo tal cual. Pasarlo
+      // por el navegador no le saca nada y lo re-codifica (un PNG de paleta de 1 MB salia de
+      // 2,4 MB).
+      const nat0 = await medidaDe(page, data)
+      if (nat0.w === w && nat0.h === h && (transparente ? /png/i : /jpe?g/i).test(mime)) {
+        mkdirSync(dirname(salida), { recursive: true })
+        writeFileSync(salida, buf)
+        return { nat: nat0, w, h, escala: 1, salida }
       }
 
       await page.setViewportSize({ width: w, height: h })
       await page.setContent(
-        `<style>html,body{margin:0}
+        `<style>html,body{margin:0;background:transparent}
          #c{width:${w}px;height:${h}px;overflow:hidden}
          img{width:100%;height:100%;object-fit:cover;display:block}</style>
          <div id="c"><img src="${data}"></div>`, { waitUntil: 'load' })
@@ -155,25 +189,29 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
         return { w: i.naturalWidth, h: i.naturalHeight }
       })
       mkdirSync(dirname(salida), { recursive: true })
-      await page.locator('#c').screenshot({ path: salida, type: 'jpeg', quality: calidad })
-      return { nat, w, h, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)) }
+      if (transparente) await page.locator('#c').screenshot({ path: salida, type: 'png', omitBackground: true })
+      else await page.locator('#c').screenshot({ path: salida, type: 'jpeg', quality: calidad })
+      return { nat, w, h, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)), salida }
     }
 
     for (const [i, bloque] of todosLosBloques(plan).entries()) {
       for (const medio of mediosDeBloque(bloque, slug)) {
         const donde = `bloque ${i + 1} (${bloque.componente}) — ${medio.etiqueta}`
         try {
-          const ext = medio.desktop.w ? 'jpg' : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.desktop.origen)?.[1] || 'jpg').toLowerCase()
-          const dsk = `${medio.nombre}-desktop.${ext}`
+          const ext = medio.desktop.w ? 'jpg' : (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.desktop.origen)?.[1] || 'jpg').toLowerCase().replace('webp', 'png')
+          let dsk = `${medio.nombre}-desktop.${ext}`
           const r = await recortar({ ...medio.desktop, salida: join(carpeta, dsk) })
+          // El recorte puede cambiar la extension (un PNG transparente no pasa a JPG).
+          if (r.salida) dsk = basename(r.salida)
           const estirada = r.escala > 1.001
           if (estirada) estiradas += 1
 
           // El archivo de MOBILE. Si el catalogo no declara medida mobile se repite el de
           // desktop: el campo es obligatorio en el CMS y no hay de donde sacar otra.
-          const mob = `${medio.nombre}-mobile.${ext}`
-          if (medio.mobile) await recortar({ ...medio.mobile, salida: join(carpeta, mob) })
-          else copyFileSync(join(carpeta, dsk), join(carpeta, mob))
+          let mob = `${medio.nombre}-mobile.${ext}`
+          const rMob = medio.mobile ? await recortar({ ...medio.mobile, salida: join(carpeta, mob) }) : null
+          if (rMob?.salida) mob = basename(rMob.salida)
+          if (!rMob) { mob = dsk.replace(/-desktop\./, '-mobile.'); copyFileSync(join(carpeta, dsk), join(carpeta, mob)) }
 
           const kb = Math.round(statSync(join(carpeta, dsk)).size / 1024)
           const registro = {
@@ -188,10 +226,19 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
           medio.campo.contenedor[medio.campo.key] = registro
           // El campo de mobile del hub queda apuntando al mismo medio: en el CMS es UNA
           // sola entidad con las dos imagenes adentro.
+          // Pero el registro del archivo mobile dice de DONDE salio ese archivo: si el hub trae
+          // una foto mobile aparte, el origen es esa, no la de desktop. Antes se copiaba el de
+          // desktop y cualquier revision posterior (volver a recortar, auditar) trabajaba sobre
+          // la foto equivocada.
           if (medio.campoMobile) {
-            medio.campoMobile.contenedor[medio.campoMobile.key] = { ...registro, archivo: join(slug, mob) }
+            medio.campoMobile.contenedor[medio.campoMobile.key] = {
+              ...registro,
+              origen: medio.mobile?.origen || registro.origen,
+              archivo: join(slug, mob),
+              ...(rMob ? { de: `${rMob.nat.w}×${rMob.nat.h}`, a: `${medio.mobile.w}×${medio.mobile.h}` } : {}),
+            }
           }
-          indice.push({
+          if (!medio.enLinea) indice.push({
             nombre: medio.nombre, desktop: { archivo: dsk }, mobile: { archivo: mob },
             alt: medio.campo.contenedor[`${campoBase(medio.campo.key)}_alt`] || '',
           })

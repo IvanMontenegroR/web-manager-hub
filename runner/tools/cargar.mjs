@@ -74,7 +74,7 @@ function paraElHub(contenido) {
 // del plan se agrega debajo, bajo un encabezado que dice de donde salio.
 const CABECERA = '--- Del plan de migracion (tools/plan.mjs) ---'
 function notas(previas, revisar) {
-  const mias = revisar.length ? [CABECERA, ...revisar.map((r) => `· ${r}`)].join('\n') : ''
+  const mias = revisar.length ? [CABECERA, ...revisar.map((r) => `- ${r}`)].join('\n') : ''
   const aMano = String(previas || '').split(CABECERA)[0].trim()
   return [aMano, mias].filter(Boolean).join('\n\n') || null
 }

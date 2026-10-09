@@ -1,10 +1,11 @@
 {
-  "_": "Escrito a partir del HTML real de /node/add/dsu_component_page (preprod MX, 8 paragraphs ya agregados). Los selectores se apoyan en name= y data-drupal-selector= porque Drupal le pega un sufijo aleatorio a cada id.",
+  "_": "Escrito a partir del HTML real de /node/add/dsu_component_page (content MX, 8 paragraphs ya agregados). Los selectores se apoyan en name= y data-drupal-selector= porque Drupal le pega un sufijo aleatorio a cada id.",
   "name": "purina-latam",
   "site": "https://content-ef5-purina-latam-mx.pantheonsite.io",
   "nodeAdd": "/node/add/dsu_component_page",
   "title": "input[name=\"title[0][value]\"]",
   "published": "input[name=\"status[value]\"]",
+  "brand": "select[name=\"field_brand\"]",
   "pathauto": "input[name=\"path[0][pathauto]\"]",
   "path": "input[name=\"path[0][alias]\"]",
   "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
@@ -22,8 +23,15 @@
   },
   "formatoTexto": {
     "_": "El FORMATO de los campos de cuerpo, para todo el sitio: se deja elegido el primero de `preferidos` que ese desplegable ofrezca. Purina Markdown va primero porque el texto del hub viaja en notacion markdown (**negrita**, [texto](link)) — con un formato HTML esos asteriscos entran literales y se ven asi en el sitio. `planos` son los formatos que toman TEXTO tal cual: ahi el cuerpo NO se envuelve en <p>, que en markdown seria basura visible. Los valores de maquina salen del HTML real del desplegable: Email HTML, Full Html, Purina Forum Markdown, Purina Markdown, Rich text.",
-    "preferidos": ["purina_markdown", "rich_text", "full_html"],
-    "planos": ["purina_markdown", "purina_forum_markdown"]
+    "preferidos": [
+      "purina_markdown",
+      "rich_text",
+      "full_html"
+    ],
+    "planos": [
+      "purina_markdown",
+      "purina_forum_markdown"
+    ]
   },
   "mediaExistente": {
     "_": "Como se ELIGE un medio ya subido. Sacado del HTML real: el campo de imagen es un inline entity form con dos botones, y el runner usa SOLO el de \"existente\" — crear medios no es cosa suya. Los selectores van por sufijo del data-drupal-selector y acotados al fieldset del campo, porque el name completo del boton lleva adentro toda la ruta del paragraph (ief-field_ln_n_components-1-subform-...) y armarla a mano es pedir que se rompa.",
@@ -323,7 +331,11 @@
           },
           "classy.dsu_c_sideimagetext_image_position": {
             "sel": "select[name=\"{base}[classy][0][c_sideimagetext][dsu_c_sideimagetext_image_position]\"]",
-            "kind": "select"
+            "kind": "select",
+            "opciones": {
+              "Izquierda": "dsu_c_sideimagetext_image_left",
+              "Derecha": "dsu_c_sideimagetext_image_right"
+            }
           },
           "classy.spacing": {
             "sel": "select[name=\"{base}[classy][0][c_sideimagetext][spacing]\"]",
@@ -709,7 +721,7 @@
               "base": "{base}[field_items][{delta}][subform]",
               "add": {
                 "mode": "buttons",
-                "button": "button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
               }
             }
           ]
@@ -1016,7 +1028,7 @@
               "base": "{base}[field_tab_item][{delta}][subform]",
               "add": {
                 "mode": "buttons",
-                "button": "button[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"], input[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"]"
+                "button": "button[name=\"{npath}_subform_field_tab_item_add_more\"], input[name=\"{npath}_subform_field_tab_item_add_more\"], button[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"], input[name=\"{npath}_subform_field_tab_item_{bundle}_add_more\"]"
               }
             }
           ]
@@ -1027,9 +1039,9 @@
         "value": "comp_tabs_tab_item",
         "fields": {
           "field_c_image": {
-            "kind": "media",
+            "kind": "mediaNuevo",
             "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
-            "note": "Inline entity form. El manifiesto pone el NOMBRE del medio y el runner lo elige de la libreria; nunca lo sube."
+            "note": "Inline entity form con UN solo boton (Añadir nuevo elemento multimedia): no deja elegir uno existente, asi que el runner CREA el medio ahi con los archivos de imagenes/ (ver src/mediaNuevo.js). Leido del formulario de content, 2026-10."
           },
           "field_title": {
             "sel": "input[name=\"{base}[field_title][0][value]\"]"
@@ -1074,15 +1086,1729 @@
               "dsel": "{dsel}-subform-field-component-{delta}",
               "base": "{base}[field_component][{delta}][subform]",
               "add": {
-                "mode": "buttons",
-                "_": "No es el modal de paragraphs_ee sino un DROPBUTTON de Gin: el primer tipo (Banner) queda a la vista y los otros ocho estan plegados detras del toggle, asi que hay que abrirlo antes de poder clickear. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. NO entran los layouts, ni otro comp_tabs, ni un accordion_grid.",
-                "open": "[data-drupal-selector=\"{dsel}-subform-field-component-add-more\"] button.dropbutton__toggle",
-                "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
+                "mode": "select",
+                "_": "En el formulario de content (2026-10) la pestaña trae \"Párrafo type\" (un desplegable) + \"Add Párrafo\", como el nivel principal de la pagina. Si aparece el dropbutton de Gin, se usa `alternativa`. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. El AJAX del desplegable esta roto en el CMS (TypeError de paragraphs_features ScrollToElementCommand): `sinAjaxAlElegir` pone el valor sin dispararlo.",
+                "select": "select[name=\"{base}[field_component][add_more][add_more_select]\"]",
+                "button": "input[name=\"{npath}_subform_field_component_add_more\"], button[name=\"{npath}_subform_field_component_add_more\"]",
+                "alternativa": {
+                  "mode": "buttons",
+                  "_": "No es el modal de paragraphs_ee sino un DROPBUTTON de Gin: el primer tipo (Banner) queda a la vista y los otros ocho estan plegados detras del toggle, asi que hay que abrirlo antes de poder clickear. Los tipos que una pestaña acepta son nueve: banner, banner_wrapper, block, html, ln_c_cardgrid, c_externalvideo, c_image, c_sideimagetext, c_text. NO entran los layouts, ni otro comp_tabs, ni un accordion_grid.",
+                  "open": "[data-drupal-selector=\"{dsel}-subform-field-component-add-more\"] button.dropbutton__toggle",
+                  "button": "button[name=\"{npath}_subform_field_component_{bundle}_add_more\"], input[name=\"{npath}_subform_field_component_{bundle}_add_more\"]"
+                },
+                "sinAjaxAlElegir": true
               }
             }
           ]
         }
+      },
+      "layout_columns_1": {
+        "label": "Layout Columns - 100",
+        "value": "layout_columns_1",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_1][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_1][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_1][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_columns_3": {
+        "label": "Layout Columns - 33",
+        "value": "layout_columns_3",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_3][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_3][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_3][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_columns_4": {
+        "label": "Layout Columns - 25",
+        "value": "layout_columns_4",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_4][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_4][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_4][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 4",
+              "dsel": "{dsel}-subform-field-column-fourth-{delta}",
+              "base": "{base}[field_column_fourth][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-fourth-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_fourth_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_fourth_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_columns_20": {
+        "label": "Layout Columns - 20",
+        "value": "layout_columns_20",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_20][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_20][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_columns_20][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 4",
+              "dsel": "{dsel}-subform-field-column-fourth-{delta}",
+              "base": "{base}[field_column_fourth][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-fourth-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_fourth_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_fourth_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 5",
+              "dsel": "{dsel}-subform-field-column-fifth-{delta}",
+              "base": "{base}[field_column_fifth][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-fifth-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_fifth_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_fifth_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_75_25": {
+        "label": "Layout_75_25",
+        "value": "layout_75_25",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_75_25][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_75_25][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_75_25][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_66_33": {
+        "label": "Layout_66_33",
+        "value": "layout_66_33",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_66_33][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_66_33][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_66_33][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_50_25_25": {
+        "label": "Layout_50_25_25",
+        "value": "layout_50_25_25",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_50_25_25][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_50_25_25][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_50_25_25][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_25_75": {
+        "label": "Layout_25_75",
+        "value": "layout_25_75",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_75][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_75][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_75][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_33_66": {
+        "label": "Layout_33_66",
+        "value": "layout_33_66",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_33_66][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_33_66][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_33_66][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_25_25_50": {
+        "label": "Layout_25_25_50",
+        "value": "layout_25_25_50",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_25_50][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_25_50][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_25_50][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "layout_25_50_25": {
+        "label": "Layout_25_50_25",
+        "value": "layout_25_50_25",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_50_25][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_50_25][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][layout_25_50_25][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Columna 1",
+              "dsel": "{dsel}-subform-field-column-first-{delta}",
+              "base": "{base}[field_column_first][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-first-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_first_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 2",
+              "dsel": "{dsel}-subform-field-column-second-{delta}",
+              "base": "{base}[field_column_second][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-second-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_second_{bundle}_add_more\"]"
+              }
+            },
+            {
+              "label": "Columna 3",
+              "dsel": "{dsel}-subform-field-column-third-{delta}",
+              "base": "{base}[field_column_third][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-column-third-add-more-add-modal-form-area-add-more\"]",
+                "button": "button[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"], input[name=\"{npath}_subform_field_column_third_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "block": {
+        "label": "Block",
+        "value": "block",
+        "_": "El paragraph Block muestra un bloque del sitio elegido en field_block. El carrusel de productos es el bloque \"Selected Product\" (pl_product_selected_product_block): al elegirlo, Drupal carga por AJAX su configuracion (la lista de productos y la presentacion). Leido del formulario de alta de content, 2026-10.",
+        "fields": {
+          "field_block.plugin": {
+            "sel": "select[name=\"{base}[field_block][0][plugin_id]\"]",
+            "kind": "select",
+            "ajax": true
+          },
+          "field_block.display": {
+            "sel": "select[name=\"{base}[field_block][0][settings][display_type]\"]",
+            "kind": "select"
+          },
+          "field_block.productos": {
+            "kind": "lista",
+            "sel": "input[name=\"{base}[field_block][0][settings][items_fixed_products][{i}][fixed_products]\"]",
+            "add": "input[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"], button[name=\"{npath}_subform_field_block_0_settings_items_fixed_products_add_more\"]",
+            "note": "Referencia a un producto del CMS (\"Nombre (nid)\"). El primero viene en el formulario; los demas con \"Añadir otro elemento\". `referencia`: un nombre con coma va entre comillas, si no Drupal lo parte en dos.",
+            "referencia": true
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "field_background_image": {
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-background-image\"]",
+            "note": "La imagen a la izquierda del carrusel (section--bg-image). Inline entity form, como las demas."
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][block][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][block][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.position_arrows": {
+            "sel": "select[name=\"{base}[classy][0][block][position_arrows]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][block][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.style_button": {
+            "sel": "select[name=\"{base}[classy][0][block][style_button]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][block][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][block][text_color]\"]",
+            "kind": "select"
+          }
+        }
+      },
+      "history_grid": {
+        "label": "History Grid",
+        "value": "history_grid",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][spacing]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][history_grid][text_color]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Hitos",
+              "dsel": "{dsel}-subform-field-items-{delta}",
+              "base": "{base}[field_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_{bundle}_add_more\"], input[name=\"{npath}_subform_field_items_{bundle}_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "history_grid_item": {
+        "label": "History Grid Item",
+        "value": "history_grid_item",
+        "fields": {
+          "field_history_year": {
+            "sel": "select[name=\"{base}[field_history_year][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_image": {
+            "kind": "media",
+            "sel": "[data-drupal-selector=\"{dsel}-subform-field-c-image\"]",
+            "note": "Obligatoria en el CMS."
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "banner_wrapper": {
+        "label": "Banner Wrapper",
+        "value": "banner_wrapper",
+        "fields": {
+          "field_banner_slider_buttons": {
+            "sel": "select[name=\"{base}[field_banner_slider_buttons]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_pos_buttons": {
+            "sel": "select[name=\"{base}[field_banner_slider_pos_buttons]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_dots": {
+            "sel": "select[name=\"{base}[field_banner_slider_dots]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_pos_dots": {
+            "sel": "select[name=\"{base}[field_banner_slider_pos_dots]\"]",
+            "kind": "select"
+          },
+          "field_banner_slider_autoplay": {
+            "sel": "input[name=\"{base}[field_banner_slider_autoplay][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][banner_wrapper][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Banners",
+              "dsel": "{dsel}-subform-field-c-subitems-{delta}",
+              "base": "{base}[field_c_subitems][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_c_subitems_banner_add_more\"], input[name=\"{npath}_subform_field_c_subitems_banner_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "cards_info": {
+        "label": "Cards Info",
+        "value": "cards_info",
+        "_": "Volcado del formulario real (inventario 2026-10). Los items son card_infos.",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.background_card_infos_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_card_infos_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.title_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][title_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_card_infos_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_card_infos_color]\"]",
+            "kind": "select"
+          },
+          "classy.icon_card_color": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][icon_card_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][text_align]\"]",
+            "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][spacing]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Cards",
+              "dsel": "{dsel}-subform-field-c-subitems-{delta}",
+              "base": "{base}[field_c_subitems][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_c_subitems_add_more\"], input[name=\"{npath}_subform_field_c_subitems_add_more\"], button[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"], input[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "card_infos": {
+        "label": "Card Info Item",
+        "value": "card_infos",
+        "fields": {
+          "field_icon": {
+            "sel": "select[name=\"{base}[field_icon][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "big_number_grid": {
+        "label": "Big Number Grid",
+        "value": "big_number_grid",
+        "_": "Volcado del formulario real (inventario 2026-10). Los items son big_number_item.",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_subtitle": {
+            "sel": "input[name=\"{base}[field_c_advanced_subtitle][0][value]\"]"
+          },
+          "field_c_advanced_subtitle.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_subtitle][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_title_size": {
+            "sel": "select[name=\"{base}[field_title_size]\"]",
+            "kind": "select"
+          },
+          "field_subtitle_size": {
+            "sel": "select[name=\"{base}[field_subtitle_size]\"]",
+            "kind": "select"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.number_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][number_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_number_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_number_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_color": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][big_number_grid][text_align]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Numeros",
+              "dsel": "{dsel}-subform-field-items-{delta}",
+              "base": "{base}[field_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_items_add_more\"], input[name=\"{npath}_subform_field_items_add_more\"], button[name=\"{npath}_subform_field_items_big_number_item_add_more\"], input[name=\"{npath}_subform_field_items_big_number_item_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "big_number_item": {
+        "label": "Big Number Item",
+        "value": "big_number_item",
+        "fields": {
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_big_number_item_number": {
+            "sel": "input[name=\"{base}[field_big_number_item_number][0][value]\"]"
+          },
+          "field_big_number_item_prefix": {
+            "sel": "input[name=\"{base}[field_big_number_item_prefix][0][value]\"]"
+          },
+          "field_big_number_item_suffix": {
+            "sel": "input[name=\"{base}[field_big_number_item_suffix][0][value]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
+      },
+      "contact_card_grid": {
+        "label": "Contact Card Grid",
+        "value": "contact_card_grid",
+        "_": "Volcado del formulario real (inventario 2026-10). Sin titulo propio; los items son contact_card.",
+        "fields": {
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          },
+          "classy.background_color": {
+            "sel": "select[name=\"{base}[classy][0][contact_card_grid][background_color]\"]",
+            "kind": "select"
+          },
+          "classy.text_align": {
+            "sel": "select[name=\"{base}[classy][0][contact_card_grid][text_align]\"]",
+            "kind": "select"
+          }
+        },
+        "children": {
+          "slots": [
+            {
+              "label": "Contactos",
+              "dsel": "{dsel}-subform-field-contact-card-items-{delta}",
+              "base": "{base}[field_contact_card_items][{delta}][subform]",
+              "add": {
+                "mode": "buttons",
+                "button": "button[name=\"{npath}_subform_field_contact_card_items_add_more\"], input[name=\"{npath}_subform_field_contact_card_items_add_more\"], button[name=\"{npath}_subform_field_contact_card_items_contact_card_add_more\"], input[name=\"{npath}_subform_field_contact_card_items_contact_card_add_more\"]"
+              }
+            }
+          ]
+        }
+      },
+      "contact_card": {
+        "label": "Contact Card",
+        "value": "contact_card",
+        "fields": {
+          "field_icon": {
+            "sel": "select[name=\"{base}[field_icon][0][value]\"]",
+            "kind": "select"
+          },
+          "field_c_advanced_title": {
+            "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
+          },
+          "field_c_advanced_title.html_tag": {
+            "sel": "select[name=\"{base}[field_c_advanced_title][0][html_tag]\"]",
+            "kind": "select"
+          },
+          "field_c_text": {
+            "sel": "textarea[name=\"{base}[field_c_text][0][value]\"]",
+            "kind": "richtext",
+            "format": {
+              "sel": "select[name=\"{base}[field_c_text][0][format]\"]"
+            }
+          },
+          "field_c_link.uri": {
+            "sel": "input[name=\"{base}[field_c_link][0][uri]\"]"
+          },
+          "field_c_link.title": {
+            "sel": "input[name=\"{base}[field_c_link][0][title]\"]"
+          },
+          "advanced.enable_visibility_control": {
+            "sel": "input[name=\"{base}[enable_visibility_control][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_gato": {
+            "sel": "input[name=\"{base}[target_paragraphs][18]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.target_perro": {
+            "sel": "input[name=\"{base}[target_paragraphs][17]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.include_see_more_button": {
+            "sel": "input[name=\"{base}[include_see_more_button][value]\"]",
+            "kind": "checkbox"
+          },
+          "advanced.see_more_title": {
+            "sel": "input[name=\"{base}[see_more_link][0][title]\"]"
+          },
+          "advanced.see_more_uri": {
+            "sel": "input[name=\"{base}[see_more_link][0][uri]\"]"
+          },
+          "advanced.section_id": {
+            "sel": "input[name=\"{base}[section_id][0][value]\"]"
+          },
+          "advanced.css_class": {
+            "sel": "input[name=\"{base}[css_class][0][value]\"]"
+          }
+        }
       }
     }
+  },
+  "productosMuestra": {
+    "_": [
+      "Adulto Todas las Razas con Optihealth® Sobre Sabor Pollo (579)",
+      "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (586)",
+      "PURINA® PRO PLAN® GATO LIVE CLEAR™ CON OPTITRACT® SABOR SALMÓN (587)",
+      "Dog Chow® Nutrición Reforzada® Adulto Minis & Pequeños Sabor Carne en Filetes con Arroz (592)",
+      "DOG CHOW® NUTRICIÓN REFORZADA ® ADULTO Sabor Cordero en Filetes con Arroz (595)",
+      "DOG CHOW GRAN COMIENZO CACHORROS MEDIANOS Y GRANDES (607)",
+      "Cat Chow® Adultos carne (605)",
+      "Cat Chow® Gato Esterilizados Carne con Hydro Defense® 85g (614)"
+    ],
+    "Pro Plan": [
+      "Adulto Todas las Razas con Optihealth® Sobre Sabor Pollo (579)",
+      "PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES (586)",
+      "PURINA® PRO PLAN® GATO LIVE CLEAR™ CON OPTITRACT® SABOR SALMÓN (587)",
+      "Cachorro Razas Grandes con Optistart® Sabor Pollo (588)",
+      "Gato Senior con Optiage® Sabor Pollo (590)",
+      "Purina® Pro Plan® Gato Urinary con Optiplus® Sobre Sabor Pollo (593)",
+      "PRO PLAN HIDROLIZADO PERROS VETERINARY DIETS (594)",
+      "PRO PLAN SENSITIVE DISGESTION ADULTOS TODOS LOS TAMAÑOS (596)"
+    ],
+    "Fancy Feast": [
+      "FANCY FEAST PETIT FILETS POLLO | POUCHES (580)",
+      "FANCY FEAST POUCHES PETIT FILETS (615)",
+      "LATA FANCY FEAST TERRINE PAVO | LÍNEA GOURMET (630)",
+      "FANCY FEAST® Classic Paté lata para gato sabor salmón (642)",
+      "SOBRE FANCY FEAST DE GOULASH CORDERO | POUCHES (674)",
+      "Fancy Feast Atún y Salmón Casserole (679)",
+      "FANCY FEAST CASSEROLE CARNE (695)",
+      "Fancy Feast ® Demi Glace Pollo | Pouches (702)"
+    ],
+    "Felix": [
+      "Felix® Classic para gato sabor atún, salmón y sardina (582)",
+      "Felix® Classic para gato sabor atún (583)",
+      "Felix® Lata para gato sabor pate pescado y atún (591)",
+      "Felix® Classic para gato sabor pescado blanco (602)",
+      "Felix® Gatito sabor carne (613)",
+      "Felix® Classic para gato sabor salmón (624)",
+      "Felix® Triple Delicious Mar para gato sabor salmón, atún y camarón (629)",
+      "Felix® Fantastic Tiritas Pavo para gatos (631)"
+    ],
+    "Excellent": [
+      "Purina® Excellent® Adulto pollo y arroz razas medianas y grandes (584)",
+      "Purina® Excellent® Cachorro pollo y arroz razas medianas y grandes (585)",
+      "Purina® Excellent® Gato adulto con pollo y arroz (659)",
+      "Purina® Excellent® Puppy: Croquetas para cachorro raza pequeña (696)",
+      "Purina® Excellent® Adulto todas las razas de cordero y arroz (714)",
+      "Purina® Excellent® Adulto pollo y arroz razas minis y pequeñas (719)",
+      "Purina® Excellent® Urinary pollo y arroz (744)",
+      "Purina® Excellent® Kitten pollo y arroz (771)"
+    ],
+    "Purina One": [
+      "Purina® One® Pollo y cordero perro adulto mediano y grande (589)",
+      "Purina® One® Gatitos de pollo y carne (633)",
+      "Purina® One® Super nutrientes pollo adultos y cachorros (645)",
+      "Purina® One® Razas pequeñas y minis adultos con pollo y cordero (654)",
+      "Purina® One® Adultos minis y pequeños pollo y carne (664)",
+      "Purina® One® Multiproteínas para perro carne, pollo y cordero (666)",
+      "Purina® One® Super nutrientes carne adultos y esterilizados (704)",
+      "Purina® One® Croquetas para gato esterilizado con pollo y salmón (707)"
+    ],
+    "Dog Chow": [
+      "Dog Chow® Nutrición Reforzada® Adulto Minis & Pequeños Sabor Carne en Filetes con Arroz (592)",
+      "DOG CHOW® NUTRICIÓN REFORZADA ® ADULTO Sabor Cordero en Filetes con Arroz (595)",
+      "DOG CHOW GRAN COMIENZO CACHORROS MEDIANOS Y GRANDES (607)",
+      "DOG CHOW® Protección Completa Adultos Minis y Pequeños (608)",
+      "DOG CHOW® TRIPLE PROTEÍNA ADULTO  Sabor Carne, Pollo y Salmón en Tiritas (616)",
+      "DOG CHOW® NUTRICIÓN REFORZADA+ Adultos Minis y Pequeños (620)",
+      "DOG CHOW® NUTRICIÓN REFORZADA+  Adultos Todos los Tamaños (621)",
+      "DOG CHOW HOGAREÑO ADULTO (623)"
+    ],
+    "Cat Chow": [
+      "Cat Chow® Adultos carne (605)",
+      "Cat Chow® Gato Esterilizados Carne con Hydro Defense® 85g (614)",
+      "Cat Chow® Esterilizados pescado con Defense Plus+® (635)",
+      "Cat Chow® Gato Esterilizados Pescado con Hydro Defense® 85g (639)",
+      "Cat Chow® Gato Pollo con Hydro Defense® 85g (648)",
+      "Cat Chow® Hogareños carne (658)",
+      "Cat Chow® Delimix Adultos salmón, carne y pollo (721)",
+      "Cat Chow® Nutriplus atún, pollo y queso (748)"
+    ],
+    "Beneful": [
+      "BENEFUL® BAKED DELIGHTS SNACKERS (622)",
+      "BENEFUL® CACHORROS MINIS CRECIMIENTO VIBRANTE CARNE (638)",
+      "BENEFUL® BAKED DELIGHT HUGS (646)",
+      "BENEFUL® ALIMENTO HÚMEDO CACHORROS POLLO Y ARROZ SALVAJE (655)",
+      "BENEFUL® ORIGINAL ADULTOS PAVO Y ARROZ SALVAJE (690)",
+      "BENEFUL® CACHORROS RAZAS PEQUEÑAS DE CARNE (720)",
+      "BENEFUL® POLLO Y CAMOTE PARA ADULTOS (734)",
+      "BENEFUL® CARNE PARA PERRO ADULTO MINIS ORIGINAL (736)"
+    ],
+    "Dentalife": [
+      "DentaLife® Razas pequeñas y medianas (684)",
+      "DentaLife® Razas grandes (689)",
+      "DentaLife® Gato con sabor a salmón (718)",
+      "DentaLife® Gato con sabor a salmón (798)"
+    ],
+    "Gatina": [
+      "GATINA GATITOS SABOR CARNES, VERDURITAS Y LECHE (712)",
+      "GATINA GATOS ADULTOS CARNE, POLLO Y VERDURAS (713)"
+    ],
+    "Campeón": [
+      "Campeón® Adultos todos los tamaños (742)",
+      "Campeón® Adultos minis y pequeños (752)",
+      "Campeón® Cachorros todos los tamaños (792)"
+    ]
   }
 }

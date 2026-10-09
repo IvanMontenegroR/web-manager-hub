@@ -231,7 +231,7 @@ export async function startUi({ mapping, mappingFile, openOpts = {}, manifestDir
 
     // 3. Traducir a manifiesto y dejarlo en disco, que es lo que se arma.
     const { manifiesto, avisos, pendientes } = aManifiesto(
-      leido.pagina, leido.bloques, mapping.paragraphs?.types)
+      leido.pagina, leido.bloques, mapping.paragraphs?.types, { productosMuestra: mapping.productosMuestra })
     for (const a of avisos) onStep(`  · ${a}`)
 
     // 3b. LO QUE SE PIDE CONTRA LO QUE HAY. El manifiesto pide medios por nombre y el

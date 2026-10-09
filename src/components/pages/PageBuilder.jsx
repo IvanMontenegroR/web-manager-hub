@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil,
+  ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil, Monitor, Smartphone,
 } from 'lucide-react'
 import { PALETTE, getComponent, slotsOf, paletteGroups } from '../../data/components'
 import {
-  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandPageBg,
+  fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandTokens, brandPageBg,
 } from '../../lib/pagesDb'
 import { exportPageMatrix } from '../../lib/exportPage'
 import { fetchSiteMenu } from '../../lib/menuDb'
@@ -12,6 +12,22 @@ import ComponentPreview from './preview/ComponentPreview.jsx'
 import SiteHeader from './preview/SiteHeader.jsx'
 import SiteFooter from './preview/SiteFooter.jsx'
 import ContentForm from './ContentForm.jsx'
+
+// Vista MOBILE: el mismo contenido con la version mobile de cada imagen. En el CMS cada
+// Media resuelve desktop y mobile solo; aca son dos campos (`image` / `image_mobile`, y
+// lo mismo adentro de las listas), asi que para dibujar el celular alcanza con que el
+// campo `<x>_mobile`, si esta cargado, tome el lugar de `<x>`. Ningun render de
+// componente tiene que saber que existe el mobile.
+export function mobileContent(v) {
+  if (Array.isArray(v)) return v.map(mobileContent)
+  if (!v || typeof v !== 'object') return v
+  const o = {}
+  for (const [k, x] of Object.entries(v)) o[k] = mobileContent(x)
+  for (const [k, x] of Object.entries(v)) {
+    if (k.endsWith('_mobile') && typeof x === 'string' && x) o[k.slice(0, -7)] = x
+  }
+  return o
+}
 
 export default function PageBuilder({ page, onBack }) {
   const [comps, setComps] = useState([])
@@ -24,6 +40,9 @@ export default function PageBuilder({ page, onBack }) {
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [editMode, setEditMode] = useState(true) // false = vista previa (pagina real, sin toolbars)
+  // desktop | mobile. Mobile dibuja la pagina a 390px con las imagenes mobile.
+  const [device, setDevice] = useState('desktop')
+  const mobile = device === 'mobile'
   const [activeTab, setActiveTab] = useState({}) // { [id del bloque de pestañas]: pestaña abierta }
   // Menu del sitio del MERCADO de esta pagina. Es config global (se edita aparte), aca
   // solo se lee para que el header del canvas y la captura del Excel sean los de verdad.
@@ -54,7 +73,7 @@ export default function PageBuilder({ page, onBack }) {
   const theme = useMemo(() => {
     const t = brandTheme(page.brand)
     if (!t && !page.brand) return null
-    return { ...(t || {}), name: page.brand || null }
+    return { ...(t || {}), name: page.brand || null, tokens: brandTokens(page.brand) }
   }, [page.brand])
   // La pagina es un ARBOL de un nivel: bloques sueltos (parent_id null) y, dentro de un
   // contenedor (bloque de pestañas), sus hijos agrupados por pestaña (tab_index).
@@ -256,7 +275,7 @@ export default function PageBuilder({ page, onBack }) {
         </div>
         <ComponentPreview
           componentKey={c.component_key}
-          content={contentFor(c)}
+          content={mobile ? mobileContent(contentFor(c)) : contentFor(c)}
           theme={theme}
           slots={isContainer ? slotNodes(c, def) : null}
           activeTab={active}
@@ -279,7 +298,18 @@ export default function PageBuilder({ page, onBack }) {
         >
           <Pencil size={14} /> {editMode ? 'Editando' : 'Vista previa'}
         </button>
-        <button className="btn btn-primary btn-sm" onClick={exportExcel} disabled={exporting || !comps.length}>
+        {/* Desktop / Mobile: el mobile es para REVISAR (las imagenes mobile y como se
+            acomoda la pagina en un celular). El Excel sale siempre de desktop. */}
+        <div className="pb-device-toggle" role="group" aria-label="Dispositivo">
+          <button className={`btn btn-sm${mobile ? '' : ' active'}`} onClick={() => setDevice('desktop')} title="Ver en desktop">
+            <Monitor size={14} /> Desktop
+          </button>
+          <button className={`btn btn-sm${mobile ? ' active' : ''}`} onClick={() => setDevice('mobile')} title="Ver en mobile (390px, imagenes mobile)">
+            <Smartphone size={14} /> Mobile
+          </button>
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={exportExcel} disabled={exporting || !comps.length || mobile}
+          title={mobile ? 'El Excel se arma con la vista desktop: volvé a Desktop para exportar' : undefined}>
           <FileSpreadsheet size={15} /> {exporting ? 'Generando...' : 'Exportar a Excel'}
         </button>
       </div>
@@ -304,7 +334,10 @@ export default function PageBuilder({ page, onBack }) {
         </div>
 
         {/* Canvas / preview */}
-        <div className={`pb-canvas${editMode ? '' : ' preview'}`}>
+        <div className={`pb-canvas${editMode ? '' : ' preview'}${mobile ? ' pb-canvas--mobile' : ''}`}>
+          {/* El "dispositivo": en desktop no existe como caja (display: contents); en mobile
+              es el celular de 390px que contiene header, pagina y footer. */}
+          <div className="pb-device">
           {/* Header global — presente en todas las paginas (no editable, va en el export). */}
           <div className="pb-globaltag">Header — global (en todas las paginas)</div>
           <div ref={headerRef} className="pb-header-host"><SiteHeader items={menu.items} /></div>
@@ -331,6 +364,7 @@ export default function PageBuilder({ page, onBack }) {
           {/* Footer global — presente en todas las paginas (no editable, va en el export). */}
           <div className="pb-globaltag">Footer — global (en todas las paginas)</div>
           <div ref={footerRef} className="pb-footer-host"><SiteFooter /></div>
+          </div>
         </div>
 
         {/* Editor de contenido */}

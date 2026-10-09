@@ -64,7 +64,7 @@ function camposImagen(def) {
   for (const f of (def?.fields || [])) {
     if (f.type === 'image' && !f.insideMedia) sueltos.push(f.key)
     if (f.type === 'list') {
-      for (const sf of (f.item || [])) if (sf.type === 'image' && !sf.insideMedia) enLista.push([f.key, sf.key])
+      for (const sf of (f.item || [])) if (sf.type === 'image' && !sf.insideMedia) enLista.push([f.key, sf.key, !!sf.creaEnLinea])
     }
   }
   return { sueltos, enLista }
@@ -182,9 +182,9 @@ export function mediosDeBloque(bloque, slug) {
   for (const k of sueltos) {
     campos.push({ contenedor: bloque.contenido, key: k, etiqueta: k, componente: bloque.componente })
   }
-  for (const [lista, k] of enLista) {
+  for (const [lista, k, enLinea] of enLista) {
     ;(bloque.contenido?.[lista] || []).forEach((it, i) => {
-      campos.push({ contenedor: it, key: k, etiqueta: `${lista}${i + 1}-${k}`, componente: itemDe(lista) })
+      campos.push({ contenedor: it, key: k, etiqueta: `${lista}${i + 1}-${k}`, componente: itemDe(lista), enLinea })
     })
   }
 
@@ -222,6 +222,8 @@ export function mediosDeBloque(bloque, slug) {
         ? { origen: origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || origen, ...objetivo.mobile }
         : null,
       campoMobile: par.mobile || null,
+      // Se crea adentro del formulario del CMS, no se sube a la libreria (ver creaEnLinea).
+      enLinea: !!par.desktop.enLinea,
     })
   }
   return out

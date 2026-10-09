@@ -6,7 +6,7 @@
 //
 // {
 //   "manifest": 1,
-//   "page": { "title": "...", "path": "/adopta/...", "published": false },
+//   "page": { "title": "...", "path": "/adopta/...", "published": false, "brand": "Pro Plan" },
 //   "blocks": [
 //     { "type": "c_text",                        // machine name del paragraph
 //       "fields": { "field_c_text": "..." },     // valores por machine name de campo
@@ -21,7 +21,12 @@
 //     layout, los items de un acordeon). Por defecto 0, que es la primera.
 //   - Las IMAGENES no van en el manifiesto: subirlas a la Media library se hace a
 //     mano (ver README). Un campo de imagen en `fields` se ignora con aviso.
-//   - `published` es siempre opcional y por defecto FALSE: el runner deja borradores.
+//   - `published` es opcional y por defecto FALSE (borrador). El traductor del hub lo pone en
+//     TRUE: en content las paginas que cargamos quedan publicadas (CRITERIOS.md).
+//   - `brand` es opcional: el nombre de la marca como lo guarda el hub ("Pro Plan", "Purina
+//     One"). Va al campo Brand del nodo, que es el que le aplica los colores de la marca a
+//     toda la pagina. Se busca entre las opciones del desplegable sin mirar ®, mayusculas,
+//     acentos ni el "Purina" del nombre. Sin marca (o "Purina") queda "- Ninguno -".
 import { readFileSync } from 'node:fs'
 
 export const MANIFEST_VERSION = 1
@@ -42,6 +47,7 @@ export function validateManifest(m, file = '(inline)') {
   if (m.manifest !== MANIFEST_VERSION) err(`"manifest" tiene que ser ${MANIFEST_VERSION}, vino ${JSON.stringify(m.manifest)}`)
   if (!m.page || typeof m.page !== 'object') err('falta "page"')
   if (!m.page.title || typeof m.page.title !== 'string') err('falta "page.title"')
+  if (m.page.brand != null && typeof m.page.brand !== 'string') err('"page.brand" tiene que ser un texto (el nombre de la marca)')
   if (!Array.isArray(m.blocks)) err('"blocks" tiene que ser un array')
 
   const walk = (blocks, path) => blocks.forEach((b, i) => {

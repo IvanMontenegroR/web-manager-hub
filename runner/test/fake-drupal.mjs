@@ -40,6 +40,10 @@ details{margin:8px 0;padding:6px;border:1px solid #ccc} details:not([open]) .js-
     <input id="t" name="title[0][value]" type="text"></div>
   <div class="js-form-item"><label for="pub">Publicado</label>
     <input id="pub" name="status[value]" type="checkbox" checked></div>
+  <div class="js-form-item"><label for="br">Brand</label>
+    <select id="br" name="field_brand"><option value="_none" selected>- Ninguno -</option>
+      <option value="3">Pro Plan®</option><option value="7">Purina® One®</option>
+      <option value="43">Purina®  Felix®</option><option value="8">Campeón®</option></select></div>
   <!-- Como en el formulario real: el alias vive en un panel PLEGADO de la barra lateral,
        asi que el check existe pero no se ve hasta que alguien lo abre. -->
   <details id="urlpath"><summary>Configuracion de la ruta URL</summary>

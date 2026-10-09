@@ -39,7 +39,7 @@ if (!leido) {
 const mapping = loadMapping(archivoMapping)
 let salida
 try {
-  salida = aManifiesto(leido.pagina, leido.bloques, mapping.paragraphs?.types)
+  salida = aManifiesto(leido.pagina, leido.bloques, mapping.paragraphs?.types, { productosMuestra: mapping.productosMuestra })
 } catch (e) {
   if (!(e instanceof ErrorDeTraduccion)) throw e
   process.stderr.write(`\nFRENO: ${e.message}\n`)

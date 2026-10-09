@@ -24,7 +24,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import {
-  CARD_SQUARE, CARD_SQUARE_DESC_MAX, BT_SECONDARY_HERO, LAYOUT_COLUMNS,
+  CARD_SQUARE, CARD_SQUARE_DESC_MAX, BT_SECONDARY_HERO, BT_ONLY_IMAGE, LAYOUT_COLUMNS,
 } from '../../src/data/components.js'
 
 const args = process.argv.slice(2)
@@ -36,6 +36,11 @@ if (!entrada || !destino) {
 }
 
 const lim = (s, n = 600) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, n)
+// Para el cuerpo con formato: respeta los saltos (la notacion del hub los usa: un salto
+// es <br>, una linea en blanco es parrafo nuevo) y solo colapsa espacios dentro de linea.
+const limMd = (s, n = 6000) => String(s ?? '').replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n')
+  .replace(/\n{3,}/g, '\n\n').trim().slice(0, n)
+const ctaDe = (bt, base) => ({ label: lim(bt.texto, 80), url: abs(bt.href, base) })
 
 // Las direcciones de imagen tienen que salir ABSOLUTAS: el que despues las baja y las
 // recorta es otro proceso y una ruta relativa ahi no resuelve a nada. `estructura.js` ya
@@ -81,6 +86,16 @@ function traducirBloque(b, ctx) {
     // El TIPO y la ALINEACION dependen de la imagen: de que tan alto es el banner y de
     // donde esta el sujeto en la foto (si el perro esta a la derecha, el texto va a la
     // izquierda). Ninguna de las dos se puede sacar del HTML, asi que van flageadas.
+    if (b.texto_en_imagen) {
+      // El texto esta QUEMADO en la foto: un Secondary Hero pondria un titulo vacio encima.
+      // Se carga como banner de solo imagen y se avisa: ese texto no lo lee Google ni un
+      // lector de pantalla, y al recortar la foto para la medida nueva se puede cortar.
+      const contenido = { type: BT_ONLY_IMAGE }
+      if (b.fondo?.desktop) contenido.image = abs(b.fondo.desktop, ctx.base)
+      if (b.fondo?.mobile && b.fondo.mobile !== b.fondo.desktop) contenido.image_mobile = abs(b.fondo.mobile, ctx.base)
+      revisar.push('BANNER CON TEXTO EN LA IMAGEN: se cargo como banner de solo imagen. Ese texto no lo lee Google ni un lector de pantalla y el recorte a la medida nueva puede cortarlo. Ideal: key visual limpio de la agencia y el texto como titulo real.')
+      return { componente: 'banner', contenido, revisar, textoEnImagen: true }
+    }
     const contenido = {
       type: BT_SECONDARY_HERO,
       title: lim(b.titulo, 200),
@@ -91,6 +106,7 @@ function traducirBloque(b, ctx) {
     if (bajada) contenido.description = lim(bajada, 800)
     if (b.fondo?.desktop) contenido.image = abs(b.fondo.desktop, ctx.base)
     if (b.fondo?.mobile && b.fondo.mobile !== b.fondo.desktop) contenido.image_mobile = abs(b.fondo.mobile, ctx.base)
+    if (b.botones?.length) contenido.ctas = b.botones.map((bt) => ctaDe(bt, ctx.base))
     revisar.push('BANNER: el tipo quedo en Secondary Hero por defecto. Mirar el alto real del banner en el sitio: si ocupa la pantalla entera es Main Hero.')
     revisar.push('BANNER: falta la ALINEACION (Banner Align Content). Se decide MIRANDO la foto: el texto va del lado contrario al sujeto.')
     if (!contenido.image) revisar.push('BANNER: no se encontro imagen de fondo. Si la pagina se leyo con una version vieja del extractor, volver a leerla.')
@@ -179,8 +195,16 @@ function traducirBloque(b, ctx) {
   }
 
   if (b.tipo === 'texto') {
-    if (!b.plano) return null
-    return { componente: 'text', revisar, contenido: { body: lim(b.plano, 4000) } }
+    if (!b.plano && !b.botones?.length) return null
+    const contenido = { body: b.md ? limMd(b.md) : lim(b.plano, 4000) }
+    if (b.botones?.length) contenido.ctas = b.botones.map((bt) => ctaDe(bt, ctx.base))
+    return { componente: 'text', revisar, contenido }
+  }
+
+  if (b.tipo === 'boton') {
+    // Un boton suelto no es un componente: en el CMS es el Link (CTA) de un bloque. Se
+    // devuelve marcado y `pegarBotones` lo cuelga del texto de arriba.
+    return { componente: 'text', revisar, contenido: { body: '', ctas: [ctaDe(b, ctx.base)] }, soloBoton: true }
   }
 
   if (b.tipo === 'iframe') {
@@ -195,6 +219,23 @@ function traducirBloque(b, ctx) {
   return null
 }
 
+// Un boton suelto se cuelga del bloque de TEXTO que tiene justo arriba (mismo slot). Si
+// arriba no hay un texto, queda como un texto que solo lleva el boton.
+function pegarBotones(lista) {
+  const out = []
+  for (const b of lista) {
+    if (b.hijos?.length) b.hijos = pegarBotones(b.hijos)
+    const prev = out[out.length - 1]
+    if (b.soloBoton && prev && prev.componente === 'text' && (prev.slot ?? null) === (b.slot ?? null)) {
+      prev.contenido.ctas = [...(prev.contenido.ctas || []), ...b.contenido.ctas]
+      continue
+    }
+    if (b.soloBoton) { delete b.soloBoton; b.revisar = [...(b.revisar || []), `BOTON "${b.contenido.ctas[0].label}" suelto, sin texto arriba: quedo en un bloque de texto que solo lleva el boton.`] }
+    out.push(b)
+  }
+  return out
+}
+
 // ---------------------------------------------------------------------------------
 function planDe(d) {
   const ctx = { primerBanner: true, base: d.final || d.pedida }
@@ -206,6 +247,8 @@ function planDe(d) {
     // Una rama puede devolver varios bloques sueltos (ej. un layout que no tenemos).
     if (tr.suelto) bloques.push(...tr.suelto); else bloques.push(tr)
   }
+  const pegados = pegarBotones(bloques)
+  bloques.length = 0; bloques.push(...pegados)
 
   const revisar = []
   if (!d.estructura?.length) {
@@ -216,7 +259,8 @@ function planDe(d) {
   if ((d.h1 || []).length > 1) {
     revisar.push(`SEO: el sitio viejo tiene ${d.h1.length} <h1> ("${d.h1.join('" / "')}"). En la pagina nueva tiene que quedar UNO: el segundo suele ir como bajada del banner.`)
   }
-  for (const b of bloques) revisar.push(...(b.revisar || []))
+  const juntar = (b) => { revisar.push(...(b.revisar || [])); (b.hijos || []).forEach(juntar) }
+  bloques.forEach(juntar)
 
   const url = d.final || d.pedida
   return {
@@ -230,7 +274,10 @@ function planDe(d) {
       url_new: rutaNueva(url),
     },
     revisar,
-    bloques: bloques.map(({ revisar: _r, ...b }) => b),
+    bloques: bloques.map(function sin({ revisar: _r, textoEnImagen: _t, soloBoton: _s, ...b }) {
+      if (b.hijos) b.hijos = b.hijos.map(sin)
+      return b
+    }),
   }
 }
 

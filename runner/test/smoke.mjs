@@ -45,6 +45,7 @@ const mapping = (site) => ({
   nodeAdd: '/node/add/page',
   title: 'input[name="title[0][value]"]',
   published: 'input[name="status[value]"]',
+  brand: 'select[name="field_brand"]',
   pathauto: 'input[name="path[0][pathauto]"]',
   path: 'input[name="path[0][alias]"]',
   save: 'input[name="op"][value="Guardar"]:visible',
@@ -105,7 +106,8 @@ const mapping = (site) => ({
 
 const manifest = validateManifest({
   manifest: 1,
-  page: { title: 'Tenencia Responsable', path: '/adopta/tenencia-responsable', published: false },
+  // "Purina One" del hub tiene que encontrar "Purina® One®" del CMS.
+  page: { title: 'Tenencia Responsable', path: '/adopta/tenencia-responsable', published: false, brand: 'Purina One' },
   blocks: [
     { type: 'c_text', fields: {
       field_c_text: 'Cuerpo del bloque de texto.',
@@ -154,6 +156,7 @@ try {
       titulo: v('input[name="title[0][value]"]'),
       medio: document.querySelector('[data-drupal-selector="edit-field-components-1-subform-field-media"] .ief-entity-table td')?.textContent?.trim() ?? null,
       publicado: document.querySelector('input[name="status[value]"]')?.checked,
+      marca: v('select[name="field_brand"]'),
       pathauto: document.querySelector('input[name="path[0][pathauto]"]')?.checked,
       alias: v('input[name="path[0][alias]"]'),
       panelUrl: document.getElementById('urlpath')?.open === true,
@@ -185,6 +188,7 @@ try {
 
   check(dom.titulo === 'Tenencia Responsable', 'titulo de la pagina')
   check(dom.publicado === false, 'quedo DESPUBLICADA')
+  check(dom.marca === '7', `eligio la marca en el campo Brand sin mirar ® ni "Purina" (${dom.marca})`)
   check(dom.pathauto === false, 'destildo el alias automatico')
   check(dom.alias === '/adopta/tenencia-responsable', `escribio el alias (${dom.alias})`)
   check(dom.panelUrl, 'abrio el panel plegado donde vive el alias')
@@ -225,6 +229,14 @@ try {
       manifest: validateManifest({ manifest: 1, page: { title: 'x' }, blocks: [{ type: 'c_text', fields: { campo_inventado: 'x' } }] }) })
   } catch (e) { freno = /no tiene el campo "campo_inventado"/.test(e.message) }
   check(freno, 'frena ante un campo que el mapping no conoce')
+
+  // Una direccion que ya existe en el sitio frena ANTES de tocar el formulario.
+  let ocupada = ''
+  try {
+    await buildPage({ page, mapping: mapping(site), save: false, onStep: () => {},
+      manifest: validateManifest({ manifest: 1, page: { title: 'x', path: '/node/123' }, blocks: [] }) })
+  } catch (e) { ocupada = e.message }
+  check(/\/node\/123 ya existe en el sitio \(responde 200\)/.test(ocupada), 'frena si la direccion ya existe en el sitio')
 
   // Un slot que no existe tambien frena: mejor eso que meter el bloque en otro lado.
   let slotMalo = false
