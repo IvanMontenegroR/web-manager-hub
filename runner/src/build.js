@@ -13,7 +13,7 @@
 //     que pide el manifiesto no esta, frena y dice cual falta.
 import { resolveSelector, rowSelector, widgetDsel, namePath, fieldWrapper, listPath, KINDS_SIN_SELECTOR } from './mapping.js'
 import { esperarAjax, esperarVisible } from './esperas.js'
-import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina } from './richtext.js'
+import { esperarEditor, escribirRich, leerRich, diagnosticoRich, prepararPagina, sinMarcas } from './richtext.js'
 import { elegirMedia, leerMedia } from './mediaExistente.js'
 import { crearMedioEnLinea } from './mediaNuevo.js'
 import { ALT_DE_RESERVA } from './media.js'
@@ -849,7 +849,8 @@ export async function fillField(ctx, f, vars, value, ref) {
         + `Estado del campo: ${await diagnosticoRich(page, el)}`)
     }
   } else {
-    await el.fill(String(value))
+    // Campo de texto plano: las marcas del hub entrarian literales (ver `sinMarcas`).
+    await el.fill(sinMarcas(value))
   }
 
   // VERIFICAR. Un campo que se llena y queda vacio es peor que un error: la pagina sale

@@ -1,3 +1,4 @@
+import { parseInline, parseRich } from '../../src/lib/richText.js'
 // Los campos de CUERPO de Drupal no son un textarea: son un textarea ESCONDIDO con un
 // CKEditor 5 montado encima. Escribirlos tiene tres trampas, y las tres se pagaron caro:
 //
@@ -122,18 +123,21 @@ async function porRuta(page, ta, valor, via, plano = false) {
     try {
       await editable.first().click({ timeout: 3000 })
       await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A')
-      await page.keyboard.insertText(valor)
+      // Tecleado no hay como poner negrita: en un formato HTML van sin las marcas (si no,
+      // los asteriscos quedarian a la vista). En markdown las marcas SON el formato.
+      await page.keyboard.insertText(plano ? valor : sinMarcas(valor))
       return true
     } catch { return false }
   }
 
-  // El textarea, aunque este escondido: `fill` exige que se vea y aca eso no sirve.
+  // El textarea, aunque este escondido: `fill` exige que se vea y aca eso no sirve. Con un
+  // formato HTML el textarea guarda el HTML fuente, asi que va convertido igual que al editor.
   return ta.evaluate((el, v) => {
     el.value = v
     el.dispatchEvent(new Event('input', { bubbles: true }))
     el.dispatchEvent(new Event('change', { bubbles: true }))
     return true
-  }, valor).catch(() => false)
+  }, plano ? valor : aHtml(valor)).catch(() => false)
 }
 
 // Lo que hay AHORA en el campo, como texto plano.
@@ -204,10 +208,35 @@ export async function prepararPagina(page) {
   await page.evaluate(buscador).catch(() => {})
 }
 
-export const aHtml = (texto) => String(texto)
-  .split(/\n{2,}/)
-  .map((p) => `<p>${escaparHtml(p).replace(/\n/g, '<br>')}</p>`)
-  .join('')
+// El cuerpo en HTML, para los formatos que NO son markdown (`rich_text`, `full_html`).
+// Antes solo se escapaba y se partia en parrafos: las marcas del hub entraban como texto
+// y el sitio mostraba los asteriscos (el hero de /dentalife/preguntas-frecuentes, cuyo
+// campo solo ofrece Rich text y Texto sin formato). Ahora se traducen: `**x**` ->
+// <strong>, `_x_` -> <em>, `[t](u)` -> <a>, `- ` / `1. ` -> listas, salto -> <br>.
+// Mismo parser que el preview del hub, asi lo que se ve en el hub es lo que llega.
+const inlineHtml = (t) => parseInline(t).map((x) => {
+  const txt = escaparHtml(x.text)
+  if (x.link) return x.url ? `<a href="${escaparHtml(x.url).replace(/"/g, '&quot;')}">${txt}</a>` : txt
+  if (x.bold) return `<strong>${txt}</strong>`
+  if (x.italic) return `<em>${txt}</em>`
+  return txt
+}).join('')
+
+export const aHtml = (texto) => parseRich(texto).map((b) => (b.type === 'p'
+  ? `<p>${b.lines.map(inlineHtml).join('<br>')}</p>`
+  : `<${b.type}>${b.items.map((it) => `<li>${inlineHtml(it)}</li>`).join('')}</${b.type}>`)).join('')
+
+// Un campo de TEXTO PLANO del CMS (un input sin formato de texto: titulos, textos de
+// boton) guarda los caracteres tal cual, y el hub igual los dibuja con formato si traen
+// marcas. Aca se sacan al escribir: queda el texto del enlace sin la URL y la
+// negrita/cursiva sin sus signos, con el MISMO parser que usa el hub para dibujarlas
+// (asi lo que se saca es exactamente lo que el hub mostraba como formato). Una URL no se
+// toca: puede llevar `_` o `*` de verdad.
+export const sinMarcas = (texto) => {
+  const s = String(texto)
+  if (/^\s*(https?:|mailto:|tel:|\/|#)\S*\s*$/i.test(s)) return s
+  return s.split('\n').map((l) => parseInline(l).map((x) => x.text).join('')).join('\n')
+}
 
 const escaparHtml = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

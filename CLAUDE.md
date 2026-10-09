@@ -546,6 +546,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   esos asteriscos entran LITERALES y se ven asi en el sitio. Los formatos de `planos` toman texto tal cual,
   y ahi el cuerpo NO se envuelve en `<p>` — en markdown esas etiquetas son basura visible. Los campos no
   ofrecen todos los mismos formatos, por eso es una lista y no un valor fijo.
+  Cuando el campo NO ofrece markdown (la Description del **Banner** solo tiene Rich text y Texto sin
+  formato) cae en `rich_text`, y ahi el runner TRADUCE las marcas a HTML (`aHtml` en
+  `runner/src/richtext.js`, con el mismo `parseInline`/`parseRich` del hub): `**x**` -> `<strong>`,
+  `[t](u)` -> `<a>`, listas -> `<ul>`/`<ol>`. Antes solo escapaba y el hero de
+  /dentalife/preguntas-frecuentes salio con los asteriscos a la vista. En los inputs de texto plano
+  (titulos, textos de boton) las marcas se SACAN (`sinMarcas`): ahi no hay formato posible.
   El **bloque de Texto** es `c_text`: el cuerpo es el unico campo propio, titulo y subtitulo son
   opcionales (cada uno con su HTML tag) y el **CTA es REPETIBLE** (`ctas`, porque `field_c_link` es
   multivaluado) con destino, rel y ARIA label.

@@ -310,6 +310,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Contacto) y la home de cada marca; NO tiene Ingredientes, Estandares ni Purina Cares. Origen: MX,
   Ingredientes ("esta pagina esta en figma no? ... esto aplica para todas").
 
+## Despues de subir
+
+- **Se pide cada imagen publicada (src y srcset) y se mira que no venga vacia.** Drupal arma las
+  versiones AVIF la primera vez que alguien las pide, y si eso falla queda un archivo de 0 bytes que se
+  ve como un recuadro gris con el alt. No se arregla solo: se vuelve a subir el MISMO archivo con otro
+  nombre en el medio (`qa-local/_reemplazar-medio.mjs`, `SOLO=field_media_image`), asi la version nace
+  de nuevo. Origen: MX, el hero desktop de Alergenos del gato (y antes Crecimiento), subidos durante un
+  corte de red.
+- **Se mira la pagina publicada buscando marcas a la vista** (`**`, `](`). Un campo de cuerpo que no
+  ofrece Purina Markdown recibe HTML, y si el texto no se convierte los asteriscos salen tal cual.
+  Origen: MX, el hero de Dentalife preguntas frecuentes.
+
 ## Spacing
 
 - **Que hace cada opcion** (medido en el CSS real de content, 2026-10): `space_py_N` es el mismo
@@ -399,6 +411,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   usuario.
 - **Los productos todavia no estan cargados en el CMS**: los nombres del carrusel son una guia para el
   editor, no hace falta el nombre exacto de catalogo ni frenar por un producto que falta.
+- **Mientras los productos no esten migrados, el carrusel lleva MUESTRAS de la marca** (`productosMuestra`
+  del mapping, nids de content) y se cambian por los reales despues, todos juntos con
+  `npm run editar` (`field_block.productos`). Preprod tiene otros nids: antes de armar alla hay que
+  mirar que productos de muestra existen ahi. Origen: MX, pedido del usuario ("dejemoslo con productos
+  de muestra de la marca y despues ponemos los correctos").
 
 ## Menu de marca
 
