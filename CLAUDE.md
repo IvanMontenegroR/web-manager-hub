@@ -159,6 +159,15 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   O sigue abierta y ya paso su fin planeado (se mide contra HOY). Ambos casos son "atraso" y se
   tratan/pintan IGUAL (mismo rojo). El fin de referencia es `delayEnd` (= `actual_end` o HOY). El
   delta en **dias habiles** se dibuja como extension rayada (de `planned_end` a `delayEnd`).
+- **Inicio tardio** (`lateStart` / `lateStartDays`, en `computeProjection`): una tarea que YA arranco
+  pero DESPUES del dia en que podia (el habil siguiente al cierre real de su predecesora, o su
+  plan si era mas tarde) suma esos dias como atraso PROPIO. Se pintan igual que el atraso (rayado
+  rojo `.bar-late` en el Gantt, X roja en el Excel) pero ANTES de la barra, y suman al `(+Nd)`, al
+  panel de Retrasos y a Referencias ("arranco tarde: podia desde..."). Nunca puede quedar un hueco
+  en blanco entre una tarea cerrada y la siguiente que arranco tarde: el kick-off de Fancy Feast CO
+  (la validacion cerro el 24/9, el kick-off fue el 7/10) dejaba dos semanas vacias que nadie veia.
+  Solo cuenta con predecesora CERRADA de verdad: si la anterior sigue abierta, arrancar en paralelo
+  no es tarde.
 - La razon de retraso es **obligatoria** en el form cuando `actual_end > planned_end`
   (`src/components/modals/TaskModal.jsx`).
 - **Adelantos** (espejo del atraso, `withDerived`): una tarea que cerro ANTES de su fin plan

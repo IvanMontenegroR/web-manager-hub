@@ -3,7 +3,7 @@ import { fetchAll } from '../lib/db'
 import { detectOverlaps, detectDelays, withDerived, buildDailyControl, applyEffectiveDelay } from '../lib/analysis'
 import { computeProjection } from '../lib/projection'
 import { taskCountries, unionHolidays } from '../lib/countries'
-import { toISO } from '../lib/dates'
+import { toISO, addDaysISO } from '../lib/dates'
 
 const DataContext = createContext(null)
 
@@ -83,6 +83,11 @@ export function DataProvider({ children }) {
       t.pulled = p.pulled
       t.pushedBy = p.pushedBy
       t.pushedByName = p.pushedBy ? byId.get(p.pushedBy)?.action_name || null : null
+      // Inicio tardio: de lateStart al dia anterior al inicio real (se pinta como atraso).
+      t.lateStart = p.lateStart
+      t.lateStartDays = p.lateStartDays || 0
+      t.isLateStart = t.lateStartDays > 0
+      t.lateStartEnd = t.isLateStart ? addDaysISO(t.actual_start, -1) : null
       // Fin de la barra REAL/proyectada: si arranco, hasta el fin efectivo (o hoy);
       // si no arranco, hasta su fin proyectado.
       const started = !!t.actual_start || !!t.actual_end || t.status === 'En curso'

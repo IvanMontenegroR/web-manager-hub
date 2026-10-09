@@ -3,7 +3,9 @@
 //   projStart / projEnd : donde caeria realmente segun el avance real de sus predecesoras
 //   effEnd              : fin efectivo usado para empujar a las siguientes
 //   pushed / pushedBy   : si la empujo una predecesora, y cual (accountability)
-import { plannedEnd, addBusinessDays, addDaysISO, daysBetween } from './dates'
+//   lateStart / lateStartDays : la tarea YA arranco, pero despues del dia en que podia
+//                         (ver abajo): ese hueco es atraso suyo y se dibuja, no queda en blanco
+import { plannedEnd, addBusinessDays, addDaysISO, daysBetween, businessDaysBetween } from './dates'
 
 // Primer dia habil DESPUES de iso (para el calendario de la tarea sucesora).
 function nextBusinessDay(iso, holidays) {
@@ -58,8 +60,23 @@ export function computeProjection(tasks, todayISO) {
     let projStart = t.planned_start
     let pushed = false
     let pulled = false
+    let lateStart = null
+    let lateStartDays = 0
     if (t.actual_start) {
       projStart = t.actual_start
+      // INICIO TARDIO. Si la predecesora que manda ya cerro de verdad y la tarea arranco
+      // despues del dia en que podia (el habil siguiente a ese cierre, o su plan si el plan
+      // era mas tarde), esos dias son tiempo que el proyecto perdio esperando a ESTA tarea.
+      // Antes quedaban en blanco entre las dos barras (el kick-off de Fancy Feast CO: la
+      // validacion cerro el 24/9 y el kick-off fue el 7/10) y nadie los veia.
+      if (predEnd && bindingFirm) {
+        const ready = nextBusinessDay(predEnd, t.holidaysSet)
+        const from = daysBetween(ready, t.planned_start) > 0 ? t.planned_start : ready
+        if (daysBetween(from, t.actual_start) > 0) {
+          lateStartDays = businessDaysBetween(addDaysISO(from, -1), addDaysISO(t.actual_start, -1), t.holidaysSet)
+          if (lateStartDays > 0) lateStart = from
+        }
+      }
     } else if (predEnd) {
       const earliest = nextBusinessDay(predEnd, t.holidaysSet)
       const delta = daysBetween(projStart, earliest) // earliest - baseline
@@ -90,7 +107,7 @@ export function computeProjection(tasks, todayISO) {
       effEnd = daysBetween(projEnd, todayISO) > 0 ? todayISO : projEnd
     }
 
-    const res = { projStart, projEnd, effPlanEnd, effEnd, pushed, pushedBy, pulled, firm: !!t.actual_end }
+    const res = { projStart, projEnd, effPlanEnd, effEnd, pushed, pushedBy, pulled, firm: !!t.actual_end, lateStart, lateStartDays }
     memo.set(t.id, res)
     stack.delete(t.id)
     return res

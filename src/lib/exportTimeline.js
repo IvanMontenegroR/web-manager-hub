@@ -244,7 +244,7 @@ function goLiveOriginal(tasks, project) {
 function dateRange(tasks, project) {
   const ds = []
   for (const t of tasks) {
-    for (const k of ['planned_start', 'planned_end', 'renderStart', 'renderEnd', 'delayEnd', 'actual_start', 'actual_end']) {
+    for (const k of ['planned_start', 'planned_end', 'renderStart', 'renderEnd', 'delayEnd', 'lateStart', 'actual_start', 'actual_end']) {
       if (t[k]) ds.push(t[k])
     }
   }
@@ -417,11 +417,13 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     stCell.alignment = { horizontal: 'center', vertical: 'middle' }
     stCell.border = border
     // DÍAS habiles del plan; con atraso "(+Nd)" en rojo, con adelanto "(-Nd)" en verde.
+    // El atraso suma las dos formas: arrancar tarde y pasarse del plan.
     const dCell = ws.getCell(row, 4)
-    dCell.value = t.isDelayed
+    const totalDelay = (t.isDelayed ? t.delayDays : 0) + (t.lateStartDays || 0)
+    dCell.value = totalDelay > 0
       ? { richText: [
           { text: `${t.planned_days}d`, font: { size: 9 } },
-          { text: ` (+${t.delayDays}d)`, font: { size: 9, bold: true, color: { argb: PURINA_RED } } },
+          { text: ` (+${totalDelay}d)`, font: { size: 9, bold: true, color: { argb: PURINA_RED } } },
         ] }
       : t.isAhead
       ? { richText: [
@@ -456,7 +458,10 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
       const nonWorking = wknd || (t.holidaysSet && t.holidaysSet.has(iso))
       const effEnd = t.effPlanEnd || t.planned_end
       const inReal = t.renderStart && realEnd && iso >= t.renderStart && iso <= realEnd
-      const isOverrun = t.isDelayed && effEnd && t.delayEnd && iso > effEnd && iso <= t.delayEnd
+      // Inicio tardio: los dias entre que pudo arrancar y su inicio real. Mismo rayado y
+      // misma X que el atraso, ANTES de la barra, asi no queda un hueco en blanco.
+      const isLate = t.isLateStart && iso >= t.lateStart && iso <= t.lateStartEnd
+      const isOverrun = isLate || (t.isDelayed && effEnd && t.delayEnd && iso > effEnd && iso <= t.delayEnd)
       // Adelanto: dias ahorrados (del fin real al fin plan efectivo) pintados en verde.
       const isSaved = t.isAhead && t.aheadStart && effEnd && iso > t.aheadStart && iso <= effEnd
       if (nonWorking) cell.fill = NONWORK_FILL
@@ -479,6 +484,15 @@ function buildSheet(wb, project, tasks, partners, idx, week = false, holByKey = 
     })
 
     // Se registra el retraso para el listado de Referencias (fechas + razon).
+    if (t.isLateStart) {
+      delaysSeen.push({
+        name: `${t.action_name || 'Tarea'} (arrancó tarde: podía desde el ${fmtCorto(t.lateStart)})`,
+        from: t.lateStart,
+        to: t.lateStartEnd,
+        days: t.lateStartDays,
+        reason: t.delay_reason || '',
+      })
+    }
     if (t.isDelayed && t.delayEnd) {
       delaysSeen.push({
         name: t.action_name || 'Tarea',

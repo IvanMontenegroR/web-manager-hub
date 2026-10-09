@@ -72,6 +72,7 @@ export default function Gantt({
       if (t.renderEnd) dates.push(t.renderEnd)
       if (t.effPlanEnd) dates.push(t.effPlanEnd)
       if (t.delayEnd) dates.push(t.delayEnd)
+      if (t.lateStart) dates.push(t.lateStart)
     }
     // Los lanzamientos por mercado deben quedar siempre dentro del rango visible.
     for (const p of projects) {
@@ -201,6 +202,8 @@ export default function Gantt({
         : null,
       conflict: conflictIds.has(t.id),
       delay: t.isDelayed ? t.delayDays : 0,
+      late: t.isLateStart ? t.lateStartDays : 0,
+      lateFrom: t.isLateStart ? fmtCorto(t.lateStart) : null,
       ahead: t.isAhead ? t.aheadDays : 0,
       pushed: t.pushed && !t.actual_end,
       pulled: t.pulled && !t.actual_end,
@@ -355,6 +358,15 @@ export default function Gantt({
                   const aheadVisible = t.isAhead && aEndPx > 0
                   const aheadLeft = aClip
                   const aheadWidth = Math.max(aEndPx - aClip - 2, 8)
+                  // Inicio tardio: del dia en que podia arrancar al anterior al inicio real.
+                  // Rayado rojo ANTES de la barra, para que no quede un hueco en blanco.
+                  const lStartPx = t.isLateStart ? idxOf(t.lateStart) * dayW : 0
+                  const lEndPx = t.isLateStart ? (idxOf(t.lateStartEnd) + 1) * dayW : 0
+                  const lClip = Math.max(lStartPx, 0)
+                  const lateVisible = t.isLateStart && lEndPx > 0
+                  const lateLeft = lClip + 2
+                  const lateWidth = Math.max(lEndPx - lClip - 2, 8)
+                  const totalDelay = (t.isDelayed ? t.delayDays : 0) + (t.lateStartDays || 0)
                   // Fantasma del plan original: cuando la realidad se corrio del plan.
                   const startMoved = idxOf(t.projStart) !== idxOf(t.planned_start)
                   const endMoved = !t.isDelayed && idxOf(t.renderEnd) !== idxOf(t.planned_end)
@@ -378,7 +390,7 @@ export default function Gantt({
                         <span className="t-name">{t.action_name}</span>
                         {t.is_extra && <span className="t-extra-tag" title="Esta tarea no estaba en el plan original">EXTRA</span>}
                         <span className="t-days" title="Días hábiles del plan (+ retraso)">
-                          {t.planned_days}d{t.isDelayed && <em className="t-delay"> (+{t.delayDays}d)</em>}
+                          {t.planned_days}d{totalDelay > 0 && <em className="t-delay"> (+{totalDelay}d)</em>}
                         </span>
                         <span className="t-partner">{partnerName(partners, t.partner_id)}</span>
                         <div className="task-actions">
@@ -424,6 +436,17 @@ export default function Gantt({
                             {t.is_meeting && <Users size={11} className="bar-meeting" />}
                             {t.is_extra && <CirclePlus size={11} className="bar-extra" />}
                             <span className="bar-txt">{t.action_name}</span>
+                          </div>
+                        )}
+                        {lateVisible && (
+                          <div
+                            className="bar-late"
+                            style={{ left: lateLeft, width: lateWidth }}
+                            onMouseEnter={(e) => showTip(e, t, project)}
+                            onMouseMove={(e) => setTip((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))}
+                            onMouseLeave={() => setTip(null)}
+                          >
+                            +{t.lateStartDays}d
                           </div>
                         )}
                         {delayVisible && (
@@ -480,6 +503,7 @@ export default function Gantt({
           {tip.actual && <div className="tt-row"><span>Real</span><b>{tip.actual}</b></div>}
           {tip.real && <div className="tt-row"><span>Real</span><b>{tip.real}</b></div>}
           {tip.conflict && <div className="tt-flag danger">Solapamiento de partner</div>}
+          {tip.late > 0 && <div className="tt-flag warn">Arrancó {tip.late} día{tip.late > 1 ? 's' : ''} hábil{tip.late > 1 ? 'es' : ''} tarde (podía desde el {tip.lateFrom})</div>}
           {tip.delay > 0 && <div className="tt-flag warn">Retraso de {tip.delay} dia{tip.delay > 1 ? 's' : ''}</div>}
           {tip.ahead > 0 && <div className="tt-flag ok">Adelanto de {tip.ahead} dia{tip.ahead > 1 ? 's' : ''}</div>}
           {tip.pushed && (

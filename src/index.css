@@ -386,7 +386,8 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .proj-label .fin-icon.bad { color: var(--danger); }
 .proj-group.finished .p-name { color: var(--ink-3); }
 .proj-group.finished .bar { opacity: 0.5; }
-.proj-group.finished .bar-delay { opacity: 0.55; }
+.proj-group.finished .bar-delay,
+.proj-group.finished .bar-late { opacity: 0.55; }
 .proj-group.finished .task-label .t-name { color: var(--ink-3); }
 
 /* Fila de task */
@@ -542,6 +543,31 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   );
   border: 1px solid var(--danger);
   border-left: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--danger);
+}
+/* Inicio tardio (ANTES de la barra): mismo rayado que el atraso, redondeado a la izquierda */
+.bar-late {
+  position: absolute;
+  top: 6px;
+  height: calc(var(--row-h) - 12px);
+  border-radius: 5px 0 0 5px;
+  z-index: 4;
+  background-color: var(--danger-tint);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(208, 67, 47, 0.55) 0,
+    rgba(208, 67, 47, 0.55) 5px,
+    rgba(208, 67, 47, 0.18) 5px,
+    rgba(208, 67, 47, 0.18) 10px
+  );
+  border: 1px solid var(--danger);
+  border-right: none;
   display: flex;
   align-items: center;
   justify-content: flex-end;

@@ -113,7 +113,13 @@ export function detectOverlaps(enriched) {
 
 // Lista de tasks retrasadas (ya enriquecidas).
 export function detectDelays(enriched) {
-  return enriched.filter((t) => t.isDelayed)
+  return enriched.filter((t) => t.isDelayed || t.isLateStart)
+}
+
+// Dias habiles de atraso de una tarea, sumando las dos formas: arrancar tarde (el hueco
+// entre el dia en que podia empezar y su inicio real) y pasarse de su plan.
+export function totalDelayDays(t) {
+  return (t.isDelayed ? t.delayDays : 0) + (t.lateStartDays || 0)
 }
 
 // Control diario: clasifica las tareas activas relativo a HOY, en DIAS HABILES,

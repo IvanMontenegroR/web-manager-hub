@@ -2,6 +2,7 @@ import { Clock, CheckCircle2 } from 'lucide-react'
 import { useData } from '../../context/DataContext.jsx'
 import { partnerName } from '../../lib/colors'
 import { fmtCorto } from '../../lib/dates'
+import { totalDelayDays } from '../../lib/analysis'
 
 export default function DelayPanel() {
   const { delays, partners, projects } = useData()
@@ -27,11 +28,21 @@ export default function DelayPanel() {
               <span className="ci-partner">{projName(t.project_id)}</span>
               <span className="ci-action">{t.action_name}</span>
               <span className="pill">{partnerName(partners, t.partner_id)}</span>
-              <span className="delay-days">+{t.delayDays} dia{t.delayDays > 1 ? 's' : ''}</span>
+              <span className="delay-days">+{totalDelayDays(t)} dia{totalDelayDays(t) > 1 ? 's' : ''}</span>
             </div>
             <div className="delay-grid">
-              <span className="k">Fin SLA</span><span className="v">{fmtCorto(t.planned_end)}</span>
-              <span className="k">Fin real</span><span className="v">{fmtCorto(t.delayEnd)}</span>
+              {t.isLateStart && (
+                <>
+                  <span className="k">Podía arrancar</span><span className="v">{fmtCorto(t.lateStart)}</span>
+                  <span className="k">Arrancó</span><span className="v">{fmtCorto(t.actual_start)}</span>
+                </>
+              )}
+              {t.isDelayed && (
+                <>
+                  <span className="k">Fin SLA</span><span className="v">{fmtCorto(t.effPlanEnd || t.planned_end)}</span>
+                  <span className="k">Fin real</span><span className="v">{fmtCorto(t.delayEnd)}</span>
+                </>
+              )}
             </div>
             {t.delay_reason && <div className="delay-reason">{t.delay_reason}</div>}
           </div>
