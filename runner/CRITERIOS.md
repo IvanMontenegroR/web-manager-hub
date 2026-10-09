@@ -48,6 +48,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   logo). No se deja una seccion con placeholder: el placeholder es SOLO para el hero (ver Heroes).
   Origen: MX, homes de marca Ecosystem 2.0, pedido del usuario.
 
+- **"Del Figma" es el ORIGINAL del frame de esa seccion, no una copia bajada del sitio publicado.** Se
+  ubica la seccion en la home de la marca del Figma y se baja el archivo que tiene de relleno, en su
+  resolucion; solo se recorta, se escala, se espeja (si el frame lo espeja) o se funden bordes. Una
+  copia publicada se reemplaza por el original cuando el original da mas resolucion para ese recorte
+  (el mosaico de Cat Chow y Fancy Feast estaba a 450px y el original da 1200 a 1800); si da lo mismo,
+  se deja. Antes de usar el sitio viejo se revisa el Figma: en Felix, fondo de tarjetas, imagen de
+  productos y mosaico 1 venian del sitio viejo y el Figma tenia los suyos. Origen: MX, homes de marca.
+
 - **Home de marca sin fotos usables: layout REDUCIDO, no secciones con fotos de relleno.** Si ni el
   mercado, ni el Figma, ni el sitio viejo tienen fotos para el carrusel de cards y el mosaico (el sitio
   viejo solo trae banners con el texto quemado y packs), esos dos bloques no se arman: la home queda en
