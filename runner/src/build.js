@@ -429,9 +429,10 @@ async function addBlock(ctx, block, num, holder) {
 async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
   const { mapping, page, onStep, esperaSubform } = ctx
   const campos = Object.entries(block.fields || {})
-  if (!campos.length) return
 
-  // Por las dudas: si "abrir todas" no alcanzo, esta fila trae su propio boton.
+  // Por las dudas: si "abrir todas" no alcanzo, esta fila trae su propio boton. Se abre
+  // AUNQUE el bloque no tenga campos propios (un contenedor de pestañas): sus hijos viven
+  // adentro, y agregando a una pagina existente la fila puede haber quedado plegada.
   const subform = page.locator(`[data-drupal-selector="${vars.dsel}-subform"]`)
   if (!(await subform.count())) {
     const editar = page.locator(`input[name="${vars.npath}_edit"], button[name="${vars.npath}_edit"]`).first()
@@ -441,6 +442,8 @@ async function llenarBloque(ctx, { block, def, vars, num, anidado }) {
       await subform.first().waitFor({ state: 'attached', timeout: esperaSubform }).catch(() => {})
     }
   }
+
+  if (!campos.length) return
 
   for (const tpl of [...(mapping.paragraphs.open || []), ...(def.open || [])]) {
     const d = page.locator(resolveSelector(tpl, vars)).first()
