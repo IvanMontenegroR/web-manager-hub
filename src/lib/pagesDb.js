@@ -66,6 +66,7 @@ const BRAND_TOKENS = {
   'Beneful': ['#F5D2D2', '#CE201F', '#A00B0B', '#000000'],
   'Campeón': ['#F5D2D2', '#FF0006', '#99150C', '#004264'],
   'Gatina': ['#FFD3D0', '#FF2314', '#99150C', '#000000'],
+  'Excellent': ['#DDDDDE', '#56545A', '#971F33', '#000000'],
 }
 export function brandTokens(brand) {
   const key = String(brand || '').trim().toLowerCase()
