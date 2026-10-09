@@ -389,10 +389,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      `slider-default-card` dibuja cards verticales por defecto y APAISADAS con el estilo en
      `CARD_SQUARE` (`card_grid_default_square`). Por eso la medida de imagen se resuelve con los DOS
      campos (`specVariant`), y por eso las apaisadas tienen **limite de caracteres** en la descripcion
-     (`CARD_SQUARE_DESC_MAX` = 128): esa card tiene alto fijo y el sitio corta el texto que no entra. El
-     numero es la descripcion mas larga que vimos renderizar ENTERA en produccion, no una validacion de
-     Drupal ni un limite exacto: lo que corta es el ALTO, y cuantos caracteres entran depende de como
-     caigan las palabras (una de 133 se ve cortada a los 111 y esta de 128 se ve completa). Es una GUIA.
+     (`CARD_SQUARE_DESC_MAX` = 100): esa card tiene alto fijo y el sitio corta el texto que no entra. El
+     numero no es una validacion de Drupal ni un limite exacto: lo que corta es el ALTO, y cuantos
+     caracteres entran depende de como caigan las palabras. Era 128, medido en desktop; en mobile a
+     360px una de 109 ya se corta y una de 100 entra. Es una GUIA.
+     Cada modo del Card Grid tiene la suya en `CARD_DESC_MAX_BY_MODE`, medida en la caja REAL a 360 y
+     390px (verticales 65, texto sobre foto 55, Image + 3 cards 70, cuadradas con icono 60, Icons 65,
+     Numbers 120, mosaico 70...). Todo el Card Grid corta salvo el Simple; un texto que se pasa por
+     mucho va a Cards Info o a la Simple en vez de recortarse.
      El **Mosaico** (`grid-cards`) tiene su propia guia, `CARD_MOSAIC_DESC_MAX` = 70: en desktop entra
      todo, pero en MOBILE la caja tiene alto fijo y la descripcion se corta a 3 lineas (medido en la
      caja real: unos 84 caracteres a 390px, entre 65 y 79 a 360px).

@@ -446,6 +446,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   caigan las palabras. Le pasaba a Cat Chow, Dog Chow, Purina One y Fancy Feast. La guia esta en el hub
   (`CARD_MOSAIC_DESC_MAX`) y en el generador de homes. Origen: MX, homes de marca, el usuario vio el
   corte en Fancy Feast.
+- **Las guias de largo se miden en MOBILE a 360px, no en desktop.** Las primeras (90 en el bloque de
+  3 tarjetas, 128 en las apaisadas, 116 en el mosaico) salieron de mirar desktop o 390px, y a 360px
+  (el Android chico) cortan antes: se rehicieron probando textos dentro de la caja real y quedaron en
+  `CARD_DESC_MAX_BY_MODE` del hub (verticales 65, texto sobre foto 55, 3 tarjetas 70, cuadradas con
+  icono 60, Icons 65, Numbers 120, mosaico 70, apaisadas 100). Origen: MX, barrido de cortes del lote.
 - **Cuando el texto no entra, primero se cambia de card, no de texto.** Todo el Card Grid corta la
   descripcion a N lineas con "…" (medido en la caja real a 360/390/1440: Icons ~65, Numbers ~125,
   Mosaico ~70-85, carruseles ~60-107 segun el modo), salvo la **Simple**. Y hay dos paragraphs que no
