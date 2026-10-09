@@ -353,6 +353,11 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Reemplaza al viejo campo `slides` del Banner, que nunca existio en el CMS
      (ver `sql/2026_banner_wrapper.sql`); el Banner vuelve a ser UNO solo, con su Media en todos los
      tipos, el Promotional incluido.
+     **CARDS INFO** (`cards_info`, "Cards con texto largo") = el paragraph `cards_info` del CMS (items
+     `card_infos`): icono + titulo + texto, y el texto NO se corta (el Card Grid si, en todos sus modos
+     menos el Simple). Es a donde van las cards con texto largo. La primera card va resaltada (Color
+     Background First Card; sin cargar, roja): al convertir se iguala a las demas. No tiene link por
+     card. Ver `runner/CRITERIOS.md`, Cards.
      **CARD GRID** (`card_grid`) = el paragraph `ln_c_cardgrid` del CMS. UN solo componente del que salen
      el mosaico y todas las variantes de cards: lo que cambia el layout es el **Modo de vista**
      (`CARD_GRID_MODES`, 11 valores), no el componente. Reemplaza a `mosaic` y `commitment_carousel`, que

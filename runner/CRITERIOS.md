@@ -438,6 +438,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   caigan las palabras. Le pasaba a Cat Chow, Dog Chow, Purina One y Fancy Feast. La guia esta en el hub
   (`CARD_MOSAIC_DESC_MAX`) y en el generador de homes. Origen: MX, homes de marca, el usuario vio el
   corte en Fancy Feast.
+- **Cuando el texto no entra, primero se cambia de card, no de texto.** Todo el Card Grid corta la
+  descripcion a N lineas con "…" (medido en la caja real a 360/390/1440: Icons ~65, Numbers ~125,
+  Mosaico ~70-85, carruseles ~60-107 segun el modo), salvo la **Simple**. Y hay dos paragraphs que no
+  cortan nunca: **Cards Info** (icono + titulo + texto) y **Contact Card**. Si un texto se pasa por
+  MUCHO (beneficios de producto, consejos con viñetas, pasos, datos de contacto, cifras), recortarlo
+  es perder el mensaje: va a Cards Info si las cards no tienen imagen, o a la Simple si la tienen.
+  Solo lo que se pasa por POCO se acorta (regla de abajo). Al pasar a Cards Info, la primera card se
+  deja IGUAL a las demas (Color Background First Card = Card - Background Color, texto negro): el
+  resaltado rojo por defecto es un enfasis que el original no tenia. Cards Info no tiene link por
+  card: un bloque con botones no se convierte. Origen: MX, revision de cortes en mobile (174 cards del
+  hub, Club Purina y las paginas de producto de Pro Plan).
 - **Acortar un texto del mercado: solo con lo que el original ya dice.** Se sacan partes, no se
   agregan: ninguna palabra ni idea que el original no tenga (si no dice "gatito", no se escribe
   "gatito"), y se mantiene el tono (si tutea o invita a algo, sigue haciendolo). Con un claim de salud

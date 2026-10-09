@@ -86,6 +86,19 @@ export const PARAGRAFOS = {
     ctaPlano: { cta_label: 'field_c_link.title', cta_url: 'field_c_link.uri', cta_target: 'field_c_link.target' },
   },
 
+  // CARDS INFO: cards con icono, titulo y texto que NO corta el texto (el Card Grid si).
+  // Sus items son `card_infos`, en la misma lista `field_c_subitems` que el Card Grid.
+  cards_info: {
+    tipo: 'cards_info',
+    campos: { ...T.titulo, ...T.subtitulo, ...T.tamanos },
+    lista: { campo: 'items', como: 'cards_info_item', slot: 0 },
+  },
+
+  cards_info_item: {
+    tipo: 'card_infos',
+    campos: { ...T.titulo, icon: 'field_icon', description: 'field_c_text' },
+  },
+
   // EL CARRUSEL DE PRODUCTOS. En el CMS no es un componente propio: es un paragraph Block
   // con el bloque "Selected Product" en Carousel, que es como lo arma F5 en /proplan y
   // /dogchow. Los productos son referencias a productos del CMS; mientras no esten

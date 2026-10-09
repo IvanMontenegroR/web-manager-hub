@@ -452,6 +452,9 @@ const CLASSY_FIELDS = {
   title_card_color: { label: 'Card - Title Color', options: BG_COLORS },
   text_card_color: { label: 'Card - Text Color', options: BG_COLORS },
   icon_card_color: { label: 'Card - Icon Color', options: BG_COLORS },
+  // Solo de Cards Info: la PRIMERA card va resaltada con sus propios colores.
+  background_card_infos_color: { label: 'Color Background First Card', options: BG_COLORS },
+  text_card_infos_color: { label: 'Color Text First Card', options: BG_COLORS },
   card_style_card: { label: 'Card - Style Card', options: CARD_STYLES },
   card_title_position: { label: 'Card - Title Position', options: CARD_TITLE_POSITIONS },
   position_arrows: { label: 'Position Arrows', options: ARROW_POSITIONS },
@@ -1267,6 +1270,38 @@ export const COMPONENTS = [
       ] },
     ],
     specs: [{ label: 'Imagen del mosaico', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
+  },
+  {
+    // CARDS INFO = el paragraph `cards_info` del CMS (items `card_infos`). Cards con icono,
+    // titulo y texto, como las del Card Grid, con una diferencia que es la razon de tenerlo:
+    // el texto NO se corta. Medido en content (/referencia/cards) a 360, 390 y 1440: el
+    // Card Grid corta la descripcion a N lineas en todos sus modos salvo el Simple, y este
+    // la muestra entera. Es el bloque para cards con texto largo (beneficios de producto,
+    // consejos, pasos) que en un Card Grid quedarian con "…" en mobile.
+    // La PRIMERA card va resaltada con sus colores propios (sin cargar, roja).
+    key: 'cards_info',
+    name: 'Cards con texto largo',
+    cmsName: 'Cards Info',
+    category: 'Carruseles',
+    help: 'Paragraph "Cards Info" del CMS: cards con icono, título y texto. A diferencia del Card Grid, el texto no se corta: va para cards con texto largo. La primera card va resaltada (Color Background First Card; sin cargar, roja).',
+    fields: [
+      { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text', cmsGroup: G_OPTIONAL },
+      { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'title_size', label: 'Tamaño del título', cmsLabel: 'Title Size', type: 'select', cms: true, options: TITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle', label: 'Subtítulo', cmsLabel: 'Subtitle', type: 'textarea', cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_tag', label: 'Subtítulo — HTML tag', cmsLabel: 'HTML tag (Subtitle)', type: 'select', cms: true, options: HTML_TAGS, cmsGroup: G_OPTIONAL },
+      { key: 'subtitle_size', label: 'Tamaño del subtítulo', cmsLabel: 'SubTitle Size', type: 'select', cms: true, options: SUBTITLE_SIZES, cmsGroup: G_OPTIONAL },
+      { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS },
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h3' },
+        { key: 'description', label: 'Descripción', cmsLabel: 'Body', type: 'textarea' },
+      ] },
+      ...advanced(),
+      ...classy('background_color', 'background_card_color', 'background_card_infos_color',
+        'text_color', 'title_card_color', 'text_card_color', 'text_card_infos_color',
+        'icon_card_color', 'text_align', 'background_position', 'spacing'),
+    ],
   },
   {
     key: 'stats_grid',

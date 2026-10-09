@@ -1314,6 +1314,46 @@ const RENDERERS = {
 
   // Grilla de numeros: titulo centrado y una fila de estadisticas (numero grande de
   // color configurable + etiqueta + linea inferior).
+  // Cards Info del CMS: icono + titulo + texto, el texto ENTERO (no se corta como en el
+  // Card Grid). La primera card va resaltada: sin colores cargados, roja con texto blanco,
+  // como en el sitio (medido en /referencia/cards).
+  cards_info: (c, ctx) => {
+    const tok = (k) => BG_TOKENS[c[k]] || ctx?.brandTokens?.[c[k]] || null
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { icon: 'pet_supplies', title: 'Título de la card', description: 'Texto de la card, que en este bloque se ve entero.' },
+      { icon: 'stethoscope', title: 'Título de la card', description: 'Texto de la card.' },
+      { icon: 'health_cross', title: 'Título de la card', description: 'Texto de la card.' },
+    ]
+    const first = tok('background_card_infos_color') || '#E91C24'
+    const firstInk = tok('text_card_infos_color') || readableOn(first)
+    const cardBg = tok('background_card_color') || '#F2F2F2'
+    const align = /center/.test(c.text_align || '') ? 'center' : /right/.test(c.text_align || '') ? 'right' : 'left'
+    return (
+      <div className="cp-cinfo" style={{ background: tok('background_color') || undefined, color: tok('text_color') || undefined }}>
+        {OPT(c.title) && <div className="cp-cinfo-title">{OPT(c.title)}</div>}
+        {OPT(c.subtitle) && <Rich className="cp-cinfo-sub">{c.subtitle}</Rich>}
+        <div className="cp-cinfo-grid">
+          {arr.map((it, i) => {
+            const bg = i === 0 ? first : cardBg
+            const ink = i === 0 ? firstInk : (tok('text_card_color') || readableOn(bg))
+            return (
+              <div key={i} className="cp-cinfo-card" style={{ background: bg, color: ink, textAlign: align }}>
+                {it.icon && (
+                  <span className="cp-cinfo-ic" style={{ color: i === 0 ? firstInk : (tok('icon_card_color') || '#E91C24') }}>
+                    <FeatureIcon name={it.icon} size={30} />
+                  </span>
+                )}
+                {OPT(it.title) && <div className="cp-cinfo-t" style={{ color: i === 0 ? firstInk : (tok('title_card_color') || undefined) }}>{it.title}</div>}
+                {OPT(it.description) && <Rich className="cp-cinfo-d">{it.description}</Rich>}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  },
+
   stats_grid: (c) => {
     const acc = T(c.color, ACCENT)
     const stats = list(c.stats)

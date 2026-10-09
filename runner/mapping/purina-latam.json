@@ -2365,6 +2365,14 @@
           "classy.text_align": {
             "sel": "select[name=\"{base}[classy][0][cards_info][text_align]\"]",
             "kind": "select"
+          },
+          "classy.background_position": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][background_position]\"]",
+            "kind": "select"
+          },
+          "classy.spacing": {
+            "sel": "select[name=\"{base}[classy][0][cards_info][spacing]\"]",
+            "kind": "select"
           }
         },
         "children": {

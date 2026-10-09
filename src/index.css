@@ -2386,6 +2386,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-mosaic-box-t { font-size: 19px; font-weight: 700; color: #fff; line-height: 1.2; }
 .cp-mosaic-box-d { margin-top: auto; font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.5; }
 
+/* ===== Cards Info (cards_info): el texto va entero ===== */
+.cp-cinfo { padding: 30px 0; }
+.cp-cinfo-title { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+.cp-cinfo-sub { font-size: 15px; margin-bottom: 22px; }
+.cp-cinfo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.cp-cinfo-card { border-radius: 12px; padding: 26px 24px; display: flex; flex-direction: column; gap: 12px; }
+.cp-cinfo-ic { display: inline-flex; }
+.cp-cinfo-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
+.cp-cinfo-d { font-size: 14px; line-height: 1.5; }
+.pb-canvas--mobile .cp-cinfo-grid { grid-template-columns: 1fr; }
+
 /* ===== Grilla de numeros (stats_grid) ===== */
 .cp-stats { padding: 30px; }
 .cp-stats-title { text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -0.5px; color: #1b252e; margin-bottom: 30px; }
