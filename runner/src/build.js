@@ -169,6 +169,11 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // una; van de afuera hacia adentro, porque la lista de un contenedor no existe hasta
   // que su fila esta abierta.
   for (const tpl of ctx.listas) {
+    // Agregando NO se abre la lista de la pagina: abriria tambien todos los bloques que ya
+    // tenia, y con 15+ bloques abiertos el formulario manda tantos campos que el servidor
+    // descarta el envio sin decir nada ("no guardo", sin mensaje). Cada bloque nuevo se
+    // abre solo, al llenarlo (ver abajo).
+    if (agregar && tpl === root.dsel) continue
     const n = listPath(tpl)
     const b = page.locator(`input[name="${n}_edit_all"], button[name="${n}_edit_all"]`).first()
     if (await b.count() && await b.isVisible().catch(() => false)) {
@@ -178,7 +183,21 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   }
 
   onStep('Llenando los campos…')
-  for (const p of ctx.pendientes) await llenarBloque(ctx, p)
+  if (agregar) {
+    // Abrir una fila pliega la anterior (Drupal se queda con lo cargado, pero los campos
+    // salen del DOM): cada bloque se verifica apenas se llena, antes de abrir el siguiente.
+    for (const p of ctx.pendientes) {
+      const desde = ctx.escritos.length
+      await llenarBloque(ctx, p)
+      const problemas = await revisarEscritos(page, ctx.escritos.slice(desde))
+      if (problemas.length) {
+        throw new Error(`Se llenaron los campos pero no quedaron como se escribieron: ${problemas.join('; ')}.`)
+      }
+    }
+    onStep(`Campos escritos y verificados: ${ctx.escritos.filter(Boolean).length}`)
+  } else {
+    for (const p of ctx.pendientes) await llenarBloque(ctx, p)
+  }
 
   // Repaso final. Agregar un bloque hace que Drupal re-dibuje el formulario, asi que un
   // campo que quedo bien al escribirlo puede haberse vaciado despues. Mejor enterarse
@@ -187,26 +206,13 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // asi tambien se caza un campo que despues cambio a otra cosa, no solo el que se vacio.
   // Un select que se resetea a "- Ninguno -" y uno que queda con otra opcion son el mismo
   // problema, y antes solo se veia el primero.
-  const problemas = []
-  for (const w of ctx.escritos) {
-    if (!w || esVacio(w.valor)) continue
-    const hay = await leerCampo(page, w.f, w.selector)
-    // Un cuerpo que se vacia solo no dice nada por si mismo: lo que hace falta saber es
-    // si el editor estaba, por donde se escribio y quien se quedo con el texto.
-    const detalle = w.f.kind === 'richtext'
-      ? ` [se escribio por "${w.rutaRich}"; ${await diagnosticoRich(page, page.locator(w.selector).first())}]`
-      : ''
-    if (esVacio(hay)) problemas.push(`${w.ref} quedo VACIO${detalle}`)
-    else if (!igual(hay, w.puesto)) {
-      problemas.push(`${w.ref} decia ${cita(w.puesto)} y ahora dice ${cita(hay)}${detalle}`)
-    }
-  }
+  const problemas = agregar ? [] : await revisarEscritos(page, ctx.escritos)
   if (problemas.length) {
     throw new Error(`Se llenaron los campos pero al final no quedaron como se escribieron: `
       + `${problemas.join('; ')}. Suele pasar cuando el formulario se vuelve a dibujar `
       + 'despues de escribir.')
   }
-  onStep(`Campos escritos y verificados: ${ctx.escritos.filter(Boolean).length}`)
+  if (!agregar) onStep(`Campos escritos y verificados: ${ctx.escritos.filter(Boolean).length}`)
 
   if (!save) {
     onStep('Listo (sin guardar). Revisa el formulario y guarda vos.')
@@ -237,6 +243,26 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   })
   if (ctx.classyAnidado.length) await repasarClassy(ctx, nodeId)
   return { saved: true, url: after, nodeId, imagenes: ctx.imagenes }
+}
+
+// Lee de nuevo lo escrito y dice lo que no quedo igual. Se compara contra lo que quedo AL
+// ESCRIBIRLO, no contra el manifiesto: asi tambien se caza un campo que cambio a otra cosa.
+async function revisarEscritos(page, escritos) {
+  const problemas = []
+  for (const w of escritos) {
+    if (!w || esVacio(w.valor)) continue
+    const hay = await leerCampo(page, w.f, w.selector)
+    // Un cuerpo que se vacia solo no dice nada por si mismo: lo que hace falta saber es
+    // si el editor estaba, por donde se escribio y quien se quedo con el texto.
+    const detalle = w.f.kind === 'richtext'
+      ? ` [se escribio por "${w.rutaRich}"; ${await diagnosticoRich(page, page.locator(w.selector).first())}]`
+      : ''
+    if (esVacio(hay)) problemas.push(`${w.ref} quedo VACIO${detalle}`)
+    else if (!igual(hay, w.puesto)) {
+      problemas.push(`${w.ref} decia ${cita(w.puesto)} y ahora dice ${cita(hay)}${detalle}`)
+    }
+  }
+  return problemas
 }
 
 // El Classy de un paragraph AGREGADO se pierde al guardar: el formulario lo muestra elegido y
