@@ -392,13 +392,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 ## Productos
 
 - **La pagina de productos de una marca (`/<marca>/productos`) es: H1 "Productos <Marca>®" con una
-  linea debajo, el banner abajo del titulo (`content_image` con la imagen abajo, como
-  /proplan/perros), el Filtro por mascota y el Listado de productos de la marca** (dos Block del CMS:
+  linea debajo (bloque de Texto), el banner abajo del titulo, el Filtro por mascota y el Listado de
+  productos de la marca** (dos Block del CMS:
   el listado trae TODOS los productos del Brand del nodo, no se cargan a mano). El banner es el hero
   de la marca, en castellano o sin texto; las de F5 tenian uno en ingles y el H1 abajo. Si la marca
   todavia no tiene hero propio, va el de la home del sitio viejo (el viejo NO tenia banner en
   productos). Las de F5 pasan a `<ruta>-anterior` despublicadas, como las homes. Origen: MX, preprod,
   /proplan/productos.
+- **El banner de la pagina de productos es un Banner Promotional (only image), no el hero**: 2088x696
+  en desktop y 465x675 en mobile, recortado de la foto de la marca sin texto quemado en otro idioma.
+  En el sitio ese banner va casi a sangre (20px del borde) y no se alinea con el H1 ni con el
+  listado, que van en el container: es como dibuja el componente. Origen: MX, preprod,
+  /proplan/productos ("los banners de productos tienen que usar el promotional banner").
 
 - **Cards que llevan a productos se reemplazan por el carrusel de productos.** Ya no hay cards
   personalizadas para productos. Origen: MX, ronda 4. **Aunque la card lleve a una gama o a un
@@ -478,6 +483,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   sujeto llega a esa franja, el subtitulo blanco se pone sobre la foto y no pasa el contraste. Se baja
   el contenido de la imagen dentro del mismo lienzo (franja transparente arriba, achicando lo justo),
   sin tocar la foto: es lo que ya hace la de Pro Plan. Origen: MX, home Dog Chow, pedido del usuario.
+- **El fondo de ese bloque lleva un sujeto, no queda vacio.** Sin imagen el panel es un degradé de
+  blanco al color de la marca y el bloque no se entiende. En las marcas sin pieza propia (Beneful,
+  Campeón, Dentalife, Excellent, Gatina) va una foto del sitio viejo: un recorte transparente si hay
+  (la salchicha de Beneful, el labrador de Excellent) y si no la foto con los bordes desvanecidos,
+  nunca una banda rectangular. El sujeto va ARRIBA (desde y=270 de 1994 en desktop, 420 de 1600 en
+  mobile): el sitio le pone encima un degradé al color de la marca que tapa la mitad de abajo, y lo
+  que queda ahi se ve lavado. Una pieza con forma grafica propia que sube hasta la franja del titulo
+  (la cuña roja de Excellent) no sirve. Origen: MX, preprod, homes de marcas chicas.
 
 - **Homes de marca, largos que no se cortan** (medido en /dogchow publicada): en el carrusel de
   cards verticales la descripcion se corta con "…" a las 3 lineas (una de 102 caracteres se corto, una

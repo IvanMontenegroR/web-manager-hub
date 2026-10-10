@@ -612,7 +612,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   mascota** (`product_filter` = `pl_base_pet_type_url_filter_block`, desplegables + lupa) y el
   **Listado de productos de la marca** (`product_grid` = `views_block:products_search-product_results_block_cont_brand`,
   todos los productos del Brand del nodo, 20 por pagina). No llevan contenido: los productos salen
-  del CMS. Arriba va el H1 con el banner abajo (`content_image`), como /proplan/perros. Ver
+  del CMS. Arriba va el H1 (bloque de Texto) y abajo un Banner Promotional (only image). Ver
   `runner/CRITERIOS.md`, Productos.
   La **Linea de tiempo** (`timeline`) es el **History Grid** del CMS: cada hito lleva año (select), imagen
   (obligatoria), titulo y cuerpo.
