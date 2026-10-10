@@ -700,6 +700,28 @@ const RENDERERS = {
     )
   },
 
+  // Pagina de productos de una marca. Como lo dibuja el sitio (medido en /dogchow/productos
+  // de preprod): el filtro son desplegables (tipo de alimento, etapa de vida) con una lupa a
+  // la derecha; el listado, una grilla de 4 columnas (2 en mobile) con TODOS los productos de
+  // la marca. Los productos salen del CMS: aca son placeholders.
+  product_filter: (c) => (
+    <div className="cp-pfilter">
+      {c.title && <div className="cp-pfilter-t">{c.title}</div>}
+      <div className="cp-pfilter-row">
+        <span className="cp-pfilter-dd">Tipo de alimento ▾</span>
+        <span className="cp-pfilter-dd">Etapa de vida ▾</span>
+        <span className="cp-pfilter-search">⌕</span>
+      </div>
+    </div>
+  ),
+  product_grid: () => (
+    <div className="cp-pgrid">
+      {Array.from({ length: 8 }, (_, i) => (
+        <div key={i} className="cp-pgrid-card"><div className="cp-plist-ph"><span>Producto {i + 1}</span></div></div>
+      ))}
+    </div>
+  ),
+
   // Listado de productos "Más populares": tabs de filtro (activo en rojo) + flechas,
   // carrusel de card-products (fondo gris, imagen contenida, titulo debajo). Card promo
   // (Pet ID) opcional en rojo + boton "Ver todos". Sin imagen usa placeholder.

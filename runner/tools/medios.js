@@ -218,9 +218,14 @@ export function mediosDeBloque(bloque, slug) {
       // Si el hub no trae foto mobile aparte, se recorta la misma.
       // `w`/`h` en null = sin medida: se sube el original sin tocarlo.
       desktop: { origen, ...(objetivo.desktop || { w: null, h: null }) },
+      // Sin medida mobile declarada, la foto mobile propia del hub va TAL CUAL (como la de
+      // desktop): repetir la de desktop dejaba en el celular una tira apaisada de 1920x540
+      // donde el mercado habia mandado una vertical (paso en /beneful/productos).
       mobile: objetivo.mobile
         ? { origen: origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || origen, ...objetivo.mobile }
-        : null,
+        : (/^https?:/.test(origenDe(par.mobile?.contenedor?.[par.mobile?.key]) || '')
+          ? { origen: origenDe(par.mobile.contenedor[par.mobile.key]), w: null, h: null }
+          : null),
       campoMobile: par.mobile || null,
       // Se crea adentro del formulario del CMS, no se sube a la libreria (ver creaEnLinea).
       enLinea: !!par.desktop.enLinea,

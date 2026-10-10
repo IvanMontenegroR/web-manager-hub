@@ -960,6 +960,29 @@ export const COMPONENTS = [
     // mobile). La spec solo aplica si la imagen izquierda esta activada.
     specs: [{ label: 'Imagen izquierda (imagen única)', ratio: 'Vertical ≈0.94:1 (650×692)', desktop: '650×692px', mobile: '650×692px', max: '500kb', format: 'JPG / PNG', requiresTrue: 'show_left_image' }],
   },
+  // LA PAGINA DE PRODUCTOS DE UNA MARCA (/<marca>/productos): dos Block del CMS que van
+  // juntos. El filtro deja elegir Perro / Gato (filtra por la URL, ?pettype=) y el listado
+  // trae TODOS los productos de la marca del nodo (el Brand de la pagina): no se carga nada,
+  // los productos salen del CMS. Leidos del formulario de las de F5 en preprod.
+  {
+    key: 'product_filter',
+    name: 'Filtro por mascota',
+    category: 'Marcas',
+    help: 'Block "Pet type filter" del CMS: botones Perro / Gato que filtran el Listado de productos de la página. Va justo antes del listado.',
+    fields: [
+      { key: 'title', label: 'Título', type: 'text', placeholder: 'Descubre productos según mascota' },
+      ...classy('spacing'),
+    ],
+  },
+  {
+    key: 'product_grid',
+    name: 'Listado de productos de la marca',
+    category: 'Marcas',
+    help: 'Block del CMS que lista TODOS los productos de la marca de la página (los toma del Brand del nodo), 20 por página. No se carga nada: los productos salen del CMS.',
+    fields: [
+      ...classy('spacing'),
+    ],
+  },
   {
     key: 'timeline',
     name: 'Línea de tiempo',

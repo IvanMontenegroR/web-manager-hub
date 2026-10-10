@@ -2082,6 +2082,28 @@
             "note": "Referencia a un producto del CMS (\"Nombre (nid)\"). El primero viene en el formulario; los demas con \"Añadir otro elemento\". `referencia`: un nombre con coma va entre comillas, si no Drupal lo parte en dos.",
             "referencia": true
           },
+          "field_block.filtro_titulo": {
+            "sel": "input[name=\"{base}[field_block][0][settings][title]\"]",
+            "note": "Titulo del filtro por mascota (pl_base_pet_type_url_filter_block)."
+          },
+          "field_block.query_name": {
+            "sel": "input[name=\"{base}[field_block][0][settings][query_name]\"]",
+            "note": "Parametro de la URL que filtra: pettype."
+          },
+          "field_block.display_name": {
+            "sel": "select[name=\"{base}[field_block][0][settings][display_name]\"]",
+            "kind": "select",
+            "note": "Como se dibuja el filtro: menu_block (botones)."
+          },
+          "field_block.check_unavailability": {
+            "sel": "input[name=\"{base}[field_block][0][settings][check_unavailability]\"]",
+            "kind": "checkbox"
+          },
+          "field_block.items_per_page": {
+            "sel": "select[name=\"{base}[field_block][0][settings][override][items_per_page]\"]",
+            "kind": "select",
+            "note": "Productos por pagina del listado de la marca (views_block:products_search-product_results_block_cont_brand)."
+          },
           "field_c_advanced_title": {
             "sel": "input[name=\"{base}[field_c_advanced_title][0][value]\"]"
           },

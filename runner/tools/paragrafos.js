@@ -118,6 +118,27 @@ export const PARAGRAFOS = {
     descartar: ['show_left_image', 'show_filters', 'filters', 'show_petid'],
   },
 
+  // LA PAGINA DE PRODUCTOS de una marca: el filtro Perro / Gato y el listado de TODOS los
+  // productos de la marca del nodo. Dos Block del CMS, configurados como los de F5.
+  product_filter: {
+    tipo: 'block',
+    fijos: {
+      'field_block.plugin': 'pl_base_pet_type_url_filter_block',
+      'field_block.query_name': 'pettype',
+      'field_block.display_name': 'menu_block',
+      'field_block.check_unavailability': true,
+    },
+    campos: { title: 'field_block.filtro_titulo' },
+  },
+  product_grid: {
+    tipo: 'block',
+    fijos: {
+      'field_block.plugin': 'views_block:products_search-product_results_block_cont_brand',
+      'field_block.items_per_page': '20',
+    },
+    campos: {},
+  },
+
   // LA LINEA DE TIEMPO = History Grid. Cada hito es un `history_grid_item` con año (un
   // select), imagen (OBLIGATORIA en el CMS), titulo y cuerpo.
   timeline: {

@@ -1917,6 +1917,17 @@ textarea.control { resize: vertical; min-height: 64px; }
    overflow hidden + margen que llega al borde del bloque = las cards se cortan
    en el borde (edge bleed). El bloque se extiende al borde derecho en preview. */
 .cp-plist-row { display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; margin-right: -30px; padding-bottom: 4px; }
+/* Pagina de productos de una marca: filtro (desplegables + lupa) y grilla de 4 columnas. */
+.cp-pfilter { display: flex; flex-direction: column; gap: 12px; }
+.cp-pfilter-t { font-size: 18px; font-weight: 600; }
+.cp-pfilter-row { display: flex; align-items: center; gap: 24px; font-size: 14px; }
+.cp-pfilter-dd { white-space: nowrap; }
+.cp-pfilter-search { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, .12); font-size: 18px; }
+.cp-pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.cp-pgrid-card { background: rgba(0, 0, 0, .06); border-radius: 12px; padding: 12px; min-height: 220px; display: flex; }
+.cp-pgrid-card .cp-plist-ph { flex: 1; }
+.pb-canvas--mobile .cp-pgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.pb-canvas--mobile .cp-pgrid-card { min-height: 150px; }
 .cp-plist-card, .cp-plist-promo { flex: 0 0 300px; }
 .cp-plist-promo { position: relative; background: var(--purina); color: #fff; border-radius: 20px; padding: 26px 24px; display: flex; flex-direction: column; }
 .cp-plist-promo-t { font-size: 22px; font-weight: 400; }

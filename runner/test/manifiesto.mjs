@@ -324,6 +324,32 @@ const frena = (bloques, que) => {
   ok(b.children[0].fields.field_history_year === '1894' && b.children[0].fields.field_c_image, 'cada hito con su año y su imagen')
 }
 
+// Sin medida mobile en el catalogo (el c_image con la imagen abajo), la foto mobile PROPIA del
+// hub va tal cual; antes se repetia la de desktop.
+{
+  const ci = { component_key: 'content_image', content: { title: 'x', image_position: 'image_bottom',
+    image: 'https://ejemplo.com/d.jpg', image_mobile: 'https://ejemplo.com/m.jpg' } }
+  const [m] = mediosDeBloque(planDelHub(ci), 'prueba')
+  ok(m && m.mobile?.origen === 'https://ejemplo.com/m.jpg' && m.mobile.w === null,
+    'la imagen mobile del hub se usa aunque el componente no declare medida mobile')
+  const [s] = mediosDeBloque(planDelHub({ ...ci, content: { ...ci.content, image_mobile: undefined } }), 'prueba')
+  ok(s && s.mobile === null, 'sin foto mobile en el hub, se sigue repitiendo la de desktop')
+}
+
+// LA PAGINA DE PRODUCTOS: filtro por mascota + listado de la marca, dos Block como los de F5.
+{
+  const r = aManifiesto(PAGINA, [
+    { component_key: 'product_filter', content: { title: 'Descubre productos según mascota' } },
+    { component_key: 'product_grid', content: {} },
+  ], tipos)
+  const [f, g] = r.manifiesto.blocks
+  ok(f.type === 'block' && f.fields['field_block.plugin'] === 'pl_base_pet_type_url_filter_block'
+    && f.fields['field_block.query_name'] === 'pettype' && f.fields['field_block.filtro_titulo'] === 'Descubre productos según mascota',
+    'el filtro por mascota es el Block del filtro, con su titulo')
+  ok(g.type === 'block' && g.fields['field_block.plugin'] === 'views_block:products_search-product_results_block_cont_brand'
+    && g.fields['field_block.items_per_page'] === '20', 'el listado es el Block de productos de la marca, 20 por pagina')
+}
+
 // EL BUSCADOR CON IA del hero viaja al CMS (va en todas las homes de marca); Pet ID no.
 {
   const r = aManifiesto(PAGINA, [{ component_key: 'banner', content: { title: 'x', show_search: true, search_fixed_mobile: true } }], tipos)
