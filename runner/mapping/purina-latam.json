@@ -2514,6 +2514,8 @@
               "base": "{base}[field_c_subitems][{delta}][subform]",
               "add": {
                 "mode": "buttons",
+                "open": "input[name=\"button_add_modal\"][data-drupal-selector=\"{dsel}-subform-field-c-subitems-add-more-add-modal-form-area-add-more\"]",
+                "_open": "En preprod la lista no tiene tipo por defecto (en content si: Card Info Item) y el alta pasa por el dialogo, como en el Card Grid. Si el boton no se ve, no se usa.",
                 "button": "button[name=\"{npath}_subform_field_c_subitems_add_more\"], input[name=\"{npath}_subform_field_c_subitems_add_more\"], button[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"], input[name=\"{npath}_subform_field_c_subitems_card_infos_add_more\"]"
               }
             }
