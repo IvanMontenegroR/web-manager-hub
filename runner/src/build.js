@@ -281,7 +281,6 @@ export async function repasarClassy(ctx, nodeId) {
   if (!nodeId) { onStep('AVISO: no se pudo leer el node id para repasar el Classy de los bloques agregados.'); return }
   onStep(`Repasando el Classy de ${ctx.classyAnidado.length} campo(s) en node/${nodeId}…`)
   await page.goto(`${mapping.site}/node/${nodeId}/edit`, { waitUntil: 'domcontentloaded', timeout: 180000 })
-  const raiz = namePath(mapping.paragraphs.dsel.split('-{delta}')[0])
   // Se abre una fila haciendo click en su boton de editar, si esta a la vista.
   const abrir = async (nombre, sel) => {
     const b = page.locator(`[name="${nombre}"]`).first()
@@ -293,10 +292,14 @@ export async function repasarClassy(ctx, nodeId) {
   let cambios = 0
   for (const r of ctx.classyAnidado) {
     const sel = page.locator(r.sel).first()
-    // Primero la fila del bloque de la pagina; si el campo es de un hijo, despues la del hijo.
-    const delta = (new RegExp(`^${raiz}_(\\d+)`).exec(r.editar) || [])[1]
-    if (!(await sel.count()) && delta != null) await abrir(`${raiz}_${delta}_edit`, sel)
-    if (!(await sel.count()) && r.editar !== `${raiz}_${delta}_edit`) await abrir(r.editar, sel)
+    // Se abre cada fila del camino, de afuera hacia adentro: el bloque de la pagina, y si el
+    // campo es de un hijo, la del hijo. Un componente adentro de una PESTAÑA tiene una fila mas
+    // en el medio (la pestaña): por eso se recorre el nombre entero y no solo bloque + hijo.
+    // Sin eso el select no aparecia y la pagina quedaba con el Classy de las pestañas en Default.
+    const partes = r.editar.replace(/_edit$/, '').split('_subform_')
+    for (let i = 1; i <= partes.length && !(await sel.count()); i++) {
+      await abrir(`${partes.slice(0, i).join('_subform_')}_edit`, sel)
+    }
     if (!(await sel.count())) throw new Error(`Repaso del Classy: no encontre ${r.ref} (${r.sel}) en el formulario guardado`)
     // El valor del manifiesto puede ser el de MAQUINA ("image_bottom") o la ETIQUETA que ve
     // el editor ("Primary White", que en el CMS es "background_card_primary_white"). Se
