@@ -324,11 +324,11 @@ const frena = (bloques, que) => {
   ok(b.children[0].fields.field_history_year === '1894' && b.children[0].fields.field_c_image, 'cada hito con su año y su imagen')
 }
 
-// SIN IA EN EL LANZAMIENTO: el buscador del banner se saca avisando.
+// EL BUSCADOR CON IA del hero viaja al CMS (va en todas las homes de marca); Pet ID no.
 {
   const r = aManifiesto(PAGINA, [{ component_key: 'banner', content: { title: 'x', show_search: true, search_fixed_mobile: true } }], tipos)
-  ok(!Object.keys(r.manifiesto.blocks[0].fields).some((k) => /search/.test(k)) && r.avisos.some((a) => /IA/.test(a)),
-    'el buscador con IA no viaja al CMS')
+  const f = r.manifiesto.blocks[0].fields
+  ok(f.field_show_search === true && f.field_search_ai_pos_fixed_mob === true, 'el buscador con IA del banner viaja al CMS')
 }
 
 // Y que FRENE. Un componente sin traduccion y un campo cargado que no sabe donde poner.

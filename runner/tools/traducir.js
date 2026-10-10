@@ -41,12 +41,11 @@ import { PARAGRAFOS } from './paragrafos.js'
 // Campos del hub que no viajan al CMS: los consume esta misma traduccion.
 const SOLO_DEL_HUB = new Set(['items', 'ctas', 'tabs'])
 
-// LO QUE NO VA EN EL LANZAMIENTO: no hay buscador con IA ni registro / inicio de sesion
-// (Pet ID). Si el bloque lo tiene prendido en el hub, se descarta avisando: el CMS lo
-// dejaria visible y no funcionaria.
+// LO QUE NO VA EN EL LANZAMIENTO: no hay registro / inicio de sesion (Pet ID). Si el
+// bloque lo tiene prendido en el hub, se descarta avisando: el CMS lo dejaria visible y no
+// funcionaria. El buscador con IA SI va: lo llevan todos los heroes de marca (decision del
+// Websites Expert, ver CRITERIOS.md).
 const SIN_LANZAMIENTO = {
-  show_search: 'el buscador con IA', search_fixed_mobile: 'el buscador con IA',
-  search_suggestions: 'las sugerencias del buscador con IA',
   show_card_pet_id: 'la card Pet ID', show_petid: 'la card Pet ID',
 }
 

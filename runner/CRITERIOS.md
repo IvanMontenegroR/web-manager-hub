@@ -432,10 +432,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Lanzamiento
 
-- **En el lanzamiento no hay buscador con IA ni registro / inicio de sesion (Pet ID).** Todo lo
-  que dependa de eso se saca al traducir, avisando: el buscador del banner, sus sugerencias, la
-  card Pet ID del carrusel de productos y la del Card Grid. Origen: MX, mapeo del carrusel de
-  productos.
+- **En el lanzamiento no hay registro / inicio de sesion (Pet ID).** Todo lo que dependa de eso
+  se saca al traducir, avisando: la card Pet ID del carrusel de productos y la del Card Grid.
+  Origen: MX, mapeo del carrusel de productos.
+- **El buscador con IA SI va, en el hero de TODAS las homes de marca** (`show_search` del Banner,
+  como el de Dog Chow). Antes se sacaba junto con Pet ID; el Websites Expert lo pidio en todas al
+  revisar preprod. Origen: MX, homes de marca en preprod.
 - **Los carruseles de productos van con productos de MUESTRA** de la misma marca de la pagina
   (`productosMuestra` del mapping, productos reales de content), tantos como tenia el bloque,
   porque los productos todavia no estan migrados. Se reemplazan cuando se migren. Las pestañas

@@ -20,11 +20,13 @@ export const PARAGRAFOS = {
     campos: {
       type: 'field_banner_type',
       remove_overlay: 'field_remover_overlay_background',
+      // El buscador con IA del hero (va en todas las homes de marca, ver CRITERIOS.md).
+      show_search: 'field_show_search',
+      search_fixed_mobile: 'field_search_ai_pos_fixed_mob',
       ...T.titulo,
       // OJO: la bajada del banner NO es `field_c_text` como en los demas: es `field_html`.
       description: 'field_html',
     },
-    // El buscador con IA no va en el lanzamiento (ver SIN_LANZAMIENTO en traducir.js).
     // En el CMS es UN Media que resuelve desktop y mobile solo; en el hub son dos campos
     // porque el mercado entrega los dos archivos.
     media: { image: 'field_c_image', image_mobile: null },
