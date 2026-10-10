@@ -94,7 +94,8 @@ export async function escribirRich(page, ta, valor, opciones = {}) {
     const pudo = await porRuta(page, ta, String(valor), via === 'editor-tarde' ? 'editor' : via, plano)
     if (!pudo) { intentos.push(`${via}: no disponible`); continue }
     const leido = await leerRich(page, ta)
-    if (leido) return { via, intentos }
+    // Vaciar un campo a proposito (editar: valor "") es justamente que quede vacio.
+    if (leido || String(valor) === '') return { via, intentos }
     intentos.push(`${via}: escribio y quedo vacio`)
   }
   return { via: null, intentos }
