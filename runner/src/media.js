@@ -234,19 +234,37 @@ async function siEsta(page, sel, ms = 2000) {
 // Un archivo del formulario. Son dos —- desktop y mobile -— y cada uno tiene su input y
 // su propio `fids`: hay que esperar el de CADA uno, porque suben de a uno por AJAX.
 async function subirArchivo(page, cfg, selArchivo, selFids, ruta, nombre, cual) {
-  const file = page.locator(selArchivo).first()
-  if (!(await file.count())) {
-    throw new Error(`No encontre el campo de archivo ${cual} en ${cfg.add} (${selArchivo}). `
-      + 'Si el formulario de medios de este sitio es otro, corregi "media" en el mapping.')
+  // El AJAX de la subida ANTERIOR (la desktop) redibuja el formulario entero, el input de
+  // la mobile incluido. Si se le pone el archivo mientras tanto, cae en un input que ya no
+  // existe y Drupal nunca lo recibe: en preprod MX la misma imagen fallaba una y otra vez
+  // y a mano, con una pausa, subia bien. Asi que primero se espera a que el formulario
+  // quede quieto, y si el fids no aparece en un rato se vuelve a poner el archivo.
+  if (cual !== 'desktop') {
+    await esperarAjax(page)
+    await page.waitForTimeout(800)
   }
-  await file.setInputFiles(ruta)
-  await esperarSubida(page, cfg, `${nombre} (${cual})`, selFids)
+  for (let intento = 1; ; intento++) {
+    const file = page.locator(selArchivo).first()
+    if (!(await file.count())) {
+      throw new Error(`No encontre el campo de archivo ${cual} en ${cfg.add} (${selArchivo}). `
+        + 'Si el formulario de medios de este sitio es otro, corregi "media" en el mapping.')
+    }
+    await file.setInputFiles(ruta)
+    try {
+      await esperarSubida(page, cfg, `${nombre} (${cual})`, selFids, intento < 3 ? 45000 : 120000)
+      return
+    } catch (e) {
+      if (intento >= 3) throw e
+      await esperarAjax(page)
+      await page.waitForTimeout(2000)
+    }
+  }
 }
 
 // Drupal sube el archivo por AJAX apenas cambia el input, y hasta que vuelve el
 // formulario no tiene ni nombre ni nada que guardar. Se espera al `fids`, que es el
 // unico dato que dice "el archivo YA esta en el servidor".
-async function esperarSubida(page, cfg, nombre, selFids) {
+async function esperarSubida(page, cfg, nombre, selFids, ms = 120000) {
   const sel = selFids || cfg.subido
   const hay = await page.locator(sel).count()
   if (!hay) {
@@ -257,7 +275,7 @@ async function esperarSubida(page, cfg, nombre, selFids) {
     const el = document.querySelector(s2)
     const v = el && el.value
     return !!v && v !== '0'
-  }, sel, { timeout: 120000 }).catch(() => {
+  }, sel, { timeout: ms }).catch(() => {
     throw new Error(`Drupal no termino de subir "${nombre}" (${sel} sigue vacio). `
       + 'Puede ser el archivo (medida o peso) o el servidor. Se puede volver a correr: '
       + 'las que ya estan se saltean.')
