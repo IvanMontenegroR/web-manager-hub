@@ -208,7 +208,13 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
 
           // El archivo de MOBILE. Si el catalogo no declara medida mobile se repite el de
           // desktop: el campo es obligatorio en el CMS y no hay de donde sacar otra.
-          let mob = `${medio.nombre}-mobile.${ext}`
+          // Una mobile SIN medida va tal cual: su extension es la de SU archivo, no la de
+          // desktop (un PNG con nombre .jpg Drupal lo rechaza: "the real content seems to be
+          // image/png").
+          const extMob = medio.mobile && !medio.mobile.w
+            ? (/\.(png|gif|jpe?g|webp)(\?|$)/i.exec(medio.mobile.origen)?.[1] || ext).toLowerCase().replace('webp', 'png')
+            : ext
+          let mob = `${medio.nombre}-mobile.${extMob}`
           const rMob = medio.mobile ? await recortar({ ...medio.mobile, salida: join(carpeta, mob) }) : null
           if (rMob?.salida) mob = basename(rMob.salida)
           if (!rMob) { mob = dsk.replace(/-desktop\./, '-mobile.'); copyFileSync(join(carpeta, dsk), join(carpeta, mob)) }
