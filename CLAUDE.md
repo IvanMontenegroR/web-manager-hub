@@ -608,6 +608,12 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   otro elemento" (kind `lista`). Cada producto es una referencia "Nombre (nid)" a un producto del CMS; como
   todavia no estan migrados, el runner pone MUESTRAS de la marca (`productosMuestra` del mapping). La
   imagen de la izquierda es `field_background_image`. Pestañas de filtro y card Pet ID no existen ahi.
+  La **pagina de productos de una marca** (`/<marca>/productos`) usa otros dos Block: el **Filtro por
+  mascota** (`product_filter` = `pl_base_pet_type_url_filter_block`, desplegables + lupa) y el
+  **Listado de productos de la marca** (`product_grid` = `views_block:products_search-product_results_block_cont_brand`,
+  todos los productos del Brand del nodo, 20 por pagina). No llevan contenido: los productos salen
+  del CMS. Arriba va el H1 con el banner abajo (`content_image`), como /proplan/perros. Ver
+  `runner/CRITERIOS.md`, Productos.
   La **Linea de tiempo** (`timeline`) es el **History Grid** del CMS: cada hito lleva año (select), imagen
   (obligatoria), titulo y cuerpo.
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en

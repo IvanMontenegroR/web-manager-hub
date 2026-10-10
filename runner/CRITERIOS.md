@@ -391,6 +391,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Productos
 
+- **La pagina de productos de una marca (`/<marca>/productos`) es: H1 "Productos <Marca>®" con una
+  linea debajo, el banner abajo del titulo (`content_image` con la imagen abajo, como
+  /proplan/perros), el Filtro por mascota y el Listado de productos de la marca** (dos Block del CMS:
+  el listado trae TODOS los productos del Brand del nodo, no se cargan a mano). El banner es el hero
+  de la marca, en castellano o sin texto; las de F5 tenian uno en ingles y el H1 abajo. Si la marca
+  todavia no tiene hero propio, va el de la home del sitio viejo (el viejo NO tenia banner en
+  productos). Las de F5 pasan a `<ruta>-anterior` despublicadas, como las homes. Origen: MX, preprod,
+  /proplan/productos.
+
 - **Cards que llevan a productos se reemplazan por el carrusel de productos.** Ya no hay cards
   personalizadas para productos. Origen: MX, ronda 4. **Aunque la card lleve a una gama o a un
   listado y no a la ficha de un producto, si lo que muestra son productos va en el carrusel de
@@ -434,6 +443,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   quedan cargados pero no se ven, asi que ningun padre va sin link (toma el de su primer hijo).
   Origen: MX, homes de marca (Dog Chow tenia el menu de Brasil en portugues y Felix, Beneful y
   Gatina mostraban el de Dentalife).
+- **El fondo de la barra de marca es el del sitio viejo.** Se elige en el termino de la marca
+  (`field_menu_background`), que solo acepta negro, blanco o uno de los 4 Brand Color: si el color del
+  sitio viejo no esta entre ellos, se carga en un Brand Color que nadie use (Excellent: Brand 04 =
+  #C3B7B7). Los links van en el color que se lea sobre ese fondo, como en el viejo. Origen: MX,
+  preprod (Excellent, Campeon, Purina One y Dentalife tenian otro color).
+- **El logo de la barra va RECORTADO AL RAS, en su proporcion.** El sitio lo dibuja con el estilo
+  "thumbnail" (100 de ancho) y un tope de 50px de alto: un archivo con aire alrededor (los 180x84 de
+  la carpeta de logos) deja los logos compactos en 42px y uno con fondo blanco (el .jpg de Cat Chow)
+  queda chiquito. Recortado al ras, los compactos llegan a 50px de alto y los anchos a 100 de ancho.
+  Sobre una barra oscura va la version BLANCA del logo (Felix). Se suben como medios nuevos ("<marca>
+  logo barra") y se cambia la referencia del termino: los de F5 quedan intactos. Origen: MX, preprod.
 
 ## Lanzamiento
 
