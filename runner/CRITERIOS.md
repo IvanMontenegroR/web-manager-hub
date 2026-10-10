@@ -321,6 +321,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Se mira la pagina publicada buscando marcas a la vista** (`**`, `](`). Un campo de cuerpo que no
   ofrece Purina Markdown recibe HTML, y si el texto no se convierte los asteriscos salen tal cual.
   Origen: MX, el hero de Dentalife preguntas frecuentes.
+- **Siempre se verifican los MARGENES**, en desktop y en mobile: el aire entre bloques (que no queden
+  dos pegados ni un hueco de mas), contra el header y la barra de marca arriba, y contra el footer
+  abajo (una franja de color tiene que ir pegada, ver Spacing). Se mira en la pagina publicada, no en el
+  builder. Es parte de toda verificacion, no un paso aparte. Origen: MX, pedido del Websites Expert al
+  revisar preprod.
 
 ## Spacing
 
