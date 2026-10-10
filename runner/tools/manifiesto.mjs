@@ -47,8 +47,30 @@ try {
 }
 const { manifiesto, avisos, pendientes } = salida
 
+// Tipos que el sitio de destino todavia no tiene (ej. preprod sin `card_infos`, asi que Cards
+// Info no se puede armar): RUNNER_OMITIR_TIPOS=cards_info. La pagina se sube SIN esos bloques y
+// quedan anotados en <slug>.omitidos.json con su posicion, para agregarlos cuando el tipo exista.
+const omitir = (process.env.RUNNER_OMITIR_TIPOS || '').split(',').map((s) => s.trim()).filter(Boolean)
+const omitidos = []
+if (omitir.length) {
+  const filtrar = (bloques, donde) => bloques.filter((b, i) => {
+    if (omitir.includes(b.type)) {
+      omitidos.push({ donde: `${donde}${i + 1}`, antesDe: bloques[i + 1]?.type || null, despuesDe: bloques[i - 1]?.type || null, bloque: b })
+      return false
+    }
+    if (b.children?.length) b.children = filtrar(b.children, `${donde}${i + 1}.`)
+    return true
+  })
+  manifiesto.blocks = filtrar(manifiesto.blocks, '')
+}
+
 // Se valida con el MISMO validador que usa el runner al construir.
 const slug = slugDePagina(path)
+if (omitidos.length) {
+  mkdirSync(resolve('manifests'), { recursive: true })
+  writeFileSync(join(resolve('manifests'), `${slug}.omitidos.json`), JSON.stringify({ path, tipos: omitir, omitidos }, null, 2) + '\n', 'utf8')
+  process.stderr.write(`\nOMITIDOS ${omitidos.length} bloque/s (${omitir.join(', ')}): ver manifests/${slug}.omitidos.json\n`)
+}
 const archivo = join(resolve('manifests'), `${slug}.json`)
 validateManifest(manifiesto, archivo)
 mkdirSync(resolve('manifests'), { recursive: true })
