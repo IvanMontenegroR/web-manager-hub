@@ -405,7 +405,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      Cada modo del Card Grid tiene la suya en `CARD_DESC_MAX_BY_MODE`, medida en la caja REAL a 360 y
      390px (verticales 65, texto sobre foto 55, Image + 3 cards 70, cuadradas con icono 60, Icons 65,
      Numbers 120, mosaico 70...). Todo el Card Grid corta salvo el Simple; un texto que se pasa por
-     mucho va a Cards Info o a la Simple en vez de recortarse.
+     mucho va a Cards Info o a la Simple en vez de recortarse. El TITULO tambien se corta en las
+     cuadradas con icono: `CARD_TITLE_MAX_BY_MODE` le da 45 (44 entraron y 48 se cortaron en preprod).
      El **Mosaico** (`grid-cards`) tiene su propia guia, `CARD_MOSAIC_DESC_MAX` = 70: en desktop entra
      todo, pero en MOBILE la caja tiene alto fijo y la descripcion se corta a 3 lineas (medido en la
      caja real: unos 84 caracteres a 390px, entre 65 y 79 a 360px).

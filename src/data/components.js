@@ -225,6 +225,11 @@ export const CARD_DESC_MAX_BY_MODE = {
   'cards-icons': 65,
   'cards-numbers': 120,
 }
+// TITULOS: en las cuadradas con icono el titulo tambien se corta (alto fijo). Medido en preprod
+// (octubre 2026) con el barrido de mobile: 44 caracteres entraron y 48 se cortaron.
+export const CARD_TITLE_MAX_BY_MODE = {
+  'slider-card-icons-square': 45,
+}
 export const CARD_SIMPLE_TITLE_MAX = 65
 export const CARD_SIMPLE_DESC_MAX = 100
 export const CARD_STYLES = [
@@ -1043,7 +1048,8 @@ export const COMPONENTS = [
       { key: 'background_image_mobile', label: 'Imagen de fondo mobile (opcional)', cmsLabel: 'Background Image (mobile)', type: 'image' },
       { key: 'items', label: 'Cards', cmsLabel: 'Subitems', type: 'list', itemLabel: 'Card', item: [
         { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text',
-          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_TITLE_MAX : null) },
+          maxLength: (c) => (c?.view_mode === 'cards-simple' ? CARD_SIMPLE_TITLE_MAX
+            : CARD_TITLE_MAX_BY_MODE[c?.view_mode || CARD_GRID_DEFAULT_MODE] ?? null) },
         // El titulo de una CARD siempre cuelga del titulo del bloque, asi que su tag por
         // defecto es h3 y no "- Ninguno -": es lo que hay que poner en el CMS salvo que
         // se elija otra cosa a proposito.
