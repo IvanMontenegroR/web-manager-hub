@@ -1970,7 +1970,11 @@ textarea.control { resize: vertical; min-height: 64px; }
    (1180px). Con los 280px de antes quedaba en 4:1 o mas y el preview le cortaba arriba
    y abajo a una imagen que el CMS muestra entera (2100x700). */
 .cp-hero--wide { height: 393px; }
-.cp-hero--brand { height: 446px; }
+/* Brand Hero: 2.5:1 como el sitio (.media--ratio-...--2-5-1), a cualquier ancho del canvas. Con
+   padding-top y no aspect-ratio, que html2canvas resuelve mal en la exportacion. */
+.cp-hero--brand { height: auto; }
+.cp-hero--brand::before { content: ''; display: block; padding-top: 40%; }
+.cp-hero--brand .cp-hero-img { position: absolute; inset: 0; }
 /* Buscador del Brand Hero (.ai-search--banner del sitio): pildora de vidrio de 64px, hasta
    35rem de ancho, icono de IA en el Brand 01 y el texto de ayuda en blanco. */
 .cp-aisearch { display: flex; align-items: center; gap: 16px; width: 100%; box-sizing: border-box; border-radius: 9999px; padding: 0 24px; }
@@ -2695,7 +2699,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas--mobile.preview .pb-block--banner { margin-inline: 0; }
 .pb-canvas--mobile .cp-hero { height: auto; aspect-ratio: 9 / 16; border-radius: 14px; }
 .pb-canvas--mobile .cp-hero--wide { aspect-ratio: 1 / 1; }
-.pb-canvas--mobile .cp-hero--brand { aspect-ratio: 2 / 3; }
+.pb-canvas--mobile .cp-hero--brand { aspect-ratio: auto; }
+.pb-canvas--mobile .cp-hero--brand::before { padding-top: 150%; }
 .pb-canvas--mobile .cp-aisearch--banner { height: 50px; }
 /* "Position Fixed Mobile": en el sitio el buscador sale del hero y queda fijo al pie de la
    pantalla, sobre el fondo de la pagina. Aca se dibuja debajo del hero. */
