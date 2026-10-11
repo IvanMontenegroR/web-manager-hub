@@ -449,13 +449,21 @@ const RENDERERS = {
           {/* La imagen sale a la medida del catalogo (2088×1044, 2:1): en su proporcion se ve
               entera, como en el sitio. Con alto fijo se recortaba a ~3:1 y se perdian claims,
               badges y productos del borde. */}
-          <Img src={c.image} h={420} natural dim="2088×1044px" className="cp-fib-img" />
+          <div className="cp-fib-media">
+            <Img src={c.image} h={420} natural dim="2088×1044px" className="cp-fib-img" />
+          </div>
           {hasText && (
             <div className="cp-fib-card">
               {c.title && <div className="cp-fib-title">{c.title}</div>}
               {c.subtitle && <div className="cp-fib-sub">{c.subtitle}</div>}
               {c.body && <Rich className="cp-fib-desc">{c.body}</Rich>}
-              {ctas.map((b, i) => <span key={i} className="cp-fib-cta">{b.label}</span>)}
+              {/* El boton es el del sitio (`btn-default`, rojo), no uno blanco: lo decide el
+                  Style Button de Classy como en el resto del componente. */}
+              {ctas.length > 0 && (
+                <div className="cp-fib-ctas">
+                  {ctas.map((b, i) => <span key={i} className={`cp-cta${btnClass(c.style_button)}`}>{b.label}</span>)}
+                </div>
+              )}
             </div>
           )}
         </div>

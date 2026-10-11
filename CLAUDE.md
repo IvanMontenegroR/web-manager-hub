@@ -468,6 +468,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      fijo y cover recortaba justo lo que en el sitio se ve (un perro sin patas, un circulo cortado).
      El "Image Background Box" tambien va en su proporcion: su imagen sale a la medida del catalogo
      (2088×1044, 2:1), y con alto fijo se recortaba a ~3:1 y se perdian claims y badges del borde.
+     Encima de la foto va el degradé negro del sitio (`.ln-image--bg-box .media::before`, 0.7 abajo a
+     transparente arriba): es lo que hace legible el texto blanco de la caja frosted, y sin el, sobre
+     una foto clara, el mockup mostraba blanco sobre blanco. La caja y el boton (rojo) tambien siguen
+     ese CSS.
      Una imagen en su proporcion no lleva el gris de carga detras (`.cp-img--nat`): en un PNG
      transparente se veia como un recuadro que en el sitio no existe.
      El titulo de un bloque de contenido (Texto, texto con imagen, Imagen) con HTML tag **h1** se dibuja

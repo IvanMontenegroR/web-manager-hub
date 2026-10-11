@@ -1600,7 +1600,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-al-right .cp-rich ul, .cp-al-right .cp-rich ol { padding-left: 0; list-style-position: inside; }
 
 /* ===== Content: Image (c_image) ===== */
-.cp-cimg { position: relative; padding: 0; }
+/* Arriba y abajo sin padding (el aire lo pone el Spacing), pero a los costados el mismo
+   que cualquier bloque: en el sitio la imagen va dentro del `.container` como el resto, y con
+   `padding: 0` salia 30px mas ancha que el texto y el video de al lado. */
+.cp-cimg { position: relative; padding-block: 0; }
 .cp-cimg-box {
   position: absolute; left: 40px; bottom: 40px; right: 40px; max-width: 560px;
   background: rgba(255,255,255,0.92); border-radius: 10px; padding: 20px 22px;
@@ -1783,12 +1786,17 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* El alto va FIJO (lo pone `Img` inline) y no por aspect-ratio: html2canvas lo resuelve
    mal y la captura del Excel sale con la imagen aplastada. */
 .cp-fib-img.cp-img { border-radius: 16px; object-fit: cover; width: 100%; }
-.cp-fib-card { position: absolute; left: 40px; bottom: 40px; max-width: 42%; background: rgba(255,255,255,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 14px; padding: 26px 28px; color: #fff; }
-.cp-fib-title { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
-.cp-fib-sub { font-size: 15px; font-weight: 600; margin-top: 4px; opacity: .95; }
-.cp-fib-desc { font-size: 14px; line-height: 1.5; margin-top: 8px; opacity: .95; }
-.cp-fib-cta + .cp-fib-cta { margin-left: 10px; }
-.cp-fib-cta { display: inline-block; margin-top: 20px; background: #fff; color: #1b252e; font-size: 13px; font-weight: 700; padding: 11px 26px; border-radius: 9999px; }
+/* Medido en el CSS del sitio (`.ln-image--bg-box`): la foto lleva un degradé negro de abajo
+   (0.7) hacia arriba (transparente), y es ESO lo que hace legible el texto blanco de la caja.
+   Sin el degradé, sobre una foto clara la caja frosted quedaba blanco sobre blanco. */
+.cp-fib-media { position: relative; line-height: 0; }
+.cp-fib-media::before { content: ""; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(0deg, rgba(0,0,0,0.7), transparent); pointer-events: none; z-index: 1; }
+.cp-fib-card { position: absolute; left: 140px; bottom: 80px; width: calc(100% - 180px); max-width: 560px; box-sizing: border-box; z-index: 2; background: rgba(255,255,255,0.25); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); border-radius: 40px; padding: 40px; color: #fff; }
+.cp-fib-title { font-size: 24px; font-weight: 500; letter-spacing: -0.3px; margin-bottom: 8px; }
+.cp-fib-sub { font-size: 15px; font-weight: 600; margin-top: 4px; }
+.cp-fib-desc { font-size: 16px; line-height: 1.5; }
+.cp-fib-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.cp-fib-ctas .cp-cta { margin-top: 0; }
 
 /* ===== Carrusel de testimonios (Historias que inspiran) ===== */
 .cp-testi { display: flex; align-items: center; gap: 44px; padding: 44px 30px; background: #ffe8e9; }
@@ -2701,7 +2709,8 @@ textarea.control { resize: vertical; min-height: 64px; }
 .pb-canvas--mobile .cp-ti, .pb-canvas--mobile .cp-ti.rev { flex-direction: column; align-items: stretch; gap: 16px; }
 .pb-canvas--mobile .cp-tabs-bar { justify-content: flex-start; overflow-x: auto; gap: 18px; }
 .pb-canvas--mobile .cp-tab { white-space: nowrap; }
-.pb-canvas--mobile .cp-fib-card { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 18px; }
+.pb-canvas--mobile .cp-fib-card { left: 40px; right: auto; bottom: 20px; width: calc(100% - 80px); max-width: none; padding: 16px; border-radius: 24px; }
+.pb-canvas--mobile .cp-fib-ctas { margin-top: 20px; }
 .pb-canvas--mobile .cp-fib-title { font-size: 20px; }
 /* Footer: logo arriba y los menus en dos columnas. */
 .pb-canvas--mobile .cp-footer-inner { padding: 28px 20px 18px; }
