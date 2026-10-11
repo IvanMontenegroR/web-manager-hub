@@ -104,7 +104,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
     // proxy) y los dibuja como data: URI. Cargar la imagen por su URL en un <img> y
     // pasarla por canvas no sirve: sin cabeceras CORS el canvas queda "tainted" y no se
     // puede exportar.
-    const recortar = async ({ origen, w, h, salida, ratio, alternativas }) => {
+    const recortar = async ({ origen, w, h, salida, ratio, alternativas, lienzo }) => {
       // Se prueban las fuentes EN ORDEN y vale la primera que conteste bien. Con una sola
       // (el caso normal) esto es exactamente lo de antes. Con varias es la portada de
       // YouTube: `maxresdefault` no existe para todos los videos y contesta 404, y ahi hay
@@ -164,24 +164,40 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
         for (let k = 3; k < px.length; k += 4 * 7) if (px[k] < 250) return true
         return false
       }, data)
-      if (transparente) salida = salida.replace(/\.jpe?g$/i, '.png')
+      // Con lienzo no: el relleno difuminado tapa la transparencia y el archivo sale JPG.
+      if (transparente && !lienzo) salida = salida.replace(/\.jpe?g$/i, '.png')
 
       // YA ESTA A LA MEDIDA y en el formato que va a salir: se sube el archivo tal cual. Pasarlo
       // por el navegador no le saca nada y lo re-codifica (un PNG de paleta de 1 MB salia de
       // 2,4 MB).
       const nat0 = await medidaDe(page, data)
-      if (nat0.w === w && nat0.h === h && (transparente ? /png/i : /jpe?g/i).test(mime)) {
+      if (!lienzo && nat0.w === w && nat0.h === h && (transparente ? /png/i : /jpe?g/i).test(mime)) {
         mkdirSync(dirname(salida), { recursive: true })
         writeFileSync(salida, buf)
         return { nat: nat0, w, h, escala: 1, salida }
       }
 
-      await page.setViewportSize({ width: w, height: h })
-      await page.setContent(
-        `<style>html,body{margin:0;background:transparent}
-         #c{width:${w}px;height:${h}px;overflow:hidden}
-         img{width:100%;height:100%;object-fit:cover;display:block}</style>
-         <div id="c"><img src="${data}"></div>`, { waitUntil: 'load' })
+      // CON LIENZO (el estilo de imagen del CMS recorta mas de lo que se ve, ej. el History
+      // Grid): la foto va recortada a lo que SE VE, centrada en el archivo del tamaño que
+      // espera el estilo, y lo que el sitio corta se rellena con la misma foto difuminada.
+      // Asi el "scale and crop" del CMS no saca nada y la caja muestra la foto entera.
+      if (lienzo) {
+        await page.setViewportSize({ width: lienzo.w, height: lienzo.h })
+        await page.setContent(
+          `<style>html,body{margin:0;background:#fff}
+           #c{position:relative;width:${lienzo.w}px;height:${lienzo.h}px;overflow:hidden}
+           #c>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(40px);transform:scale(1.15)}
+           #f{position:absolute;left:${Math.round((lienzo.w - w) / 2)}px;top:${Math.round((lienzo.h - h) / 2)}px;width:${w}px;height:${h}px;overflow:hidden}
+           #f>img{width:100%;height:100%;object-fit:cover;display:block}</style>
+           <div id="c"><img src="${data}"><div id="f"><img src="${data}"></div></div>`, { waitUntil: 'load' })
+      } else {
+        await page.setViewportSize({ width: w, height: h })
+        await page.setContent(
+          `<style>html,body{margin:0;background:transparent}
+           #c{width:${w}px;height:${h}px;overflow:hidden}
+           img{width:100%;height:100%;object-fit:cover;display:block}</style>
+           <div id="c"><img src="${data}"></div>`, { waitUntil: 'load' })
+      }
       // El tamaño NATURAL sale del navegador, no de la extraccion: es el unico dato que
       // dice si esto es un recorte o un estiramiento.
       const nat = await page.evaluate(() => {
@@ -189,7 +205,7 @@ export async function recortarPagina({ ctx, plan, slug, destino, calidad = 82, o
         return { w: i.naturalWidth, h: i.naturalHeight }
       })
       mkdirSync(dirname(salida), { recursive: true })
-      if (transparente) await page.locator('#c').screenshot({ path: salida, type: 'png', omitBackground: true })
+      if (transparente && !lienzo) await page.locator('#c').screenshot({ path: salida, type: 'png', omitBackground: true })
       else await page.locator('#c').screenshot({ path: salida, type: 'jpeg', quality: calidad })
       return { nat, w, h, escala: Math.max(w / (nat.w || 1), h / (nat.h || 1)), salida }
     }

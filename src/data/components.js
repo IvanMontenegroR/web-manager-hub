@@ -270,7 +270,14 @@ const SPACING_DEFAULT = {
   // `.ln-video` declara 0 arriba y 0 abajo: sin spacing cargado el video queda pegado a lo
   // que tenga al lado (en preprod, /adopta, tocaba la banda roja de abajo).
   external_video: 'space_py_0',
+  // `.timeline` (History Grid) declara su propio 60/60 -> 80/80 desde 992px.
+  timeline: 'timeline_own',
 }
+// Ademas del padding, `.timeline` lleva `margin: 2rem 0` FIJO: el spacing cargado cambia el
+// padding pero el margen sigue. Sin spacing quedaban 183px entre el bloque de arriba y el
+// titulo de la Historia (en preprod, /conoce-purina/historia).
+const SPACING_MARGIN = { timeline: 32 }
+const SPACING_OWN = { timeline_own: { m: [60, 60], d: [80, 80] } }
 export function spacingDefault(key, c = {}) {
   if (SPACING_DEFAULT[key]) return SPACING_DEFAULT[key]
   if (key === 'card_grid' && c.view_mode === 'full-background-card-icons-square') return 'space_py_0'
@@ -278,8 +285,11 @@ export function spacingDefault(key, c = {}) {
 }
 // [arriba, abajo] en px de un bloque, el cargado o el de su componente.
 export function spacingPx(key, c = {}, mobile = false) {
-  const v = SPACING_PX[c.spacing] || SPACING_PX[spacingDefault(key, c)]
-  return Array.isArray(v) ? v : (mobile ? v.m : v.d)
+  const d = spacingDefault(key, c)
+  const v = SPACING_PX[c.spacing] || SPACING_PX[d] || SPACING_OWN[d]
+  const [t, b] = Array.isArray(v) ? v : (mobile ? v.m : v.d)
+  const m = SPACING_MARGIN[key] || 0
+  return [t + m, b + m]
 }
 
 export const CLASSY_ALIGNS = [
@@ -1001,8 +1011,19 @@ export const COMPONENTS = [
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'description', label: 'Descripción', type: 'textarea' },
       ] },
+      ...advanced(),
+      // Orden del panel Classy de `history_grid` en Drupal.
+      ...classy('background_color', 'background_position', 'spacing', 'text_align', 'text_color'),
     ],
-    specs: [{ ratio: 'Desktop 4:3 - Mobile 4:3', desktop: '670×502px', mobile: '670×502px', max: '500kb', format: 'JPG / PNG' }],
+    // La imagen del hito pasa por el estilo de BANNER del CMS (`banner_full_desktop` 2088×696
+    // y `banner_full_mobile` 465×675, scale and crop al centro) y despues la caja del sitio
+    // (297×190 desktop, ~350×190 mobile) la vuelve a recortar con cover. Subida a 4:3, de
+    // cada foto quedaba la franja del medio (del retrato de Danforth, los ojos). Por eso las
+    // medidas son las de lo que SE VE, y `lienzo` el archivo que espera el estilo: el runner
+    // centra la foto ahi y rellena con ella misma difuminada (ver `recortar` en
+    // runner/src/imagenes.js).
+    specs: [{ ratio: 'Desktop 1,56:1 - Mobile 1,84:1', desktop: '1086×696px', mobile: '465×253px', max: '500kb', format: 'JPG / PNG',
+      lienzo: { desktop: '2088×696', mobile: '465×675' } }],
   },
   {
     key: 'commitment_carousel',

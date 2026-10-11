@@ -159,6 +159,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   pantalla. Origen: MX, ronda 5 (Dr. Satyaraj en Alergenos del gato), confirmado por el usuario.
 - **Los avisos legales metidos en una imagen no se borran** (la linea de marcas registradas al pie de
   una infografia), aunque esten en ingles: los decide Legal.
+- **La imagen de un hito de la Linea de tiempo (History Grid) se COMPONE, no se recorta.** El CMS la
+  pasa por el estilo de BANNER (`banner_full_desktop` 2088×696 y `banner_full_mobile` 465×675, scale
+  and crop al centro) y despues la caja del sitio (297×190 en desktop, ~350×190 en mobile) la vuelve a
+  recortar: de una foto 4:3 quedaba la franja del medio, y del retrato de Danforth solo los ojos. Por
+  eso la foto se encuadra a lo que SE VE (1,56:1 en desktop, 1,84:1 en mobile) y el runner la centra en
+  el archivo que espera el estilo, rellenando lo que el sitio corta con la misma foto difuminada
+  (`lienzo` en la spec del catalogo). Un logo o un envase va entero con aire alrededor; una foto chica
+  o de otra proporcion (un aviso de diario vertical, una foto vieja de 374px) va entera sobre su propio
+  difuminado en vez de recortarla. Se revisa simulando los dos recortes, no mirando el archivo. Es la
+  configuracion del componente en el CMS (la /historia original de preprod tenia el mismo problema):
+  si la agencia le pone un estilo propio, hay que volver a medir. Origen: MX, Nuestra historia ("la
+  primera imagen del timeline solamente se ve los ojos de la persona").
 
 ## Heroes y banners
 
@@ -362,6 +374,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - Origen: MX, primera pagina subida con el runner (Por que cambiar a Purina One: "quiero que
   aprendas sobre los spacings que tenemos y que apliques correctamente, ademas, que paso con el
   accordion?").
+
+- **La Linea de tiempo (History Grid) va con Seccion Medio.** Sin spacing trae el suyo, 60 -> 80px
+  arriba y abajo, MAS un `margin: 2rem 0` fijo que el spacing no saca: quedaban 183px entre el bloque
+  de arriba y el titulo "Historia Purina®", el doble que en el resto del sitio (la home de F5 deja
+  entre 89 y 120 entre secciones). No va con 0: las flechas del carrusel cuelgan 70px debajo de los
+  hitos y se meterian en el bloque de abajo. Con Medio queda en ~115 arriba y ~97 abajo.
+  Si lo de arriba son columnas (layout) con Medio, bajarlas a **Seccion Pequeño**: dejan 40 abajo en
+  vez de 60. Origen: MX, Nuestra historia ("controla los margenes para que tenga consistencia con el
+  resto de la web").
 
 - **Homes de marca: el hero va con `space_py_5` y el primer bloque despues del hero con `space_py_11`**,
   como el modelo de F5 (/proplan, armado desde el Figma). Queda 100px de aire despues del hero y

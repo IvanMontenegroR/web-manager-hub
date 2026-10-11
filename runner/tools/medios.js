@@ -169,6 +169,10 @@ export function mediosDeBloque(bloque, slug) {
   if (!def) return []
   const specs = getSpecs(def, bloque.contenido || {})
   const objetivo = { desktop: medida(specs[0]?.desktop), mobile: medida(specs[0]?.mobile) }
+  // El archivo que espera el estilo de imagen del CMS cuando es MAS GRANDE que lo que se ve
+  // (ver `lienzo` en el catalogo). Sin el, la medida es el archivo.
+  const lienzo = { desktop: medida(specs[0]?.lienzo?.desktop), mobile: medida(specs[0]?.lienzo?.mobile) }
+  for (const v of ['desktop', 'mobile']) if (objetivo[v] && lienzo[v]) objetivo[v] = { ...objetivo[v], lienzo: lienzo[v] }
 
   // En que paragraph hijo se convierte cada lista. Sale de la MISMA tabla que usa el
   // traductor, asi que no hay una segunda lista que se pueda desincronizar.

@@ -816,7 +816,7 @@ const RENDERERS = {
               <span className="cp-tl-year">{T(it.year, '—')}</span>
               {it.image
                 ? <MediaEl className="cp-tl-img" src={it.image} />
-                : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">670×502px</span></div>}
+                : <div className="cp-tl-img cp-tl-ph"><ImageIcon size={20} /><span className="cp-ph-dim">1086×696px</span></div>}
               <div className="cp-tl-name">{T(it.title, 'Título del hito')}</div>
               <Rich className="cp-tl-desc">{T(it.description, 'Descripción del hito.')}</Rich>
               <span className="cp-tl-dot" />
