@@ -267,6 +267,9 @@ const SPACING_DEFAULT = {
   banner: 'space_py_4', banner_wrapper: 'space_py_0',
   text: 'space_py_5', text_image: 'space_py_5',
   accordion_grid: 'space_py_0', breadcrumb: 'space_py_0',
+  // `.ln-video` declara 0 arriba y 0 abajo: sin spacing cargado el video queda pegado a lo
+  // que tenga al lado (en preprod, /adopta, tocaba la banda roja de abajo).
+  external_video: 'space_py_0',
 }
 export function spacingDefault(key, c = {}) {
   if (SPACING_DEFAULT[key]) return SPACING_DEFAULT[key]
@@ -1284,6 +1287,9 @@ export const COMPONENTS = [
       { key: 'thumb', label: 'Portada del video (opcional)', cmsLabel: 'Video thumb', type: 'image',
         insideMedia: 'video_url', derivedFrom: 'video_url', size: '2784×1566px' },
       { key: 'thumb_alt', label: 'Alt text', cmsLabel: 'Texto alternativo', type: 'text', cms: true },
+      ...advanced(),
+      // Orden del panel Classy de `c_externalvideo` (el mapping del runner, leido del formulario).
+      ...classy('background_color', 'background_position', 'spacing', 'text_align', 'text_color'),
     ],
     specs: [
       { label: 'Video', ratio: 'Desktop 16:9 - Mobile 16:9', max: '2-4MB', format: 'MP4 / YouTube' },

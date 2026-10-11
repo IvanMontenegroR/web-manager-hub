@@ -434,7 +434,7 @@ const RENDERERS = {
   //     `image_background_full`) todavia no estan dibujados: sin saber como se ven,
   //     mentir el mockup seria peor que dejar el generico.
   // `text_align` alinea el texto, igual que en el bloque de Texto.
-  content_image: (c) => {
+  content_image: (c, ctx) => {
     const ctas = ctaList(c)
     const bottom = c.image_position === 'image_bottom'
     const bgBox = c.image_position === 'image_background_box'
@@ -453,7 +453,10 @@ const RENDERERS = {
             <Img src={c.image} h={420} natural dim="2088×1044px" className="cp-fib-img" />
           </div>
           {hasText && (
-            <div className="cp-fib-card">
+            /* El texto de la caja es el Text Color de Classy; SIN cargar es el del sitio
+               (`--color-text-default`, oscuro), no blanco: en preprod VetLine salio con el
+               texto negro porque el bloque no lo tenia cargado y el mockup lo pintaba blanco. */
+            <div className="cp-fib-card" style={{ color: BG_TOKENS[c.text_color] || ctx?.brandTokens?.[c.text_color] || undefined }}>
               {c.title && <div className="cp-fib-title">{c.title}</div>}
               {c.subtitle && <div className="cp-fib-sub">{c.subtitle}</div>}
               {c.body && <Rich className="cp-fib-desc">{c.body}</Rich>}

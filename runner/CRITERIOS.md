@@ -336,7 +336,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   40/80, Extra Grande 40/80 -> 60/120 (mobile -> desktop, arriba/abajo).
 - **Sin spacing cargado cada componente trae el suyo**: Medio en todos los card grid, la Imagen,
   las pestañas, el carrusel de productos y el resto de las secciones; 20/20 el Texto y el Texto
-  con imagen; 16/16 el Banner; **0 el Acordeon suelto**. El aire entre dos bloques es la SUMA del
+  con imagen; 16/16 el Banner; **0 el Acordeon suelto** y **0 el Video externo** (`.ln-video`: en /adopta quedo
+  pegado a la banda roja de abajo; cargarle Seccion Medio). El aire entre dos bloques es la SUMA del
   de abajo de uno y el de arriba del otro.
 - **Un Texto que es solo el TITULO de la seccion de abajo va con 0 (`space_py_0`)**: asi queda a
   32px de su contenido (el aire de arriba del componente que sigue) y no flotando a mitad de camino.

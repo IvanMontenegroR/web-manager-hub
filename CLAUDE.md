@@ -293,7 +293,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      (medido en el CSS de content: `space_py_N` -> `section-py-N`, mismo padding arriba y abajo;
      `space_section_X` -> `section-space--X`, un valor en mobile y otro desde 992px) y
      `spacingDefault` lo que pone cada componente sin cargar nada (Medio casi todos; 20/20 Texto y
-     Texto con imagen; 16/16 Banner; 0 el Acordeon suelto). `spacingPx` resuelve el par
+     Texto con imagen; 16/16 Banner; 0 el Acordeon suelto y el Video externo). `spacingPx` resuelve el par
      [arriba, abajo] y el preview lo aplica en `.cp-render.cp-sp` como padding AFUERA del bloque, o
      ADENTRO de la banda si el bloque pinta fondo (`.cp-bleed`). En Vista previa las secciones van
      pegadas (gap 0): el aire entre dos bloques es la suma de los dos, como en el sitio. La regla de
