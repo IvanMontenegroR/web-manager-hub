@@ -165,9 +165,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   recortar: de una foto 4:3 quedaba la franja del medio, y del retrato de Danforth solo los ojos. Por
   eso la foto se encuadra a lo que SE VE (1,56:1 en desktop, 1,84:1 en mobile) y el runner la centra en
   el archivo que espera el estilo, rellenando lo que el sitio corta con la misma foto difuminada
-  (`lienzo` en la spec del catalogo). Un logo o un envase va entero con aire alrededor; una foto chica
-  o de otra proporcion (un aviso de diario vertical, una foto vieja de 374px) va entera sobre su propio
-  difuminado en vez de recortarla. Se revisa simulando los dos recortes, no mirando el archivo. Es la
+  (`lienzo` en la spec del catalogo). La imagen del hub va a 1,56:1, pero en mobile la caja es mas
+  apaisada y le saca ~8% arriba y ~8% abajo: **lo importante tiene que entrar en la franja central de
+  1,84:1**, que es lo que se ve en las dos. Un logo o un envase va entero con aire alrededor, dentro de
+  esa franja; una foto chica o de otra proporcion (un aviso de diario vertical, una foto vieja de 374px)
+  va entera sobre su propio difuminado en vez de recortarla; una foto se encuadra para que el texto que
+  tenga no toque el borde. No sirve meter la imagen entera tambien en mobile (contain): el difuminado
+  sale a los costados como manchas del color del logo. Y el recorte de un PDF se mira a mayor tamaño
+  antes de usarlo: el de Felix venia sin la huella ni el sello PURINA de arriba. Se revisa simulando
+  los dos recortes, no mirando el archivo. Es la
   configuracion del componente en el CMS (la /historia original de preprod tenia el mismo problema):
   si la agencia le pone un estilo propio, hay que volver a medir. Origen: MX, Nuestra historia ("la
   primera imagen del timeline solamente se ve los ojos de la persona").
