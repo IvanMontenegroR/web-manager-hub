@@ -209,6 +209,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   forma pensada para pegarse a una seccion de color del sitio viejo (la cuña verde de Dog Chow), se
   pinta del fondo de la pagina. Origen: MX, revision de los colores de marca ("en este tipo de casos
   si me gusta mucho mas que el titulo y subtitulo este por encima del banner", Pro Plan Perros).
+  La bajada va en UN solo parrafo, sin saltos de linea: si el sitio viejo la partia en dos (una frase
+  corta y despues el resto), se juntan con punto seguido. Origen: MX, Adopta, "¿Estás pensando en
+  adoptar?" ("no debemos tener un line break en los subtitulos"). Las piezas de Adopta salen de las
+  versiones ACTUALES del sitio viejo (las que linkea el landing, 2025-10: `que-hacemos-en-purina-adopta`,
+  `pensando-en-adoptar`), no de las paginas viejas que siguen publicadas sin link.
 - **La excepcion: si las letras de la imagen SON el titulo** (no un slogan: el mismo texto, como
   "UN SOLO producto 15 BENEFICIOS PARA LA SALUD" de Campeon), titulo arriba e imagen abajo repiten
   todo. Ahi se borran las letras de la imagen y el titulo va EN el banner. Origen: MX, idem ("no me
