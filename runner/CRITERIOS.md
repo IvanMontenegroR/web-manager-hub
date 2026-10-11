@@ -375,14 +375,15 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   aprendas sobre los spacings que tenemos y que apliques correctamente, ademas, que paso con el
   accordion?").
 
-- **La Linea de tiempo (History Grid) va con Seccion Medio.** Sin spacing trae el suyo, 60 -> 80px
-  arriba y abajo, MAS un `margin: 2rem 0` fijo que el spacing no saca: quedaban 183px entre el bloque
-  de arriba y el titulo "Historia Purina®", el doble que en el resto del sitio (la home de F5 deja
-  entre 89 y 120 entre secciones). No va con 0: las flechas del carrusel cuelgan 70px debajo de los
-  hitos y se meterian en el bloque de abajo. Con Medio queda en ~115 arriba y ~97 abajo.
-  Si lo de arriba son columnas (layout) con Medio, bajarlas a **Seccion Pequeño**: dejan 40 abajo en
-  vez de 60. Origen: MX, Nuestra historia ("controla los margenes para que tenga consistencia con el
-  resto de la web").
+- **La Linea de tiempo (History Grid) va con `space_py_5` (20/20) y el bloque que la sigue con mas aire
+  abajo.** Sin spacing trae el suyo, 60 -> 80px arriba y abajo, MAS un `margin: 2rem 0` fijo que el
+  spacing no saca: quedaban 183px antes del titulo "Historia Purina®". No va con 0: las flechas del
+  carrusel cuelgan ~34px debajo de los hitos y con 20 abajo todavia caen dentro del margen. Medido
+  contra el Figma de Nuestra historia (desktop: 60 hero -> texto, 120 hasta el titulo de la Historia,
+  80 de las flechas al titulo siguiente, 120 de las ultimas cards al footer), con columnas en Seccion
+  Medio, la linea de tiempo en 20/20 y el Card Grid de cierre en **Seccion Extra Grande** queda
+  69 / 123 / 85 / 120. Con los defaults del Card Grid las cards quedaban a 60 del footer, pegadas.
+  Origen: MX, Nuestra historia ("los margenes siguen viendose raros" — espaciado entre componentes).
 
 - **Homes de marca: el hero va con `space_py_5` y el primer bloque despues del hero con `space_py_11`**,
   como el modelo de F5 (/proplan, armado desde el Figma). Queda 100px de aire despues del hero y

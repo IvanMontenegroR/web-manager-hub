@@ -623,7 +623,7 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   al centro) y la caja la vuelve a recortar, asi que la spec es lo que SE VE (1086×696 / 465×253) y
   `lienzo` el archivo que pide el estilo: el runner centra la foto ahi con la misma foto difuminada
   de relleno (`recortar` en `runner/src/imagenes.js`). Su spacing propio es 60 -> 80 MAS un margen
-  fijo de 32 (`SPACING_MARGIN`), y va con Seccion Medio (ver `runner/CRITERIOS.md`).
+  fijo de 32 (`SPACING_MARGIN`), y va con `space_py_5` (ver `runner/CRITERIOS.md`, Spacing).
   El **Acordeon** (`accordion_grid`) es el paragraph del CMS. Sus items son `accordion_item`, que en
   Drupal son paragraphs hijos, pero como lo unico que llevan es titulo + cuerpo van como campo repetible:
   son los mismos datos con mucha menos maquinaria. El `accordion_item` no tiene panel Classy en el CMS.
