@@ -537,6 +537,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   el color de la marca abajo) va ENCIMA: sobre una foto con fondo la lava y la pieza se ve sucia. Si la
   pieza del mercado vino como foto, se pide el recorte y mientras tanto va el de MX de la misma marca.
   Origen: BR, ronda 2 (Pro Plan, "no me gusta como quedo este").
+- **Un hero que no pasa el contraste se oscurece como en MX**: degradé pizarra (#25282D) desde el lado
+  del titulo en desktop y desde arriba en mobile, lo justo para 3:1 / 4.5:1 medidos con el velo del
+  sitio. Nunca una mancha oscura detras del texto: sobre un fondo blanco se ve gris sucio. Si la foto es
+  la MISMA que un hero de MX ya tratado (ingredientes, Vet Diets, Purina Cares...), va la imagen de MX
+  tal cual y no se trata de nuevo. Origen: BR, QA ronda 3.
 - **En una marca oscura (Pro Plan) el mosaico va con la paleta de la marca**: caja en su negro (Brand
   03), titulo en su dorado (Brand 01) y texto blanco. Las cajas blancas de las marcas claras se ven
   ajenas sobre el negro. Origen: BR, ronda 2 ("los mosaicos no tienen los colores de proplan").
