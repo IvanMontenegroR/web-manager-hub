@@ -532,9 +532,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   recorta: la card la corta al centro y se pierden badges, sellos y textos de la pieza (los "3 em 1" de
   Pro Plan). Fondo liso: el mismo color; PNG transparente: transparente. Una FOTO se deja con el recorte.
   Origen: BR, ronda 2 ("se ven cortadas las cards").
-- **El fondo de "Image + 3 cards with icons" cubre TODO el panel** (en el sitio la imagen va a lo ancho
-  y el degrade, el titulo y las tarjetas van encima). Un PNG recortado deja ver el fondo de la pagina;
-  una foto con fondo tiene que llegar a los bordes, en desktop y en mobile. Origen: BR, ronda 2.
+- **El fondo de "Image + 3 cards with icons" es un RECORTE (PNG sin fondo) de los animales**, como en
+  MX. En el sitio la imagen va a lo ancho del panel, en su proporcion, y el degrade (transparente arriba,
+  el color de la marca abajo) va ENCIMA: sobre una foto con fondo la lava y la pieza se ve sucia. Si la
+  pieza del mercado vino como foto, se pide el recorte y mientras tanto va el de MX de la misma marca.
+  Origen: BR, ronda 2 (Pro Plan, "no me gusta como quedo este").
 - **En una marca oscura (Pro Plan) el mosaico va con la paleta de la marca**: caja en su negro (Brand
   03), titulo en su dorado (Brand 01) y texto blanco. Las cajas blancas de las marcas claras se ven
   ajenas sobre el negro. Origen: BR, ronda 2 ("los mosaicos no tienen los colores de proplan").
@@ -695,6 +697,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## CTAs y links
 
+- **Los botones no toman el color de la marca: en el CMS son rojos (Default)** tambien en Pro Plan y
+  Dog Chow (medido en content MX). Style Button solo ofrece Outline, Secondary (negro) y Text, que sobre
+  una pagina negra no se leen. Un boton dorado para Pro Plan necesita un estilo nuevo de F5. Origen: BR,
+  ronda 2.
 - **Si el sitio viejo tenia boton en cada card, el nuevo tambien.** La card Simple del Card Grid es
   ENTERA el link y no dibuja el texto del boton: para un "Ver mais" visible, cada card va en una columna
   (layout 50/50 o 33) con la imagen (Imagen, entera) y un bloque de Texto con titulo, texto y el boton.

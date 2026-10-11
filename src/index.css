@@ -2785,7 +2785,10 @@ textarea.control { resize: vertical; min-height: 64px; }
 /* ===== Card Grid "Image + 3 cards with icons" (full-background-card-icons-box) =====
    Medido en content /proplan: tarjetas de 338x352 (286x320 en mobile), texto a 4 lineas. */
 .cp-icobox { padding: 40px 0 48px; color: var(--txt, inherit); }
-.cp-icobox-panel { position: relative; height: 800px; border-radius: 32px; overflow: hidden; }
+.cp-icobox-panel { position: relative; border-radius: 32px; overflow: hidden; }
+/* En el sitio el panel tiene el alto de la imagen (`.media` con aspect-ratio auto): 2784x1994 en
+   desktop, 702x1600 en mobile. Con padding-top, que html2canvas resuelve bien. */
+.cp-icobox-panel::before { content: ''; display: block; padding-top: 71.6%; }
 .cp-icobox-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .cp-icobox-fade { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 22%, var(--ib-grad) 63%); }
 .cp-icobox-content { position: absolute; top: 0; bottom: 0; left: 60px; right: 60px; padding: 32px; display: flex; flex-direction: column; justify-content: space-between; }
@@ -2799,6 +2802,7 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-icobox-d { color: var(--ib-tx); font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .cp-icobox-d p { margin: 0; }
 .pb-canvas--mobile .cp-icobox { padding: 28px 0 32px; }
-.pb-canvas--mobile .cp-icobox-panel { height: 780px; border-radius: 24px; }
+.pb-canvas--mobile .cp-icobox-panel { border-radius: 24px; }
+.pb-canvas--mobile .cp-icobox-panel::before { padding-top: 228%; }
 .pb-canvas--mobile .cp-icobox-content { left: 0; right: 0; padding: 24px 16px; }
 .pb-canvas--mobile .cp-icobox-row { grid-template-columns: 82% 82% 82%; gap: 16px; overflow: hidden; }
