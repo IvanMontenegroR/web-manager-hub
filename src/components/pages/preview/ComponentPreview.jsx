@@ -296,7 +296,7 @@ const RENDERERS = {
     )
   },
 
-  banner: (c) => {
+  banner: (c, ctx) => {
     // Valores de MAQUINA del CMS (ver BANNER_TYPES). Las paginas viejas guardaban la
     // etiqueta, pero se migraron; igual se acepta la etiqueta por las dudas.
     const type = c.type || BT_MAIN_HERO
@@ -323,17 +323,36 @@ const RENDERERS = {
     // --banner-bg, .btn-primary; CTA mt-6). Secondary = ratio mas ancho/bajo (3:1) y
     // sin bordes redondeados; Main = 2:1 con esquinas redondeadas.
     if (heroLike) {
+      // Buscador del Brand Hero ("Show Search", grupo Search AI): en el sitio es el
+      // `.ai-search--banner` (pildora de vidrio con el icono de IA, abajo del titulo). En
+      // mobile, con "Position Fixed Mobile", el sitio lo fija al pie de la pantalla: aca va
+      // debajo del hero, sobre el fondo de la pagina. El Brand Hero sin titulo NO lleva
+      // texto de relleno: en las homes de marca va solo la imagen o el video y el buscador.
+      const search = brand && c.show_search
+      const fixedMob = search && c.search_fixed_mobile
+      const ph = ctx?.market === 'BR' ? 'Escreva suas dúvidas aqui...' : 'Escribe tus dudas aquí...'
+      const bar = (cls) => (
+        <div className={`cp-aisearch ${cls}`}>
+          <span className="cp-aisearch-ico"><FeatureIcon name="ai" size={24} /></span>
+          <span className="cp-aisearch-ph">{ph}</span>
+        </div>
+      )
       return (
-        <div className={`cp-hero${secondary ? ' cp-hero--wide' : ''}`}>
-          {c.image
-            ? <MediaEl className="cp-hero-img" src={c.image} />
-            : <div className="cp-hero-img cp-hero-ph"><span className="cp-dim-badge">{dim}</span></div>}
-          <div className="cp-hero-scrim" />
-          <div className={`cp-hero-content h-${h} v-${v}`}>
-            <div className="cp-hero-title">{T(c.title, secondary ? 'Secondary Hero' : 'Main Hero')}</div>
-            {c.description && <Rich className="cp-hero-desc">{c.description}</Rich>}
-            {cta && <span className="cp-hero-cta">{cta}</span>}
+        <div className={`cp-hero-wrap${fixedMob ? ' cp-hero-wrap--fixmob' : ''}`}
+          style={ctx?.brandTokens?.['Brand 01'] ? { '--cp-brand01': ctx.brandTokens['Brand 01'] } : undefined}>
+          <div className={`cp-hero${secondary ? ' cp-hero--wide' : ''}${brand ? ' cp-hero--brand' : ''}`}>
+            {c.image
+              ? <MediaEl className="cp-hero-img" src={c.image} />
+              : <div className="cp-hero-img cp-hero-ph"><span className="cp-dim-badge">{dim}</span></div>}
+            {!(brand && c.remove_overlay) && <div className="cp-hero-scrim" />}
+            <div className={`cp-hero-content h-${h} v-${v}`}>
+              {(c.title || !brand) && <div className="cp-hero-title">{T(c.title, secondary ? 'Secondary Hero' : 'Main Hero')}</div>}
+              {c.description && <Rich className="cp-hero-desc">{c.description}</Rich>}
+              {cta && <span className="cp-hero-cta">{cta}</span>}
+              {search && bar('cp-aisearch--banner')}
+            </div>
           </div>
+          {fixedMob && bar('cp-aisearch--fixmob')}
         </div>
       )
     }
@@ -768,7 +787,7 @@ const RENDERERS = {
         <div className="cp-plist-main">
           {showLeft && (
             <div className="cp-plist-left">
-              <Img src={c.left_image} aspect="396/498" dim="650×692px" className="cp-plist-leftimg" />
+              <Img src={c.left_image} h={420} dim="650×692px" className="cp-plist-leftimg" />
             </div>
           )}
           <div className="cp-plist-content">
@@ -1254,7 +1273,7 @@ const RENDERERS = {
                   <Img src={it.image} aspect="1/1" dim="760×760px" className="cp-mosaic-img" />
                 </div>
                 <div className="cp-mosaic-box" style={{ background: acc }}>
-                  {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTextStyle}>{T(it.title, 'Título de la card')}</div>}
+                  {(it.title || !it.description) && <div className="cp-mosaic-box-t" style={boxTitleStyle}>{T(it.title, 'Título de la card')}</div>}
                   {(it.description || !it.title) && <Rich className="cp-mosaic-box-d" style={boxTextStyle}>{T(it.description, 'Texto de la card.')}</Rich>}
                 </div>
               </div>
@@ -1265,10 +1284,14 @@ const RENDERERS = {
     }
     if (mode === 'full-background-card-icons-box') {
       // "Image + 3 cards with icons", medido en /proplan ("Nutricion respaldada por
-      // ciencia"): titulo y bajada centrados, un panel redondeado con el degradé (Background
-      // Degrade Color, sin cargar = el fondo de la pagina) y la imagen de fondo arriba, y una
-      // fila de 3 tarjetas de alto FIJO encima con icono, titulo y texto. El texto se corta a
-      // 4 lineas, como en el sitio, para que se vea aca lo que se va a cortar alla.
+      // ciencia") y en el CSS del sitio (.full-background-card-icons-box): la imagen de
+      // fondo ocupa TODO el panel redondeado (a lo ancho, en su proporcion: 2784x1994 en
+      // desktop, 702x1600 en mobile), con un degradé encima que va de transparente al
+      // Background Degrade Color (sin cargar, #1f1f1f). Titulo, bajada y la fila de 3
+      // tarjetas van ADENTRO del panel, sobre la imagen: arriba el titulo, abajo las cards.
+      // Antes el hub achicaba la imagen al 62% y centrada, que solo andaba con los PNG
+      // recortados de MX: una foto con fondo quedaba como un cuadro en el medio.
+      // El texto de las tarjetas se corta a 4 lineas, como en el sitio.
       const arr = items.length ? items : [
         { icon: 'browse', title: 'Título', description: 'Texto de la tarjeta.' },
         { icon: 'beef', title: 'Título', description: 'Texto de la tarjeta.' },
@@ -1277,7 +1300,7 @@ const RENDERERS = {
       const grad = tok(c.background_degrade_color)
       const card = tok(c.background_card_color) || '#FFFFFF'
       const st = {
-        '--ib-grad': grad || 'transparent',
+        '--ib-grad': grad || '#1f1f1f',
         '--ib-card': card,
         '--ib-ico': tok(c.icon_card_color) || ctx?.brandAccent || ACCENT,
         '--ib-tt': tok(c.title_card_color) || ctx?.brandAccent || ACCENT,
@@ -1286,26 +1309,27 @@ const RENDERERS = {
       }
       return (
         <div className={`cp-icobox${tok(c.text_color) ? ' cp-icobox--hastxt' : ''}`} style={st}>
-          {(OPT(c.title) || OPT(c.subtitle)) && (
-            <div className="cp-icobox-head">
-              {OPT(c.title) && <div className="cp-icobox-title">{c.title}</div>}
-              {OPT(c.subtitle) && <div className="cp-icobox-sub"><RT>{c.subtitle}</RT></div>}
-            </div>
-          )}
           <div className="cp-icobox-panel">
-            <div className="cp-icobox-bg">
-              {c.background_image
-                ? <MediaEl className="cp-icobox-img" src={c.background_image} />
-                : <Img h={300} dim="2784×1994px" />}
-            </div>
-            <div className="cp-icobox-row">
-              {arr.map((it, i) => (
-                <div key={i} className="cp-icobox-card">
-                  <span className="cp-icobox-ico"><FeatureIcon name={it.icon} size={24} /></span>
-                  <div className="cp-icobox-t">{T(it.title, 'Título')}</div>
-                  <Rich className="cp-icobox-d">{T(it.description, 'Texto de la tarjeta.')}</Rich>
+            {c.background_image
+              ? <MediaEl className="cp-icobox-img" src={c.background_image} />
+              : <div className="cp-icobox-img"><Img h={800} dim="2784×1994px" /></div>}
+            <div className="cp-icobox-fade" />
+            <div className="cp-icobox-content">
+              {(OPT(c.title) || OPT(c.subtitle)) ? (
+                <div className="cp-icobox-head">
+                  {OPT(c.title) && <div className="cp-icobox-title">{c.title}</div>}
+                  {OPT(c.subtitle) && <div className="cp-icobox-sub"><RT>{c.subtitle}</RT></div>}
                 </div>
-              ))}
+              ) : <div />}
+              <div className="cp-icobox-row">
+                {arr.map((it, i) => (
+                  <div key={i} className="cp-icobox-card">
+                    <span className="cp-icobox-ico"><FeatureIcon name={it.icon} size={24} /></span>
+                    <div className="cp-icobox-t">{T(it.title, 'Título')}</div>
+                    <Rich className="cp-icobox-d">{T(it.description, 'Texto de la tarjeta.')}</Rich>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -1517,6 +1541,7 @@ export default function ComponentPreview({ componentKey, content, theme, slots, 
     brandAccent: theme?.accent || null,
     // Los "Brand 01".."Brand 04" del CMS, que dependen de la marca de la pagina.
     brandTokens: theme?.tokens || null,
+    market: theme?.market || null,
     dark: !!theme?.dark,
     slots: slots || null,
     activeTab: activeTab || 0,

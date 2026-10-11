@@ -72,9 +72,10 @@ export default function PageBuilder({ page, onBack }) {
   // si la marca no tiene tema definido; el nombre igual sirve, ej. para el menu de marca).
   const theme = useMemo(() => {
     const t = brandTheme(page.brand)
-    if (!t && !page.brand) return null
-    return { ...(t || {}), name: page.brand || null, tokens: brandTokens(page.brand) }
-  }, [page.brand])
+    // El mercado viaja siempre: algunos textos fijos del sitio (el buscador del hero) cambian de idioma.
+    if (!t && !page.brand) return { market: page.market || null }
+    return { ...(t || {}), name: page.brand || null, tokens: brandTokens(page.brand), market: page.market || null }
+  }, [page.brand, page.market])
   // La pagina es un ARBOL de un nivel: bloques sueltos (parent_id null) y, dentro de un
   // contenedor (bloque de pestañas), sus hijos agrupados por pestaña (tab_index).
   const roots = useMemo(() => comps.filter((c) => !c.parent_id), [comps])

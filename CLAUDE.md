@@ -223,10 +223,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   `import.meta.env.BASE_URL`.
 - **Creacion de paginas** (`src/components/pages/`, se abre desde la seccion Modulos de Ecosystem 2.0):
   modulo para armar las paginas de la migracion. Dos capas:
-  1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Not started|Filling Matrix|
+  1. **Tracker** (`PagesTracker`) — lista de paginas (`pages`) con estado (Draft|Not started|Filling Matrix|
      In progress|On hold|Complete (outliers)|Done, ver `PAGE_STATUS_LABEL`: el valor guardado es el del
      proceso en ingles y la UI muestra la etiqueta en castellano. "Complete (outliers)" es el ANTEULTIMO
-     paso: esta todo salvo lo que quedo colgado por algo de afuera; cuando eso se destraba pasa a Done) y orden por prioridad (reordenable,
+     paso: esta todo salvo lo que quedo colgado por algo de afuera; cuando eso se destraba pasa a Done.
+     **Draft** ("Borrador") va aparte de la escala: una pagina que se decidio NO migrar pero se guarda
+     armada por si acaso (las de planeta por marca y las Inscreva-se de marca de BR); no es On hold, que es
+     una pagina que si va y espera algo) y orden por prioridad (reordenable,
      persiste `sort_order`). Cada pagina lleva ademas cuatro enlaces de referencia opcionales —
      `url_old` (sitio viejo), `url_new` (sitio nuevo), `url_copydeck` y `url_figma` — que se editan en el
      PageModal; todos menos el copydeck bajan precargados a la matriz de contenido exportada. Son
@@ -575,6 +578,13 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   Content. Suma el checkbox "Remover Overlay Background" y el grupo **Search AI** (mostrar el buscador,
   fijarlo en mobile, y las sugerencias). El Media va en TODOS los tipos, el Promotional incluido: ahi la
   imagen es lo unico que hay. Para varios banners rotando esta el `banner_wrapper`.
+  El **Brand Hero** se dibuja como el `.brand-hero` del sitio: 2.5:1 en desktop y 2:3 en mobile, SIN
+  titulo de relleno (las homes de marca van solo con la imagen o el video), sin el oscurecido si esta
+  "Remover Overlay Background", y con el **buscador** (`.ai-search--banner`: pildora de vidrio con el
+  icono de IA en el Brand 01, abajo al centro) cuando esta "Show Search". El texto de ayuda sale del
+  mercado de la pagina ("Escribe tus dudas aquí..." / "Escreva suas dúvidas aqui..."; por eso el
+  `theme` del builder lleva `market`). Con "Position Fixed Mobile" el sitio lo saca del hero y lo fija al
+  pie de la pantalla: en mobile el mockup lo dibuja debajo del hero.
   El Banner Type **"Full Image + Box Content" YA NO existe**: ese layout (imagen a sangre con la card
   frosted encima) se arma con el `c_image` y el Image position en **"Image Background Box"**. Salio de
   `BANNER_TYPES`, y su medida y su mockup (`.cp-fib`) se mudaron al Imagen. Ver
@@ -612,6 +622,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   otro elemento" (kind `lista`). Cada producto es una referencia "Nombre (nid)" a un producto del CMS; como
   todavia no estan migrados, el runner pone MUESTRAS de la marca (`productosMuestra` del mapping). La
   imagen de la izquierda es `field_background_image`. Pestañas de filtro y card Pet ID no existen ahi.
+  Esa imagen es una COLUMNA del carrusel: del mismo alto que las cards, recortada con cover (en el
+  mockup, 420px las dos), no una foto en su proporcion que desborda el carrusel.
   La **pagina de productos de una marca** (`/<marca>/productos`) usa otros dos Block: el **Filtro por
   mascota** (`product_filter` = `pl_base_pet_type_url_filter_block`, desplegables + lupa) y el
   **Listado de productos de la marca** (`product_grid` = `views_block:products_search-product_results_block_cont_brand`,

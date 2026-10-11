@@ -139,10 +139,14 @@ export const PAGE_MARKET_LABEL = Object.fromEntries(PAGE_MARKETS.map((m) => [m.c
 
 // Estados de una pagina (orden fijo, de menos a mas avanzado). Los valores guardados
 // son los del CMS/proceso en ingles; la UI muestra la etiqueta en castellano.
+// `Draft` (Borrador) va PRIMERO y fuera de la escala: es una pagina que ya no se migra (se
+// decidio sacarla del sitio nuevo) pero se guarda armada por si acaso. No es "On hold": esa es
+// una pagina que SI va y espera algo de afuera.
 export const PAGE_STATUSES = [
-  'Not started', 'Filling Matrix', 'In progress', 'On hold', 'Complete (outliers)', 'Done',
+  'Draft', 'Not started', 'Filling Matrix', 'In progress', 'On hold', 'Complete (outliers)', 'Done',
 ]
 export const PAGE_STATUS_LABEL = {
+  Draft: 'Borrador',
   'Not started': 'No iniciada',
   'Filling Matrix': 'Llenando matriz',
   'In progress': 'En progreso',

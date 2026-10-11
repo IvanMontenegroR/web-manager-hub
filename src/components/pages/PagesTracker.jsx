@@ -17,7 +17,7 @@ function readCollapsed() {
 
 // Clase de color por estado (para el pill).
 const STATUS_CLASS = {
-  'Not started': 'ns', 'Filling Matrix': 'fm', 'In progress': 'ip',
+  Draft: 'dr', 'Not started': 'ns', 'Filling Matrix': 'fm', 'In progress': 'ip',
   'On hold': 'oh', 'Complete (outliers)': 'co', Done: 'dn',
 }
 

@@ -46,6 +46,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 - **Las paginas de linea de Pro Plan (debajo de /proplan/gatos y /proplan/perros) quedan en pausa**:
   la idea es linkear directo a los productos. Origen: MX, ronda 3.
+- **Hay UNA sola pagina de "Comprometidos con el planeta" para todo el sitio.** Las versiones por marca
+  (Cat Chow, Dog Chow, Fancy Feast, Friskies, Pro Plan, Purina One, Tidy Cats en BR) repetian el mismo
+  contenido: quedan en **Borrador** (`Draft`, armadas por si acaso) y todo link a ellas va a la general.
+  Origen: BR, ronda 2 ("como en mx, tendremos una sola pagina de comprometidos con el planeta").
+- **Las paginas de newsletter (Inscreva-se) de las marcas no van: Borrador.** La general (/purina-
+  inscreva-se) sigue en pausa por el registro. Origen: BR, ronda 2.
 - **Club Purina se arma a mano.** El borrador automatico queda solo como referencia. Origen: MX, ronda 2.
 
 ## Imagenes
@@ -184,6 +190,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   campaña): se pone el PLACEHOLDER del Brand Hero y se marca como pendiente.** No se lo reemplaza con
   otra foto: el hero es la pieza de la marca y una foto cualquiera ahi parece una decision tomada. Es la
   unica seccion que lleva placeholder; en el resto se busca una imagen que funcione (ver Imagenes).
+- **En otro mercado, el hero de la home de marca es el de MX de la MISMA marca** (imagen o video, con el
+  buscador) mientras no llegue el propio: es el asset de la marca, no una foto cualquiera. Si trae texto en
+  el idioma de MX (el sello "60 AÑOS DE PROTECCIÓN" de Cat Chow, "100 AÑOS" y el tagline del logo de Dog
+  Chow) se borra solo limpiando, como cualquier letra en una imagen. Una marca sin home en MX (Friskies,
+  Tidy Cats) usa su propio key visual del sitio actual, sin letras, y queda pedido. Origen: BR, ronda 2
+  ("las imagenes/videos puedes reutilizar de MX si es que no tenemos imagenes para BR"). Reemplaza al
+  placeholder de la regla de arriba para las homes de un mercado que ya tiene la de MX.
   Origen: MX, home de Dog Chow (el video no estaba en la carpeta), pedido del usuario.
 
 - **Hero con video: en el CMS va un Responsive Video (mp4 desktop + mobile, sin audio); en el Hub, un
@@ -472,6 +485,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Menu de marca
 
+- **Un mercado sin CMS todavia (Brasil): el menu de marca queda armado en las notas de la home**, con
+  el mismo criterio de abajo (textos de la matriz, links con la ruta nueva, planeta a la pagina unica),
+  listo para cargar en el termino de la marca cuando exista el sitio. Origen: BR, ronda 2.
+
 - **El menu de marca (la barra con el logo debajo del header) sale de la MATRIZ; si la matriz no lo
   trae, del menu del sitio viejo. Lo que haya hoy en content no manda.** Es un menu de Drupal por
   marca (`dog-chow`, `pro-plan`...), elegido en el campo "Brand Menu" del termino de la marca. Las
@@ -510,6 +527,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   no tiene titulo (lo que se ve arriba es la etiqueta de cada pestaña). Origen: MX, idem.
 
 ## Cards
+
+- **Una imagen de card Simple que no es cuadrada se completa a cuadrado con su propio fondo**, nunca se
+  recorta: la card la corta al centro y se pierden badges, sellos y textos de la pieza (los "3 em 1" de
+  Pro Plan). Fondo liso: el mismo color; PNG transparente: transparente. Una FOTO se deja con el recorte.
+  Origen: BR, ronda 2 ("se ven cortadas las cards").
+- **El fondo de "Image + 3 cards with icons" cubre TODO el panel** (en el sitio la imagen va a lo ancho
+  y el degrade, el titulo y las tarjetas van encima). Un PNG recortado deja ver el fondo de la pagina;
+  una foto con fondo tiene que llegar a los bordes, en desktop y en mobile. Origen: BR, ronda 2.
+- **En una marca oscura (Pro Plan) el mosaico va con la paleta de la marca**: caja en su negro (Brand
+  03), titulo en su dorado (Brand 01) y texto blanco. Las cajas blancas de las marcas claras se ven
+  ajenas sobre el negro. Origen: BR, ronda 2 ("los mosaicos no tienen los colores de proplan").
 
 - **Bloque de 3 tarjetas con icono: el fondo deja libre la franja del titulo y el subtitulo.** En el
   sitio la imagen cubre TODO el panel y el texto va encima de su parte de arriba (desktop: hasta ~230px
@@ -666,6 +694,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   newsletter de Combinaciones de proteinas).
 
 ## CTAs y links
+
+- **Si el sitio viejo tenia boton en cada card, el nuevo tambien.** La card Simple del Card Grid es
+  ENTERA el link y no dibuja el texto del boton: para un "Ver mais" visible, cada card va en una columna
+  (layout 50/50 o 33) con la imagen (Imagen, entera) y un bloque de Texto con titulo, texto y el boton.
+  Origen: BR, ronda 2 (Veterinary Diets: "en el sitio viejo hay un cta y en el nuevo no"); se aplico
+  tambien a A nutrição mais avançada y LiveClear.
 
 - **Si el copy invita a una accion, lleva CTA.** "Donde comprar", "Registrate", "Encuentra..." sin
   boton es un bloque que no lleva a ningun lado. El destino sale de `urlmap.json` (sitio viejo ->
