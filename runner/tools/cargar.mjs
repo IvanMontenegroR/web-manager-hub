@@ -106,6 +106,8 @@ for (const archivo of planes) {
   const fila = {
     name: p.name, path: p.path, market: p.market,
     category: p.category || null, status: p.status || 'Not started',
+    // La marca (subcategoria de 'Marca') solo si el plan la trae: un plan viejo sin ella no la borra.
+    ...(p.brand ? { brand: p.brand } : {}),
     url_old: p.url_old || null, url_new: p.url_new || null,
     notes: notas(existente?.notes, plan.revisar || []),
   }

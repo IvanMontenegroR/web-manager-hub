@@ -3,6 +3,7 @@
 //
 //   node tools/plan.mjs salida/paginas.jsonl planes/            # todas las leidas
 //   node tools/plan.mjs salida/paginas.jsonl planes/ --url=...  # una sola
+//   node tools/plan.mjs salida/paginas.jsonl planes/ --market=BR # otro mercado (default MX)
 //
 // QUE ES UN PLAN Y POR QUE EXISTE. Armar una pagina tiene dos mitades que no se parecen
 // en nada:
@@ -29,6 +30,8 @@ import {
 
 const args = process.argv.slice(2)
 const soloUrl = args.find((a) => a.startsWith('--url='))?.slice(6)
+// El mercado de las paginas (MX por defecto). Brasil: --market=BR.
+const MARKET = args.find((a) => a.startsWith('--market='))?.slice(9) || 'MX'
 const [entrada, destino] = args.filter((a) => !a.startsWith('--'))
 if (!entrada || !destino) {
   process.stderr.write('uso: node tools/plan.mjs <paginas.jsonl> <carpeta-planes> [--url=...]\n')
@@ -267,7 +270,7 @@ function planDe(d) {
     pagina: {
       name: lim((d.titulo || '').split('|')[0], 120) || slugDe(url),
       path: rutaNueva(url),
-      market: 'MX',
+      market: MARKET,
       category: '',            // se completa a mano: la categoria del tracker
       status: 'In progress',
       url_old: d.pedida,
