@@ -2186,6 +2186,15 @@
           "classy.text_color": {
             "sel": "select[name=\"{base}[classy][0][block][text_color]\"]",
             "kind": "select"
+          },
+          "field_block.store_radius": {
+            "sel": "input[name=\"{base}[field_block][0][settings][store_locator_radius]\"], select[name=\"{base}[field_block][0][settings][store_locator_radius]\"]",
+            "note": "Radio de busqueda en km del buscador de tiendas (views_block:store_search-block_1). Leido de /store-locator de content."
+          },
+          "field_block.store_brand_filter": {
+            "sel": "input[name=\"{base}[field_block][0][settings][store_locator_brand_filter]\"]",
+            "kind": "checkbox",
+            "note": "Filtro por marca del buscador de tiendas."
           }
         }
       },

@@ -996,6 +996,39 @@ export const COMPONENTS = [
       ...classy('spacing'),
     ],
   },
+  // DONDE COMPRAR: el buscador de tiendas del sitio es un Block (la vista store_search) que
+  // busca sobre un mapa por cercania. No lleva contenido: las tiendas salen del CMS. Radio y
+  // filtro por marca son los de la pagina de ejemplo de content (/store-locator).
+  {
+    key: 'store_locator',
+    name: 'Buscador de tiendas',
+    category: 'Componentes reusables',
+    help: 'Block "Store search" del CMS: buscador de tiendas y veterinarias sobre un mapa, por cercanía. Las tiendas salen del CMS; acá solo se configura el radio y si filtra por marca.',
+    fields: [
+      { key: 'radius', label: 'Radio de búsqueda (km)', cmsLabel: 'Store locator radius', type: 'text', cms: true, default: '50' },
+      { key: 'brand_filter', label: 'Filtro por marca', cmsLabel: 'Store locator brand filter', type: 'checkbox', cms: true, default: true },
+    ],
+  },
+  // CONTACTO: el paragraph Contact Card Grid, una card por canal (telefono, WhatsApp, email,
+  // direccion). Cada card es icono + titulo + dato, y la card entera lleva al link del canal
+  // (tel:, wa.me, mailto:, Maps). Armado como el /contacto de content.
+  {
+    key: 'contact_cards',
+    name: 'Cards de contacto',
+    cmsName: 'Contact Card Grid',
+    category: 'Componentes reusables',
+    help: 'Paragraph "Contact Card Grid" del CMS: una card por canal de contacto (icono, título, dato y link: tel:, WhatsApp, mailto:, Maps).',
+    fields: [
+      { key: 'items', label: 'Canales', cmsLabel: 'Contact Card', type: 'list', itemLabel: 'Canal', item: [
+        { key: 'icon', label: 'Icono', cmsLabel: 'Icon', type: 'select', options: CMS_ICON_OPTIONS },
+        { key: 'title', label: 'Título', cmsLabel: 'Título', type: 'text' },
+        { key: 'title_tag', label: 'Título — HTML tag', cmsLabel: 'HTML tag (Título)', type: 'select', cms: true, options: HTML_TAGS, default: 'h2' },
+        { key: 'text', label: 'Dato', cmsLabel: 'Body', type: 'textarea' },
+        { key: 'link_url', label: 'Link', cmsLabel: 'Link (URL)', type: 'url' },
+        { key: 'link_title', label: 'Link — texto', cmsLabel: 'Link (texto)', type: 'text', cms: true },
+      ] },
+    ],
+  },
   {
     key: 'timeline',
     name: 'Línea de tiempo',
@@ -1712,7 +1745,6 @@ export const CMS_PENDING_PARAGRAPHS = [
   'Nutritional Table', 'Nutritional Item',
   'History Grid', 'History Grid Item',
   'Media Gallery', 'Media Gallery Modal', 'Media',
-  'Contact Card', 'Contact Card Grid',
   'Content: Tint', 'TINT Component', 'TINT Component Item CTA',
   'Content: Forms', 'Block', 'HTML', 'Flag Anonymous Modal',
 ]

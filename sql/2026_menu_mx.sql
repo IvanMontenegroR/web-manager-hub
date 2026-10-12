@@ -1,5 +1,5 @@
--- El MENU del sitio de MEXICO (purina:header-main), tal cual la matriz que completo el
--- mercado. Se corre UNA vez en el SQL editor de Supabase.
+-- El MENU del sitio de MEXICO (purina:header-main): la matriz que completo el mercado,
+-- ajustada con la revision del sitio viejo (Consejos y cuidados, marcas, Donde comprar). Se corre UNA vez en el SQL editor de Supabase.
 --
 -- Es un upsert por mercado: la fila de MX es unica, asi que esto la crea o la reemplaza.
 -- El arbol entero va en el jsonb `items` (ver src/lib/menuDb.js): los cinco menus
@@ -9,7 +9,7 @@
 -- usa la app: asi lo que queda en la base y lo que dibuja el mockup no se pueden separar.
 -- Si hay que cambiar el menu, se cambia alla y se vuelve a generar.
 --
--- Las URLs van VACIAS: la matriz vino sin ellas. Se completan en el editor del menu.
+-- Las URLs son las de preprod; las vacias no tienen pagina todavia.
 --
 -- Requiere la tabla `site_menu` (SETUP_SQL de src/lib/menuDb.js).
 
@@ -29,15 +29,15 @@ values ('MX', '[
         "links": [
           {
             "label": "Cachorro",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B6%5D=6"
           },
           {
             "label": "Adulto",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B22%5D=22&pettype=30"
           },
           {
             "label": "Senior",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B1%5D=1&pettype=30"
           }
         ]
       },
@@ -47,15 +47,15 @@ values ('MX', '[
         "links": [
           {
             "label": "Gatito",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B54%5D=54"
           },
           {
             "label": "Adulto",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B22%5D=22&pettype=18"
           },
           {
             "label": "Senior",
-            "url": ""
+            "url": "/productos?field_product_life_stage%5B1%5D=1&pettype=18"
           }
         ]
       },
@@ -65,15 +65,15 @@ values ('MX', '[
         "links": [
           {
             "label": "Alimento Seco",
-            "url": ""
+            "url": "/productos?field_product_food_type%5B8%5D=8"
           },
           {
             "label": "Alimento Húmedo",
-            "url": ""
+            "url": "/productos?field_product_food_type%5B4%5D=4"
           },
           {
             "label": "Premios y Snacks",
-            "url": ""
+            "url": "/productos?field_product_food_type%5B26%5D=26"
           },
           {
             "label": "Suplementos",
@@ -84,7 +84,7 @@ values ('MX', '[
     ],
     "more": {
       "label": "Ver productos",
-      "url": ""
+      "url": "/productos"
     },
     "promos": []
   },
@@ -98,19 +98,35 @@ values ('MX', '[
         "links": [
           {
             "label": "Pro Plan®",
-            "url": ""
+            "url": "/proplan"
           },
           {
             "label": "Felix®",
-            "url": ""
+            "url": "/felix"
           },
           {
             "label": "Cat Chow®",
-            "url": ""
+            "url": "/catchow"
           },
           {
             "label": "Fancy Feast®",
-            "url": ""
+            "url": "/fancy-feast"
+          },
+          {
+            "label": "Purina® One®",
+            "url": "/purina-one"
+          },
+          {
+            "label": "Gatina®",
+            "url": "/gatina"
+          },
+          {
+            "label": "Excellent®",
+            "url": "/excellent"
+          },
+          {
+            "label": "Dentalife®",
+            "url": "/dentalife"
           }
         ]
       },
@@ -120,26 +136,38 @@ values ('MX', '[
         "links": [
           {
             "label": "Pro Plan®",
-            "url": ""
+            "url": "/proplan"
           },
           {
             "label": "Dog Chow®",
-            "url": ""
+            "url": "/dogchow"
           },
           {
             "label": "Beneful®",
-            "url": ""
+            "url": "/beneful"
           },
           {
-            "label": "Purina One®",
-            "url": ""
+            "label": "Excellent®",
+            "url": "/excellent"
+          },
+          {
+            "label": "Purina® One®",
+            "url": "/purina-one"
+          },
+          {
+            "label": "Campeón®",
+            "url": "/campeon"
+          },
+          {
+            "label": "Dentalife®",
+            "url": "/dentalife"
           }
         ]
       }
     ],
     "more": {
       "label": "Ver todas",
-      "url": ""
+      "url": "/nuestras-marcas"
     },
     "promos": [
       {
@@ -157,20 +185,58 @@ values ('MX', '[
     ]
   },
   {
-    "label": "Red Purina®",
-    "layout": "links",
-    "links": [
+    "label": "Consejos y cuidados",
+    "layout": "boxes",
+    "groups": [
       {
-        "label": "Lo más leído",
-        "url": "",
-        "icon": "newsmode"
+        "title": "Perros",
+        "icon": "dog",
+        "links": [
+          {
+            "label": "Nutrición",
+            "url": "/articulos/nutricion?pettype=30"
+          },
+          {
+            "label": "Cuidado y bienestar",
+            "url": "/articulos/cuidado-y-bienestar?pettype=30"
+          },
+          {
+            "label": "Cambios en mi mascota",
+            "url": "/articulos/cambios-em-mi-mascota?pettype=30"
+          },
+          {
+            "label": "Entrenamiento",
+            "url": "/articulos/entrenamiento?pettype=30"
+          }
+        ]
       },
       {
-        "label": "Comunidad Purina®",
-        "url": "",
-        "icon": "forum"
+        "title": "Gatos",
+        "icon": "cat",
+        "links": [
+          {
+            "label": "Nutrición",
+            "url": "/articulos/nutricion?pettype=18"
+          },
+          {
+            "label": "Cuidado y bienestar",
+            "url": "/articulos/cuidado-y-bienestar?pettype=18"
+          },
+          {
+            "label": "Cambios en mi mascota",
+            "url": "/articulos/cambios-em-mi-mascota?pettype=18"
+          },
+          {
+            "label": "Entrenamiento",
+            "url": "/articulos/entrenamiento?pettype=18"
+          }
+        ]
       }
     ],
+    "more": {
+      "label": "Ver todos los artículos",
+      "url": "/articulos"
+    },
     "promos": [
       {
         "title": "Pregunta a un experto",
@@ -192,12 +258,12 @@ values ('MX', '[
     "links": [
       {
         "label": "Adopta una mascota",
-        "url": "",
+        "url": "/adopta",
         "icon": "adocao"
       },
       {
         "label": "Contacta a un experto",
-        "url": "",
+        "url": "https://wa.me/+525549637160",
         "icon": "chat"
       },
       {
@@ -211,8 +277,8 @@ values ('MX', '[
         "icon": "hotel"
       },
       {
-        "label": "Tiendas",
-        "url": "",
+        "label": "Dónde comprar",
+        "url": "/donde-comprar",
         "icon": "storefront"
       },
       {
@@ -241,7 +307,7 @@ values ('MX', '[
     "links": [
       {
         "label": "Nuestra historia",
-        "url": "",
+        "url": "/conoce-purina/historia",
         "icon": "history"
       },
       {
@@ -251,7 +317,7 @@ values ('MX', '[
       },
       {
         "label": "Aliados",
-        "url": "",
+        "url": "/aliados",
         "icon": "handshake"
       },
       {
@@ -261,12 +327,12 @@ values ('MX', '[
       },
       {
         "label": "Profesionales",
-        "url": "",
+        "url": "/profesionales",
         "icon": "stethoscope"
       },
       {
         "label": "Contacto",
-        "url": "",
+        "url": "/contacto",
         "icon": "mail"
       },
       {

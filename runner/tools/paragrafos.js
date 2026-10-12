@@ -139,6 +139,31 @@ export const PARAGRAFOS = {
     campos: {},
   },
 
+  // DONDE COMPRAR: el buscador de tiendas (vista store_search), configurado como la pagina
+  // de ejemplo de content (/store-locator): radio 50 km y filtro por marca.
+  store_locator: {
+    tipo: 'block',
+    fijos: {
+      'field_block.plugin': 'views_block:store_search-block_1',
+      'field_block.items_per_page': 'none',
+    },
+    campos: { radius: 'field_block.store_radius', brand_filter: 'field_block.store_brand_filter' },
+  },
+
+  // CONTACTO: Contact Card Grid, una Contact Card por canal (como el /contacto de content).
+  contact_cards: {
+    tipo: 'contact_card_grid',
+    campos: {},
+    lista: { campo: 'items', como: 'contact_card', slot: 0 },
+  },
+  contact_card: {
+    tipo: 'contact_card',
+    campos: {
+      icon: 'field_icon', ...T.titulo, text: 'field_c_text',
+      link_url: 'field_c_link.uri', link_title: 'field_c_link.title',
+    },
+  },
+
   // LA LINEA DE TIEMPO = History Grid. Cada hito es un `history_grid_item` con año (un
   // select), imagen (OBLIGATORIA en el CMS), titulo y cuerpo.
   timeline: {

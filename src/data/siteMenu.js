@@ -11,7 +11,7 @@
 //   - `boxes` : cajas con borde, cada una con titulo + icono y su lista de links
 //               (Alimento, Marcas). Alimento ademas lleva el buscador arriba.
 //   - `links` : lista plana de links con icono, en dos columnas
-//               (Red Purina, Servicios, Conoce Purina).
+//               (Servicios, Conoce Purina). Consejos y cuidados usa `boxes`.
 // A la derecha de CADA menu van sus PROMOS (las tarjetas). Son de cada menu, no del
 // header: dos menus pueden mostrar tarjetas distintas. Son 0, 1 o 2 — si un menu no
 // tiene ninguna, ese menu ocupa todo el ancho.
@@ -33,7 +33,7 @@ export function menuIconFor(key) {
   return CMS_ICON_SVG[key] || null
 }
 
-const L = (label, icon) => (icon ? { label, url: '', icon } : { label, url: '' })
+const L = (label, icon, url = '') => (icon ? { label, url, icon } : { label, url })
 
 // Tarjetas con las que arranca un menu nuevo. Hoy los cinco de Mexico muestran las
 // mismas dos, pero cada uno tiene las suyas: cambiarlas en Alimento no toca Marcas.
@@ -56,12 +56,15 @@ const CLUB = () => ({
 })
 const P = (...tarjetas) => tarjetas.map((x) => ({ ...x }))
 
-// EL MENU REAL DE MEXICO, tal cual la matriz que completo el mercado. Es ademas con lo
-// que se siembra un mercado nuevo: se copia y se edita, que es mas rapido que empezar de
-// cero — los cinco menus principales son los mismos en todos los mercados.
+// EL MENU DE MEXICO. Nacio de la matriz que completo el mercado y despues se ajusto con la
+// revision del sitio viejo (2026-10): "Red Purina" paso a "Consejos y cuidados" con cajas
+// por especie, como Alimento y Marcas (un nombre de programa no dice que hay adentro, y los
+// sitios de Purina de otros paises nombran la seccion por su contenido); Marcas suma las
+// marcas que ya tienen pagina; Servicios lleva Donde comprar. Es ademas con lo que se
+// siembra un mercado nuevo: se copia y se edita.
 //
-// Las URLs van VACIAS a proposito: la matriz vino sin ellas. El menu no funciona hasta
-// que se carguen, y un destino inventado es peor que uno vacio.
+// Las URLs son las de preprod. Las que van VACIAS no tienen pagina todavia: un destino
+// inventado es peor que uno vacio.
 export const DEFAULT_MENU = [
   {
     label: 'Alimento',
@@ -74,33 +77,66 @@ export const DEFAULT_MENU = [
     // distintas — cachorro/gatito). Por eso este menu NO lleva tarjetas: con tres cajas
     // mas las dos tarjetas, el megamenu queda apretado.
     groups: [
-      { title: 'Perros', icon: 'dog', links: [L('Cachorro'), L('Adulto'), L('Senior')] },
-      { title: 'Gatos', icon: 'cat', links: [L('Gatito'), L('Adulto'), L('Senior')] },
+      { title: 'Perros', icon: 'dog', links: [
+        L('Cachorro', null, '/productos?field_product_life_stage%5B6%5D=6'),
+        L('Adulto', null, '/productos?field_product_life_stage%5B22%5D=22&pettype=30'),
+        L('Senior', null, '/productos?field_product_life_stage%5B1%5D=1&pettype=30'),
+      ] },
+      { title: 'Gatos', icon: 'cat', links: [
+        L('Gatito', null, '/productos?field_product_life_stage%5B54%5D=54'),
+        L('Adulto', null, '/productos?field_product_life_stage%5B22%5D=22&pettype=18'),
+        L('Senior', null, '/productos?field_product_life_stage%5B1%5D=1&pettype=18'),
+      ] },
       { title: 'Tipo de alimento', icon: 'pet_supplies', links: [
-        L('Alimento Seco'), L('Alimento Húmedo'), L('Premios y Snacks'), L('Suplementos'),
+        L('Alimento Seco', null, '/productos?field_product_food_type%5B8%5D=8'),
+        L('Alimento Húmedo', null, '/productos?field_product_food_type%5B4%5D=4'),
+        L('Premios y Snacks', null, '/productos?field_product_food_type%5B26%5D=26'),
+        L('Suplementos'),
       ] },
     ],
-    more: { label: 'Ver productos', url: '' },
+    more: { label: 'Ver productos', url: '/productos' },
     promos: [],
   },
   {
     label: 'Marcas',
     layout: 'boxes',
+    // Todas las marcas que tienen pagina, en la especie de sus productos (Excellent,
+    // Purina One y Dentalife tienen productos para las dos).
     groups: [
       { title: 'Para Gatos', icon: 'cat', links: [
-        L('Pro Plan®'), L('Felix®'), L('Cat Chow®'), L('Fancy Feast®'),
+        L('Pro Plan®', null, '/proplan'), L('Felix®', null, '/felix'), L('Cat Chow®', null, '/catchow'),
+        L('Fancy Feast®', null, '/fancy-feast'), L('Purina® One®', null, '/purina-one'), L('Gatina®', null, '/gatina'),
+        L('Excellent®', null, '/excellent'), L('Dentalife®', null, '/dentalife'),
       ] },
       { title: 'Para Perros', icon: 'dog', links: [
-        L('Pro Plan®'), L('Dog Chow®'), L('Beneful®'), L('Purina One®'),
+        L('Pro Plan®', null, '/proplan'), L('Dog Chow®', null, '/dogchow'), L('Beneful®', null, '/beneful'),
+        L('Excellent®', null, '/excellent'), L('Purina® One®', null, '/purina-one'), L('Campeón®', null, '/campeon'),
+        L('Dentalife®', null, '/dentalife'),
       ] },
     ],
-    more: { label: 'Ver todas', url: '' },
+    more: { label: 'Ver todas', url: '/nuestras-marcas' },
     promos: P(EXPERTO('Recibe asesoría personalizada y encuentra el alimento adecuado para tu mascota.'), CLUB()),
   },
   {
-    label: 'Red Purina®',
-    layout: 'links',
-    links: [L('Lo más leído', 'newsmode'), L('Comunidad Purina®', 'forum')],
+    // Antes "Red Purina®". Cajas por especie con las categorias de articulos del sitio
+    // (las mismas del sitio viejo, para no perder URLs); cada una filtra por especie.
+    label: 'Consejos y cuidados',
+    layout: 'boxes',
+    groups: [
+      { title: 'Perros', icon: 'dog', links: [
+        L('Nutrición', null, '/articulos/nutricion?pettype=30'),
+        L('Cuidado y bienestar', null, '/articulos/cuidado-y-bienestar?pettype=30'),
+        L('Cambios en mi mascota', null, '/articulos/cambios-em-mi-mascota?pettype=30'),
+        L('Entrenamiento', null, '/articulos/entrenamiento?pettype=30'),
+      ] },
+      { title: 'Gatos', icon: 'cat', links: [
+        L('Nutrición', null, '/articulos/nutricion?pettype=18'),
+        L('Cuidado y bienestar', null, '/articulos/cuidado-y-bienestar?pettype=18'),
+        L('Cambios en mi mascota', null, '/articulos/cambios-em-mi-mascota?pettype=18'),
+        L('Entrenamiento', null, '/articulos/entrenamiento?pettype=18'),
+      ] },
+    ],
+    more: { label: 'Ver todos los artículos', url: '/articulos' },
     promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
   {
@@ -112,10 +148,10 @@ export const DEFAULT_MENU = [
     // "Yo Reciclo" va SIN icono: en el set del CMS no hay ninguno de reciclaje, y poner
     // uno parecido seria elegir mal por el mercado. Cuando exista, se carga.
     links: [
-      L('Adopta una mascota', 'adocao'), L('Contacta a un experto', 'chat'),
+      L('Adopta una mascota', 'adocao', '/adopta'), L('Contacta a un experto', 'chat', 'https://wa.me/+525549637160'),
       L('Conoce nuestro programa de Breeders', 'genetics'),
       L('Encuentra dónde dejar a tu mascota', 'hotel'),
-      L('Tiendas', 'storefront'), L('Yo Reciclo'),
+      L('Dónde comprar', 'storefront', '/donde-comprar'), L('Yo Reciclo'),
     ],
     promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
@@ -123,9 +159,9 @@ export const DEFAULT_MENU = [
     label: 'Conoce Purina®',
     layout: 'links',
     links: [
-      L('Nuestra historia', 'history'), L('Prensa', 'newsmode'),
-      L('Aliados', 'handshake'), L('Preguntas frecuentes', 'help'),
-      L('Profesionales', 'stethoscope'), L('Contacto', 'mail'),
+      L('Nuestra historia', 'history', '/conoce-purina/historia'), L('Prensa', 'newsmode'),
+      L('Aliados', 'handshake', '/aliados'), L('Preguntas frecuentes', 'help'),
+      L('Profesionales', 'stethoscope', '/profesionales'), L('Contacto', 'mail', '/contacto'),
       L('Club Purina®', 'workspace_premium'),
     ],
     // Sin tarjetas: la matriz dice "Sin tarjeta" en las dos.

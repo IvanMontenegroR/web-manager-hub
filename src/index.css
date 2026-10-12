@@ -1941,6 +1941,25 @@ textarea.control { resize: vertical; min-height: 64px; }
 .cp-pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .cp-pgrid-card { background: rgba(0, 0, 0, .06); border-radius: 12px; padding: 12px; min-height: 220px; display: flex; }
 .cp-pgrid-card .cp-plist-ph { flex: 1; }
+/* Buscador de tiendas (Block store_search) */
+.cp-store { display: flex; flex-direction: column; gap: 16px; }
+.cp-store-search { display: flex; gap: 8px; }
+.cp-store-input { flex: 1; border: 1px solid #c8c8c8; border-radius: 999px; padding: 12px 18px; color: #767676; font-size: 15px; }
+.cp-store-btn { background: #E91C24; color: #fff; border-radius: 999px; padding: 12px 22px; font-weight: 600; }
+.cp-store-body { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; min-height: 360px; }
+.cp-store-list { display: flex; flex-direction: column; gap: 10px; }
+.cp-store-item { border: 1px solid #e3e3e3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.cp-store-item span { color: #767676; }
+.cp-store-map { background: repeating-linear-gradient(45deg, #e9eef2, #e9eef2 12px, #dfe6eb 12px, #dfe6eb 24px); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #5b6670; font-size: 14px; }
+.pb-canvas--mobile .cp-store-body { grid-template-columns: 1fr; }
+.pb-canvas--mobile .cp-store-map { min-height: 260px; }
+/* Cards de contacto (Contact Card Grid) */
+.cp-contact { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.cp-contact-card { border: 1px solid #e3e3e3; border-radius: 16px; padding: 24px 18px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.cp-contact-ic { color: #E91C24; }
+.cp-contact-t { font-weight: 700; font-size: 18px; }
+.cp-contact-d { font-size: 15px; overflow-wrap: anywhere; }
+.pb-canvas--mobile .cp-contact { grid-template-columns: 1fr; }
 .pb-canvas--mobile .cp-pgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .pb-canvas--mobile .cp-pgrid-card { min-height: 150px; }
 .cp-plist-card, .cp-plist-promo { flex: 0 0 300px; }

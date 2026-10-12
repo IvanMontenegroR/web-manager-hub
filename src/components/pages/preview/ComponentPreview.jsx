@@ -752,6 +752,45 @@ const RENDERERS = {
     </div>
   ),
 
+  // Buscador de tiendas: buscador arriba, lista de resultados a la izquierda y el mapa a la
+  // derecha. Las tiendas salen del CMS: aca son placeholders.
+  store_locator: (c) => (
+    <div className="cp-store">
+      <div className="cp-store-search">
+        <span className="cp-store-input">Ingresa tu código postal o ciudad</span>
+        <span className="cp-store-btn">Buscar</span>
+      </div>
+      <div className="cp-store-body">
+        <div className="cp-store-list">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="cp-store-item"><b>Tienda {i}</b><span>Dirección de la tienda · a {i * 2} km</span></div>
+          ))}
+        </div>
+        <div className="cp-store-map"><span>Mapa · radio {c.radius || '50'} km{c.brand_filter === false ? '' : ' · filtro por marca'}</span></div>
+      </div>
+    </div>
+  ),
+
+  // Cards de contacto: una por canal, icono rojo + titulo + dato, centradas.
+  contact_cards: (c) => {
+    const items = list(c.items)
+    const arr = items.length ? items : [
+      { icon: 'call', title: 'Teléfono', text: '+52 55 0000 0000' },
+      { icon: 'mail', title: 'Email', text: 'correo@ejemplo.com' },
+    ]
+    return (
+      <div className="cp-contact">
+        {arr.map((it, i) => (
+          <div key={i} className="cp-contact-card">
+            {it.icon && <span className="cp-contact-ic"><FeatureIcon name={it.icon} size={30} /></span>}
+            {OPT(it.title) && <div className="cp-contact-t">{it.title}</div>}
+            {OPT(it.text) && <Rich className="cp-contact-d">{it.text}</Rich>}
+          </div>
+        ))}
+      </div>
+    )
+  },
+
   // Listado de productos "Más populares": tabs de filtro (activo en rojo) + flechas,
   // carrusel de card-products (fondo gris, imagen contenida, titulo debajo). Card promo
   // (Pet ID) opcional en rojo + boton "Ver todos". Sin imagen usa placeholder.
