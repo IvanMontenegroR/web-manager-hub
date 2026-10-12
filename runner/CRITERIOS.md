@@ -528,6 +528,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 ## Cards
 
+- **Cards con botón (que la Simple no dibuja) van en columnas con UN bloque Imagen por columna**:
+  título, texto y botón arriba, la imagen abajo (`image_bottom`). Nunca imagen y texto como dos
+  bloques en la misma columna: en el CMS no se apilan, el sitio los reparte en la grilla como cards
+  sueltas y la imagen de una queda al lado del texto de otra. Origen: MX, /purina-cuida/por-el-planeta/
+  reciclando-con-purina en preprod (los tres puntos de recolección salieron mezclados).
 - **Una imagen de card Simple que no es cuadrada se completa a cuadrado con su propio fondo**, nunca se
   recorta: la card la corta al centro y se pierden badges, sellos y textos de la pieza (los "3 em 1" de
   Pro Plan). Fondo liso: el mismo color; PNG transparente: transparente. Una FOTO se deja con el recorte.
