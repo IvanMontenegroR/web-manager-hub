@@ -114,7 +114,11 @@ export const DEFAULT_MENU = [
         L('Dentalife®', null, '/dentalife'),
       ] },
     ],
-    // Sin "Ver todas": el menu ya lista todas las marcas.
+    // El link final NO es opcional en un menu de cajas: el sitio arma las cajas en una
+    // grilla de 2 filas que se llena por COLUMNA, y la fila de abajo la ocupa este link.
+    // Sin el, las dos cajas caen una debajo de la otra. Como el menu ya lista todas las
+    // marcas, no dice "Ver todas" sino que lleva a la pagina de marcas.
+    more: { label: 'Conoce nuestras marcas', url: '/nuestras-marcas' },
     promos: P(EXPERTO('Recibe asesoría personalizada y encuentra el alimento adecuado para tu mascota.'), CLUB()),
   },
   {

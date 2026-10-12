@@ -691,7 +691,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   serian tres tablas y ninguna consulta que las aproveche. Cada menu principal tiene un `layout`
   que sale de como se ve en el sitio — `boxes` (cajas con titulo + icono y su lista de links:
   Alimento, que ademas lleva buscador, Marcas y Consejos y cuidados) o `links` (lista plana con icono en dos
-  columnas, por FILAS: el 1 y el 2 son la primera fila) — y sus propias **tarjetas** (`promos`,
+  columnas, por FILAS: el 1 y el 2 son la primera fila). Un menu `boxes` lleva SIEMPRE el link del pie
+  (`more`): en el sitio la fila de abajo de la grilla es de ese link, y sin el las cajas se apilan
+  (ver `runner/CRITERIOS.md`). Ademas cada menu tiene sus propias **tarjetas** (`promos`,
   0/1/2; sin ninguna el menu ocupa todo el ancho). Las tarjetas son de CADA menu, no del header:
   la columna `promos` de la tabla es legado y ya no se escribe, pero `withPromos` la baja a cada
   item al leer, asi una fila sin migrar sigue funcionando. Los iconos son claves de `CMS_ICONS` y el

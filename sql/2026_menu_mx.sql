@@ -165,6 +165,10 @@ values ('MX', '[
         ]
       }
     ],
+    "more": {
+      "label": "Conoce nuestras marcas",
+      "url": "/nuestras-marcas"
+    },
     "promos": [
       {
         "title": "Pregunta a un experto",

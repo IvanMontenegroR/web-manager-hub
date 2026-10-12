@@ -286,6 +286,9 @@ export default function MenuEditor({ market: market0, onBack }) {
                   <input className="control" placeholder="URL del pie" value={it.more?.url || ''}
                     onChange={(e) => upd({ more: { ...(it.more || {}), url: e.target.value } })} />
                 </div>
+                {it.layout === 'boxes' && !it.more?.label && (
+                  <div className="hint">En un menú de cajas el link del pie no es opcional: sin él, en el sitio las cajas quedan una debajo de la otra.</div>
+                )}
 
                 {/* Las tarjetas son de ESTE menú: cambiarlas acá no toca las de los
                     otros. Pueden ser 0, 1 o 2; sin ninguna, el menú ocupa todo el ancho. */}
