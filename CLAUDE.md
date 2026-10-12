@@ -676,6 +676,9 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   formulario, util en productos y articulos). Abre solo las filas que toca, verifica, guarda una vez y
   repasa el Classy. Ensayo por defecto. Es la herramienta para cargar los productos reales en los
   carruseles cuando se migren (hoy van muestras de la marca). Ver `runner/README.md`.
+  Para SUMAR bloques adentro de un contenedor ajeno (los slides del Banner Wrapper de la home de
+  F5) el manifiesto lleva `page.nid` + `page.dentroDe: { fila, tipo, slot }`; lo que la ranura ya
+  tenia no se toca.
 - **Criterios de migracion** (`runner/CRITERIOS.md`): las decisiones del Websites Expert al revisar
   paginas migradas del sitio viejo (medidas, heroes, contraste, carrusel de productos, iconos, CTAs...),
   cada una con el caso que la origino. Se lee ANTES de traducir o corregir una pagina, y cada decision
@@ -705,8 +708,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   queda en `site_menu` y lo que dibuja el mockup no se pueden separar. Detalles que son decisiones y
   no descuidos: **Alimento** lleva TRES cajas (la etapa de vida va partida por especie, porque perros
   y gatos tienen etapas distintas) y por eso va SIN tarjetas — con tres cajas mas dos tarjetas el
-  megamenu queda apretado; **Conoce Purina®** tampoco lleva tarjetas; "Yo Reciclo" queda SIN icono
-  porque en el set del CMS no hay ninguno de reciclaje; **"Red Purina®" paso a "Consejos y
+  megamenu queda apretado; **Conoce Purina®** tampoco lleva tarjetas; "Yo Reciclo" lleva el globo
+  (`language`) porque en el set del CMS no hay icono de reciclaje; **"Red Purina®" paso a "Consejos y
   cuidados"** con cajas Perros / Gatos (las cuatro categorias de articulos del sitio viejo, filtradas
   por especie con `?pettype=30/18`) y "Ver todos los articulos": un nombre de programa no dice que hay
   adentro, y ningun sitio de Purina de otro pais lo usa; **Marcas** lista las que eligio el Expert

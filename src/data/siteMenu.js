@@ -146,13 +146,13 @@ export const DEFAULT_MENU = [
     // El orden es el de LECTURA (por filas): el sitio los pone en dos columnas, asi que
     // 1 y 2 son la primera fila, 3 y 4 la segunda, etc.
     //
-    // "Yo Reciclo" va SIN icono: en el set del CMS no hay ninguno de reciclaje, y poner
-    // uno parecido seria elegir mal por el mercado. Cuando exista, se carga.
+    // "Yo Reciclo" lleva el globo (`language`): en el set del CMS no hay icono de reciclaje y
+    // el globo es el que dice "planeta", que es donde vive la pagina (Purina por el planeta).
     links: [
       L('Adopta una mascota', 'adocao', '/adopta'), L('Contacta a un experto', 'chat', 'https://wa.me/+525549637160'),
       L('Conoce nuestro programa de Breeders', 'genetics'),
       L('Encuentra dónde dejar a tu mascota', 'hotel'),
-      L('Dónde comprar', 'storefront', '/donde-comprar'), L('Yo Reciclo', null, '/purina-cuida/por-el-planeta/reciclando-con-purina'),
+      L('Dónde comprar', 'storefront', '/donde-comprar'), L('Yo Reciclo', 'language', '/purina-cuida/por-el-planeta/reciclando-con-purina'),
     ],
     promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },

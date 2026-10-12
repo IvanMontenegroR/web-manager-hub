@@ -12,9 +12,9 @@ const COLS = [
   { title: 'Alimento', links: ['Húmedos', 'Secos', 'Snacks'] },
   { title: 'Etapa de Vida', links: ['Cachorros', 'Gatitos', 'Adultos', 'Senior'] },
   { title: 'Marcas', links: ['Gatos', 'Perros'] },
-  { title: 'Consejos y cuidados', links: ['Nutrición', 'Cuidado y bienestar', 'Cambios en mi mascota', 'Entrenamiento', 'Todos los artículos'] },
+  { title: 'Consejos y cuidados', links: ['Nutrición', 'Cuidado y bienestar', 'Cambios en mi mascota', 'Entrenamiento'] },
   { title: 'Servicios', links: ['Adopción', 'Vetline', 'Yo Reciclo'] },
-  { title: 'Sobre Purina®', links: ['Nosotros', 'Contacto', 'Nuestra historia', 'Innovación', 'Purina® Cares'] },
+  { title: 'Sobre Purina®', links: ['Nosotros', 'Contacto', 'Nuestra historia', 'Innovación', 'Purina® Cuida'] },
 ]
 const LEGAL = ['Términos y condiciones', 'Aviso de privacidad', 'Política de cookies']
 

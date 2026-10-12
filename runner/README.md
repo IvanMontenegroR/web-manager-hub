@@ -556,6 +556,24 @@ El plan habla el idioma de los manifiestos, no el de los nombres largos de Drupa
   y lo dice.
 - Una pagina por vez; si una falla se anota y sigue con la siguiente. Bitacora en
   `logs/editar.jsonl`.
+- Los hijos del **Banner Wrapper** no traen la clase con el tipo: se reconocen por la etiqueta
+  de la cabecera ("Banner"), igual que al armar.
+
+### Agregar bloques ADENTRO de un contenedor que ya existe
+
+Un manifiesto con `page.nid` agrega sus bloques al final de la pagina. Con `page.dentroDe`
+los agrega al final de UNA ranura de un bloque que ya esta: es como se suman slides al Banner
+Wrapper de una home que armo otro.
+
+```json
+{ "page": { "title": "Home", "path": "/home", "nid": 90,
+            "dentroDe": { "fila": 5, "tipo": "banner_wrapper", "slot": 0 } },
+  "blocks": [ { "type": "banner", "fields": { "...": "..." } } ] }
+```
+
+`fila` es la posicion del contenedor en la pagina (1 = el primero). Si esa fila no es del
+`tipo` pedido, frena sin tocar nada. Lo que la ranura ya tenia NUNCA se reusa: llega plegado
+y se veria vacio.
 
 En un entorno que sale a internet por un proxy (una sesion en la
 nube), Node lo toma con `NODE_USE_ENV_PROXY=1` y `NODE_EXTRA_CA_CERTS=<bundle>`. En tu

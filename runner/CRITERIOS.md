@@ -185,6 +185,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   primera imagen del timeline solamente se ve los ojos de la persona").
 
 ## Heroes y banners
+- **Banners del carrusel de la home**: si la imagen ya trae el mensaje (logo de la campaña, texto en
+  la pieza), va como **Promotional banner (only image)**: en el CMS ese tipo envuelve TODA la imagen
+  en el link, asi que el banner entero es clickeable y no hace falta boton. Un Secondary Hero encima
+  de esas piezas les pone el velo gris en toda la imagen y monta el titulo sobre logos y productos.
+  Secondary Hero solo para las fotos que no dicen nada sin texto. El mobile del solo-imagen es
+  vertical 2:3: se sube la pieza mobile original, no el recorte cuadrado del Secondary Hero.
+  Origen: MX, banners de la home vieja en el carrusel de la home de preprod.
 
 - **Hero de una home de marca sin su asset especifico (el video de la marca, el key visual de la
   campaña): se pone el PLACEHOLDER del Brand Hero y se marca como pendiente.** No se lo reemplaza con
@@ -416,6 +423,19 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   69 / 123 / 85 / 120. Con los defaults del Card Grid las cards quedaban a 60 del footer, pegadas.
   Origen: MX, Nuestra historia ("los margenes siguen viendose raros" — espaciado entre componentes).
 
+- **El ultimo bloque de la pagina deja 60 contra el footer**: si no es una banda de color pegada al
+  pie, va con Seccion Medio. Con su default (20 el Texto y el Texto con imagen, 16 el Banner) el
+  contenido quedaba a 16-22px de la caja del footer en 25 paginas. Origen: MX, QA de spacing de
+  preprod ("que nada quede muy pegado ni muy separado").
+- **Un video o una imagen a sangre nunca va pegado al bloque de al lado**: el Video externo trae 0,
+  y despues de un hero o antes de una imagen Full Width quedaba a 0-16px. Va con Seccion Medio; y un
+  banner que sigue a una imagen a sangre, tambien. Origen: MX, Longevidad, Nutricion reforzada e
+  Innovacion.
+- **Como se mide**: el aire entre el CONTENIDO visible de dos bloques (texto, imagen, fondo pintado),
+  no entre sus cajas. Lo normal en desktop es 40-110px; menos de 24 es pegado y mas de 130 es un
+  hueco. Las excepciones que se dejan: el titulo de una seccion contra su contenido (20-32 a
+  proposito), las bandas de color pegadas al footer (0) y los Block de F5 (carrusel de productos,
+  listado) que traen su propio padding.
 - **Homes de marca: el hero va con `space_py_5` y el primer bloque despues del hero con `space_py_11`**,
   como el modelo de F5 (/proplan, armado desde el Figma). Queda 100px de aire despues del hero y
   112 hasta el bloque siguiente en desktop; el resto con los defaults (92 / 60 / 60). En mobile
@@ -636,6 +656,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Dos Texto con imagen seguidos se alternan**: si uno tiene la imagen a la izquierda, el siguiente
   la lleva a la derecha. Origen: MX, Resultados visibles en 28 dias ("hay 2 text + images hacia el
   final y estan del mismo lado, siempre hay que alternar").
+  Vale para TODA fila de imagen al costado de texto, no solo para el componente: una fila asi se
+  arma con **Texto con imagen** (`c_sideimagetext`) y la posicion alternando, nunca con un layout de
+  columnas con imagen + texto en cada columna (dos bloques en una columna fluyen en la grilla y
+  quedan todas las filas con la imagen del mismo lado). Despues de subir se confirma en el HTML:
+  cada fila tiene que decir `image-left` o `image-right`; una sin clase quedo en `_none` (el Classy
+  no se guardo) y se ve a la izquierda. Origen: MX, Purina Cuida y Alergenos del gato ("los text +
+  images no alternan de imagen izquierda a derecha, eso no puede ocurrir en ninguna pagina").
 - **Pestañas sobre una marca de fondo oscuro o de color**: el Text Color de Classy del Tabs pinta las
   pestañas NO seleccionadas (sin cargar caen a #1f1f1f, que no se lee sobre el turquesa de Purina One
   ni el verde de Dog Chow). Va en Primary White. Origen: MX, Por que cambiar a Purina One ("hay poco
@@ -718,6 +745,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   newsletter de Combinaciones de proteinas).
 
 ## CTAs y links
+- **La negrita no lleva espacio adentro del marcador**: `**texto **` no cierra en markdown, y el
+  runner lo escapa (`\*\*`) para que no rompa el resto, asi que los asteriscos salen a la vista.
+  Se escribe `**texto**` y el espacio va afuera. Origen: MX, Aviso de privacidad.
+- **Un link a una pagina del sitio usa la ruta NUEVA**: Contacto es `/contacto` (no
+  `/conoce-purina/contacto`). Un link a una ruta que no existe se ve igual que uno bueno hasta que
+  alguien lo toca: despues de subir se revisan todos los links internos (que respondan 200).
 
 - **Los botones no toman el color de la marca: en el CMS son rojos (Default)** tambien en Pro Plan y
   Dog Chow (medido en content MX). Style Button solo ofrece Outline, Secondary (negro) y Text, que sobre

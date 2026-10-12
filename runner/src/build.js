@@ -156,11 +156,18 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
   // bloque del mismo tipo nunca cae encima de uno que ya tenia contenido.
   if (agregar) ctx.precreadas.set(root.dsel, [])
 
+  // ADENTRO de un contenedor que ya existe (`page.dentroDe`, solo agregando): los bloques van al
+  // final de UNA ranura de ese bloque y no al final de la pagina. Es como se suman slides al
+  // Banner Wrapper de una home que armo otro: lo que ya tenia la ranura no se toca.
+  const destino = agregar && manifest.page.dentroDe ? await abrirContenedor(ctx, manifest.page.dentroDe) : root
+  // Las filas que ya tenia la ranura tambien llegan PLEGADAS y se verian vacias: nunca se reusan.
+  if (destino !== root) ctx.precreadas.set(destino.dsel, [])
+
   onStep('Armando la estructura…')
   let n = 0
   for (const block of manifest.blocks) {
     n += 1
-    await addBlock(ctx, block, `${n}`, root)
+    await addBlock(ctx, block, `${n}`, destino)
   }
 
   // Paragraphs CIERRA las filas ya agregadas cada vez que se agrega otra: en vez del
@@ -423,6 +430,41 @@ async function addBlock(ctx, block, num, holder) {
         },
       })
     }
+  }
+}
+
+// Abre la fila `fila` (1 = el primer bloque de la pagina) y devuelve la lista de su ranura
+// `slot`, lista para `addBlock`. Frena si esa fila no es del tipo esperado: agregar adentro
+// del bloque equivocado mezclaria contenido en una seccion que no es.
+async function abrirContenedor(ctx, { fila, tipo, slot = 0 }) {
+  const { mapping, page, onStep, esperaSubform, root } = ctx
+  const def = mapping.paragraphs.types[tipo]
+  const s = def?.children?.slots?.[slot]
+  if (!s) throw new Error(`dentroDe: "${tipo}" no tiene la ranura ${slot} en el mapping`)
+  const delta = Number(fila) - 1
+  const dsel = resolveSelector(root.dsel, { delta })
+  const padre = { base: resolveSelector(root.base, { delta }), dsel, dselw: widgetDsel(dsel), npath: namePath(dsel) }
+  const row = page.locator(rowSelector(dsel)).first()
+  if (!(await row.count())) throw new Error(`dentroDe: la pagina no tiene la fila ${fila}`)
+  const { bundle, titulo } = await row.evaluate(mirarFila)
+  const quiere = enGuiones(def.value || tipo)
+  if (bundle ? bundle !== quiere : titulo !== def.label) {
+    throw new Error(`dentroDe: la fila ${fila} es "${bundle || titulo || '?'}" y no "${quiere}". No se agrega nada.`)
+  }
+  const subform = page.locator(`[data-drupal-selector="${dsel}-subform"]`)
+  if (!(await subform.count())) {
+    const editar = page.locator(`input[name="${padre.npath}_edit"], button[name="${padre.npath}_edit"]`).first()
+    if (!(await editar.count())) throw new Error(`dentroDe: no encontre el boton para abrir la fila ${fila}`)
+    await editar.click()
+    await esperarAjax(page)
+    await subform.first().waitFor({ state: 'attached', timeout: esperaSubform })
+  }
+  onStep(`Agregando adentro de la fila ${fila} (${def.label || tipo}), al final de "${s.label || slot}"`)
+  const dselHijo = resolveSelector(s.dsel, padre)
+  return {
+    dsel: dselHijo,
+    base: resolveSelector(s.base, padre),
+    add: { enMedio: EN_MEDIO(fieldWrapper(dselHijo)), enMedioAbre: EN_MEDIO_GENERICO(fieldWrapper(dselHijo)), ...resolveIn(s.add, padre) },
   }
 }
 

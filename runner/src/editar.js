@@ -148,11 +148,15 @@ export async function editarPagina({ page, mapping, pagina, mensaje, save = fals
       const vh = { dsel: p.hijo.dsel, base: p.hijo.base, dselw: widgetDsel(p.hijo.dsel), npath: namePath(p.hijo.dsel) }
       if (!(await page.locator(rowSelector(vh.dsel)).count())) throw new Error(`${p.ref}: el bloque no tiene el item ${p.c.item}`)
       await abrirFila(page, vh, esperaSubform)
-      const bundle = await page.locator(rowSelector(vh.dsel)).first().evaluate((el) => {
+      const { bundle, titulo } = await page.locator(rowSelector(vh.dsel)).first().evaluate((el) => {
         const n = [el.closest('tr'), el, el.querySelector('[class*="paragraph-type--"]')].find((x) => x && /paragraph-type--/.test(x.className || ''))
-        return n ? /paragraph-type--([a-z0-9-]+)/.exec(n.className)[1] : null
+        return { bundle: n ? /paragraph-type--([a-z0-9-]+)/.exec(n.className)[1] : null,
+          titulo: (el.querySelector('.paragraph-type-title')?.textContent || '').trim() }
       })
-      const [tipoH, defH] = tipoDelBundle(mapping, bundle)
+      // Los hijos del Banner Wrapper no traen la clase con el bundle: lo unico que dice el
+      // tipo es la etiqueta de la cabecera ("Banner"), igual que al armar (ver mirarFila).
+      const [tipoH, defH] = bundle ? tipoDelBundle(mapping, bundle)
+        : (Object.entries(mapping.paragraphs.types).find(([, d]) => titulo && d.label === titulo) || [null, null])
       f = defH?.fields?.[p.c.campo]
       if (!f) throw new Error(`${p.ref}: el item ${p.c.item} (${tipoH || bundle}) no tiene el campo "${p.c.campo}"`)
       vars = vh

@@ -263,7 +263,8 @@ values ('MX', '[
       },
       {
         "label": "Yo Reciclo",
-        "url": "/purina-cuida/por-el-planeta/reciclando-con-purina"
+        "url": "/purina-cuida/por-el-planeta/reciclando-con-purina",
+        "icon": "language"
       }
     ],
     "promos": [
