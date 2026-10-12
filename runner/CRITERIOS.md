@@ -371,9 +371,9 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   footer.
 - **Un megamenu de CAJAS siempre lleva el link final** (el de flecha, clase `last`). El CSS del sitio
   arma las cajas en una grilla de 2 filas que se llena por columna, y la fila de abajo la ocupa ese
-  link: sin el, las cajas caen una debajo de la otra. Si el menu ya lista todo, el link no dice "Ver
-  todas" sino que lleva a la pagina del tema (Marcas: "Conoce nuestras marcas"). Origen: MX, Marcas
-  quedo con Para Gatos y Para Perros apilados al sacar "Ver todas".
+  link: sin el, las cajas caen una debajo de la otra. Por eso Marcas lista solo las marcas principales
+  (Gatos hasta Felix, Perros hasta Beneful) y deja "Ver todas" abajo. Origen: MX, Marcas quedo con Para
+  Gatos y Para Perros apilados al sacar "Ver todas".
 
 ## Spacing
 

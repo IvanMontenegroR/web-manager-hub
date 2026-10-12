@@ -709,8 +709,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   porque en el set del CMS no hay ninguno de reciclaje; **"Red Purina®" paso a "Consejos y
   cuidados"** con cajas Perros / Gatos (las cuatro categorias de articulos del sitio viejo, filtradas
   por especie con `?pettype=30/18`) y "Ver todos los articulos": un nombre de programa no dice que hay
-  adentro, y ningun sitio de Purina de otro pais lo usa; **Marcas** lista todas las marcas con pagina
-  en la especie de sus productos. Las URLs son las de preprod (es lo que quedo cargado ahi); las que
+  adentro, y ningun sitio de Purina de otro pais lo usa; **Marcas** lista las que eligio el Expert
+  (Gatos hasta Felix, Perros hasta Beneful) y el resto queda en "Ver todas". Las URLs son las de preprod (es lo que quedo cargado ahi); las que
   van vacias no tienen pagina todavia. El **footer** (`SiteFooter.jsx`) repite el menu en un nivel y
   abajo lleva la fila legal como el sitio viejo (Terminos, Aviso de privacidad, Cookies); lo que no
   tiene pagina no va. El export va en su PROPIO Excel (`src/lib/exportMenu.js`): el

@@ -100,25 +100,22 @@ export const DEFAULT_MENU = [
   {
     label: 'Marcas',
     layout: 'boxes',
-    // Todas las marcas que tienen pagina, en la especie de sus productos (Excellent,
-    // Purina One y Dentalife tienen productos para las dos).
+    // Las marcas que eligio el Websites Expert (Gatos hasta Felix, Perros hasta Beneful, en
+    // el orden de content); el resto se encuentra en "Ver todas".
     groups: [
       { title: 'Para Gatos', icon: 'cat', links: [
-        L('Pro Plan®', null, '/proplan'), L('Felix®', null, '/felix'), L('Cat Chow®', null, '/catchow'),
-        L('Fancy Feast®', null, '/fancy-feast'), L('Purina® One®', null, '/purina-one'), L('Gatina®', null, '/gatina'),
-        L('Excellent®', null, '/excellent'), L('Dentalife®', null, '/dentalife'),
+        L('Pro Plan®', null, '/proplan'), L('Cat Chow®', null, '/catchow'), L('Fancy Feast®', null, '/fancy-feast'),
+        L('Purina® One®', null, '/purina-one'), L('Felix®', null, '/felix'),
       ] },
       { title: 'Para Perros', icon: 'dog', links: [
-        L('Pro Plan®', null, '/proplan'), L('Dog Chow®', null, '/dogchow'), L('Beneful®', null, '/beneful'),
-        L('Excellent®', null, '/excellent'), L('Purina® One®', null, '/purina-one'), L('Campeón®', null, '/campeon'),
-        L('Dentalife®', null, '/dentalife'),
+        L('Pro Plan®', null, '/proplan'), L('Dog Chow®', null, '/dogchow'), L('Purina® One®', null, '/purina-one'),
+        L('Excellent®', null, '/excellent'), L('Beneful®', null, '/beneful'),
       ] },
     ],
     // El link final NO es opcional en un menu de cajas: el sitio arma las cajas en una
     // grilla de 2 filas que se llena por COLUMNA, y la fila de abajo la ocupa este link.
-    // Sin el, las dos cajas caen una debajo de la otra. Como el menu ya lista todas las
-    // marcas, no dice "Ver todas" sino que lleva a la pagina de marcas.
-    more: { label: 'Conoce nuestras marcas', url: '/nuestras-marcas' },
+    // Sin el, las dos cajas caen una debajo de la otra.
+    more: { label: 'Ver todas', url: '/nuestras-marcas' },
     promos: P(EXPERTO('Recibe asesoría personalizada y encuentra el alimento adecuado para tu mascota.'), CLUB()),
   },
   {

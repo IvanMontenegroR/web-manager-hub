@@ -101,10 +101,6 @@ values ('MX', '[
             "url": "/proplan"
           },
           {
-            "label": "Felix®",
-            "url": "/felix"
-          },
-          {
             "label": "Cat Chow®",
             "url": "/catchow"
           },
@@ -117,16 +113,8 @@ values ('MX', '[
             "url": "/purina-one"
           },
           {
-            "label": "Gatina®",
-            "url": "/gatina"
-          },
-          {
-            "label": "Excellent®",
-            "url": "/excellent"
-          },
-          {
-            "label": "Dentalife®",
-            "url": "/dentalife"
+            "label": "Felix®",
+            "url": "/felix"
           }
         ]
       },
@@ -143,30 +131,22 @@ values ('MX', '[
             "url": "/dogchow"
           },
           {
-            "label": "Beneful®",
-            "url": "/beneful"
+            "label": "Purina® One®",
+            "url": "/purina-one"
           },
           {
             "label": "Excellent®",
             "url": "/excellent"
           },
           {
-            "label": "Purina® One®",
-            "url": "/purina-one"
-          },
-          {
-            "label": "Campeón®",
-            "url": "/campeon"
-          },
-          {
-            "label": "Dentalife®",
-            "url": "/dentalife"
+            "label": "Beneful®",
+            "url": "/beneful"
           }
         ]
       }
     ],
     "more": {
-      "label": "Conoce nuestras marcas",
+      "label": "Ver todas",
       "url": "/nuestras-marcas"
     },
     "promos": [
