@@ -192,6 +192,14 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Secondary Hero solo para las fotos que no dicen nada sin texto. El mobile del solo-imagen es
   vertical 2:3: se sube la pieza mobile original, no el recorte cuadrado del Secondary Hero.
   Origen: MX, banners de la home vieja en el carrusel de la home de preprod.
+- **Pieza con espacio libre pensado para texto (el sitio viejo le montaba el copy en HTML)**: el copy
+  se COMPONE en la imagen, desktop y mobile, y el banner sigue solo-imagen. El texto del banner del
+  CMS es siempre blanco y estas piezas son claras: no hay forma de cargarlo como texto. Se compone
+  con la tipografia del sitio (Antenna Purina, la del tema), texto oscuro en el hueco donde lo ponia
+  el sitio viejo, y el boton como pildora roja del sitio (el link es el banner entero). El alt lleva
+  el texto que quedo en la pieza. Si la pieza ya trae su mensaje (Adopta) no se le agrega nada, solo
+  el link. Nunca se genera la pieza con IA: es texto real sobre la imagen original. Origen: MX,
+  Reciclaje, Juntos es mejor y Ruta Beneful en la home.
 
 - **Hero de una home de marca sin su asset especifico (el video de la marca, el key visual de la
   campaña): se pone el PLACEHOLDER del Brand Hero y se marca como pendiente.** No se lo reemplaza con
