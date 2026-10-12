@@ -784,11 +784,24 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un boton o link sin destino conocido va con `#` y se anota como pendiente** (pagina, bloque,
   etiqueta), no frena la subida. El `#` es la marca buscable para completarlo despues con `aplicar`.
   Origen: MX, subida a content (botones de Adopta).
-- **Todo carrusel de productos lleva su "Ver todos" con destino** (el listado de la marca; Campeón,
-  que no tiene, al listado general). Sin URL el boton no lleva a ningun lado.
+- **Todo carrusel de productos lleva su "Ver todos" con destino**: el listado de LA marca
+  (`/<marca>/productos`), nunca el general `/productos`, que mezcla todas. Hoy todas las marcas MX
+  tienen el suyo. Sin URL el boton no lleva a ningun lado.
 - **En un carrusel donde todas las cards llevan link, la que no lo tiene y tiene tema con pagina
   propia se linkea.** Cards que en el sitio viejo iban todas a la misma pagina (porque no existian las
   otras) van cada una a su tema.
+- **Cards de categoria de una home de marca (el primer carrusel despues del hero): cada card a SU
+  destino, nunca varias al mismo listado.** Que el link responda no alcanza: "Gatitos" y "Adultos" al
+  mismo `/catchow/productos` llevan a lo mismo. Orden de preferencia: (1) la pagina propia del tema
+  (`/proplan/perros`, `/purina-one/productos/gatos`, `/felix/alimento-seco`); (2) el listado de la
+  marca YA FILTRADO, porque los filtros del listado son por URL y Drupal acepta la query en el link:
+  `?field_product_life_stage[54]=54` (Gatitos), `[22]` Adulto, `[6]` Cachorro, `[1]` Adultos mayores;
+  `?field_product_food_type[8]=8` Seco, `[4]` Humedo, `[26]` Snacks, `[150]` Latas (los ids salen del
+  formulario de filtros de cada listado; no todas las marcas tienen todas las opciones); (3) el listado
+  de la marca sin filtro, y se avisa al mercado. Si la card es un concepto que no tiene pagina
+  ("Necesidades especiales"), se cambia por lo que si la tiene, cuidando que la imagen siga
+  correspondiendo (en Pro Plan la de perro paso a "Perros" y la de gato a "Gatos"). Cada filtro se
+  prueba despues de guardar: el total del listado tiene que bajar. Origen: MX, homes de marca.
 - **Paginas gemelas (gatos/perros, FAQ de dos marcas) quedan iguales**: mismo icono, misma etiqueta,
   mismo destino para lo mismo.
 
