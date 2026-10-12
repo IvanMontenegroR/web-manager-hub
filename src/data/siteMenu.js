@@ -151,7 +151,7 @@ export const DEFAULT_MENU = [
       L('Adopta una mascota', 'adocao', '/adopta'), L('Contacta a un experto', 'chat', 'https://wa.me/+525549637160'),
       L('Conoce nuestro programa de Breeders', 'genetics'),
       L('Encuentra dónde dejar a tu mascota', 'hotel'),
-      L('Dónde comprar', 'storefront', '/donde-comprar'), L('Yo Reciclo'),
+      L('Dónde comprar', 'storefront', '/donde-comprar'), L('Yo Reciclo', null, '/purina-cuida/por-el-planeta/reciclando-con-purina'),
     ],
     promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
