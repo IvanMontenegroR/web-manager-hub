@@ -14,7 +14,7 @@ const COLS = [
   { title: 'Marcas', links: ['Gatos', 'Perros'] },
   { title: 'Consejos y cuidados', links: ['Nutrición', 'Cuidado y bienestar', 'Cambios en mi mascota', 'Entrenamiento', 'Todos los artículos'] },
   { title: 'Servicios', links: ['Adopción', 'Vetline', 'Yo Reciclo'] },
-  { title: 'Sobre Purina®', links: ['Nosotros', 'Aliados', 'Profesionales', 'Contacto', 'Nuestra historia', 'Innovación', 'Purina® Cares'] },
+  { title: 'Sobre Purina®', links: ['Nosotros', 'Contacto', 'Nuestra historia', 'Innovación', 'Purina® Cares'] },
 ]
 const LEGAL = ['Términos y condiciones', 'Aviso de privacidad', 'Política de cookies']
 

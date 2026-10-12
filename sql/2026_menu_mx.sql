@@ -165,10 +165,6 @@ values ('MX', '[
         ]
       }
     ],
-    "more": {
-      "label": "Ver todas",
-      "url": "/nuestras-marcas"
-    },
     "promos": [
       {
         "title": "Pregunta a un experto",
@@ -316,19 +312,9 @@ values ('MX', '[
         "icon": "newsmode"
       },
       {
-        "label": "Aliados",
-        "url": "/aliados",
-        "icon": "handshake"
-      },
-      {
         "label": "Preguntas frecuentes",
         "url": "",
         "icon": "help"
-      },
-      {
-        "label": "Profesionales",
-        "url": "/profesionales",
-        "icon": "stethoscope"
       },
       {
         "label": "Contacto",

@@ -114,7 +114,7 @@ export const DEFAULT_MENU = [
         L('Dentalife®', null, '/dentalife'),
       ] },
     ],
-    more: { label: 'Ver todas', url: '/nuestras-marcas' },
+    // Sin "Ver todas": el menu ya lista todas las marcas.
     promos: P(EXPERTO('Recibe asesoría personalizada y encuentra el alimento adecuado para tu mascota.'), CLUB()),
   },
   {
@@ -156,12 +156,13 @@ export const DEFAULT_MENU = [
     promos: P(EXPERTO('Recibe asesoría personalizada y aprende más de tu mascota.'), CLUB()),
   },
   {
+    // Sin Aliados ni Profesionales: no existen en el sitio viejo (en preprod son paginas de
+    // muestra de F5, con socios de EE.UU. en ingles).
     label: 'Conoce Purina®',
     layout: 'links',
     links: [
       L('Nuestra historia', 'history', '/conoce-purina/historia'), L('Prensa', 'newsmode'),
-      L('Aliados', 'handshake', '/aliados'), L('Preguntas frecuentes', 'help'),
-      L('Profesionales', 'stethoscope', '/profesionales'), L('Contacto', 'mail', '/contacto'),
+      L('Preguntas frecuentes', 'help'), L('Contacto', 'mail', '/contacto'),
       L('Club Purina®', 'workspace_premium'),
     ],
     // Sin tarjetas: la matriz dice "Sin tarjeta" en las dos.
