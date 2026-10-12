@@ -362,6 +362,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   abajo (una franja de color tiene que ir pegada, ver Spacing). Se mira en la pagina publicada, no en el
   builder. Es parte de toda verificacion, no un paso aparte. Origen: MX, pedido del Websites Expert al
   revisar preprod.
+- **Rehacer una pagina (borrar el nodo y volver a crearla) borra los items de menu que la linkean.**
+  Drupal guarda el link de menu contra el NODO, no contra la ruta, y lo elimina con el nodo. Despues
+  de rehacerla se vuelven a crear esos items (menu principal y footer) y se borra la cache. Origen: MX,
+  "Yo Reciclo" desaparecio al rehacer /purina-cuida/por-el-planeta/reciclando-con-purina.
+- **El footer de preprod (bloque Footer Main de F5) no se actualiza solo** al cambiar sus menus: queda
+  cacheado y hay que vaciar todas las caches (Configuracion > Rendimiento). Origen: MX, revision del
+  footer.
 
 ## Spacing
 
