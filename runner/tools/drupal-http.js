@@ -17,6 +17,8 @@ export const SITIOS = {
   // (HTTP basic) delante: sale de RUNNER_SHIELD=usuario:clave, nunca del codigo.
   'content-mx': { base: 'https://content-ef5-purina-latam-mx.pantheonsite.io', env: 'CONTENT', mkt: 'MX', escribe: true },
   'preprod-mx': { base: 'https://preprod-dig0049395-petcare-purina-mexico.pantheonsite.io', env: 'PREPROD', cred: 'CONTENT', mkt: 'MX', escribe: true, shield: true },
+  // Brasil tiene su propio usuario (DRUPAL_MCP_USER_PREPROD_BR / DRUPAL_MCP_PASS_PREPROD_BR).
+  'preprod-br': { base: 'https://preprod-dig0049498-petcare-purina-brazil.pantheonsite.io', env: 'PREPROD', mkt: 'BR', escribe: true, shield: true },
 }
 
 /** El header del shield (HTTP basic) de un sitio que lo tiene, o nada. */
@@ -27,7 +29,7 @@ export function shieldHeader(sitio) {
   return { authorization: 'Basic ' + Buffer.from(s).toString('base64') }
 }
 
-export const USER_AGENT = 'migration-mx'
+export const USER_AGENT = process.env.RUNNER_UA || 'migration-mx'
 
 export class ErrorDrupal extends Error {}
 
