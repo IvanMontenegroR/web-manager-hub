@@ -201,6 +201,20 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   el link. Nunca se genera la pieza con IA: es texto real sobre la imagen original. Origen: MX,
   Reciclaje, Juntos es mejor y Ruta Beneful en la home.
 
+- **Nunca dos bloques de imagen seguidos** (el hero con su foto y despues una pieza, una pieza y
+  despues un video, dos piezas con texto horneado): se leen como dos banners iguales uno tras otro.
+  La pieza se muda a donde corte dos secciones de texto (en Reciclando, el "2.6 toneladas" paso al
+  final, como cierre de impacto despues de explicar como se recicla). Se audita en el hub:
+  top-level, un bloque visual (Imagen con foto, Banner, Banner Wrapper, Video) pegado a una Imagen o
+  Banner SIN texto. Origen: MX, Reciclando con Purina ("inmediatamente luego del hero tenes un
+  banner de las mismas proporciones").
+- **Una pieza con el texto horneado que explica algo (pasos, que se recibe) se TRADUCE a nuestros
+  componentes**: el texto pasa a texto real y las ilustraciones se recortan de la pieza original
+  (sin IA). "Recibimos empaques..." -> Texto con imagen (el recorte de los empaques); "¿Como se
+  recicla?" -> titulo + Card Grid Simple con los tres circulos del paso a paso montados sobre el
+  verde de las cards del Paso 1, para que las dos secciones sean de la misma familia. Asi el texto
+  se lee en mobile, lo indexa el buscador y se puede editar. Origen: MX, Reciclando con Purina.
+
 - **Hero de una home de marca sin su asset especifico (el video de la marca, el key visual de la
   campaña): se pone el PLACEHOLDER del Brand Hero y se marca como pendiente.** No se lo reemplaza con
   otra foto: el hero es la pieza de la marca y una foto cualquiera ahi parece una decision tomada. Es la
@@ -320,6 +334,30 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Si el usuario ya decidio un hero, no se revierte por una regla general nueva.** Pro Plan Gatos y
   Perros quedan como Imagen con el key visual entero (ronda 4, confirmado de nuevo al revisar los
   colores de marca).
+
+## Jerarquia de titulos
+
+- **Un titulo de menor nivel nunca se dibuja mas grande que el de su seccion.** Los tamaños los
+  pone el componente, no el tag: el titulo del Texto es SIEMPRE 32px y su subtitulo 24 (no tiene
+  Title Size); la Imagen dibuja 40 sin Title Size y 20 con Small (`fs-headline-sm`); el titulo de
+  un Card Grid 40 sin Title Size (Medium = 24); el de las cards Simple 20; el del Banner 48 fijo.
+  Entonces: un "Paso 2" que cuelga de un H2 va como SUBTITULO de un Texto (24, igual que el Paso
+  1), y los titulos de las columnas de abajo en h4 con Small. Se audita en preprod midiendo el
+  font-size de cada h1-h6 contra el ultimo titulo de nivel menor. Origen: MX, Reciclando ("el
+  titulo es un h2 pero los h3 de cada card son mas grandes, no tiene sentido jerarquico").
+- **Limite conocido: el Banner dibuja su titulo a 48px y el H1 de una Imagen llega a 40.** En las
+  paginas con hero de Imagen y banners de cruce abajo (/proplan/perros, /proplan/gatos, Nutricion
+  Reforzada) el banner queda mas grande que el H1. No se arregla desde el contenido: o F5 suma
+  Title Size al Banner, o el hero pasa a Banner. Tampoco las pestañas (su etiqueta es un h2 de
+  24px) ni el bloque de servicios de la home (h2 de 16px, de F5).
+
+## Imagen en columnas
+
+- **En una columna la Imagen va con Image position = Default: la imagen ARRIBA y el texto debajo**
+  (`ln-image` sin modificador, medido en /content-image de content). `image_bottom` pone el texto
+  arriba y la foto debajo, que en una columna se lee al reves de una card. Origen: MX, Reciclando
+  ("las imagenes debajo del texto no quedan bien, debe ser al reves"); aplicado tambien en Adopta
+  lo que debes saber y Dog Chow preguntas frecuentes.
 
 ## Textos
 

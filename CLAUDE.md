@@ -596,8 +596,10 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   y el editor ya sabe subir el archivo). Suma
   Title Size / SubTitle Size y un Classy propio con Image position e Image Style. El **Image position** es
   el que decide el LAYOUT y la medida de la imagen (`specKey`): hoy estan dibujados `image_bottom` (texto
-  arriba, imagen abajo) e `image_background_box` (la card frosted sobre la imagen); los otros tres caen al
-  generico y no muestran medida, porque no sabemos como se ven. Todo lo visual sale de Classy — `content_text_styles`
+  arriba, imagen abajo), **vacio = Default (imagen ARRIBA, texto debajo: el layout de una card en una
+  columna)** e `image_background_box` (la card frosted sobre la imagen); los otros tres caen al
+  generico y no muestran medida, porque no sabemos como se ven. Con Title Size Small el titulo se dibuja
+  como subnivel (`hClass` -> `.cp-h3`). Todo lo visual sale de Classy — `content_text_styles`
   (una o dos columnas), `text_align`, `background_color`/`text_color` (tokens) y `style_button` con las
   CUATRO opciones reales (vacio = Default el rojo, mas Outline / Secondary / Text).
   El **Video externo** (`c_externalvideo`) lleva el link y una **portada** (el "Video thumb" del CMS,

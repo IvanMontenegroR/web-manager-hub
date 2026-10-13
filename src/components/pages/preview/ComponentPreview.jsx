@@ -112,7 +112,9 @@ function Img({ src, h = 160, aspect, natural, dim, className = '' }) {
 // no hay hero: una pagina legal, un hero de texto al lado de la foto). En el sitio un h1 se
 // ve como h1; con la clase de un h2 el titulo de la pagina quedaba mas chico que las
 // secciones y las cards de abajo.
-const hClass = (c) => (c.title_tag === 'h1' ? 'cp-hpage' : 'cp-h2')
+// Title Size "Small" (fs-headline-sm) es el tamano de un titulo de card: un bloque que lo
+// carga es un SUBnivel de la seccion y no puede dibujarse como un h2.
+const hClass = (c) => (c.title_tag === 'h1' ? 'cp-hpage' : c.title_size === 'fs-headline-sm' ? 'cp-h3' : 'cp-h2')
 
 // ID de un video de YouTube a partir de cualquiera de sus formas de link
 // (watch?v=, youtu.be/, /embed/, /shorts/). null si no es de YouTube.
@@ -448,14 +450,18 @@ const RENDERERS = {
   //     (blanco .25 + blur) apoyada abajo a la izquierda. Es el layout que antes se
   //     pedia con el Banner Type "Full Image + Box Content", que ya no existe: el mismo
   //     componente Imagen lo resuelve con este Image position.
-  //   - el resto (vacio incluido) -> la caja de texto va ENCIMA de la imagen, que es
-  //     como venia. Los otros tres valores (`image_center`, `image_fixed_background`,
-  //     `image_background_full`) todavia no estan dibujados: sin saber como se ven,
-  //     mentir el mockup seria peor que dejar el generico.
+  //   - vacio (Default en Classy) -> la imagen ARRIBA y el texto debajo: es lo que dibuja
+  //     el sitio (`ln-image` sin modificador, medido en /content-image de content), y es
+  //     el layout de una card con imagen en una columna.
+  //   - el resto -> la caja de texto va ENCIMA de la imagen, que es como venia. Los otros
+  //     tres valores (`image_center`, `image_fixed_background`, `image_background_full`)
+  //     todavia no estan dibujados: sin saber como se ven, mentir el mockup seria peor
+  //     que dejar el generico.
   // `text_align` alinea el texto, igual que en el bloque de Texto.
   content_image: (c, ctx) => {
     const ctas = ctaList(c)
     const bottom = c.image_position === 'image_bottom'
+    const top = !c.image_position
     const bgBox = c.image_position === 'image_background_box'
     const al = /center/.test(c.text_align || '') ? 'center'
       : /right/.test(c.text_align || '') ? 'right' : 'left'
@@ -492,7 +498,7 @@ const RENDERERS = {
       )
     }
     const txt = hasText && (
-      <div className={bottom ? 'cp-cimg-txt' : 'cp-cimg-box'}>
+      <div className={bottom || top ? 'cp-cimg-txt' : 'cp-cimg-box'}>
         {c.title && <div className={hClass(c)}>{c.title}</div>}
         {c.subtitle && <div className="cp-h3">{c.subtitle}</div>}
         {c.body && <Rich className="cp-p">{c.body}</Rich>}
@@ -506,7 +512,7 @@ const RENDERERS = {
     // cortarse contra el gutter es la imagen.
     const full = c.image_style === 'full_width_content_image' && !!c.image
     return (
-      <div className={`cp-block cp-cimg cp-al-${al}${bottom ? ' cp-cimg--bottom' : ''}${full ? ' cp-cimg--full cp-bleed' : ''}`}>
+      <div className={`cp-block cp-cimg cp-al-${al}${bottom || top ? ' cp-cimg--bottom' : ''}${full ? ' cp-cimg--full cp-bleed' : ''}`}>
         {bottom && txt}
         <Img src={c.image} h={340} natural />
         {!bottom && txt}
