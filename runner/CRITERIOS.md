@@ -539,6 +539,20 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   quedan cargados pero no se ven, asi que ningun padre va sin link (toma el de su primer hijo).
   Origen: MX, homes de marca (Dog Chow tenia el menu de Brasil en portugues y Felix, Beneful y
   Gatina mostraban el de Dentalife).
+- **Cada item del menu de marca tiene que llevar a una pagina que TENEMOS; si el item de la matriz no
+  la tiene, manda el formato del sitio viejo (que ya esta validado).** El orden: (1) el texto de la
+  matriz con su pagina; (2) si la matriz propone un concepto sin pagina ("Etapa de vida", "Necesidades
+  especiales", "¿Por que Fancy Feast?"), el item del sitio viejo que si la tiene (Pro Plan: Perros,
+  Gatos, LiveClear, Veterinary Diets); (3) si la matriz vino vacia (Cat Chow, Beneful, Campeon,
+  Dentalife, Gatina), el menu del sitio viejo. El primer item es la home de la marca (el logo de la
+  barra no es link). "Comprometidos con el planeta" va a `/purina-cuida`: las paginas de planeta por
+  marca no se migran. Un item que repite la home ("Añade mas a su vida" de Dog Chow) o que no tiene
+  productos atras (Snacks de Felix) no va, y se le avisa al mercado. Los links a productos van al
+  listado de LA marca, filtrado si hace falta (ver Cards). Despues de cargar: todos los links responden
+  200 y la barra ENTRA a 1024px; si no, se acortan los textos (Purina One: "Nutricion superior
+  respaldada por expertos" -> "¿Por que cambiar a One®?", como el sitio viejo). Origen: MX, revision
+  de menus de marca (Dentalife Productos daba 404, Purina One linkeaba a /purina-one-cats y Dog Chow
+  FAQ a la pagina de prueba de F5).
 - **El fondo de la barra de marca es el del sitio viejo.** Se elige en el termino de la marca
   (`field_menu_background`), que solo acepta negro, blanco o uno de los 4 Brand Color: si el color del
   sitio viejo no esta entre ellos, se carga en un Brand Color que nadie use (Excellent: Brand 04 =
