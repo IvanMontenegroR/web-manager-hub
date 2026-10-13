@@ -3041,5 +3041,9 @@
       "Campeón® Adultos minis y pequeños (752)",
       "Campeón® Cachorros todos los tamaños (792)"
     ]
-  }
+  },
+  "marcasSinTermino": [
+    "Snacks"
+  ],
+  "_marcasSinTermino": "Marcas del hub que no existen como termino Brand en el CMS: la pagina se arma sin marca (tema Purina) en vez de frenar. Snacks agrupa petiscos de varias marcas; en MX esas paginas ya van sin marca."
 }

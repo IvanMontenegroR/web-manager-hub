@@ -128,7 +128,12 @@ async function armarPagina({ page, mapping, manifest, save, onStep, esperaSubfor
     // una pagina de Pro Plan en blanco y negro sin que nadie lo note.
     if (mapping.brand) {
       const sel = page.locator(mapping.brand).first()
-      const quiere = claveMarca(manifest.page.brand)
+      // Marcas del hub que en el CMS no son una marca (ej. "Snacks", que agrupa petiscos de
+      // varias): la pagina va sin marca, con el tema Purina, igual que en MX. Las declara el
+      // mapping (`marcasSinTermino`); cualquier otra marca que falte sigue frenando.
+      const sinTermino = (mapping.marcasSinTermino || []).some((m) => claveMarca(m) === claveMarca(manifest.page.brand))
+      const quiere = sinTermino ? '' : claveMarca(manifest.page.brand)
+      if (sinTermino) onStep(`Marca: "${manifest.page.brand}" no es una marca del CMS, va sin marca (tema Purina)`)
       if (quiere && await sel.count()) {
         const opciones = await sel.locator('option').evaluateAll((os) => os.map((o) => ({ value: o.value, label: o.textContent })))
         const elegida = opciones.find((o) => claveMarca(o.label) === quiere)
