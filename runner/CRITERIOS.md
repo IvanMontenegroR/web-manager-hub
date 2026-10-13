@@ -345,6 +345,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   1), y los titulos de las columnas de abajo en h4 con Small. Se audita en preprod midiendo el
   font-size de cada h1-h6 contra el ultimo titulo de nivel menor. Origen: MX, Reciclando ("el
   titulo es un h2 pero los h3 de cada card son mas grandes, no tiene sentido jerarquico").
+- **Toda home de marca lleva H1: un bloque de Texto ARRIBA del hero, alineado a la izquierda**, como
+  el resto de las paginas del sitio (el H1 arriba a la izquierda y la imagen debajo). Texto: la marca
+  y que es, "Purina® Dog Chow®: alimento para perros" (no solo el nombre: eso ya lo dice el logo de
+  la barra, y el buscador necesita el "que"). NO va en el titulo del Brand Hero: se probo y sobre
+  el video choca con lo que el propio video trae (claims, logos, empaques) y cambia en cada cuadro.
+  El H1 del Texto queda en 32px, mas chico que los 40 de la seccion de cards de abajo: es el costo
+  de no tener Title Size en el Texto, y se acepto. Origen: MX, homes de marca sin H1 (SEO).
 - **Limite conocido: el Banner dibuja su titulo a 48px y el H1 de una Imagen llega a 40.** En las
   paginas con hero de Imagen y banners de cruce abajo (/proplan/perros, /proplan/gatos, Nutricion
   Reforzada) el banner queda mas grande que el H1. No se arregla desde el contenido: o F5 suma

@@ -579,7 +579,8 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
   fijarlo en mobile, y las sugerencias). El Media va en TODOS los tipos, el Promotional incluido: ahi la
   imagen es lo unico que hay. Para varios banners rotando esta el `banner_wrapper`.
   El **Brand Hero** se dibuja como el `.brand-hero` del sitio: 2.5:1 en desktop y 2:3 en mobile, SIN
-  titulo de relleno (las homes de marca van solo con la imagen o el video), sin el oscurecido si esta
+  titulo de relleno (las homes de marca van solo con la imagen o el video; su H1 va en un bloque de
+  Texto ARRIBA del hero, ver `runner/CRITERIOS.md`), sin el oscurecido si esta
   "Remover Overlay Background", y con el **buscador** (`.ai-search--banner`: pildora de vidrio con el
   icono de IA en el Brand 01, abajo al centro) cuando esta "Show Search". El texto de ayuda sale del
   mercado de la pagina ("Escribe tus dudas aquí..." / "Escreva suas dúvidas aqui..."; por eso el
