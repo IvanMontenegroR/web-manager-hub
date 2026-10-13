@@ -56,8 +56,8 @@ export const MEDIA_POR_DEFECTO = {
   nombre: 'input[name="name[0][value]"]',
   // Gin repite Guardar en su barra pegajosa: hay DOS con el mismo name. Se aprieta el
   // que se ve (mismo problema que los botones de alta de paragraphs).
-  guardar: 'input[name="op"][value="Guardar"], input[name="op"][value="Save"], '
-    + 'button[name="op"][value="Guardar"], button[name="op"][value="Save"]',
+  guardar: 'input[name="op"][value="Guardar"], input[name="op"][value="Save"], input[name="op"][value="Salvar"], '
+    + 'button[name="op"][value="Guardar"], button[name="op"][value="Save"], button[name="op"][value="Salvar"]',
   alUsar: 'Placeholder de prueba',
   // Un media NO es contenido publicado en el sitio: es material que el editor elige desde
   // la libreria. Uno despublicado no se puede elegir, asi que la regla de "siempre

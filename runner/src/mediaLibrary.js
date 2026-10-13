@@ -369,7 +369,7 @@ async function completarPortada({ page, c, nombre, thumb, ref, onStep }) {
     const alt = await esperarVisible(tab, cfg.alt || 'input[name$="[alt]"]', 10000)
     if (alt) await alt.fill(String(thumb.alt || '').trim() || ALT_DE_RESERVA)
 
-    const guardar = await esperarVisible(tab, cfg.guardar || 'input[name="op"][value="Guardar"]', 10000)
+    const guardar = await esperarVisible(tab, cfg.guardar || 'input[name="op"][value="Guardar"], input[name="op"][value="Salvar"]', 10000)
     if (!guardar) {
       onStep('     (subi la portada pero no encontre el boton de guardar de la ficha: '
         + 'quedo SIN guardar, hay que entrar a mano)')

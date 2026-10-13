@@ -34,8 +34,8 @@ try {
   if (!(await isLoggedIn(page, mapping.site))) {
     await page.goto(mapping.site + '/user/login', { waitUntil: 'domcontentloaded' })
     if (await pasarAvisoSandbox(page)) await page.goto(mapping.site + '/user/login', { waitUntil: 'domcontentloaded' })
-    await page.fill('input[name="name"]', process.env.DRUPAL_MCP_USER_CONTENT_MX)
-    await page.fill('input[name="pass"]', process.env.DRUPAL_MCP_PASS_CONTENT_MX)
+    await page.fill('input[name="name"]', (process.env.RUNNER_LOGIN_USER || process.env.DRUPAL_MCP_USER_CONTENT_MX))
+    await page.fill('input[name="pass"]', (process.env.RUNNER_LOGIN_PASS || process.env.DRUPAL_MCP_PASS_CONTENT_MX))
     await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(() => {}), page.click('#edit-submit')])
     if (!(await isLoggedIn(page, mapping.site))) throw new Error('no se pudo iniciar sesion')
   }

@@ -109,6 +109,96 @@
           "Purina® Excellent® Adulto pollo y arroz razas medianas y grandes (1070)"
         ]
       }
+    },
+    "preprod-br": {
+      "site": "https://preprod-dig0049498-petcare-purina-brazil.pantheonsite.io",
+      "shield": true,
+      "productosMuestra": {
+        "_": [
+          "PURINA® PRO PLAN® Cuidado Excepcional Adulto Frango (5492)",
+          "DOG CHOW® Saúde Oral para Cão Adulto médios e grandes (5452)",
+          "CAT CHOW® para Gato Castrado sabor carne ao molho (5459)",
+          "ONE® Superfoods Adultos e Filhotes para todos os tamanhos sabor salmão (5444)",
+          "PURINA FANCY FEAST® Supremo Carne (5335)",
+          "Friskies® Mar de sabores é uma onda de nutrição e sabores gostosos que seu pet amará (5470)"
+        ],
+        "Pro Plan": [
+          "PURINA® PRO PLAN® Cuidado Excepcional Adulto Frango (5492)",
+          "PRO PLAN® Sache para Gato Adulto sabor salmão ao molho (5450)",
+          "PURINA® PRO PLAN® Cuidado Excepcional Adulto Grande (5517)",
+          "PURINA® PRO PLAN® Controle de Peso Minis e Pequenos (5511)",
+          "PURINA® PRO PLAN® Cuidado Urinário Adulto (5400)",
+          "PURINA® PRO PLAN® Cuidado Excepcional Adulto Mini e Pequeno (5407)",
+          "PURINA® PRO PLAN® Hipoalergênico Minis e Pequenos (5413)",
+          "PURINA® PRO PLAN® Alta Vitalidade Adultos Todos os Tamanhos (5385)"
+        ],
+        "Dog Chow": [
+          "DOG CHOW® Saúde Oral para Cão Adulto médios e grandes (5452)",
+          "Ração seca PURINA® DOG CHOW® Alta Proteína para Cães Adultos (5449)",
+          "DOG CHOW® Biscoitos para Cão Adulto médios e grandes sabor frango (5388)",
+          "Saborosos petiscos Dog Chow®  Saúde oral cães adultos (5373)",
+          "Ração seca PURINA® DOG CHOW® Multiproteína para Cães Adultos (5425)",
+          "DOG CHOW® NUTRIÇÃO REFORÇADA  ADULTO Sabor Carne em Filetes com Arroz 85g (5299)",
+          "Dog Chow Ração Papita Filhote todos os tamanhos (5252)",
+          "DOG CHOW® NUTRIÇÃO REFORÇADA ADULTO Sabor Frango em Filetes com Arroz  85g (5323)"
+        ],
+        "Cat Chow": [
+          "CAT CHOW® para Gato Castrado sabor carne ao molho (5459)",
+          "CAT CHOW® para Gato Filhote sabor frango ao molho (5456)",
+          "CAT CHOW® para Gato Adulto sabor peixe (5499)",
+          "CAT CHOW® para Gato Adulto sabor carne ao molho (5437)",
+          "Cat Chow castrados sabor frango (5422)",
+          "CAT CHOW® para Gato Castrado sabor peixe ao molho (5327)",
+          "Cat Chow carne para gato adulto (5279)",
+          "CAT CHOW® para Gato Castrado sabor peixe (5308)"
+        ],
+        "Purina One": [
+          "ONE® Superfoods Adultos e Filhotes para todos os tamanhos sabor salmão (5444)",
+          "PURINA ONE® Microbioma Equilibrado Gatos Filhotes sabor Frango (5460)",
+          "PURINA ONE® Natural Sense Cães Adultos Médios e Grandes sabor Frango e Salmão (5457)",
+          "PURINA ONE® Natural Sense Gatos Adultos Castrados sabor Frango e Salmão (5496)",
+          "PURINA ONE® Plus Sistema Indoor Gatos Adultos Castrados sabor Salmão (5480)",
+          "PURINA ONE® Natural Sense Gatos Adultos Castrados sabor Frango e Carne (5479)",
+          "ONE® Super Nutrientes para Gato Adulto sabor carne (5405)",
+          "PURINA ONE® Plus Hipoalergênico Cães Adultos Todos os Tamanhos sabor Salmão (5397)"
+        ],
+        "Fancy Feast": [
+          "PURINA FANCY FEAST® Supremo Carne (5335)",
+          "PURINA FANCY FEAST® Goulash Atum (5473)",
+          "PURINA FANCY FEAST® Supremo Bacalhau (5469)",
+          "PURINA FANCY FEAST® Demi Glace Carne (5498)",
+          "PURINA FANCY FEAST® Casserole Frango & Peru (5482)",
+          "PURINA FANCY FEAST® Demi Glace Frango (5404)",
+          "PURINA FANCY FEAST® Casserole Atum e Salmão (5374)",
+          "PURINA FANCY FEAST® Petit Filet Salmão (5292)"
+        ],
+        "Friskies": [
+          "Friskies® Mar de sabores é uma onda de nutrição e sabores gostosos que seu pet amará (5470)",
+          "Ração úmida Friskies® filhotes Carne ao molho: seu pequeno pet amará (5466)",
+          "PURINA FRISKIES® Ração Seca para Gatos Filhotes Frango e Leite (5464)",
+          "PURINA FRISKIES® Ração Seca para Gatos Adultos Mix de Carnes (5454)",
+          "PURINA FRISKIES® Ração úmida para Gatos Adultos Mix de Carne (5475)",
+          "PURINA FRISKIES® Ração úmida para Gatos Adultos Megamix (5478)",
+          "Friskies® Sachê: deliciosa e saudável fórmula sem conservantes (5508)",
+          "Ração Úmida PURINA FRISKIES® Patê Sensações para Gatos Filhotes Atum (5504)"
+        ],
+        "Dentalife": [
+          "DENTALIFE Gatos Adultos Frango (5494)",
+          "DENTALIFE Cães Adultos Pequenos Frango (5490)",
+          "DENTALIFE Cães Adultos Grandes Frango (5414)",
+          "DENTALIFE Cães Adultos Médios Frango (5307)"
+        ],
+        "Snacks": [
+          "DENTALIFE Gatos Adultos Frango (5494)",
+          "DENTALIFE Cães Adultos Pequenos Frango (5490)",
+          "Saborosos petiscos Dog Chow®  Saúde oral cães adultos (5373)",
+          "DENTALIFE Cães Adultos Grandes Frango (5414)",
+          "DENTALIFE Cães Adultos Médios Frango (5307)",
+          "Petisco Bifinho PURINA® DOGUITOS® com Frango para Cães Adultos (5276)",
+          "PURINA FRISKIES® Party Mix® Petiscos para Gatos Salmão (5502)",
+          "PURINA FRISKIES® Party Mix® Petiscos para Gatos Carne (5497)"
+        ]
+      }
     }
   },
   "nodeAdd": "/node/add/dsu_component_page",
@@ -117,7 +207,7 @@
   "brand": "select[name=\"field_brand\"]",
   "pathauto": "input[name=\"path[0][pathauto]\"]",
   "path": "input[name=\"path[0][alias]\"]",
-  "save": "input[name=\"op\"][value=\"Guardar\"]:visible",
+  "save": "input[name=\"op\"][value=\"Guardar\"]:visible, input[name=\"op\"][value=\"Salvar\"]:visible",
   "media": {
     "_": "Bundle responsive_image, NO image: es el que piden los campos de los componentes, y un medio de ese tipo lleva DOS imagenes adentro (Image Desktop e Image Mobile, las dos obligatorias). Verificado contra el HTML real de /media/add/responsive_image. El formulario cambia entero al subir: el alt y la vista previa los dibuja el AJAX. Por eso `subido`/`subidoMobile` (los hidden fids) son la señal de que cada subida termino, y los alt se buscan despues. Son DOS -— uno por imagen -— y los dos obligatorios: llenar solo el de desktop hace que Drupal rechace el formulario entero y no se guarde nada.",
     "add": "/media/add/responsive_image",
@@ -128,7 +218,7 @@
     "subidoMobile": "input[name=\"field_image_mobile[0][fids]\"]",
     "alt": "input[name$=\"[alt]\"]",
     "nombre": "input[name=\"name[0][value]\"]",
-    "guardar": "input[name=\"op\"][value=\"Guardar\"]"
+    "guardar": "input[name=\"op\"][value=\"Guardar\"], input[name=\"op\"][value=\"Salvar\"]"
   },
   "formatoTexto": {
     "_": "El FORMATO de los campos de cuerpo, para todo el sitio: se deja elegido el primero de `preferidos` que ese desplegable ofrezca. Purina Markdown va primero porque el texto del hub viaja en notacion markdown (**negrita**, [texto](link)) — con un formato HTML esos asteriscos entran literales y se ven asi en el sitio. `planos` son los formatos que toman TEXTO tal cual: ahi el cuerpo NO se envuelve en <p>, que en markdown seria basura visible. Los valores de maquina salen del HTML real del desplegable: Email HTML, Full Html, Purina Forum Markdown, Purina Markdown, Rich text.",
