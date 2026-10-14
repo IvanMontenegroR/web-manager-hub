@@ -835,6 +835,10 @@ BR y MX.
   NUNCA se lo hace mas fuerte: "ayudan a mantener una piel sana" no pasa a "para una piel sana";
   antes que eso, se saca una parte. Cada version se prueba en la caja real a 360 y 390 y se elige la
   mas completa que entra. Origen: MX, mosaicos de las homes, pedido del usuario.
+  Lo que se saca es lo SECUNDARIO: el mensaje principal (el argumento de venta, quien lo respalda) se
+  queda aunque cueste mas caracteres. Origen: BR, /proplan, card de Veterinary Diets: "Formulados por
+  cientistas, nutricionistas e médicos-veterinários para ajudar seu cão ou gato com necessidades
+  nutricionais especiais" quedo "Para ajudar seu cão ou gato..." y perdio justo quien lo formula.
 - **Despues de crear una pagina, se relee el Classy de cada bloque.** En Dog Chow el de dos Card Grid
   (tarjetas y mosaico) se perdio al guardar aunque el formulario lo mostraba puesto; se repuso con
   `aplicar`. Origen: MX, home Dog Chow.
