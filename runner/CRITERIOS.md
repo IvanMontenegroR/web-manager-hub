@@ -399,6 +399,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Origen: MX, Gran Comienzo ("el subtitulo nunca debe estar separados por breaks").
 - **Los restos en castellano o ingles se traducen al migrar**, no se dejan "tal cual, confirmar": solo se
   deja lo que es nombre de producto o de marca. Origen: BR, "Dias 1 y 2", "Purina Summer".
+- **De la interfaz del CMS se traduce SOLO lo que ve el visitante** (botones, filtros, mensajes de
+  busqueda, formularios publicos). Lo que vive solo en el admin (nombres de bloques, plugins,
+  desplegables del editor) queda sin traducir, en el idioma de origen. No es prolijidad: el tema arma
+  nombres de plantilla con la etiqueta del bloque, y una etiqueta traducida rompe el render. Origen:
+  BR, "Selected Product" traducido a "Produto selecionado" dejaba los 54 carruseles de productos de 33
+  paginas en columna ("nada que no sea front-facing necesitamos traducir").
 - **Los titulos de una pagina de linea van en tipo oracion** aunque sean nombres de linea en ingles
   ("Purina® Pro Plan® Adult"). Origen: MX, 28 titulos en las paginas de linea de Pro Plan.
 - **Un meta title del sitio viejo que es de otra pagina se corrige** con la descripcion de la misma
