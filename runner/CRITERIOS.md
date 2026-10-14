@@ -79,7 +79,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 
 - **Snacks NO es una marca**: agrupa snacks de varias (Dog Chow, Beneful, Felix, DentaLife). /snacks es
   una pagina de componentes comun, sin brand hero ni menu de marca, con un carrusel de productos por
-  especie. Origen: MX, pedido del usuario.
+  especie. Origen: MX, pedido del usuario. En el CMS tampoco hay termino Snacks: va sin marca (tema
+  Purina, `marcasSinTermino` del mapping). Origen: BR, /snacks frenaba buscando la marca.
 
 - **Home de marca sin fotos usables: layout REDUCIDO, no secciones con fotos de relleno.** Si ni el
   mercado, ni el Figma, ni el sitio viejo tienen fotos para el carrusel de cards y el mosaico (el sitio
@@ -183,6 +184,10 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   configuracion del componente en el CMS (la /historia original de preprod tenia el mismo problema):
   si la agencia le pone un estilo propio, hay que volver a medir. Origen: MX, Nuestra historia ("la
   primera imagen del timeline solamente se ve los ojos de la persona").
+- **Cada hito de la Linea de tiempo lleva TITULO.** El CMS lo pide obligatorio y, si falta, la
+  validacion del navegador frena el guardado sin ningun mensaje a la vista: parece que la pagina no
+  guarda por pesada. Si el sitio viejo no tenia titulo en ese hito, va lo que cuenta el hito en pocas
+  palabras. Origen: BR, Nossa história no guardaba.
 
 ## Heroes y banners
 - **Banners del carrusel de la home**: si la imagen ya trae el mensaje (logo de la campaña, texto en
@@ -441,6 +446,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   link: sin el, las cajas caen una debajo de la otra. Por eso Marcas lista solo las marcas principales
   (Gatos hasta Felix, Perros hasta Beneful) y deja "Ver todas" abajo. Origen: MX, Marcas quedo con Para
   Gatos y Para Perros apilados al sacar "Ver todas".
+- **Las metas (Meta title y Meta description) son las del sitio viejo.** Una vez subida la pagina se
+  cargan en sus meta tags (`field_ln_n_meta_tags[0][basic][title]` / `[description]`), tal cual las
+  tenia la pagina vieja (`url_old`; si el hub no la tiene, la misma ruta en el sitio viejo). Las
+  paginas nuevas sin equivalente quedan con las que pone el CMS. Origen: MX y BR, pedido del Websites
+  Expert.
 
 ## Spacing
 
@@ -604,7 +614,11 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   200 y la barra ENTRA a 1024px; si no, se acortan los textos (Purina One: "Nutricion superior
   respaldada por expertos" -> "¿Por que cambiar a One®?", como el sitio viejo). Origen: MX, revision
   de menus de marca (Dentalife Productos daba 404, Purina One linkeaba a /purina-one-cats y Dog Chow
-  FAQ a la pagina de prueba de F5).
+  FAQ a la pagina de prueba de F5). Cuando la barra no entra, el logo es lo primero que se aplasta
+  (Dog Chow BR, con 7 items, lo dejaba en 0px): se acortan primero los textos mas largos y no la
+  promesa ("100% Satisfação" queda entera). Asi quedo Dog Chow BR: Mais à vida | Produtos | 100%
+  Satisfação | Planeta | Dúvidas | Qualidade. Una marca sin menu propio (Friskies BR) se le crea uno
+  y se elige en su termino. Origen: BR, menus de marca.
 - **El fondo de la barra de marca es el del sitio viejo.** Se elige en el termino de la marca
   (`field_menu_background`), que solo acepta negro, blanco o uno de los 4 Brand Color: si el color del
   sitio viejo no esta entre ellos, se carga en un Brand Color que nadie use (Excellent: Brand 04 =

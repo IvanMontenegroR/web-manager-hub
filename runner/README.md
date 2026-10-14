@@ -579,6 +579,31 @@ En un entorno que sale a internet por un proxy (una sesion en la
 nube), Node lo toma con `NODE_USE_ENV_PROXY=1` y `NODE_EXTRA_CA_CERTS=<bundle>`. En tu
 maquina no hace falta.
 
+## Otro mercado: Brasil
+
+Todo lo de arriba corre igual contra el preprod de Brasil; cambian el sitio, el usuario y el
+idioma del admin.
+
+- **El sitio sale de `RUNNER_SITE`** (`preprod-br`, ver `SITIOS` en `tools/drupal-http.js`) y el
+  User-Agent de `RUNNER_UA` (`migration-br`; sin la variable sigue siendo `migration-mx`). Las
+  credenciales HTTP son `DRUPAL_MCP_USER_PREPROD_BR` / `DRUPAL_MCP_PASS_PREPROD_BR`, y el login
+  con navegador de `editar` toma `RUNNER_LOGIN_USER` / `RUNNER_LOGIN_PASS` si estan.
+- **El admin esta en portugues.** Los selectores de guardar del mapping y de los medios aceptan
+  "Salvar" ademas de "Guardar"; un boton nuevo que se busque por texto tiene que aceptar los dos.
+- **Cada sitio trae sus productos de muestra** (`sitios.<sitio>.productosMuestra` en el
+  mapping): los nid son de ESE sitio, los de MX no existen en BR.
+- **`marcasSinTermino`** (mapping): marcas del hub que no son un termino Brand del CMS (Snacks).
+  La pagina se arma sin marca, con el tema Purina, en vez de frenar.
+- **Varios workers a la vez**: cada uno con su propio perfil de navegador (`RUNNER_PROFILE`), y
+  el limite de sesiones del rol del usuario levantado en el sitio. Con el mismo perfil, dos
+  navegadores se pisan la sesion.
+- **El sitio da 502 sueltos.** Un guardado que corta a mitad del repaso de Classy deja la
+  pagina bien pero el Classy de los hijos en Default: se vuelve a correr `editar` sobre esa
+  pagina. Una lectura (`leer`) no despliega los hijos de un contenedor, asi que para auditar el
+  Classy de un hijo hay que abrir su fila.
+- **Un alias que no cambia al guardar el nodo** (Pathauto lo pisa) se cambia en el formulario
+  del alias (Configuracion > Busca e metadados > Aliases de URL), no en el nodo.
+
 ## Para la revision de compliance
 
 - **Que hace:** crea nodos nuevos en el CMS (publicados si el manifiesto lo pide, que es lo
