@@ -182,7 +182,7 @@ values ('MX', '[
           },
           {
             "label": "Cambios en mi mascota",
-            "url": "/articulos/cambios-em-mi-mascota?pettype=30"
+            "url": "/articulos/cambios-en-mi-mascota?pettype=30"
           },
           {
             "label": "Entrenamiento",
@@ -204,7 +204,7 @@ values ('MX', '[
           },
           {
             "label": "Cambios en mi mascota",
-            "url": "/articulos/cambios-em-mi-mascota?pettype=18"
+            "url": "/articulos/cambios-en-mi-mascota?pettype=18"
           },
           {
             "label": "Entrenamiento",

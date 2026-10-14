@@ -97,6 +97,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Son las medidas reales del CMS. Origen: MX, ronda 3.
 - **No se generan imagenes nuevas: se modifican y redimensionan las que ya existen.** Nada de IA
   generativa para crear contenido. Origen: MX, ronda 1.
+- **Unica excepcion: sacar el FONDO de fotos de producto y de ingredientes con un modelo local**
+  (rembg: BiRefNet para el borde, SAM con puntos para lo que BiRefNet se come, como un bowl blanco; alfa
+  final = el maximo de los dos). No se genera ni se completa nada: el pixel que queda es el de la foto. Los
+  granos o migas sueltos se sacan, no hace falta conservarlos. Origen: BR, ingredientes de NeuroCare: el
+  recorte clasico por umbral dejaba bordes sucios ("esta calidad no es aceptable") y el usuario aprobo la IA
+  solo para esto.
 - **Nunca texto sobre texto**: si la imagen trae letras metidas y el componente dibuja su titulo
   encima, hay que resolverlo (limpiar la imagen o cambiar de componente). Origen: MX, ronda 3.
 - **Una imagen que en el sitio viejo se fundia con el fondo blanco se pinta del fondo nuevo.** Las
@@ -384,6 +390,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   que venian partidas con `<br>` se unen con un espacio, poniendo el punto que falte entre una y otra.
   Vale para el subtitulo de cualquier componente, la Description del banner y la bajada de un h1.
   Origen: MX, Gran Comienzo ("el subtitulo nunca debe estar separados por breaks").
+- **Los restos en castellano o ingles se traducen al migrar**, no se dejan "tal cual, confirmar": solo se
+  deja lo que es nombre de producto o de marca. Origen: BR, "Dias 1 y 2", "Purina Summer".
+- **Los titulos de una pagina de linea van en tipo oracion** aunque sean nombres de linea en ingles
+  ("Purina® Pro Plan® Adult"). Origen: MX, 28 titulos en las paginas de linea de Pro Plan.
+- **Un meta title del sitio viejo que es de otra pagina se corrige** con la descripcion de la misma
+  pagina. Origen: MX, Pro Plan gatos sensibles tenia el de cachorros.
 - **El contenido no puede quedar solo como texto adentro de una imagen.** Una infografia con
   informacion (cifras, pasos, porcentajes) se rearma con componentes de texto: cards con icono para
   las cifras, cards numeradas para los pasos. La imagen se puede sacar. Un key visual de campaña con
@@ -451,6 +463,17 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   tenia la pagina vieja (`url_old`; si el hub no la tiene, la misma ruta en el sitio viejo). Las
   paginas nuevas sin equivalente quedan con las que pone el CMS. Origen: MX y BR, pedido del Websites
   Expert.
+- **Nada de prueba queda publicado.** Los bloques de ultimos articulos (home, /articulos, "tambien te
+  puede interesar") muestran lo ultimo publicado sin filtro, y las paginas de muestra de F5 (lorem,
+  ejemplos de componentes, castellano en BR) entran al sitemap. Antes de cerrar una ronda se buscan
+  (titulo con test/teste/prueba, autor ajeno a la migracion, idioma de otro pais, lorem) y se
+  despublican, no se borran. Origen: MX, un "Article Test" con una foto meme encabezaba "Nuestro Blog";
+  una muestra de F5 tenia un link a una herramienta interna. BR: unas 30 muestras en castellano.
+- **Despues de una ronda se chequean los links de TODAS las paginas, no solo de las tocadas**, y se
+  repite al final: otro agente puede cambiar alias en paralelo. Origen: MX, los alias de producto
+  cambiaron durante el QA.
+- **Dos nodos que pelean por el mismo alias: el que no se eligio pasa a `<ruta>-anterior`
+  despublicado**, aunque lo hayamos armado nosotros. Origen: BR, /produtos (nodos 75 y 5572).
 
 ## Spacing
 
@@ -492,6 +515,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   Medio, la linea de tiempo en 20/20 y el Card Grid de cierre en **Seccion Extra Grande** queda
   69 / 123 / 85 / 120. Con los defaults del Card Grid las cards quedaban a 60 del footer, pegadas.
   Origen: MX, Nuestra historia ("los margenes siguen viendose raros" — espaciado entre componentes).
+  **Si la Linea de tiempo es el ULTIMO bloque, va con Seccion Medio**: el `space_py_5` supone un bloque
+  abajo que ponga el aire; sin el, las flechas quedaban a 18px del footer. Origen: BR, /conhecer-purina/historia.
+- **Un Card Grid SIN titulo debajo de un hero lleva las flechas abajo a la derecha
+  (`position_arrows_bottom_right`) y Seccion Grande**: arriba, las flechas se montaban sobre la imagen
+  del hero. Origen: BR, Resultados visiveis em 28 dias.
+- **Un Carrusel de banners debajo de un carrusel de productos lleva Position Buttons `center_inside`**
+  (flechas a los costados, adentro del banner): con las flechas arriba a la derecha quedaban pegadas al
+  "Ver todos" de arriba y se leian como flechas de ese carrusel. Origen: BR, /proplan/caes y /gatos.
+- **El Filtro por mascota de una marca de UNA sola especie no dibuja nada pero deja su padding**: va con
+  `space_py_0`. Origen: MX, Beneful, Campeon y Gatina productos (hueco de 136px).
+- **Paginas de categoria de articulos: el filtro de mascota con Seccion Pequeño y el resto Default**,
+  todas iguales. Origen: MX, Entrenamiento quedaba a 16px del footer.
 
 - **El ultimo bloque de la pagina deja 60 contra el footer**: si no es una banda de color pegada al
   pie, va con Seccion Medio. Con su default (20 el Texto y el Texto con imagen, 16 el Banner) el
@@ -584,6 +619,56 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   `npm run editar` (`field_block.productos`). Preprod tiene otros nids: antes de armar alla hay que
   mirar que productos de muestra existen ahi. Origen: MX, pedido del usuario ("dejemoslo con productos
   de muestra de la marca y despues ponemos los correctos").
+- **Un carrusel cuya pagina existe en el sitio viejo lleva los productos del viejo**, en el mismo orden,
+  sin tope ni exclusiones por marca. Origen: BR, /snacks (Dentalife estaba en los dos carruseles del viejo).
+- **Si ni la matriz ni el sitio viejo dicen que productos van, se eligen hasta 8 publicados de la
+  marca**: primero el producto bandera, despues alternando especies, seco y humedo y etapas de vida, una
+  variante por linea y nunca dos sabores casi iguales seguidos. Si la marca tiene menos, van todos.
+  Origen: MX, las 9 homes de marca que tenian muestras ("elegi vos entonces los productos").
+- **La pagina general de productos (/produtos, /productos) sigue el patron de las /<marca>/productos**:
+  H1 arriba a la izquierda con una linea, el Banner Promotional abajo con el bodegon DEL PAIS (el del
+  sitio viejo, packs en el idioma del pais), el filtro por mascota y el listado con filtro de marca.
+  Origen: BR, /productos tenia el bodegon de MX con packs en castellano.
+
+## Ficha de producto
+
+El modelo es NeuroCare de BR (nid 5510), aprobado por el usuario, y se aplico a todas las fichas de
+BR y MX.
+
+- **Descripcion de la derecha (`field_summary_formatted`)**: si falta o es corta, se escriben los
+  BENEFICIOS del sitio viejo como texto corrido. Una ficha con la derecha vacia se ve abandonada.
+- **Informacion adicional**: el acordeon lleva los titulos del sitio viejo de cada pais (BR: Quantidade
+  diária recomendada, Composição básica, Níveis de garantia). Sin "Apresentações"; no se agrega una
+  seccion sin contenido. Lo que venia mezclado en Ingredientes (beneficios, tecnologia, indicaciones) va
+  a su propio item. La tabla nutricional va como `nutritional_table`, no como HTML.
+- **La lista legal de ingredientes es una LISTA**: mismo orden y mismas palabras (es texto legal), un
+  item por cada coma de primer nivel (las de adentro de () y [] no cortan), primera letra en mayuscula,
+  sin punto final, en `<ul class="add-info__pane-list">` (la clase del tema para ese panel; hay que
+  habilitarla en el formato Rich text, Source editing). Los bloques con titulo (Eventuais substitutos,
+  Enriquecimento) van como titulo + su lista. Lo arma `formatear` (`composicion.py`). Origen: BR,
+  NeuroCare ("¿es la mejor forma, tipo wall of text?").
+- **Ingredientes destacados**: los del glosario del sitio viejo del pais, en su idioma y en tipo oracion,
+  con texto corto e imagen sin fondo. PROTEINA ANIMAL PRIMERO, despues el orden de la composicion. Las
+  fotos de beneficios no son ingredientes. El Main ingredient es la proteina principal.
+- **Condiciones**: solo estas etiquetas, en tags (`health_condition`) y en Pet ID (`pet_health_condition`).
+  BR: Sobrepeso, Saúde dental, Pele Sensível, Controle de bolas de pelo, Sensibilidade do Sistema
+  Urinário, Sensibilidade Digestiva, Saúde Renal, Gestante/Lactante, Castrado. MX: Sobrepeso, Salud
+  Dental, Piel Sensible, Control de bolas de pelo, Sensibilidad del Sistema Urinario, Sensibilidad
+  Digestiva, Salud renal, Embarazo y Lactancia, Castrado. Extralife y Low Fat no van.
+- **Etapas de vida: no se cambian sin preguntar.** Si el sitio viejo las trae, es por algo: los casos
+  incoherentes se listan con su razonamiento y decide el usuario. Si el producto dice "todas las
+  edades", van todas (NeuroCare: Adulto, Idosos y Filhotes). El porte (`field_product_pet_weight`) no se
+  dibuja y se deja como esta.
+- **Otros sabores**: las familias de sabores se linkean de forma RECIPROCA (el campo es manual).
+- **Imagenes de producto**: PNG transparente cuadrado de 2000px, el pack en una caja centrada de 56% x
+  82% apoyado al 9% del borde de abajo, sin sombra agregada (se conserva la del original). Mismo orden de
+  vistas en todos: frente, verso, laterales, detalle, ambiente. Se reemplaza el ARCHIVO dentro del mismo
+  medio, nunca un medio nuevo. Alt en el idioma del pais.
+- **Life Stage, Pet Weight y Main ingredient son obligatorios**: una ficha sin alguno no se puede
+  guardar en nada. Si estan vacios se completan con lo que dice el titulo, y se anota.
+- **Errores obvios se corrigen directo** (titulos con typos, especie o tipo mal, minimo y maximo
+  invertidos) y el alias lleva el prefijo de la marca. Todo en el idioma del pais.
+- **El espaciado de la ficha no se controla desde el contenido**: lo fija la plantilla de F5.
 
 ## Menu de marca
 
@@ -647,6 +732,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   no tiene titulo (lo que se ve arriba es la etiqueta de cada pestaña). Origen: MX, idem.
 
 ## Cards
+
+- **Una card sin imagen en un modo con foto (verticales, slider-default-card) es INVISIBLE**: el texto
+  blanco queda sobre el fondo de la pagina y el bloque se ve como un hueco. No se publica asi: lleva
+  imagen (la del sitio viejo, o el pack del producto si la card es de una categoria o receta), o el
+  bloque pasa a un modo sin foto, o no va. Origen: BR, Friskies, Fancy Feast, Cat Chow y Purina One.
+- **El mosaico (`grid-cards`) no dibuja el "See more" de Avanzado**: un link de salida desde un mosaico va
+  en otro bloque (Texto con boton) o en la barra de marca. Origen: BR, /proplan (se probo y se revirtio).
+- **Titulos de cards en una marca de fondo amarillo (Friskies) van en Brand 03, nunca Brand 02**: Brand 02
+  es el amarillo de la pagina y sobre la card blanca da 1,4:1. Origen: BR, Friskies.
+- **La imagen de un Texto con imagen lleva SOLO lo que se quiere ver**: el CMS la recorta al centro a
+  800x605. Una pieza ancha se recorta a su elemento y se centra en un lienzo 800x605 transparente.
+  Origen: BR, el sello "47%" de LiveClear salia cortado.
 
 - **Cards con botón (que la Simple no dibuja) van en columnas con UN bloque Imagen por columna**:
   título, texto y botón arriba, la imagen abajo (`image_bottom`). Nunca imagen y texto como dos
@@ -833,6 +930,22 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   newsletter de Combinaciones de proteinas).
 
 ## CTAs y links
+- **Un link fijo a una ficha de producto se carga como `/node/<nid>`**, no con el alias: Drupal lo dibuja
+  con el alias vigente y sobrevive a los cambios de alias. Origen: MX, Combinacion de proteinas (dos
+  "Ver mas" a alias que ya no existian).
+- **Un archivo del sitio viejo (PDF) se sube como medio Document y se linkea local**: el sitio viejo deja
+  de existir en el lanzamiento. Origen: MX (Hasta 1.8 años) y BR (Até 1,8 anos, Comprometidos com o planeta).
+- **Una card o boton sin destino no lleva flecha ni boton**: o se le da el destino que el copy pide, o se
+  saca el link (un `#` dibuja una flecha que recarga la pagina). Origen: MX, Tiendas y Cuidadores en las
+  11 homes; "Postulate aqui" de Adopta.
+- **Vetline siempre va al WhatsApp de Vetline**, como el footer y el menu. Origen: MX, homes de marca.
+- **Las rutas viejas tienen su 301 a la ruta nueva**: las institucionales con prefijo /purina/ (BR), los
+  listados y fichas de producto viejos a la ficha o el listado nuevo, y las paginas que se movieron de
+  lugar. Sin eso, todo link de un articulo o de Google da 404 cuando el dominio pase al sitio nuevo. Se
+  cargan en el modulo Redirect y se verifica que terminen en 200. Origen: BR y MX, QA de journey (cientos
+  de links rotos en los articulos).
+- **"Ver todos los articulos" va al listado (/articulos)**, no a una pagina de titulo solo. Origen: BR,
+  /meu-pet.
 - **La negrita no lleva espacio adentro del marcador**: `**texto **` no cierra en markdown, y el
   runner lo escapa (`\*\*`) para que no rompa el resto, asi que los asteriscos salen a la vista.
   Se escribe `**texto**` y el espacio va afuera. Origen: MX, Aviso de privacidad.

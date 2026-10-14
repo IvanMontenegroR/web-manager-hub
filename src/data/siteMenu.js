@@ -127,13 +127,13 @@ export const DEFAULT_MENU = [
       { title: 'Perros', icon: 'dog', links: [
         L('Nutrición', null, '/articulos/nutricion?pettype=30'),
         L('Cuidado y bienestar', null, '/articulos/cuidado-y-bienestar?pettype=30'),
-        L('Cambios en mi mascota', null, '/articulos/cambios-em-mi-mascota?pettype=30'),
+        L('Cambios en mi mascota', null, '/articulos/cambios-en-mi-mascota?pettype=30'),
         L('Entrenamiento', null, '/articulos/entrenamiento?pettype=30'),
       ] },
       { title: 'Gatos', icon: 'cat', links: [
         L('Nutrición', null, '/articulos/nutricion?pettype=18'),
         L('Cuidado y bienestar', null, '/articulos/cuidado-y-bienestar?pettype=18'),
-        L('Cambios en mi mascota', null, '/articulos/cambios-em-mi-mascota?pettype=18'),
+        L('Cambios en mi mascota', null, '/articulos/cambios-en-mi-mascota?pettype=18'),
         L('Entrenamiento', null, '/articulos/entrenamiento?pettype=18'),
       ] },
     ],

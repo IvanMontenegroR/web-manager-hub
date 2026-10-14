@@ -196,6 +196,10 @@ linea &amp; otra</textarea><input name="g" value="h" disabled><input type="submi
   ok(candado, 'en un sitio de solo lectura --save frena')
   ok(sitioDelPlan({ sitio: 'pp' }, false, { pp: { base: 'x', escribe: false } }).base === 'x', 'pero el ensayo si corre')
   ok(prepararCambios([['a', '1']], [{ campo: 'b', antes: 'x', despues: 'y' }]).problemas.length === 1, 'un campo que no existe es un problema')
+  {
+    const r = prepararCambios([['a', '1'], ['b', 'x']], [{ campo: 'a', antes: '1', despues: null }, { campo: 'b', antes: 'x', despues: 'y' }])
+    ok(r.problemas.length === 0 && JSON.stringify(r.nuevos) === JSON.stringify([['b', 'y']]), 'un `despues: null` que no va ultimo no rompe los cambios que siguen')
+  }
 
   const g0 = guardados
   let r = await aplicarPagina(s, { ruta: '/adopta/tenencia', cambios: [cambio] }, { mensaje: 'Batch prueba', guardar: false, log: silencio })

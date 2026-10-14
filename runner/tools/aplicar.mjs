@@ -72,7 +72,8 @@ export function prepararCambios(pares, cambios) {
   const problemas = []
   const nuevos = pares.map(p => [...p])
   for (const c of cambios) {
-    const idx = nuevos.map((p, i) => (p[0] === c.campo ? i : -1)).filter(i => i >= 0)
+    // Los que ya se sacaron (`despues: null` de un cambio anterior) quedan en null hasta el final.
+    const idx = nuevos.map((p, i) => (p && p[0] === c.campo ? i : -1)).filter(i => i >= 0)
     if (idx.length > 1) { problemas.push(`${c.campo}: aparece ${idx.length} veces en el formulario (campo multiple), no se cambia por nombre.`); continue }
     const actual = idx.length ? nuevos[idx[0]][1] : null
     // Un campo vacio puede no viajar (checkbox destildado, select sin valor): vale como "".
