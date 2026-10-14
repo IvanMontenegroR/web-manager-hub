@@ -188,7 +188,9 @@ export const CARD_SQUARE = 'card_grid_default_square'
 // Por eso se avisa y no se recorta lo ya cargado.
 // Era 128, medido en DESKTOP. En mobile la misma card corta antes: a 360px una de 109 ya se ve
 // cortada y una de 100 entra (Tenencia Responsable, octubre 2026). Manda el mobile.
-export const CARD_SQUARE_DESC_MAX = 100
+// En portugues las palabras son mas largas: en Brasil a 360px una de 93 se corto y una de 83
+// entro (/nossas-marcas, octubre 2026). La guia es una para todos los mercados: 85.
+export const CARD_SQUARE_DESC_MAX = 85
 // "Image + 3 cards with icons" (full-background-card-icons-box): la descripcion de cada
 // tarjeta se corta a 4 LINEAS (line-clamp del sitio). Lo que manda es MOBILE: a 390px un texto
 // de 102 se corta y uno de 86 entra, pero a 360px (Android chico) uno de 76 ya se corta y uno de
@@ -227,8 +229,11 @@ export const CARD_DESC_MAX_BY_MODE = {
 }
 // TITULOS: en las cuadradas con icono el titulo tambien se corta (alto fijo). Medido en preprod
 // (octubre 2026) con el barrido de mobile: 44 caracteres entraron y 48 se cortaron.
+// En Icons (cards-icons) el titulo tambien se corta: a 360px 48 entraron y 52 se cortaron
+// (Brasil, /purina-one/por-que-mudar-para-purina-one).
 export const CARD_TITLE_MAX_BY_MODE = {
   'slider-card-icons-square': 45,
+  'cards-icons': 48,
 }
 export const CARD_SIMPLE_TITLE_MAX = 65
 export const CARD_SIMPLE_DESC_MAX = 100
