@@ -196,6 +196,13 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   palabras. Origen: BR, Nossa história no guardaba.
 
 ## Heroes y banners
+
+- **El panel de color de un hero no puede ser del mismo color que el fondo de la pagina**: con la marca
+  del nodo la pagina ya va pintada (Purina One: Brand 02 rojo), y un panel del mismo rojo se pierde y el
+  hero parece no tener borde. Va en el tono oscuro de la marca (Purina One: **Brand 04, granate
+  #7E1418**), que se distingue del fondo y sigue siendo de la marca. Se recolorea la imagen (solo el
+  panel: el logo y la foto no se tocan). Origen: BR y MX, Purina One ("tiene que ser granate pero sin
+  perderse con el fondo").
 - **Banners del carrusel de la home**: si la imagen ya trae el mensaje (logo de la campaña, texto en
   la pieza), va como **Promotional banner (only image)**: en el CMS ese tipo envuelve TODA la imagen
   en el link, asi que el banner entero es clickeable y no hace falta boton. Un Secondary Hero encima
@@ -733,6 +740,12 @@ BR y MX.
 
 ## Cards
 
+- **Las cards de una misma fila usan el mismo TIPO de foto**: si dos son fotos de gatos en una casa, la
+  tercera tambien (mismo encuadre: el animal mirando a camara, la cara en el medio y el texto abajo), no el
+  pack del producto. Un pack va solo si todas las cards son packs. Si la marca no tiene una tercera foto
+  de la misma serie, se busca una que comparta estilo y tonos entre las del hub, y se reencuadra para
+  que la cara caiga en el mismo lugar que en las otras. Origen: BR, Cat Chow, la card Castrados con la
+  bolsa al lado de Filhotes y Adultos ("la tercera card esta mal, necesito criterio para eso").
 - **Una card sin imagen en un modo con foto (verticales, slider-default-card) es INVISIBLE**: el texto
   blanco queda sobre el fondo de la pagina y el bloque se ve como un hueco. No se publica asi: lleva
   imagen (la del sitio viejo, o el pack del producto si la card es de una categoria o receta), o el
