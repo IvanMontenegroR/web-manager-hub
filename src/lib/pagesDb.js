@@ -67,6 +67,8 @@ const BRAND_TOKENS = {
   'Campeón': ['#F5D2D2', '#FF0006', '#99150C', '#004264'],
   'Gatina': ['#FFD3D0', '#FF2314', '#99150C', '#000000'],
   'Excellent': ['#DDDDDE', '#56545A', '#971F33', '#000000'],
+  // Solo BR (preprod, termino Doguitos® creado en 2026-10 con los colores del pack).
+  'Doguitos': ['#FDB913', '#78080E', '#4A0508', '#000000'],
 }
 export function brandTokens(brand) {
   const key = String(brand || '').trim().toLowerCase()
@@ -76,7 +78,7 @@ export function brandTokens(brand) {
 
 // Marca de la pagina (opcional). Las que tienen tema definido en BRAND_THEMES pintan
 // el builder con sus colores; el resto usa el tema Purina por defecto.
-export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Gatina', 'Purina']
+export const PAGE_BRANDS = ['Pro Plan', 'Fancy Feast', 'Purina One', 'Dog Chow', 'Cat Chow', 'Felix', 'Excellent', 'Beneful', 'Campeón', 'Dentalife', 'Gatina', 'Doguitos', 'Purina']
 
 // ===== Categorias =====
 // El tracker agrupa las paginas por categoria (Marca, Purina Adopta...). La lista es
