@@ -122,6 +122,18 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   una card blanca sobre la pagina. Pintar sigue valiendo para ilustraciones y graficos sin foto.
   Origen: MX, Calidad en tus manos ("la foto del perro debe tener el fondo blanco, ya que no queda
   bien sin fondo"; la de nuestra promesa igual, por consistencia).
+- **No se le cambia el fondo a una imagen del sitio viejo: va con SU color de fondo original.** Si
+  hace falta mas ancho o alto para la medida del componente, se extiende con ese MISMO color plano
+  (muestreado del sitio viejo o de la imagen), sin tocar el sujeto. Ojo con los PNG transparentes: el
+  "fondo" es el del CSS de la seccion vieja (se mide en la pagina, no en el archivo), y pasar el PNG a
+  JPG sin componerlo deja el transparente en NEGRO y convierte el brillo semitransparente en manchas
+  duras con bordes sucios. Se compone el PNG (alfa premultiplicado al escalar) sobre ese color. El
+  texto del Secondary Hero es siempre blanco: con el velo del banner (30% negro) se mide el contraste
+  sobre el color oscurecido, y si el sujeto queda debajo del texto se mueve el sujeto (alineacion
+  Left Top y el sujeto abajo a la derecha), no el texto. Origen: BR, FAQ de Cat Chow ("no tiene
+  sentido haber modificado la imagen del sitio viejo para que tenga fondo negro y quede feo"): el gato
+  con el escudo era un PNG transparente sobre #1093BC y estaba en negro; quedo sobre #1093BC, Left
+  Top, blanco 6.5:1 con el velo.
 - **Al sacar un elemento del borde de una imagen (la cuña verde del sitio viejo) no se recorta al
   sujeto.** Si el recorte a la medida del componente se come la cabeza del sujeto, se rellena el
   hueco con el fondo de la propia foto (desenfocado, inpainting clasico) y se recorta por el costado
