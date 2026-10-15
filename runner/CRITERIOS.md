@@ -691,6 +691,23 @@ BR y MX.
 - **Ingredientes destacados**: los del glosario del sitio viejo del pais, en su idioma y en tipo oracion,
   con texto corto e imagen sin fondo. PROTEINA ANIMAL PRIMERO, despues el orden de la composicion. Las
   fotos de beneficios no son ingredientes. El Main ingredient es la proteina principal.
+- **Sabor e ingredientes destacados salen SOLO del sitio viejo de ESE producto.** Los ingredientes
+  destacados son terminos del glosario que FIGURAN en la composicion vieja del producto, en el orden de esa
+  composicion (las proteinas en si primero; una harina, subproducto, viscera o higado NO cuenta como
+  proteina y va en su lugar de la composicion). Nunca un ingrediente que no este en la composicion. Si la
+  proteina principal (la del sabor o la primera de la composicion) no tiene termino en el glosario
+  (tilápia, atum, peru, peixe branco, bacalhau, sardinha...), NO se reemplaza por otra proteina que si lo
+  tenga: la lista arranca por el siguiente ingrediente que corresponda y queda sin proteina. El sabor es
+  el que dice el sitio viejo (titulo, o la descripcion si el titulo no lo nombra) y es la proteina en si
+  (o Mix de proteínas si combina varias); nunca una harina. Si el producto no tiene ninguna proteina en si
+  (solo harinas), no se le elige una. Un sabor de otra proteina se crea como termino solo con una imagen
+  del sitio viejo (Cordeiro usa la foto del glosario viejo); si el sitio viejo no tiene foto, no se crea y
+  el producto queda sin sabor hasta tenerla: nunca un sabor de pollo o carne en un producto de pescado.
+  Origen: BR, Fancy Feast Supremo Peixe Branco (nid 5303, "Carne de tilápia, carne mecanicamente separada
+  de frango..."), que habia quedado con sabor "Carne de frango" y "Carne de frango" como primer ingrediente
+  porque el rollout tomaba la primera proteina de la composicion que TENIA ficha en el glosario ("corregí
+  todos los productos, solamente basado en el sitio viejo"; "los sabores solo pueden ser carne, pollo,
+  salmón o proteínas en sí, no harinas/subproductos").
 - **Condiciones**: solo estas etiquetas, en tags (`health_condition`) y en Pet ID (`pet_health_condition`).
   BR: Sobrepeso, Saúde dental, Pele Sensível, Controle de bolas de pelo, Sensibilidade do Sistema
   Urinário, Sensibilidade Digestiva, Saúde Renal, Gestante/Lactante, Castrado. MX: Sobrepeso, Salud
@@ -710,7 +727,8 @@ BR y MX.
   tripla proteina). Nunca una harina o subproducto ("Farinha de subprodutos de frango", "Harina de
   pescado"): eso es un ingrediente, no un sabor. Un hermano con un sabor que no entra en las cuatro
   (peru/pavo, atum/atún, peixe/pescado, cordeiro/cordero, bacalhau, sardina, linguicinha) no se fuerza a
-  la mas parecida: queda como esta y se le pregunta al usuario. El sabor es un termino propio del
+  la mas parecida: lleva su propio termino si el sitio viejo tiene foto, y si no queda sin sabor (ver
+  "Sabor e ingredientes destacados salen SOLO del sitio viejo", arriba). El sabor es un termino propio del
   vocabulario `ingredients`, distinto del ingrediente destacado: en BR los terminos del glosario se
   llaman "Carne bovina", "Carne de frango", "Carne de salmão" y el sabor "Carne", "Frango", "Salmão",
   con la misma foto. La foto de "Mix de proteínas" se compone con PIL juntando las fotos recortadas de
@@ -718,7 +736,9 @@ BR y MX.
   BR y MX, revision de fichas ("no hace falta que todos los productos tengan un main ingredient,
   solamente los que tienen distintos sabores de un mismo producto"; "donde dice sabor carne y frango
   tiene que llamarse Mix de proteínas"). Para poder vaciarlo, el campo `field_pdt_main_ingredient`
-  tiene que dejar de ser obligatorio en el tipo Producto.
+  tiene que dejar de ser obligatorio en el tipo Producto (ya no lo es en preprod BR y MX, aprobado por
+  el usuario). Un producto sin sabor no dibuja el bloque, y sus hermanos lo omiten (no queda un circulo
+  vacio).
 - **Imagenes de producto**: PNG transparente cuadrado de 2000px, el pack en una caja centrada de 56% x
   82% apoyado al 9% del borde de abajo, sin sombra agregada (se conserva la del original). Mismo orden de
   vistas en todos: frente, verso, laterales, detalle, ambiente. Se reemplaza el ARCHIVO dentro del mismo
