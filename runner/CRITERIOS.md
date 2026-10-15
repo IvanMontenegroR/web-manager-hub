@@ -725,8 +725,9 @@ BR y MX.
   especiales", "¿Por que Fancy Feast?"), el item del sitio viejo que si la tiene (Pro Plan: Perros,
   Gatos, LiveClear, Veterinary Diets); (3) si la matriz vino vacia (Cat Chow, Beneful, Campeon,
   Dentalife, Gatina), el menu del sitio viejo. El primer item es la home de la marca (el logo de la
-  barra no es link). "Comprometidos con el planeta" va a `/purina-cuida`: las paginas de planeta por
-  marca no se migran. Un item que repite la home ("Añade mas a su vida" de Dog Chow) o que no tiene
+  barra no es link). **Planeta NO va en el menu de marca** (ni "Planeta" ni "Comprometidos con el
+  planeta"): la pagina unica de planeta se llega desde el menu principal; las de planeta por marca no se
+  migran. Origen: BR ("saca 'planeta' como menu en todas las marcas"); se desactiva el item, no se borra. Un item que repite la home ("Añade mas a su vida" de Dog Chow) o que no tiene
   productos atras (Snacks de Felix) no va, y se le avisa al mercado. Los links a productos van al
   listado de LA marca, filtrado si hace falta (ver Cards). Despues de cargar: todos los links responden
   200 y la barra ENTRA a 1024px; si no, se acortan los textos (Purina One: "Nutricion superior
@@ -735,7 +736,7 @@ BR y MX.
   FAQ a la pagina de prueba de F5). Cuando la barra no entra, el logo es lo primero que se aplasta
   (Dog Chow BR, con 7 items, lo dejaba en 0px): se acortan primero los textos mas largos y no la
   promesa ("100% Satisfação" queda entera). Asi quedo Dog Chow BR: Mais à vida | Produtos | 100%
-  Satisfação | Planeta | Dúvidas | Qualidade. Una marca sin menu propio (Friskies BR) se le crea uno
+  Satisfação | Dúvidas | Qualidade. Una marca sin menu propio (Friskies BR) se le crea uno
   y se elige en su termino. Origen: BR, menus de marca.
 - **El fondo de la barra de marca es el del sitio viejo.** Se elige en el termino de la marca
   (`field_menu_background`), que solo acepta negro, blanco o uno de los 4 Brand Color: si el color del
