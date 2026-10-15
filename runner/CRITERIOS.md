@@ -258,6 +258,21 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   placeholder de la regla de arriba para las homes de un mercado que ya tiene la de MX.
   Origen: MX, home de Dog Chow (el video no estaba en la carpeta), pedido del usuario.
 
+- **El H1 de una home de marca va como en Pro Plan BR (`/proplan`, nid 5531), que es el modelo**: un
+  `c_text` como PRIMER bloque, arriba del Brand Hero, con la marca en el Titulo (HTML tag **h1**,
+  "Purina® Pro Plan®") y la bajada ("Alimento para cães e gatos") en el **CUERPO** (Description,
+  `field_c_text`), no en el Subtitulo: Subtitulo y su HTML tag vacios, y el Classy entero en Default
+  (sin color de fondo ni de texto, Spacing default = 20/20, alineacion default, que ya es a la
+  izquierda). Medido en el sitio: H1 32px a 1440 y 24px a 390 (peso 500), bajada 14px (`fs-body-sm`)
+  en los dos anchos, bloque de 114px a 1440 y 105px a 390. Como subtitulo la bajada salia a 24px, casi
+  del tamaño del H1 en mobile, y competia con el. El color lo pone la marca (blanco sobre Pro Plan, Dog
+  Chow, Cat Chow, Purina One y Felix; negro sobre Fancy Feast, Friskies, Beneful, Campeon, DentaLife,
+  Excellent y Gatina): todas pasan 4.5:1 (la mas baja, Dog Chow, 5.5:1), asi que no se toca el color.
+  El formato del cuerpo puede ser Purina Markdown (lo que pone el runner) o Full Html (lo que tiene el
+  modelo): se dibuja igual. Snacks no entra: no es una home de marca (sin Brand, sin barra de marca ni
+  Brand Hero) y su H1 es el titular del key visual. Origen: BR y MX, pedido del Expert ("mira como esta
+  puesto el H1 y la descripcion en Pro Plan; asi deben estar los H1 en las demas paginas de marca"),
+  aplicado a las 5 homes de BR y las 11 de MX.
 - **Hero con video: en el CMS va un Responsive Video (mp4 desktop + mobile, sin audio); en el Hub, un
   cuadro del mismo video.** El bucket del Hub no acepta mp4. El medio de video se crea antes de guardar
   la pagina con el MISMO nombre que el traductor le da a la imagen del hero, asi el runner lo elige de
@@ -377,7 +392,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   titulo es un h2 pero los h3 de cada card son mas grandes, no tiene sentido jerarquico").
 - **Toda home de marca lleva H1: un bloque de Texto ARRIBA del hero, alineado a la izquierda**, como
   el resto de las paginas del sitio (el H1 arriba a la izquierda y la imagen debajo). Texto: la marca
-  como titulo y lo que es como SUBTITULO (tag p): "Purina® Dog Chow®" / "Alimento para perros". El
+  como titulo y lo que es como bajada en el CUERPO del Texto, no en el subtitulo (ver Heroes y
+  banners, modelo Pro Plan BR): "Purina® Dog Chow®" / "Alimento para perros". El
   "que" tiene que estar (el logo de la barra ya dice el nombre, y el buscador necesita el que), pero
   no pegado al titulo con dos puntos: lo que va despues del ":" es una bajada. Mismo criterio para
   cualquier h1 con dos puntos. NO va en el titulo del Brand Hero: se probo y sobre
