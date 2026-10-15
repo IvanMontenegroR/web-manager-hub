@@ -673,12 +673,32 @@ BR y MX.
   edades", van todas (NeuroCare: Adulto, Idosos y Filhotes). El porte (`field_product_pet_weight`) no se
   dibuja y se deja como esta.
 - **Otros sabores**: las familias de sabores se linkean de forma RECIPROCA (el campo es manual).
+- **El sabor (Main ingredient) solo lo llevan los productos que tienen hermanos de otro sabor.** Es lo
+  que la ficha dibuja como "Sabores disponíveis/disponibles" (un circulo por hermano) y como icono en el
+  hover de la card del listado. Un producto sin hermanos de otro sabor no lleva sabor: el campo va
+  vacio y el bloque no se dibuja. En una familia, el sabor es SOLO uno de cuatro: **Carne, Frango,
+  Salmão** (MX: **Carne, Pollo, Salmón**) o **Mix de proteínas** cuando el producto combina proteinas
+  ("carne e frango", "carne, frango e arroz", Megamix, Mix de carnes, Mar de sabores, multiproteina,
+  tripla proteina). Nunca una harina o subproducto ("Farinha de subprodutos de frango", "Harina de
+  pescado"): eso es un ingrediente, no un sabor. Un hermano con un sabor que no entra en las cuatro
+  (peru/pavo, atum/atún, peixe/pescado, cordeiro/cordero, bacalhau, sardina, linguicinha) no se fuerza a
+  la mas parecida: queda como esta y se le pregunta al usuario. El sabor es un termino propio del
+  vocabulario `ingredients`, distinto del ingrediente destacado: en BR los terminos del glosario se
+  llaman "Carne bovina", "Carne de frango", "Carne de salmão" y el sabor "Carne", "Frango", "Salmão",
+  con la misma foto. La foto de "Mix de proteínas" se compone con PIL juntando las fotos recortadas de
+  carne, frango y salmon del glosario de cada sitio, en el mismo lienzo y encuadre (sin IA). Origen:
+  BR y MX, revision de fichas ("no hace falta que todos los productos tengan un main ingredient,
+  solamente los que tienen distintos sabores de un mismo producto"; "donde dice sabor carne y frango
+  tiene que llamarse Mix de proteínas"). Para poder vaciarlo, el campo `field_pdt_main_ingredient`
+  tiene que dejar de ser obligatorio en el tipo Producto.
 - **Imagenes de producto**: PNG transparente cuadrado de 2000px, el pack en una caja centrada de 56% x
   82% apoyado al 9% del borde de abajo, sin sombra agregada (se conserva la del original). Mismo orden de
   vistas en todos: frente, verso, laterales, detalle, ambiente. Se reemplaza el ARCHIVO dentro del mismo
   medio, nunca un medio nuevo. Alt en el idioma del pais.
 - **Life Stage, Pet Weight y Main ingredient son obligatorios**: una ficha sin alguno no se puede
-  guardar en nada. Si estan vacios se completan con lo que dice el titulo, y se anota.
+  guardar en nada. Si estan vacios se completan con lo que dice el titulo, y se anota. El Main
+  ingredient deja de serlo en cuanto se aplique la regla de sabores de arriba (solo lo llevan los
+  productos con hermanos de otro sabor).
 - **Errores obvios se corrigen directo** (titulos con typos, especie o tipo mal, minimo y maximo
   invertidos) y el alias lleva el prefijo de la marca. Todo en el idioma del pais.
 - **El espaciado de la ficha no se controla desde el contenido**: lo fija la plantilla de F5.
