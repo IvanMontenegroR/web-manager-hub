@@ -9,7 +9,7 @@ const LOGO = (import.meta.env.BASE_URL || '/') + 'purina-logo.png'
 // Condiciones de venta, Politica de vinculacion, Razas, Asistente de IA) no va: un link a
 // ninguna parte es peor que no tenerlo. Es lo mismo que quedo cargado en preprod.
 const COLS = [
-  { title: 'Alimento', links: ['Húmedos', 'Secos', 'Snacks'] },
+  { title: 'Alimento', links: ['Secos', 'Húmedos', 'Snacks'] },
   { title: 'Etapa de Vida', links: ['Cachorros', 'Gatitos', 'Adultos', 'Senior'] },
   { title: 'Marcas', links: ['Gatos', 'Perros'] },
   { title: 'Consejos y cuidados', links: ['Nutrición', 'Cuidado y bienestar', 'Cambios en mi mascota', 'Entrenamiento'] },

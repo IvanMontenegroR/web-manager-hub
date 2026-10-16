@@ -100,16 +100,18 @@ export const DEFAULT_MENU = [
   {
     label: 'Marcas',
     layout: 'boxes',
-    // Las marcas que eligio el Websites Expert (Gatos hasta Felix, Perros hasta Beneful, en
-    // el orden de content); el resto se encuentra en "Ver todas".
+    // Las marcas y el ORDEN que fijo el Websites Expert por especie (2026-10): Gatos = Pro Plan,
+    // Felix, Cat Chow, Purina One, Gatina; Perros = Pro Plan, Purina One, Beneful, Dog Chow,
+    // Campeon. Fancy Feast y Excellent quedan en "Ver todas" (en preprod, desactivados en el
+    // menu, no borrados). Es el mismo orden que siguen los carruseles de esa especie.
     groups: [
       { title: 'Para Gatos', icon: 'cat', links: [
-        L('Pro Plan®', null, '/proplan'), L('Cat Chow®', null, '/catchow'), L('Fancy Feast®', null, '/fancy-feast'),
-        L('Purina® One®', null, '/purina-one'), L('Felix®', null, '/felix'),
+        L('Pro Plan®', null, '/proplan'), L('Felix®', null, '/felix'), L('Cat Chow®', null, '/catchow'),
+        L('Purina® One®', null, '/purina-one'), L('Gatina®', null, '/gatina'),
       ] },
       { title: 'Para Perros', icon: 'dog', links: [
-        L('Pro Plan®', null, '/proplan'), L('Dog Chow®', null, '/dogchow'), L('Purina® One®', null, '/purina-one'),
-        L('Excellent®', null, '/excellent'), L('Beneful®', null, '/beneful'),
+        L('Pro Plan®', null, '/proplan'), L('Purina® One®', null, '/purina-one'), L('Beneful®', null, '/beneful'),
+        L('Dog Chow®', null, '/dogchow'), L('Campeón®', null, '/campeon'),
       ] },
     ],
     // El link final NO es opcional en un menu de cajas: el sitio arma las cajas en una

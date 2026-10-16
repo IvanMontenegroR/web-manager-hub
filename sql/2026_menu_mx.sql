@@ -101,20 +101,20 @@ values ('MX', '[
             "url": "/proplan"
           },
           {
-            "label": "Cat Chow®",
-            "url": "/catchow"
+            "label": "Felix®",
+            "url": "/felix"
           },
           {
-            "label": "Fancy Feast®",
-            "url": "/fancy-feast"
+            "label": "Cat Chow®",
+            "url": "/catchow"
           },
           {
             "label": "Purina® One®",
             "url": "/purina-one"
           },
           {
-            "label": "Felix®",
-            "url": "/felix"
+            "label": "Gatina®",
+            "url": "/gatina"
           }
         ]
       },
@@ -127,20 +127,20 @@ values ('MX', '[
             "url": "/proplan"
           },
           {
-            "label": "Dog Chow®",
-            "url": "/dogchow"
-          },
-          {
             "label": "Purina® One®",
             "url": "/purina-one"
           },
           {
-            "label": "Excellent®",
-            "url": "/excellent"
-          },
-          {
             "label": "Beneful®",
             "url": "/beneful"
+          },
+          {
+            "label": "Dog Chow®",
+            "url": "/dogchow"
+          },
+          {
+            "label": "Campeón®",
+            "url": "/campeon"
           }
         ]
       }
