@@ -708,6 +708,15 @@ BR y MX.
   porque el rollout tomaba la primera proteina de la composicion que TENIA ficha en el glosario ("corregí
   todos los productos, solamente basado en el sitio viejo"; "los sabores solo pueden ser carne, pollo,
   salmón o proteínas en sí, no harinas/subproductos").
+- **Un sabor queda solo si es SEGURO y DISTINGUE al producto de sus hermanos.** Seguro = la proteina en
+  si que dice el sitio viejo (o Mix de proteínas). Se quita el sabor de: los hermanos que solo tienen
+  harinas, los que no son una proteina (Doguitos Linguicinha), los que no tienen termino ni foto, y los que
+  COMPARTEN el mismo sabor con otro hermano de la familia (cuatro "Mix de proteínas" iguales no dicen
+  nada). Si despues de eso la familia queda con menos de 2 sabores distintos, se le quita tambien al que
+  queda: el bloque "Sabores disponíveis/disponibles" solo se muestra con al menos 2 sabores distintos y
+  seguros (un circulo solo no es una eleccion). Origen: BR, Friskies Mar de Sabores 85g ("a todos los
+  productos que tengamos dudas sobre los sabores sacalos y dejemos solo los que estamos seguros y tengan
+  sentido").
 - **Condiciones**: solo estas etiquetas, en tags (`health_condition`) y en Pet ID (`pet_health_condition`).
   BR: Sobrepeso, Saúde dental, Pele Sensível, Controle de bolas de pelo, Sensibilidade do Sistema
   Urinário, Sensibilidade Digestiva, Saúde Renal, Gestante/Lactante, Castrado. MX: Sobrepeso, Salud
