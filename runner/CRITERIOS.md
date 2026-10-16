@@ -50,6 +50,12 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   (Cat Chow, Dog Chow, Fancy Feast, Friskies, Pro Plan, Purina One, Tidy Cats en BR) repetian el mismo
   contenido: quedan en **Borrador** (`Draft`, armadas por si acaso) y todo link a ellas va a la general.
   Origen: BR, ronda 2 ("como en mx, tendremos una sola pagina de comprometidos con el planeta").
+- **Las paginas de marca NO llevan bloques que lleven a planeta.** Ni la seccion entera ("Bom para o
+  seu animal de estimação, bom para o planeta" con el globo y "Conheça o compromisso com o planeta")
+  ni una card suelta que linkee ahi: el bloque se saca, no se re-linkea a la pagina unica. La pagina
+  de planeta se llega desde el menu principal, igual que con el menu de marca (ver Menu de marca).
+  Origen: BR, Purina One Resultados visiveis ("elimina este componente ... y todos estos tipos de
+  componentes en paginas de marca que lleven a planeta").
 - **Las paginas de newsletter (Inscreva-se) de las marcas no van: Borrador.** La general (/purina-
   inscreva-se) sigue en pausa por el registro. Origen: BR, ronda 2.
 - **Club Purina se arma a mano.** El borrador automatico queda solo como referencia. Origen: MX, ronda 2.
