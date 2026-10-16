@@ -967,6 +967,13 @@ BR y MX.
   texto placeholder. Lo unico que cambia por marca es la imagen de fondo. En el CMS es un Tabs
   "Full Background" con una pestaña cuya imagen es el fondo y un Card Grid "slider-card-icons-square"
   adentro. Origen: MX, homes de marca Ecosystem 2.0, pedido del usuario.
+  **Purina One BR ya va armado como el de la home del sitio** ("Parceiros e serviços"): un solo Card
+  Grid "Square icon card + background image" (`full-background-card-icons-square`) con la foto de
+  fondo, titulo h2, bajada en `p`, Text Color Primary White y "Show Card PET ID" destildado (si no,
+  mete una card de Pet ID en el carrusel). El bloque va en proporcion fija (16:9 desktop, 9:16 mobile):
+  a 1440 mide 810 contra los 620 del Tabs, y la foto se ve entera en vez de cortarle la cabeza al
+  perro. Origen: BR, home de Purina One ("tiene que estar hecho igual que la home ... asi se ve la
+  cara del perro").
 
 - **En una card el texto va DEBAJO de la imagen.** El `c_image` del CMS no tiene "imagen arriba, texto
   abajo" (Image Bottom deja el texto arriba), asi que una card armada con columnas va como DOS bloques
