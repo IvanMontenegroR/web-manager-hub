@@ -749,6 +749,12 @@ BR y MX.
   productos con hermanos de otro sabor).
 - **Errores obvios se corrigen directo** (titulos con typos, especie o tipo mal, minimo y maximo
   invertidos) y el alias lleva el prefijo de la marca. Todo en el idioma del pais.
+- **EAN y botón de compra (Buy Now)**: los EAN de un producto van en el SKU del bloque Buy Now
+  (`field_buy_now[0][sku]`), separados por coma y espacio, todos los tamaños y multipacks del mismo
+  producto en la MISMA ficha. El SKU solo aparece eligiendo el proveedor: **Fornecedor = ChannelSight,
+  Widget = PURINA - BR**, y eso es lo que dibuja el botón de compra de ChannelSight en la ficha. Todo
+  producto con EAN lleva el botón. Una fila de la lista del mercado sin ficha clara no se fuerza. Origen:
+  BR, lista de EAN del mercado (modelo: LiveClear, nid 5256).
 - **El espaciado de la ficha no se controla desde el contenido**: lo fija la plantilla de F5.
 
 ## Menu de marca
