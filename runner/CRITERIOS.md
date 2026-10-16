@@ -497,8 +497,8 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 - **Un megamenu de CAJAS siempre lleva el link final** (el de flecha, clase `last`). El CSS del sitio
   arma las cajas en una grilla de 2 filas que se llena por columna, y la fila de abajo la ocupa ese
   link: sin el, las cajas caen una debajo de la otra. Por eso Marcas lista solo las marcas principales
-  (Gatos hasta Felix, Perros hasta Beneful) y deja "Ver todas" abajo. Origen: MX, Marcas quedo con Para
-  Gatos y Para Perros apilados al sacar "Ver todas".
+  (las cinco de la lista de cada especie, ver "Orden de marcas y productos") y deja "Ver todas" abajo.
+  Origen: MX, Marcas quedo con Para Gatos y Para Perros apilados al sacar "Ver todas".
 - **Las metas (Meta title y Meta description) son las del sitio viejo.** Una vez subida la pagina se
   cargan en sus meta tags (`field_ln_n_meta_tags[0][basic][title]` / `[description]`), tal cual las
   tenia la pagina vieja (`url_old`; si el hub no la tiene, la misma ruta en el sitio viejo). Las
@@ -660,8 +660,29 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   `npm run editar` (`field_block.productos`). Preprod tiene otros nids: antes de armar alla hay que
   mirar que productos de muestra existen ahi. Origen: MX, pedido del usuario ("dejemoslo con productos
   de muestra de la marca y despues ponemos los correctos").
-- **Un carrusel cuya pagina existe en el sitio viejo lleva los productos del viejo**, en el mismo orden,
-  sin tope ni exclusiones por marca. Origen: BR, /snacks (Dentalife estaba en los dos carruseles del viejo).
+- **Un carrusel cuya pagina existe en el sitio viejo lleva los productos del viejo**, sin tope ni
+  exclusiones por marca; el ORDEN ya no es el del viejo sino el de "Orden de marcas y productos".
+  Origen: BR, /snacks (Dentalife estaba en los dos carruseles del viejo).
+- **Orden de marcas y productos (fijado por el Websites Expert).** Donde NO hay filtro de especie va el
+  orden Mezclado; donde hay filtro o el contexto es de perro o de gato, la lista de esa especie. Las
+  marcas que no estan en la lista van despues, en el orden Mezclado.
+  - BR Perros: Pro Plan, Purina One, Dog Chow, los demas. Gatos: Pro Plan, Friskies, Purina One,
+    Cat Chow, Fancy Feast, los demas. Mezclado: Pro Plan, Friskies, Purina One, Dog Chow, Cat Chow,
+    los demas.
+  - MX Perros: Pro Plan, Purina One, Beneful, Dog Chow, Campeon. Gatos: Pro Plan, Felix, Cat Chow,
+    Purina One, Gatina. Mezclado: Pro Plan, Felix, Cat Chow, Purina One, Beneful, Dog Chow, Campeon,
+    Gatina, los demas (Fancy Feast, Dentalife, Excellent). El Mezclado MX se armo para que, filtrado
+    por especie, de EXACTAMENTE la lista de perros y la de gatos: el orden de marcas del sitio es UN
+    solo peso por termino (vocabulario Brand), asi que un Mezclado que no las respete obligaria a
+    pedirle a F5 un orden por especie. Por eso los dos Chow no van juntos.
+  - Dentro de una misma marca, en carruseles y listados de productos: SECO, despues HUMEDO, despues
+    SNACKS (sin reordenar dentro de cada tipo). En una pagina de una sola marca solo aplica esto.
+  - Donde vive: el peso de los terminos Brand (carrusel de marcas de la home, /nuestras-marcas MX, el
+    filtro de marca y el orden de /productos y /produtos), los pesos del menu `main` (megamenu Marcas,
+    cinco por especie y el resto en "Ver todas"), los carruseles "Selected Product" de cada pagina y
+    las cards de /nossas-marcas BR. El contexto de un carrusel sale de sus productos: todos de perro =
+    lista de perros, todos de gato = lista de gatos, mezclados = Mezclado.
+  Origen: BR y MX, pedido del Websites Expert (2026-10).
 - **Si ni la matriz ni el sitio viejo dicen que productos van, se eligen hasta 8 publicados de la
   marca**: primero el producto bandera, despues alternando especies, seco y humedo y etapas de vida, una
   variante por linea y nunca dos sabores casi iguales seguidos. Si la marca tiene menos, van todos.
