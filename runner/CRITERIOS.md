@@ -703,6 +703,16 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
 El modelo es NeuroCare de BR (nid 5510), aprobado por el usuario, y se aplico a todas las fichas de
 BR y MX.
 
+- **Titulo del producto: "PURINA® MARCA® nombre"**, con PURINA y la marca en mayusculas y cada una con
+  su ®, siempre ADELANTE ("Petisco Bifinho PURINA® DOGUITOS® com Frango" -> "PURINA® DOGUITOS® Petisco
+  Bifinho com Frango"). La marca sale del campo Brand del nodo. Purina One va "PURINA® ONE nombre": la
+  marca ya contiene Purina y el ® va solo en PURINA. El resto del nombre queda como estaba, salvo que
+  venga todo en mayusculas: ahi pasa a minuscula con mayuscula inicial en las palabras principales, y
+  las siglas (NF, HA, OM...) y las tecnologias con su ®/™ quedan como estan ("PRO PLAN NF LATA PERROS
+  CON PROBLEMAS RENALES" -> "PURINA® PRO PLAN® NF Lata Perros con Problemas Renales"). La URL NO cambia:
+  se destilda el alias automatico y queda el alias que tenia (el ® no llega a la URL igual, pero
+  regenerarla le cambiaria la ruta a todo lo que linkea ahi). Los H1 de las homes de marca siguen la
+  misma regla ("PURINA® DOG CHOW®", "PURINA® ONE"). Origen: BR y MX, pedido del usuario (2026-10-17).
 - **Descripcion de la derecha (`field_summary_formatted`)**: si falta o es corta, se escriben los
   BENEFICIOS del sitio viejo como texto corrido. Una ficha con la derecha vacia se ve abandonada.
 - **Informacion adicional**: el acordeon lleva los titulos del sitio viejo de cada pais (BR: Quantidade
@@ -715,6 +725,12 @@ BR y MX.
   habilitarla en el formato Rich text, Source editing). Los bloques con titulo (Eventuais substitutos,
   Enriquecimento) van como titulo + su lista. Lo arma `formatear` (`composicion.py`). Origen: BR,
   NeuroCare ("¿es la mejor forma, tipo wall of text?").
+- **BR: los ingredientes destacados (`field_pdt_ingredients`) van VACIOS hasta que el mercado los
+  cargue a mano.** Se sacaron de todas las fichas de BR; el sabor (Main ingredient) NO se toca. Al
+  mercado se le paso la lista de terminos en Excel para que renombre y describa los que quiera; la
+  relacion producto -> ingredientes que tenia cada ficha queda guardada aparte por si se necesita.
+  Origen: BR, pedido del usuario (2026-10-17, "los vamos a agregar manualmente luego"). Las reglas de
+  abajo siguen valiendo para MX y para cuando BR los vuelva a cargar.
 - **Ingredientes destacados**: los del glosario del sitio viejo del pais, en su idioma y en tipo oracion,
   con texto corto e imagen sin fondo. PROTEINA ANIMAL PRIMERO, despues el orden de la composicion. Las
   fotos de beneficios no son ingredientes. El Main ingredient es la proteina principal.
@@ -744,6 +760,11 @@ BR y MX.
   seguros (un circulo solo no es una eleccion). Origen: BR, Friskies Mar de Sabores 85g ("a todos los
   productos que tengamos dudas sobre los sabores sacalos y dejemos solo los que estamos seguros y tengan
   sentido").
+- **Condiciones (la "recomendacion veterinaria"): VACIAS en todos los productos de BR y MX, en los dos
+  campos** (`field_product_health_condition`, las etiquetas visibles, y `field_pet_health_condition`, el
+  de Pet ID), hasta que los mercados digan cuales van en cada producto. Los terminos del vocabulario se
+  quedan. Origen: BR y MX, pedido del usuario (2026-10-17, "vamos a pedir a los mercados que nos
+  pasen"). La lista de abajo es la que vale cuando se vuelvan a cargar.
 - **Condiciones**: solo estas etiquetas, en tags (`health_condition`) y en Pet ID (`pet_health_condition`).
   BR: Sobrepeso, Saúde dental, Pele Sensível, Controle de bolas de pelo, Sensibilidade do Sistema
   Urinário, Sensibilidade Digestiva, Saúde Renal, Gestante/Lactante, Castrado. MX: Sobrepeso, Salud
