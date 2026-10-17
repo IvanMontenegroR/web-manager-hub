@@ -3,6 +3,7 @@ import { Plus, X, Image as ImageIcon, Ruler, Upload, Link2, Bold, Italic, List, 
 import { getSpecs, visibleFields, visibleSubFields, optValue, optLabel, maxLengthOf } from '../../data/components'
 import { uploadMedia, isVideoUrl } from '../../lib/storageDb'
 import { wrapLink, wrapMark, toggleList } from '../../lib/richText'
+import { safeZonesSvg, safeLegend } from '../../lib/safeZones'
 
 // Cuerpo de un componente: es RICH TEXT en el CMS (negritas, saltos, listas). Por
 // debajo el formato se guarda con una notacion tipo markdown, para que el dato viaje
@@ -213,6 +214,35 @@ function ListField({ f, value, onChange, content }) {
 // Panel de tamanos de imagen recomendados (Design Guidelines). Se muestra arriba
 // del form; si el componente resuelve sus specs por tipo (banner, product cards),
 // se actualiza al cambiar ese campo.
+// ZONAS SEGURAS de una imagen de fondo (spec con `safe`, ver FBSQ_SAFE en el catalogo): un
+// esquema por breakpoint con lo que tapan el titulo y las cards y donde puede ir el sujeto.
+// El SVG lo arma src/lib/safeZones.js (el mismo que va al overlay del builder y al Excel) y
+// sale de datos del catalogo, no de lo que carga el usuario.
+function SafeZones({ safe }) {
+  const fig = (name, v, px) => {
+    const [rw, rh] = v.ratio || [16, 9]
+    return (
+      <figure className={`cf-safe-fig cf-safe-fig--${name.toLowerCase()}`}>
+        <div className="cf-safe-svg" dangerouslySetInnerHTML={{ __html: safeZonesSvg(v, { px, fontPx: name === 'Mobile' ? 9 : 10 }) }} />
+        <figcaption><b>{name} {rw}:{rh}</b>{v.anchos && <span>medido de {v.anchos}</span>}</figcaption>
+      </figure>
+    )
+  }
+  const swatch = (k) => `cf-safe-sw cf-safe-sw--${k}`
+  return (
+    <div className="cf-safe">
+      <div className="cf-safe-h">Zonas seguras al armar la foto</div>
+      {safe.desktop && fig('Desktop', safe.desktop, 286)}
+      <div className="cf-safe-row">
+        {safe.mobile && fig('Mobile', safe.mobile, 104)}
+        <ul className="cf-safe-legend">
+          {safeLegend(safe).map((l) => <li key={l.kind}><i className={swatch(l.kind)} />{l.text}</li>)}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 function SpecsPanel({ specs }) {
   if (!specs.length) return null
   return (
@@ -228,6 +258,7 @@ function SpecsPanel({ specs }) {
             {s.max && <div><span>Max</span> {s.max}</div>}
             {s.format && <div><span>Formato</span> {s.format}</div>}
           </div>
+          {s.safe && <SafeZones safe={s.safe} />}
         </div>
       ))}
     </div>

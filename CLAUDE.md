@@ -421,6 +421,14 @@ FKs: `tasks.project_id` ON DELETE CASCADE; `tasks.partner_id` ON DELETE SET NULL
      estaba largo tiene que poder verse entero para acortarlo) y baja a la hoja **Contenido** pegado a
      la etiqueta ("Descripción (máx. 111 caracteres)"), que es la unica forma de que el mercado se
      entere. La hoja CMS no lo lleva: ahi las etiquetas son las de Drupal, textuales.
+     El modo **Square icon card + background image** (`full-background-card-icons-square`, el carrusel
+     de servicios de la home y de las homes de marca) tiene mockup propio: foto a sangre 16:9 / 9:16 con
+     el velo, titulo, bajada y cards anclados abajo. Su spec de imagen trae `safe` (`FBSQ_SAFE`): las
+     ZONAS que tapan titulo y cards, medidas en el sitio de 1024 a 1920 y de 360 a 430 px, y la zona
+     segura para el sujeto (arriba). `src/lib/safeZones.js` es el UNICO que las dibuja: esquema en el
+     panel de medidas, overlay "Ver zonas seguras" en el builder (apagado por defecto, no sale en Vista
+     previa ni en la captura) y PNG debajo de "Tamaño de imagen" en la matriz de Excel. Cualquier spec
+     que declare `safe` se suma sola a las tres. Ver `runner/CRITERIOS.md`, "Cuidado integral".
      La **PALETA** (`PALETTE`) es una lista aparte de `COMPONENTS`: sus items pueden ser un componente o un
      ATAJO con contenido inicial. Los modos de vista entran como atajos ("Mosaico", "Cards verticales"...)
      para elegir por como se ve, pero lo que se guarda es siempre `card_grid` + `view_mode`.

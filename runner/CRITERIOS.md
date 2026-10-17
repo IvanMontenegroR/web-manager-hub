@@ -306,6 +306,21 @@ reescribe (no se agrega otra que la contradiga) y se deja el caso nuevo.
   texto y tarjetas a 1440, 1920 y 390 antes de subir). Ojo con los archivos del mercado: en Dog Chow
   "Desktop" y "Mobile" venian INVERTIDOS (medir siempre el tamaño real). Origen: MX, homes de marca
   ("el fondo del carrusel de servicios no se entiende").
+  **Con el formato nuevo ("Square icon card + background image", ver "Homes de marca" mas abajo) el
+  sujeto va ARRIBA.** El bloque va en proporcion fija (16:9 desktop, 9:16 mobile) con la foto entera
+  (cover sin recorte si la proporcion es exacta); titulo, bajada y cards van anclados ABAJO con
+  medidas fijas en px, asi que cuanto mas angosta la pantalla, mas foto tapan. Medido en preprod BR
+  (home y /purina-one, de 1024 a 1920 y de 360 a 430, titulo de 2 lineas, 16px de aire): en DESKTOP
+  lo unico libre en todos los anchos es la franja de arriba, 0 a 10% del alto (a 1024 el titulo
+  arranca en el 10%); desde 1280 la franja llega al 28%, y a la derecha del titulo queda una columna
+  libre (x 72 a 87%, hasta el 50%). En MOBILE lo libre es 0 a 20%. Por eso: (1) caras y producto en
+  esa franja, o en desktop a la derecha del titulo; lo que cae del 40% para abajo lo tapan las cards
+  en algun ancho; (2) la foto se entrega en la proporcion exacta (2160x1215 y 1125x2000: el CMS no
+  sirve mas de 1640 y 600 px), porque una 3:2 en mobile pierde el 62% del ancho; (3) el sitio ya pone
+  un velo parejo: uno propio solo si el blanco no pasa 4.5:1, y solo detras del texto. El hub dibuja
+  estas zonas en el panel de medidas, en "Ver zonas seguras" del builder y en la matriz de Excel
+  (`FBSQ_SAFE` en `src/data/components.js`, dibujo en `src/lib/safeZones.js`). Origen: BR, home de
+  Purina One (en mobile el titulo caia sobre la boca del perro; se reencuadro con la misma foto).
 
 - **Si el titulo cruza al sujeto o al producto, se parte**: el h1 queda con lo que dice de que es la
   pagina y el resto pasa a la bajada, sin reescribir ("Donde comprar" + "Encuentra tu veterinaria mas

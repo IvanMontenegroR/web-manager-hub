@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2, FileSpreadsheet, Save, Check, X, LayoutGrid, Pencil, Monitor, Smartphone,
+  Eye, EyeOff,
 } from 'lucide-react'
-import { PALETTE, getComponent, slotsOf, paletteGroups } from '../../data/components'
+import { PALETTE, getComponent, getSpecs, slotsOf, paletteGroups } from '../../data/components'
+import { safeOf } from '../../lib/safeZones'
 import {
   fetchPageComponents, addPageComponent, updatePageComponentContent, deletePageComponent, persistComponentOrder, pageIsDark, brandTheme, brandTokens, brandPageBg,
 } from '../../lib/pagesDb'
@@ -43,6 +45,11 @@ export default function PageBuilder({ page, onBack }) {
   // desktop | mobile. Mobile dibuja la pagina a 390px con las imagenes mobile.
   const [device, setDevice] = useState('desktop')
   const mobile = device === 'mobile'
+  // "Ver zonas seguras": pinta encima de la foto del bloque SELECCIONADO lo que tapan el
+  // titulo y las cards (solo en los componentes cuya imagen declara `safe` en el catalogo).
+  // Apagado por defecto y sin recordarse: es una ayuda puntual para revisar la foto, no una
+  // forma de ver la pagina. No aparece en Vista previa ni en el Excel.
+  const [showSafe, setShowSafe] = useState(false)
   const [activeTab, setActiveTab] = useState({}) // { [id del bloque de pestañas]: pestaña abierta }
   // Menu del sitio del MERCADO de esta pagina. Es config global (se edita aparte), aca
   // solo se lee para que el header del canvas y la captura del Excel sean los de verdad.
@@ -92,6 +99,7 @@ export default function PageBuilder({ page, onBack }) {
   }
   const selected = comps.find((c) => c.id === selId) || null
   const selectedDef = selected ? getComponent(selected.component_key) : null
+  const selectedSafe = selectedDef ? safeOf(getSpecs(selectedDef, draft)) : null
 
   // Refs con el ultimo valor, para que los timers / beforeunload / flush no dependan
   // de closures viejas.
@@ -281,6 +289,7 @@ export default function PageBuilder({ page, onBack }) {
           slots={isContainer ? slotNodes(c, def) : null}
           activeTab={active}
           onTab={isContainer ? ((ti) => setActiveTab((m) => ({ ...m, [c.id]: ti }))) : null}
+          safeOverlay={showSafe && editMode && selId === c.id && !!selectedSafe}
         />
       </div>
     )
@@ -377,6 +386,15 @@ export default function PageBuilder({ page, onBack }) {
                 <button className="ic-btn" onClick={closeEditor} title="Cerrar"><X size={15} /></button>
               </div>
               {selectedDef.help && <div className="pb-editor-help">{selectedDef.help}</div>}
+              {selectedSafe && (
+                <div className="pb-safe-toggle">
+                  <button className={`btn btn-sm${showSafe ? ' active' : ''}`} onClick={() => setShowSafe((v) => !v)} aria-pressed={showSafe}
+                    title="Pinta encima de la foto lo que tapan el título y las cards en algún ancho">
+                    {showSafe ? <EyeOff size={14} /> : <Eye size={14} />} Ver zonas seguras
+                  </button>
+                  <span>Sobre la foto del bloque, en {mobile ? 'mobile (9:16)' : 'desktop (16:9)'}.</span>
+                </div>
+              )}
               <ContentForm component={selectedDef} draft={draft} onChange={setDraftField} brandSecondary={theme?.secondary || null} />
               <div className="pb-editor-foot">
                 <button className="btn btn-primary btn-sm" onClick={flushSave} disabled={busy || saving || !dirty}>

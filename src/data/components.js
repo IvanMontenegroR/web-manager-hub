@@ -157,6 +157,76 @@ export const CARD_GRID_IMAGE_MODES = [
   'grid-cards', 'cards-simple', 'slider-default-card', 'slider-background-default-card',
 ]
 
+// ZONAS SEGURAS del fondo de "Square icon card + background image"
+// (`full-background-card-icons-square`): que parte de la foto tapan el titulo y las cards,
+// para armar la imagen sabiendo donde NO poner caras, mascotas ni producto.
+// Medido como visitante en preprod BR (2026-10, la home "Parceiros e servicos" y
+// /purina-one "Natureza. Ciencia. Resultados.") a 1920x1080, 1440x900, 1280x800 y 1024x768
+// (desktop, el bloque va 16:9) y a 430, 390 y 360 de ancho (mobile, 9:16; el corte es 992px).
+// Todo en % de la IMAGEN (x, y, ancho, alto). La foto va con object-fit cover centrado y en
+// su proporcion exacta no se recorta nada; una que no es 16:9 / 9:16 SI (la de la home es 3:2:
+// en desktop pierde 7,8% arriba y abajo y en mobile se ve solo el 37,5% del ancho, al centro).
+// Por que los numeros cambian tanto entre anchos: titulo, bajada y cards van anclados ABAJO
+// con medidas FIJAS en px (cards de 280 de alto, 40 entre el titulo y las cards, 60 al pie en
+// desktop y 40 en mobile), mientras la foto crece con el ancho. A 1920 el texto arranca en el
+// 52% de la foto; a 1024 (576 de alto) en el 10%. Por eso la zona segura de desktop es tan
+// chica: la manda 1024 con titulo de 2 lineas.
+// Cada rectangulo es el de UN ancho (`vp`), con el titulo forzado a 2 lineas (en desktop pasa
+// desde ~38 caracteres; en mobile ya a 360 con "Natureza. Ciencia. Resultados.") y la bajada
+// real (la de la home ocupa 2 lineas en mobile), mas 16px de aire alrededor. La UNION de todos
+// es lo que puede quedar tapado. Las cards se estiran hasta el borde derecho: con 4 o mas (o
+// desde 1280 para abajo, ya con 3) la fila llega al borde. Flechas (desktop) y puntos (mobile)
+// medidos con 6 cards, el carrusel activo en todos los anchos. Mobile va a lo ancho: los 20px
+// de gutter menos el aire no dejan nada util a la izquierda.
+// La zona `safe` es lo que queda libre en TODOS los anchos (el rectangulo libre mas grande).
+// La que lleva `from` queda libre solo desde ese ancho: a 1024 la tapa el titulo.
+// Mediciones crudas y calculo: carpeta de trabajo del agente (zonas-seguras/med).
+export const FBSQ_SAFE = {
+  desktop: {
+    ratio: [16, 9],
+    anchos: '1024 a 1920 px',
+    zones: [
+      { kind: 'text', vp: 1920, x: 8, y: 52, w: 47, h: 15 },
+      { kind: 'text', vp: 1440, x: 3, y: 36, w: 61, h: 20 },
+      { kind: 'text', vp: 1280, x: 3, y: 28, w: 69, h: 22 },
+      // A 1024 el titulo de 2 lineas llena los 844px de ancho maximo del header.
+      { kind: 'text', vp: 1024, x: 4, y: 10, w: 86, h: 27, label: 'Título + bajada' },
+      { kind: 'cards', vp: 1920, x: 8, y: 67, w: 92, h: 29 },
+      { kind: 'cards', vp: 1440, x: 3, y: 56, w: 97, h: 39 },
+      { kind: 'cards', vp: 1280, x: 3, y: 50, w: 97, h: 44 },
+      { kind: 'cards', vp: 1024, x: 4, y: 38, w: 96, h: 55, label: 'Cards' },
+      // Flechas: arriba a la derecha de la fila, a la altura del header.
+      { kind: 'cards', vp: 1920, x: 85, y: 59, w: 7, h: 8 },
+      { kind: 'cards', vp: 1440, x: 88, y: 46, w: 9, h: 10 },
+      { kind: 'cards', vp: 1280, x: 87, y: 39, w: 10, h: 11 },
+      { kind: 'cards', vp: 1024, x: 83, y: 24, w: 13, h: 13 },
+      { kind: 'safe', x: 0, y: 0, w: 100, h: 10, label: 'Zona segura para el sujeto' },
+      // Desde 1280 la franja libre llega al 28% (el titulo de 2 lineas arranca en el 28,6%) y
+      // a la derecha del titulo queda una columna hasta las cards (las flechas de 1280 empiezan
+      // en el 87%).
+      { kind: 'safe', from: 1280, x: 0, y: 0, w: 100, h: 28, label: 'Libre desde 1280 px' },
+      { kind: 'safe', from: 1280, x: 72, y: 28, w: 15, h: 22 },
+    ],
+  },
+  mobile: {
+    ratio: [9, 16],
+    anchos: '360 a 430 px',
+    zones: [
+      // A 360 el header (titulo de 2 lineas + bajada de 2) arranca en el 22,5%: con el aire, 20.
+      { kind: 'text', vp: 430, x: 0, y: 33, w: 100, h: 18 },
+      { kind: 'text', vp: 390, x: 0, y: 26, w: 100, h: 20 },
+      { kind: 'text', vp: 360, x: 0, y: 20, w: 100, h: 21, label: 'Título + bajada' },
+      // La card ocupa el 85% del ancho y la siguiente asoma: la fila llega al borde.
+      { kind: 'cards', vp: 430, x: 0, y: 51, w: 100, h: 42 },
+      { kind: 'cards', vp: 390, x: 0, y: 46, w: 100, h: 46 },
+      { kind: 'cards', vp: 360, x: 0, y: 41, w: 100, h: 50, label: 'Cards' },
+      // Puntos debajo de las cards (con 6 cards miden 112px de ancho).
+      { kind: 'cards', x: 35, y: 88, w: 41, h: 9 },
+      { kind: 'safe', x: 0, y: 0, w: 100, h: 20, label: 'Zona segura para el sujeto' },
+    ],
+  },
+}
+
 // Un `option` de un select puede ser un string (valor = etiqueta) o { value, label }
 // cuando lo que se guarda y lo que se muestra son distintos (ej. el Modo de vista).
 export const optValue = (o) => (o && typeof o === 'object' ? o.value : o)
@@ -1192,6 +1262,13 @@ export const COMPONENTS = [
       // El fondo del bloque (la mascota recortada sobre el degradé). Medida de la matriz de
       // las homes de marca. Mobile es aproximado: se adecua al largo de la descripcion.
       'full-background-card-icons-box': [{ label: 'Imagen de fondo', ratio: 'Desktop ~1.4:1 - Mobile ~9:20', desktop: '2784×1994px', mobile: '702×1600px', max: '500kb', format: 'JPG / PNG' }],
+      // El fondo a sangre de "Square icon card + background image": 16:9 desktop y 9:16
+      // mobile, proporcion FIJA (otra se recorta con cover). NO va al doble del ancho como el
+      // resto: el CMS sirve como mucho 1640px (estilo full_width_image) y 600px
+      // (full_width_image_mobile), asi que mas que esto no se ve. Son las medidas de los
+      // fondos que ya estan cargados (Purina One BR), y el runner no los marca como estirados.
+      // `safe`: las zonas que tapan titulo y cards (ver FBSQ_SAFE).
+      'full-background-card-icons-square': [{ label: 'Imagen de fondo', ratio: 'Desktop 16:9 - Mobile 9:16', desktop: '2160×1215px', mobile: '1125×2000px', max: '500kb', format: 'JPG / PNG', safe: FBSQ_SAFE }],
       'grid-cards': [{ label: 'Imagen de la card', ratio: 'Desktop 1:1', desktop: '760×760px', max: '500kb', format: 'JPG / PNG' }],
       // Simple: la card mide 300px en pantalla en TODOS los anchos (medido en content), asi
       // que se pide al doble para que se vea nitida en pantallas de alta densidad. Los 450

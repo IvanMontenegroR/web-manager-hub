@@ -13,6 +13,7 @@ import {
 } from '../data/components'
 import { PURINA_LOGO_B64 } from './purinaLogo'
 import { stripLinks, extractLinks, toExcelRich, richToPlain } from './richText'
+import { safeSheetPng } from './safeZones'
 
 // Las dos hojas del archivo. El nombre es FIJO porque la hoja CMS referencia a la de
 // contenido por formula (='Contenido'!C12).
@@ -465,6 +466,28 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
     return atRow + 1
   }
 
+  // ZONAS SEGURAS de la imagen de fondo (spec con `safe`, ver FBSQ_SAFE en el catalogo):
+  // debajo del tamaño, el esquema desktop + mobile con lo que tapan el titulo y las cards,
+  // para que el mercado arme la foto sabiendo donde va el sujeto. Es el MISMO dibujo del
+  // panel de medidas del hub (src/lib/safeZones.js), pasado a PNG. Va a lo ancho de campo +
+  // contenido (B:C): en la columna de contenido sola no se leeria.
+  async function safeRows(atRow, safe) {
+    const r = fieldRow(atRow, 'Zonas seguras de la foto',
+      'El sujeto (caras, mascotas, producto) va en la zona verde punteada. Lo azul (título y bajada) y lo naranja (cards, flechas y puntos) lo tapa el bloque en algún ancho de pantalla.',
+      { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
+    let png = null
+    try { png = await safeSheetPng(safe) } catch { png = null }
+    if (!png) return r
+    const { w, h } = fit(png.w, png.h, 570, 420)
+    const id = wb.addImage({ base64: png.dataUrl, extension: 'png' })
+    ws.mergeCells(r, 2, r, 3)
+    const thin = { style: 'thin', color: { argb: BORDER } }
+    ws.getCell(r, 2).border = { top: thin, bottom: thin, left: thin, right: thin }
+    setH(r, h * 0.75 + 10)
+    ws.addImage(id, { tl: { col: 1.04, row: (r - 1) + 0.06 }, ext: { width: w, height: h }, editAs: 'oneCell' })
+    return r + 1
+  }
+
   // Campo de texto + sus enlaces. El texto va con su FORMATO (negritas, viñetas, saltos)
   // y sin las marcas, y cada enlace baja ademas a su propia fila con el hipervinculo
   // real: en xlsx el link es por celda, asi que un parrafo con varios enlaces no puede
@@ -593,6 +616,7 @@ export async function exportPageMatrix(page, components, getNode, opts = {}) {
         const label = 'Tamaño de imagen' + (s.label ? ` — ${s.label}` : '')
         const parts = [s.ratio, s.desktop && `Desktop ${s.desktop}`, s.mobile && `Mobile ${s.mobile}`, s.max && `Max ${s.max}`, s.format].filter(Boolean).join('  -  ').replace(/·/g, '-')
         row = fieldRow(row, label, parts, { color: PURINA_RED, italic: true, fill: SUBHEAD_BG })
+        if (s.safe) row = await safeRows(row, s.safe)
       }
     }
 

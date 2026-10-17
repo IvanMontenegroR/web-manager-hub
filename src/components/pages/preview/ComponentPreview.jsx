@@ -1,7 +1,8 @@
-import { ImageIcon, PawPrint, ChevronDown, Play, ArrowRight } from 'lucide-react'
+import { ImageIcon, PawPrint, ChevronDown, ChevronLeft, ChevronRight, Play, ArrowRight } from 'lucide-react'
 import { CMS_ICON_SVG } from '../../../data/cmsIcons'
 import { Fragment } from 'react'
 import { parseInline, parseRich } from '../../../lib/richText'
+import { safeZonesSvg, SAFE_PALETTE_OVERLAY } from '../../../lib/safeZones'
 import {
   CMT_VERTICAL, CMT_ICON, CMT_WIDE_BOTTOM, CMT_WIDE_TOP, CMT_NUMBERS,
   BG_TOKENS, CARD_GRID_DEFAULT_MODE, CARD_SQUARE, tabList, LAYOUT_COLUMNS, getComponent, getSpecs,
@@ -1380,6 +1381,86 @@ const RENDERERS = {
         </div>
       )
     }
+    if (mode === 'full-background-card-icons-square') {
+      // "Square icon card + background image", medido en preprod BR (home "Parceiros e
+      // servicos" y /purina-one) y en el CSS del sitio (.full-background-card-icons-square):
+      // la foto va A SANGRE en proporcion FIJA, 16:9 en desktop y 9:16 en mobile (cover,
+      // centrada), con un velo negro encima (20% parejo + un degradé desde arriba a la
+      // izquierda). Titulo, bajada y la fila de cards van anclados ABAJO con medidas fijas:
+      // 60px al pie y de gutter, 40 entre el header y las cards, cards de 410x280 (85% del
+      // ancho en mobile, la siguiente asoma) con fondo blanco al 70% y blur. Flechas arriba a
+      // la derecha de la fila en desktop; puntos debajo en mobile.
+      // El mockup dibuja la pagina como se ve a 1440 (desktop) y 390 (mobile): las medidas
+      // van en unidades del ancho del bloque (`--u`, ver index.css), asi en el canvas del
+      // builder, mas angosto, no se amontona todo arriba como pasaria a 900px reales (el
+      // sitio a esos anchos ya muestra la version mobile).
+      // `ctx.safeOverlay`: el builder pide pintar encima las ZONAS SEGURAS de la imagen
+      // (mismo SVG que el panel de medidas y el Excel). Van las dos, desktop y mobile, y el
+      // CSS muestra la del dispositivo: el render no sabe en cual esta.
+      const spec = getSpecs(getComponent('card_grid'), c)[0] || {}
+      const arr = items.length ? items : [
+        { icon: 'atr', title: 'Título de la card', description: 'Texto de la card.' },
+        { icon: 'add_2', title: 'Segunda card', description: 'Texto de la segunda card.' },
+        { icon: 'heart', title: 'Tercera card', description: 'Texto de la tercera card.' },
+      ]
+      const txt = tok(c.text_color)
+      const card = hexToRgb(tok(c.background_card_color))
+      const st = {
+        '--fb-card': card ? `rgba(${card.r}, ${card.g}, ${card.b}, .7)` : 'rgba(255, 255, 255, .7)',
+        '--fb-ico': tok(c.icon_card_color) || '#E91C24',
+        '--fb-tt': tok(c.title_card_color) || '#000000',
+        '--fb-tx': tok(c.text_card_color) || '#1F1F1F',
+        ...(txt ? { '--txt': txt } : {}),
+      }
+      const bg = typeof c.background_image === 'string' && c.background_image ? c.background_image : null
+      const safe = spec.safe
+      return (
+        <div className="cp-fbsq cp-bleed" style={st}>
+          <div className="cp-fbsq-media">
+            {bg
+              ? <div className="cp-fbsq-bg" style={{ backgroundImage: `url("${bg}")` }} />
+              : <div className="cp-fbsq-bg cp-img-ph"><ImageIcon size={26} /><span className="cp-ph-dim">{spec.desktop}</span></div>}
+            <div className="cp-fbsq-veil" />
+            <div className="cp-fbsq-content">
+              {(OPT(c.title) || OPT(c.subtitle)) && (
+                <div className="cp-fbsq-head">
+                  {OPT(c.title) && <div className="cp-fbsq-title">{c.title}</div>}
+                  {OPT(c.subtitle) && <div className="cp-fbsq-sub"><RT>{c.subtitle}</RT></div>}
+                </div>
+              )}
+              <div className="cp-fbsq-cards">
+                <div className="cp-fbsq-row">
+                  {arr.map((it, i) => (
+                    <div key={i} className="cp-fbsq-card">
+                      <span className="cp-fbsq-ico"><FeatureIcon name={it.icon} size={48} /></span>
+                      <div>
+                        <div className="cp-fbsq-t">{T(it.title, 'Título')}</div>
+                        <Rich className="cp-fbsq-d">{T(it.description, 'Texto de la card.')}</Rich>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {arr.length > 1 && (
+                  <div className="cp-fbsq-arrows" aria-hidden="true">
+                    <span className="cp-fbsq-arrow"><ChevronLeft size={16} /></span>
+                    <span className="cp-fbsq-arrow"><ChevronRight size={16} /></span>
+                  </div>
+                )}
+                <div className="cp-fbsq-dots" aria-hidden="true">
+                  {arr.map((_, i) => <i key={i} className={i === 0 ? 'on' : ''} />)}
+                </div>
+              </div>
+            </div>
+            {ctx?.safeOverlay && safe && (
+              <>
+                {safe.desktop && <div className="cp-safe-ov cp-safe-ov--desktop" dangerouslySetInnerHTML={{ __html: safeZonesSvg(safe.desktop, { palette: SAFE_PALETTE_OVERLAY, px: 1000, frame: false, fontPx: 13 }) }} />}
+                {safe.mobile && <div className="cp-safe-ov cp-safe-ov--mobile" dangerouslySetInnerHTML={{ __html: safeZonesSvg(safe.mobile, { palette: SAFE_PALETTE_OVERLAY, px: 390, frame: false, fontPx: 12 }) }} />}
+              </>
+            )}
+          </div>
+        </div>
+      )
+    }
     // El resto de los modos son variantes del carrusel de cards: se adapta el contenido
     // a la forma que ese render ya sabe dibujar. Los modos que todavia no tienen mockup
     // propio caen a las cards verticales, que es el layout mas neutro.
@@ -1571,7 +1652,7 @@ for (const def of LAYOUT_COLUMNS) {
   )
 }
 
-export default function ComponentPreview({ componentKey, content, theme, slots, activeTab, onTab }) {
+export default function ComponentPreview({ componentKey, content, theme, slots, activeTab, onTab, safeOverlay }) {
   const render = RENDERERS[componentKey]
   if (!render) return <div className="cp-unknown">Componente “{componentKey}” sin preview.</div>
   // ctx: tokens de color de la marca de la pagina (ver BRAND_THEMES en pagesDb) +
@@ -1591,6 +1672,9 @@ export default function ComponentPreview({ componentKey, content, theme, slots, 
     slots: slots || null,
     activeTab: activeTab || 0,
     onTab: onTab || null,
+    // Zonas seguras encima de la imagen de fondo (solo el bloque seleccionado, con el toggle
+    // del builder prendido). Nunca en Vista previa ni en el Excel.
+    safeOverlay: !!safeOverlay,
   }
   // SPACING: el padding de arriba y abajo de la seccion, el que cargaron en Classy o el
   // que el componente trae por defecto (ver `spacingPx`). Va como variables y el CSS lo
