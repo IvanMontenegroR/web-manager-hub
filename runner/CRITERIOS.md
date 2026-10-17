@@ -706,10 +706,14 @@ BR y MX.
 - **Titulo del producto: "PURINA® MARCA® nombre"**, con PURINA y la marca en mayusculas y cada una con
   su ®, siempre ADELANTE ("Petisco Bifinho PURINA® DOGUITOS® com Frango" -> "PURINA® DOGUITOS® Petisco
   Bifinho com Frango"). La marca sale del campo Brand del nodo. Purina One va "PURINA® ONE nombre": la
-  marca ya contiene Purina y el ® va solo en PURINA. El resto del nombre queda como estaba, salvo que
-  venga todo en mayusculas: ahi pasa a minuscula con mayuscula inicial en las palabras principales, y
-  las siglas (NF, HA, OM...) y las tecnologias con su ®/™ quedan como estan ("PRO PLAN NF LATA PERROS
-  CON PROBLEMAS RENALES" -> "PURINA® PRO PLAN® NF Lata Perros con Problemas Renales"). La URL NO cambia:
+  marca ya contiene Purina y el ® va solo en PURINA. Despues de la marca, toda PALABRA en mayusculas
+  pasa a minuscula con mayuscula inicial (conectores en minuscula), venga el nombre entero en mayusculas
+  o solo una parte; las siglas (NF, HA, EN, OM...) y las tecnologias con su ®/™ quedan como estan
+  ("PRO PLAN NF LATA PERROS CON PROBLEMAS RENALES" -> "PURINA® PRO PLAN® NF Lata Perros con Problemas
+  Renales"; "DOG CHOW® NUTRICIÓN REFORZADA® ADULTO MINIS & PEQUEÑOS Sabor Pollo..." -> "PURINA® DOG
+  CHOW® Nutrición Reforzada® Adulto Minis & Pequeños Sabor Pollo..."). Un titulo que no es el nombre del
+  producto (un encabezado de SEO, "Descubre los beneficios de...") se reemplaza por el nombre real, como
+  el de sus hermanos (MX 1121 -> "PURINA® PRO PLAN® Veterinary Diets FortiFlora Gatos"). La URL NO cambia:
   se destilda el alias automatico y queda el alias que tenia (el ® no llega a la URL igual, pero
   regenerarla le cambiaria la ruta a todo lo que linkea ahi). Los H1 de las homes de marca siguen la
   misma regla ("PURINA® DOG CHOW®", "PURINA® ONE"). Origen: BR y MX, pedido del usuario (2026-10-17).
